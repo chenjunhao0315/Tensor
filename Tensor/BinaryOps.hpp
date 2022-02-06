@@ -1,0 +1,30 @@
+//
+//  BinaryOps.hpp
+//  Tensor
+//
+//  Created by 陳均豪 on 2022/1/30.
+//
+
+#ifndef BinaryOps_hpp
+#define BinaryOps_hpp
+
+#include "DispatchStub.hpp"
+#include "Scalar.hpp"
+#include "TensorIterator.hpp"
+
+namespace otter {
+
+using structured_binary_fn = void(*)(TensorIterator&);
+using structured_binary_fn_alpha = void(*)(TensorIterator&, const Scalar& alpha);
+
+DECLARE_DISPATCH(structured_binary_fn_alpha, add_stub);
+DECLARE_DISPATCH(structured_binary_fn_alpha, sub_stub);
+DECLARE_DISPATCH(structured_binary_fn, mul_stub);
+DECLARE_DISPATCH(structured_binary_fn, div_true_stub);
+
+ 
+}
+
+
+
+#endif /* BinaryOps_hpp */

@@ -8,6 +8,48 @@
 
 /* Begin PBXBuildFile section */
 		76E6C50B27A502680036A26F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C50A27A502680036A26F /* main.cpp */; };
+		76E6C51327A502A30036A26F /* Tensor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51127A502A30036A26F /* Tensor.cpp */; };
+		76E6C51627A502F60036A26F /* Memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51427A502F60036A26F /* Memory.cpp */; };
+		76E6C51927A5038F0036A26F /* Allocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51727A5038F0036A26F /* Allocator.cpp */; };
+		76E6C51C27A504000036A26F /* DType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51A27A504000036A26F /* DType.cpp */; };
+		76E6C51F27A504C80036A26F /* ScalarType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51D27A504C80036A26F /* ScalarType.cpp */; };
+		76E6C52227A504FC0036A26F /* PerspectiveView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C52027A504FC0036A26F /* PerspectiveView.cpp */; };
+		76E6C52527A505250036A26F /* ArrayRef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C52327A505250036A26F /* ArrayRef.cpp */; };
+		76E6C52827A505700036A26F /* SmallVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C52627A505700036A26F /* SmallVector.cpp */; };
+		76E6C52B27A505D50036A26F /* MaybeOwned.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C52927A505D50036A26F /* MaybeOwned.cpp */; };
+		76E6C52E27A505FE0036A26F /* TensorOptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C52C27A505FE0036A26F /* TensorOptions.cpp */; };
+		76E6C53127A506C50036A26F /* TensorFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C52F27A506C50036A26F /* TensorFactory.cpp */; };
+		76E6C53427A506E90036A26F /* Accumulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C53227A506E90036A26F /* Accumulator.cpp */; };
+		76E6C53727A50F4A0036A26F /* libomp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 76E6C53627A50F4A0036A26F /* libomp.dylib */; };
+		76E6C53A27A510F30036A26F /* Parallel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C53827A510F30036A26F /* Parallel.cpp */; };
+		76E6C53E27A511B50036A26F /* ParallelOpenMP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C53C27A511B50036A26F /* ParallelOpenMP.cpp */; };
+		76E6C54227A5124A0036A26F /* ThreadPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C54027A5124A0036A26F /* ThreadPool.cpp */; };
+		76E6C54527A5132B0036A26F /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C54327A5132B0036A26F /* Utils.cpp */; };
+		76E6C54827A513A10036A26F /* TensorIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C54627A513A10036A26F /* TensorIterator.cpp */; };
+		76E6C54B27A513D50036A26F /* SmallBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C54927A513D50036A26F /* SmallBuffer.cpp */; };
+		76E6C54E27A53AAA0036A26F /* TensorResize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C54C27A53AAA0036A26F /* TensorResize.cpp */; };
+		76E6C55127A553550036A26F /* FunctionRef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C54F27A553550036A26F /* FunctionRef.cpp */; };
+		76E6C55427A578980036A26F /* Loop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C55227A578980036A26F /* Loop.cpp */; };
+		76E6C55727A57AAD0036A26F /* Function_Trait.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C55527A57AAD0036A26F /* Function_Trait.cpp */; };
+		76E6C55A27A57BE00036A26F /* C++17.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C55827A57BE00036A26F /* C++17.cpp */; };
+		76F336BE27A5B52300E3AEF1 /* BinaryOpsKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336BC27A5B52300E3AEF1 /* BinaryOpsKernel.cpp */; };
+		76F336C127A5B61E00E3AEF1 /* Scalar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336BF27A5B61E00E3AEF1 /* Scalar.cpp */; };
+		76F336C427A5B9B800E3AEF1 /* Dispatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336C227A5B9B800E3AEF1 /* Dispatch.cpp */; };
+		76F336C727A5CEEC00E3AEF1 /* DispatchStub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336C527A5CEEC00E3AEF1 /* DispatchStub.cpp */; };
+		76F336CA27A5D02700E3AEF1 /* Device.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336C827A5D02700E3AEF1 /* Device.cpp */; };
+		76F336CD27A5D17E00E3AEF1 /* BinaryOps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336CB27A5D17E00E3AEF1 /* BinaryOps.cpp */; };
+		76F336D027A660D800E3AEF1 /* Fill.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336CE27A660D800E3AEF1 /* Fill.cpp */; };
+		76F336D327A668D900E3AEF1 /* FillKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336D127A668D900E3AEF1 /* FillKernel.cpp */; };
+		76F336D627A7AD1600E3AEF1 /* TensorFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336D427A7AD1600E3AEF1 /* TensorFunction.cpp */; };
+		76F336D927A816E200E3AEF1 /* ExclusivelyOwned.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336D727A816E200E3AEF1 /* ExclusivelyOwned.cpp */; };
+		76F336DD27A8FCE600E3AEF1 /* EmptyTensor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336DB27A8FCE600E3AEF1 /* EmptyTensor.cpp */; };
+		76F336E027A90E8E00E3AEF1 /* TensorBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336DE27A90E8E00E3AEF1 /* TensorBase.cpp */; };
+		76F336E327AD6DB000E3AEF1 /* RefPtr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336E127AD6DB000E3AEF1 /* RefPtr.cpp */; };
+		76F336E627AEA7E400E3AEF1 /* TensorOperator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336E427AEA7E300E3AEF1 /* TensorOperator.cpp */; };
+		76F336E927AED61200E3AEF1 /* ScalarOps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336E727AED61100E3AEF1 /* ScalarOps.cpp */; };
+		76F336EC27AEEC9500E3AEF1 /* UnaryOps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336EA27AEEC9400E3AEF1 /* UnaryOps.cpp */; };
+		76F336EF27AEF75000E3AEF1 /* UnaryOpsKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336ED27AEF75000E3AEF1 /* UnaryOpsKernel.cpp */; };
+		76F336F227AF133300E3AEF1 /* TensorConversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336F027AF133300E3AEF1 /* TensorConversion.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +67,92 @@
 /* Begin PBXFileReference section */
 		76E6C50727A502680036A26F /* Tensor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Tensor; sourceTree = BUILT_PRODUCTS_DIR; };
 		76E6C50A27A502680036A26F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		76E6C51127A502A30036A26F /* Tensor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Tensor.cpp; sourceTree = "<group>"; };
+		76E6C51227A502A30036A26F /* Tensor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Tensor.hpp; sourceTree = "<group>"; };
+		76E6C51427A502F60036A26F /* Memory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Memory.cpp; sourceTree = "<group>"; };
+		76E6C51527A502F60036A26F /* Memory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Memory.hpp; sourceTree = "<group>"; };
+		76E6C51727A5038F0036A26F /* Allocator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Allocator.cpp; sourceTree = "<group>"; };
+		76E6C51827A5038F0036A26F /* Allocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Allocator.hpp; sourceTree = "<group>"; };
+		76E6C51A27A504000036A26F /* DType.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DType.cpp; sourceTree = "<group>"; };
+		76E6C51B27A504000036A26F /* DType.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DType.hpp; sourceTree = "<group>"; };
+		76E6C51D27A504C80036A26F /* ScalarType.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScalarType.cpp; sourceTree = "<group>"; };
+		76E6C51E27A504C80036A26F /* ScalarType.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ScalarType.hpp; sourceTree = "<group>"; };
+		76E6C52027A504FC0036A26F /* PerspectiveView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PerspectiveView.cpp; sourceTree = "<group>"; };
+		76E6C52127A504FC0036A26F /* PerspectiveView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PerspectiveView.hpp; sourceTree = "<group>"; };
+		76E6C52327A505250036A26F /* ArrayRef.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ArrayRef.cpp; sourceTree = "<group>"; };
+		76E6C52427A505250036A26F /* ArrayRef.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ArrayRef.hpp; sourceTree = "<group>"; };
+		76E6C52627A505700036A26F /* SmallVector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SmallVector.cpp; sourceTree = "<group>"; };
+		76E6C52727A505700036A26F /* SmallVector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SmallVector.hpp; sourceTree = "<group>"; };
+		76E6C52927A505D50036A26F /* MaybeOwned.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MaybeOwned.cpp; sourceTree = "<group>"; };
+		76E6C52A27A505D50036A26F /* MaybeOwned.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MaybeOwned.hpp; sourceTree = "<group>"; };
+		76E6C52C27A505FE0036A26F /* TensorOptions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorOptions.cpp; sourceTree = "<group>"; };
+		76E6C52D27A505FE0036A26F /* TensorOptions.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorOptions.hpp; sourceTree = "<group>"; };
+		76E6C52F27A506C50036A26F /* TensorFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorFactory.cpp; sourceTree = "<group>"; };
+		76E6C53027A506C50036A26F /* TensorFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorFactory.hpp; sourceTree = "<group>"; };
+		76E6C53227A506E90036A26F /* Accumulator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Accumulator.cpp; sourceTree = "<group>"; };
+		76E6C53327A506E90036A26F /* Accumulator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Accumulator.hpp; sourceTree = "<group>"; };
+		76E6C53627A50F4A0036A26F /* libomp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libomp.dylib; path = ../../../../../usr/local/Cellar/llvm/13.0.0_2/lib/libomp.dylib; sourceTree = "<group>"; };
+		76E6C53827A510F30036A26F /* Parallel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Parallel.cpp; sourceTree = "<group>"; };
+		76E6C53927A510F30036A26F /* Parallel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Parallel.hpp; sourceTree = "<group>"; };
+		76E6C53B27A511570036A26F /* Config.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Config.hpp; sourceTree = "<group>"; };
+		76E6C53C27A511B50036A26F /* ParallelOpenMP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ParallelOpenMP.cpp; sourceTree = "<group>"; };
+		76E6C53D27A511B50036A26F /* ParallelOpenMP.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ParallelOpenMP.hpp; sourceTree = "<group>"; };
+		76E6C53F27A512090036A26F /* Parallel-inline.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = "Parallel-inline.hpp"; sourceTree = "<group>"; };
+		76E6C54027A5124A0036A26F /* ThreadPool.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadPool.cpp; sourceTree = "<group>"; };
+		76E6C54127A5124A0036A26F /* ThreadPool.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ThreadPool.hpp; sourceTree = "<group>"; };
+		76E6C54327A5132B0036A26F /* Utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; };
+		76E6C54427A5132B0036A26F /* Utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Utils.hpp; sourceTree = "<group>"; };
+		76E6C54627A513A10036A26F /* TensorIterator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorIterator.cpp; sourceTree = "<group>"; };
+		76E6C54727A513A10036A26F /* TensorIterator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorIterator.hpp; sourceTree = "<group>"; };
+		76E6C54927A513D50036A26F /* SmallBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SmallBuffer.cpp; sourceTree = "<group>"; };
+		76E6C54A27A513D50036A26F /* SmallBuffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SmallBuffer.hpp; sourceTree = "<group>"; };
+		76E6C54C27A53AAA0036A26F /* TensorResize.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorResize.cpp; sourceTree = "<group>"; };
+		76E6C54D27A53AAA0036A26F /* TensorResize.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorResize.hpp; sourceTree = "<group>"; };
+		76E6C54F27A553550036A26F /* FunctionRef.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FunctionRef.cpp; sourceTree = "<group>"; };
+		76E6C55027A553550036A26F /* FunctionRef.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FunctionRef.hpp; sourceTree = "<group>"; };
+		76E6C55227A578980036A26F /* Loop.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Loop.cpp; sourceTree = "<group>"; };
+		76E6C55327A578980036A26F /* Loop.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Loop.hpp; sourceTree = "<group>"; };
+		76E6C55527A57AAD0036A26F /* Function_Trait.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Function_Trait.cpp; sourceTree = "<group>"; };
+		76E6C55627A57AAD0036A26F /* Function_Trait.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Function_Trait.hpp; sourceTree = "<group>"; };
+		76E6C55827A57BE00036A26F /* C++17.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "C++17.cpp"; sourceTree = "<group>"; };
+		76E6C55927A57BE00036A26F /* C++17.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = "C++17.hpp"; sourceTree = "<group>"; };
+		76F336BC27A5B52300E3AEF1 /* BinaryOpsKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BinaryOpsKernel.cpp; sourceTree = "<group>"; };
+		76F336BD27A5B52300E3AEF1 /* BinaryOpsKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BinaryOpsKernel.hpp; sourceTree = "<group>"; };
+		76F336BF27A5B61E00E3AEF1 /* Scalar.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Scalar.cpp; sourceTree = "<group>"; };
+		76F336C027A5B61E00E3AEF1 /* Scalar.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Scalar.hpp; sourceTree = "<group>"; };
+		76F336C227A5B9B800E3AEF1 /* Dispatch.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Dispatch.cpp; sourceTree = "<group>"; };
+		76F336C327A5B9B800E3AEF1 /* Dispatch.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Dispatch.hpp; sourceTree = "<group>"; };
+		76F336C527A5CEEC00E3AEF1 /* DispatchStub.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DispatchStub.cpp; sourceTree = "<group>"; };
+		76F336C627A5CEEC00E3AEF1 /* DispatchStub.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DispatchStub.hpp; sourceTree = "<group>"; };
+		76F336C827A5D02700E3AEF1 /* Device.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Device.cpp; sourceTree = "<group>"; };
+		76F336C927A5D02700E3AEF1 /* Device.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Device.hpp; sourceTree = "<group>"; };
+		76F336CB27A5D17E00E3AEF1 /* BinaryOps.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BinaryOps.cpp; sourceTree = "<group>"; };
+		76F336CC27A5D17E00E3AEF1 /* BinaryOps.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BinaryOps.hpp; sourceTree = "<group>"; };
+		76F336CE27A660D800E3AEF1 /* Fill.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Fill.cpp; sourceTree = "<group>"; };
+		76F336CF27A660D800E3AEF1 /* Fill.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Fill.hpp; sourceTree = "<group>"; };
+		76F336D127A668D900E3AEF1 /* FillKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FillKernel.cpp; sourceTree = "<group>"; };
+		76F336D227A668D900E3AEF1 /* FillKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FillKernel.hpp; sourceTree = "<group>"; };
+		76F336D427A7AD1600E3AEF1 /* TensorFunction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorFunction.cpp; sourceTree = "<group>"; };
+		76F336D527A7AD1600E3AEF1 /* TensorFunction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorFunction.hpp; sourceTree = "<group>"; };
+		76F336D727A816E200E3AEF1 /* ExclusivelyOwned.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ExclusivelyOwned.cpp; sourceTree = "<group>"; };
+		76F336D827A816E200E3AEF1 /* ExclusivelyOwned.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ExclusivelyOwned.hpp; sourceTree = "<group>"; };
+		76F336DA27A817D000E3AEF1 /* in_place.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = in_place.hpp; sourceTree = "<group>"; };
+		76F336DB27A8FCE600E3AEF1 /* EmptyTensor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EmptyTensor.cpp; sourceTree = "<group>"; };
+		76F336DC27A8FCE600E3AEF1 /* EmptyTensor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EmptyTensor.hpp; sourceTree = "<group>"; };
+		76F336DE27A90E8E00E3AEF1 /* TensorBase.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorBase.cpp; sourceTree = "<group>"; };
+		76F336DF27A90E8E00E3AEF1 /* TensorBase.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorBase.hpp; sourceTree = "<group>"; };
+		76F336E127AD6DB000E3AEF1 /* RefPtr.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RefPtr.cpp; sourceTree = "<group>"; };
+		76F336E227AD6DB000E3AEF1 /* RefPtr.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RefPtr.hpp; sourceTree = "<group>"; };
+		76F336E427AEA7E300E3AEF1 /* TensorOperator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorOperator.cpp; sourceTree = "<group>"; };
+		76F336E527AEA7E300E3AEF1 /* TensorOperator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorOperator.hpp; sourceTree = "<group>"; };
+		76F336E727AED61100E3AEF1 /* ScalarOps.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScalarOps.cpp; sourceTree = "<group>"; };
+		76F336E827AED61100E3AEF1 /* ScalarOps.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ScalarOps.hpp; sourceTree = "<group>"; };
+		76F336EA27AEEC9400E3AEF1 /* UnaryOps.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UnaryOps.cpp; sourceTree = "<group>"; };
+		76F336EB27AEEC9400E3AEF1 /* UnaryOps.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UnaryOps.hpp; sourceTree = "<group>"; };
+		76F336ED27AEF75000E3AEF1 /* UnaryOpsKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UnaryOpsKernel.cpp; sourceTree = "<group>"; };
+		76F336EE27AEF75000E3AEF1 /* UnaryOpsKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UnaryOpsKernel.hpp; sourceTree = "<group>"; };
+		76F336F027AF133300E3AEF1 /* TensorConversion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorConversion.cpp; sourceTree = "<group>"; };
+		76F336F127AF133300E3AEF1 /* TensorConversion.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorConversion.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +160,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				76E6C53727A50F4A0036A26F /* libomp.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -43,6 +172,7 @@
 			children = (
 				76E6C50927A502680036A26F /* Tensor */,
 				76E6C50827A502680036A26F /* Products */,
+				76E6C53527A50F4A0036A26F /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,8 +188,101 @@
 			isa = PBXGroup;
 			children = (
 				76E6C50A27A502680036A26F /* main.cpp */,
+				76E6C51127A502A30036A26F /* Tensor.cpp */,
+				76E6C51227A502A30036A26F /* Tensor.hpp */,
+				76E6C51427A502F60036A26F /* Memory.cpp */,
+				76E6C51527A502F60036A26F /* Memory.hpp */,
+				76E6C51727A5038F0036A26F /* Allocator.cpp */,
+				76E6C51827A5038F0036A26F /* Allocator.hpp */,
+				76E6C51A27A504000036A26F /* DType.cpp */,
+				76E6C51B27A504000036A26F /* DType.hpp */,
+				76E6C51D27A504C80036A26F /* ScalarType.cpp */,
+				76E6C51E27A504C80036A26F /* ScalarType.hpp */,
+				76E6C52027A504FC0036A26F /* PerspectiveView.cpp */,
+				76E6C52127A504FC0036A26F /* PerspectiveView.hpp */,
+				76E6C52327A505250036A26F /* ArrayRef.cpp */,
+				76E6C52427A505250036A26F /* ArrayRef.hpp */,
+				76E6C52627A505700036A26F /* SmallVector.cpp */,
+				76E6C52727A505700036A26F /* SmallVector.hpp */,
+				76E6C52927A505D50036A26F /* MaybeOwned.cpp */,
+				76E6C52A27A505D50036A26F /* MaybeOwned.hpp */,
+				76E6C52C27A505FE0036A26F /* TensorOptions.cpp */,
+				76E6C52D27A505FE0036A26F /* TensorOptions.hpp */,
+				76E6C52F27A506C50036A26F /* TensorFactory.cpp */,
+				76E6C53027A506C50036A26F /* TensorFactory.hpp */,
+				76E6C53227A506E90036A26F /* Accumulator.cpp */,
+				76E6C53327A506E90036A26F /* Accumulator.hpp */,
+				76E6C53827A510F30036A26F /* Parallel.cpp */,
+				76E6C53927A510F30036A26F /* Parallel.hpp */,
+				76E6C53B27A511570036A26F /* Config.hpp */,
+				76E6C53C27A511B50036A26F /* ParallelOpenMP.cpp */,
+				76E6C53D27A511B50036A26F /* ParallelOpenMP.hpp */,
+				76E6C53F27A512090036A26F /* Parallel-inline.hpp */,
+				76E6C54027A5124A0036A26F /* ThreadPool.cpp */,
+				76E6C54127A5124A0036A26F /* ThreadPool.hpp */,
+				76E6C54327A5132B0036A26F /* Utils.cpp */,
+				76E6C54427A5132B0036A26F /* Utils.hpp */,
+				76E6C54627A513A10036A26F /* TensorIterator.cpp */,
+				76E6C54727A513A10036A26F /* TensorIterator.hpp */,
+				76E6C54927A513D50036A26F /* SmallBuffer.cpp */,
+				76E6C54A27A513D50036A26F /* SmallBuffer.hpp */,
+				76E6C54C27A53AAA0036A26F /* TensorResize.cpp */,
+				76E6C54D27A53AAA0036A26F /* TensorResize.hpp */,
+				76E6C54F27A553550036A26F /* FunctionRef.cpp */,
+				76E6C55027A553550036A26F /* FunctionRef.hpp */,
+				76E6C55227A578980036A26F /* Loop.cpp */,
+				76E6C55327A578980036A26F /* Loop.hpp */,
+				76E6C55527A57AAD0036A26F /* Function_Trait.cpp */,
+				76E6C55627A57AAD0036A26F /* Function_Trait.hpp */,
+				76E6C55827A57BE00036A26F /* C++17.cpp */,
+				76E6C55927A57BE00036A26F /* C++17.hpp */,
+				76F336BC27A5B52300E3AEF1 /* BinaryOpsKernel.cpp */,
+				76F336BD27A5B52300E3AEF1 /* BinaryOpsKernel.hpp */,
+				76F336BF27A5B61E00E3AEF1 /* Scalar.cpp */,
+				76F336C027A5B61E00E3AEF1 /* Scalar.hpp */,
+				76F336C227A5B9B800E3AEF1 /* Dispatch.cpp */,
+				76F336C327A5B9B800E3AEF1 /* Dispatch.hpp */,
+				76F336C527A5CEEC00E3AEF1 /* DispatchStub.cpp */,
+				76F336C627A5CEEC00E3AEF1 /* DispatchStub.hpp */,
+				76F336C827A5D02700E3AEF1 /* Device.cpp */,
+				76F336C927A5D02700E3AEF1 /* Device.hpp */,
+				76F336CB27A5D17E00E3AEF1 /* BinaryOps.cpp */,
+				76F336CC27A5D17E00E3AEF1 /* BinaryOps.hpp */,
+				76F336CE27A660D800E3AEF1 /* Fill.cpp */,
+				76F336CF27A660D800E3AEF1 /* Fill.hpp */,
+				76F336D127A668D900E3AEF1 /* FillKernel.cpp */,
+				76F336D227A668D900E3AEF1 /* FillKernel.hpp */,
+				76F336D427A7AD1600E3AEF1 /* TensorFunction.cpp */,
+				76F336D527A7AD1600E3AEF1 /* TensorFunction.hpp */,
+				76F336D727A816E200E3AEF1 /* ExclusivelyOwned.cpp */,
+				76F336D827A816E200E3AEF1 /* ExclusivelyOwned.hpp */,
+				76F336DA27A817D000E3AEF1 /* in_place.hpp */,
+				76F336DB27A8FCE600E3AEF1 /* EmptyTensor.cpp */,
+				76F336DC27A8FCE600E3AEF1 /* EmptyTensor.hpp */,
+				76F336DE27A90E8E00E3AEF1 /* TensorBase.cpp */,
+				76F336DF27A90E8E00E3AEF1 /* TensorBase.hpp */,
+				76F336E127AD6DB000E3AEF1 /* RefPtr.cpp */,
+				76F336E227AD6DB000E3AEF1 /* RefPtr.hpp */,
+				76F336E427AEA7E300E3AEF1 /* TensorOperator.cpp */,
+				76F336E527AEA7E300E3AEF1 /* TensorOperator.hpp */,
+				76F336E727AED61100E3AEF1 /* ScalarOps.cpp */,
+				76F336E827AED61100E3AEF1 /* ScalarOps.hpp */,
+				76F336EA27AEEC9400E3AEF1 /* UnaryOps.cpp */,
+				76F336EB27AEEC9400E3AEF1 /* UnaryOps.hpp */,
+				76F336ED27AEF75000E3AEF1 /* UnaryOpsKernel.cpp */,
+				76F336EE27AEF75000E3AEF1 /* UnaryOpsKernel.hpp */,
+				76F336F027AF133300E3AEF1 /* TensorConversion.cpp */,
+				76F336F127AF133300E3AEF1 /* TensorConversion.hpp */,
 			);
 			path = Tensor;
+			sourceTree = "<group>";
+		};
+		76E6C53527A50F4A0036A26F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				76E6C53627A50F4A0036A26F /* libomp.dylib */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -119,7 +342,48 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				76E6C53427A506E90036A26F /* Accumulator.cpp in Sources */,
+				76E6C54227A5124A0036A26F /* ThreadPool.cpp in Sources */,
+				76F336CA27A5D02700E3AEF1 /* Device.cpp in Sources */,
+				76F336D927A816E200E3AEF1 /* ExclusivelyOwned.cpp in Sources */,
+				76F336EF27AEF75000E3AEF1 /* UnaryOpsKernel.cpp in Sources */,
+				76E6C54E27A53AAA0036A26F /* TensorResize.cpp in Sources */,
+				76F336F227AF133300E3AEF1 /* TensorConversion.cpp in Sources */,
+				76E6C55A27A57BE00036A26F /* C++17.cpp in Sources */,
+				76F336BE27A5B52300E3AEF1 /* BinaryOpsKernel.cpp in Sources */,
+				76E6C55127A553550036A26F /* FunctionRef.cpp in Sources */,
+				76F336D327A668D900E3AEF1 /* FillKernel.cpp in Sources */,
+				76E6C51627A502F60036A26F /* Memory.cpp in Sources */,
+				76E6C54527A5132B0036A26F /* Utils.cpp in Sources */,
+				76E6C52527A505250036A26F /* ArrayRef.cpp in Sources */,
+				76E6C54B27A513D50036A26F /* SmallBuffer.cpp in Sources */,
+				76E6C53E27A511B50036A26F /* ParallelOpenMP.cpp in Sources */,
+				76F336E927AED61200E3AEF1 /* ScalarOps.cpp in Sources */,
+				76E6C54827A513A10036A26F /* TensorIterator.cpp in Sources */,
+				76E6C55727A57AAD0036A26F /* Function_Trait.cpp in Sources */,
+				76F336D027A660D800E3AEF1 /* Fill.cpp in Sources */,
+				76F336E027A90E8E00E3AEF1 /* TensorBase.cpp in Sources */,
+				76F336C127A5B61E00E3AEF1 /* Scalar.cpp in Sources */,
+				76F336CD27A5D17E00E3AEF1 /* BinaryOps.cpp in Sources */,
+				76E6C51F27A504C80036A26F /* ScalarType.cpp in Sources */,
+				76F336EC27AEEC9500E3AEF1 /* UnaryOps.cpp in Sources */,
+				76F336C727A5CEEC00E3AEF1 /* DispatchStub.cpp in Sources */,
+				76E6C52E27A505FE0036A26F /* TensorOptions.cpp in Sources */,
+				76E6C51C27A504000036A26F /* DType.cpp in Sources */,
+				76F336E627AEA7E400E3AEF1 /* TensorOperator.cpp in Sources */,
+				76F336C427A5B9B800E3AEF1 /* Dispatch.cpp in Sources */,
+				76E6C53A27A510F30036A26F /* Parallel.cpp in Sources */,
+				76F336E327AD6DB000E3AEF1 /* RefPtr.cpp in Sources */,
+				76E6C51327A502A30036A26F /* Tensor.cpp in Sources */,
+				76E6C52827A505700036A26F /* SmallVector.cpp in Sources */,
 				76E6C50B27A502680036A26F /* main.cpp in Sources */,
+				76E6C51927A5038F0036A26F /* Allocator.cpp in Sources */,
+				76E6C53127A506C50036A26F /* TensorFactory.cpp in Sources */,
+				76E6C52B27A505D50036A26F /* MaybeOwned.cpp in Sources */,
+				76E6C52227A504FC0036A26F /* PerspectiveView.cpp in Sources */,
+				76E6C55427A578980036A26F /* Loop.cpp in Sources */,
+				76F336D627A7AD1600E3AEF1 /* TensorFunction.cpp in Sources */,
+				76F336DD27A8FCE600E3AEF1 /* EmptyTensor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,7 +504,17 @@
 		76E6C50F27A502680036A26F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CC = /usr/local/opt/llvm/bin/clang;
+				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_STYLE = Automatic;
+				COMPILER_INDEX_STORE_ENABLE = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				HEADER_SEARCH_PATHS = /usr/local/opt/llvm/lib/clang/13.0.0_2/include;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/llvm/13.0.0_2/lib,
+				);
+				OTHER_CFLAGS = "-fopenmp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -248,7 +522,17 @@
 		76E6C51027A502680036A26F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CC = /usr/local/opt/llvm/bin/clang;
+				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_STYLE = Automatic;
+				COMPILER_INDEX_STORE_ENABLE = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				HEADER_SEARCH_PATHS = /usr/local/opt/llvm/lib/clang/13.0.0_2/include;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/llvm/13.0.0_2/lib,
+				);
+				OTHER_CFLAGS = "-fopenmp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
