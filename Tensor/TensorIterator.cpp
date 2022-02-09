@@ -5,6 +5,7 @@
 //  Created by 陳均豪 on 2022/1/29.
 //
 
+#include "TensorFactory.hpp"
 #include "TensorIterator.hpp"
 #include "TensorResize.hpp"
 #include "Parallel.hpp"
@@ -153,6 +154,10 @@ void TensorIterator::compute_types(const TensorIteratorConfig &config) {
         
         assert(op.target_dtype == op.current_dtype);
         
+        if (common_device == Device::CPU) {
+            common_device = op.tensor_base().device();
+        }
+        
         if (!op.is_output) {
             if (op.target_dtype != common_dtype_) {
                 if (common_dtype_ == ScalarType::Undefined) {
@@ -172,13 +177,37 @@ void TensorIterator::compute_types(const TensorIteratorConfig &config) {
         }
     }
     
-    assert(!(has_different_input_dtypes && (has_undefined_outputs)));
+    assert(!(has_different_input_dtypes && !config.promote_inputs_to_common_dtype_ &&
+             (has_undefined_outputs || config.enforce_safe_casting_to_output_ ||
+             config.cast_common_dtype_to_outputs_)));
     
-    if (!has_undefined_outputs) {
+    if (config.check_all_same_dtype_ &&
+        (has_different_input_dtypes || has_different_output_dtypes ||
+        (common_dtype_ != output_dtype && output_dtype != ScalarType::Undefined))) {
+        for (auto& op : operands_) {
+            if (!op.tensor_base().defined()) {
+                continue;
+            }
+            assert(op.target_dtype == common_dtype_);
+        }
+    }
+    
+    if (!has_undefined_outputs && !config.check_all_same_device_ &&
+        !config.promote_inputs_to_common_dtype_ && !config.cast_common_dtype_to_outputs_ &&
+        !config.enforce_safe_casting_to_output_) {
         common_dtype_ = has_different_input_dtypes ? ScalarType::Undefined : common_dtype_;
         return;
     }
     
+//    if (has_different_input_dtypes && config.promote_inputs_to_common_dtype_) {
+//        common_dtype_ = ;
+//    }
+    
+//    if (config.promote_integer_inputs_to_float_ && c10::isIntegralType(common_dtype_, /*includeBool=*/true)) {
+//        common_dtype_ = c10::typeMetaToScalarType(c10::get_default_dtype());
+//    }
+    
+    common_device_ = common_device;
     for (auto& op : operands_) {
         bool is_type_defined = op.is_type_defined();
         
@@ -195,18 +224,12 @@ void TensorIterator::compute_types(const TensorIteratorConfig &config) {
         }
         
         if (common_device == Device::CPU) {
-//            if (config.cast_common_dtype_to_outputs_ && op.is_output && op.current_dtype != common_dtype_ && !is_meta_) {
-//                TORCH_INTERNAL_ASSERT(op.tensor_base().defined());
-//                op.exchange_tensor(c10::MaybeOwned<TensorBase>::owned(
-//                                                                      at::empty_like(op.tensor(),
-//                                                                                     op.tensor_base().options().dtype(common_dtype_),
-//                                                                                     LEGACY_CONTIGUOUS_MEMORY_FORMAT)));
-//                if (!names_.empty()) {
-//                    namedinference::propagate_names(op.tensor_base(), names_);
-//                }
-//                op.current_dtype = common_dtype_;
-//                op.target_dtype = common_dtype_;
-//            }
+            if (config.cast_common_dtype_to_outputs_ && op.is_output && op.current_dtype != common_dtype_) {
+                assert(op.tensor_base().defined());
+                op.exchange_tensor(MaybeOwned<TensorBase>::owned(otter::empty_like(op.tensor(), op.tensor_base().options().dtype(common_dtype_))));
+                op.current_dtype = common_dtype_;
+                op.target_dtype = common_dtype_;
+            }
             
             if (config.promote_inputs_to_common_dtype_ && !op.is_output && op.current_dtype != common_dtype_) {
                 op.exchange_tensor(MaybeOwned<TensorBase>::owned(op.tensor().to(common_dtype_)));
@@ -466,21 +489,32 @@ void TensorIterator::serial_for_each(loop2d_t loop, Range range) const {
     otter::internal::serial_for_each(shape_, strides, ptrs.data(), ptrs.size(), loop, range);
 }
 
-TensorIterator TensorIterator::binary_op(TensorBase& out, const TensorBase& a, const TensorBase& b) {
-    TensorIterator iter;
-    iter.build_binary_op(out, a, b);
-    return iter;
+#define BINARY_FLOAT_OP_CONFIG()                \
+TensorIteratorConfig()                          \
+.promote_inputs_to_common_dtype(true)           \
+.cast_common_dtype_to_outputs(true)             \
+.enforce_safe_casting_to_output(true)           \
+.promote_integer_inputs_to_float(true)
+
+void TensorIterator::build_binary_float_op(const TensorBase& out, const TensorBase& a, const TensorBase& b) {
+    this->build(BINARY_FLOAT_OP_CONFIG()
+        .add_owned_output(out)
+        .add_owned_input(a)
+        .add_owned_input(b));
 }
 
-TensorIterator TensorIterator::borrowing_binary_op(
-                                                   const TensorBase& out, const TensorBase& a, const TensorBase& b) {
-    TensorIterator iter;
-    iter.build_borrowing_binary_op(out, a, b);
-    return iter;
+void TensorIterator::build_borrowing_binary_float_op(const TensorBase& out, const TensorBase& a, const TensorBase& b) {
+    this->build(BINARY_FLOAT_OP_CONFIG()
+        .add_output(out)
+        .add_input(a)
+        .add_input(b));
 }
 
-#define BINARY_OP_CONFIG()                              \
-TensorIteratorConfig()
+#define BINARY_OP_CONFIG()                          \
+TensorIteratorConfig()                              \
+.promote_inputs_to_common_dtype(true)               \
+.cast_common_dtype_to_outputs(true)                 \
+.enforce_safe_casting_to_output(true)               \
 
 void TensorIterator::build_binary_op(const TensorBase &out, const TensorBase &a, const TensorBase &b) {
     this->build(BINARY_OP_CONFIG().add_owned_output(out).add_owned_input(a).add_owned_input(b));
@@ -491,8 +525,12 @@ void TensorIterator::build_borrowing_binary_op(const TensorBase& out, const Tens
 }
 
 #define UNARY_FLOAT_OP_CONFIG()                                         \
-TensorIteratorConfig()                                              \
-.promote_inputs_to_common_dtype(true)
+TensorIteratorConfig()                                                  \
+.promote_inputs_to_common_dtype(true)                                   \
+.promote_inputs_to_common_dtype(true)                                   \
+.cast_common_dtype_to_outputs(true)                                     \
+.enforce_safe_casting_to_output(true)                                   \
+.promote_integer_inputs_to_float(true)
 
 void TensorIterator::build_unary_float_op(const TensorBase &out, const TensorBase &a) {
     this->build(UNARY_FLOAT_OP_CONFIG().add_owned_output(out).add_owned_input(a));

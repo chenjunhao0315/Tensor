@@ -22,6 +22,10 @@ Tensor empty_like(const Tensor& self) {
     return empty_like(self, self.scalar_type());
 }
 
+Tensor empty_like(const Tensor& self, const TensorOptions& options) {
+    return empty_like(self, typeMetaToScalarType(options.dtype()));
+}
+
 Tensor empty_like(const Tensor& self, ScalarType dtype) {
     auto result = empty(self.sizes(), dtype);
     
@@ -38,6 +42,10 @@ Tensor ones(IntArrayRef size, ScalarType dtype) {
     auto result = empty(size, dtype);
     
     return result.fill_(1);
+}
+
+Tensor zeros(IntArrayRef size, ScalarType dtype) {
+    return empty_cpu(size, dtype);
 }
 
 

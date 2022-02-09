@@ -55,6 +55,25 @@ static inline size_t elementSize(ScalarType t) {
     return -1;
 }
 
+static inline bool isIntegralType(ScalarType t) {
+  return (
+      t == ScalarType::Byte || t == ScalarType::Char || t == ScalarType::Int ||
+      t == ScalarType::Long || t == ScalarType::Short);
+}
+
+static inline bool isIntegralType(ScalarType t, bool includeBool) {
+  bool isIntegral =
+      (t == ScalarType::Byte || t == ScalarType::Char || t == ScalarType::Int ||
+       t == ScalarType::Long || t == ScalarType::Short);
+
+  return includeBool ? isIntegral || (t == ScalarType::Bool) : isIntegral;
+}
+
+static inline bool isFloatingType(ScalarType t) {
+  return (
+      t == ScalarType::Double || t == ScalarType::Float);
+}
+
 template <typename To, typename From>
 typename std::enable_if<std::is_same<From, bool>::value, bool>::type overflows(From f) {
     return false;

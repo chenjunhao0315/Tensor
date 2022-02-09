@@ -56,7 +56,19 @@ public:
         return *this;
     }
     
+    Tensor operator~() const {
+        return bitwise_not();
+    }
+    
+    Tensor operator-() const {
+        return neg();
+    }
+    
     Tensor& operator+=(const Tensor& other) {
+        return add_(other);
+    }
+    
+    Tensor& operator+=(Scalar other) {
         return add_(other);
     }
     
@@ -64,8 +76,42 @@ public:
         return sub_(other);
     }
     
+    Tensor& operator-=(Scalar other) {
+        return sub_(other);
+    }
+    
+    Tensor& operator*=(const Tensor& other) {
+        return mul_(other);
+    }
+    
+    Tensor& operator*=(Scalar other) {
+        return mul_(other);
+    }
+    
+    Tensor& operator/=(const Tensor& other) {
+        return div_(other);
+    }
+    
+    Tensor& operator/=(Scalar other) {
+        return div_(other);
+    }
+    
+    Tensor& operator&=(const Tensor& other) {
+        return bitwise_and_(other);
+    }
+    
+    Tensor& operator|=(const Tensor& other) {
+        return bitwise_or_(other);
+    }
+    
+    Tensor& operator^=(const Tensor& other) {
+        return bitwise_xor_(other);
+    }
+    
     Tensor& zero_();
     Tensor& fill_(const Scalar& value);
+    
+    Tensor to(ScalarType dtype) const;
     
     Tensor& add_(const Tensor& other, const Scalar& alpha = 1);
     Tensor add(const Tensor& other, const Scalar& alpha = 1) const;
@@ -87,7 +133,47 @@ public:
     Tensor& div_(const Scalar& other);
     Tensor div(const Scalar& other) const;
     
-    Tensor to(ScalarType dtype) const;
+    Tensor& remainder_(const Tensor& other);
+    Tensor remainder(const Tensor& other) const;
+    Tensor& remainder_(const Scalar& other);
+    Tensor remainder(const Scalar& other) const;
+    
+    Tensor& bitwise_and_(const Tensor& other);
+    Tensor bitwise_and(const Tensor& other) const;
+    Tensor& bitwise_and_(const Scalar& other);
+    Tensor bitwise_and(const Scalar& other) const;
+    
+    Tensor& bitwise_or_(const Tensor& other);
+    Tensor bitwise_or(const Tensor& other) const;
+    Tensor& bitwise_or_(const Scalar& other);
+    Tensor bitwise_or(const Scalar& other) const;
+    
+    Tensor& bitwise_xor_(const Tensor& other);
+    Tensor bitwise_xor(const Tensor& other) const;
+    Tensor& bitwise_xor_(const Scalar& other);
+    Tensor bitwise_xor(const Scalar& other) const;
+    
+    Tensor& bitwise_not_();
+    Tensor bitwise_not() const;
+    
+    Tensor& neg_();
+    Tensor neg() const;
+    
+    Tensor& abs_();
+    Tensor abs() const;
+    
+    Tensor& sin_();
+    Tensor sin() const;
+    
+    Tensor& cos_();
+    Tensor cos() const;
+    
+    Tensor& tan_();
+    Tensor tan() const;
+    
+    Tensor& exp_();
+    Tensor exp() const;
+    
 };
 
 template <typename T, typename... Args>

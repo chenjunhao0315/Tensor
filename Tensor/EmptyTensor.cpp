@@ -25,7 +25,7 @@ size_t computeStorageNbytes(
 }
 
 Tensor empty_cpu(IntArrayRef size, TensorOptions option) {
-    ScalarType dtype = ScalarType::Float;
+    ScalarType dtype = typeMetaToScalarType(option.dtype());
     
     return empty_cpu(size, dtype);
 }

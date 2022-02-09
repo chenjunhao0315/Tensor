@@ -20,114 +20,58 @@ DECLEAR_META_STRUCTURE_OTHER_WITH_SCALAR(add, Tensor);
 DECLEAR_META_STRUCTURE_OTHER_WITH_SCALAR(sub, Tensor);
 DECLEAR_META_STRUCTURE_OTHER(mul, Tensor);
 DECLEAR_META_STRUCTURE_OTHER(div, Tensor);
+DECLEAR_META_STRUCTURE_OTHER(remainder, Tensor);
+DECLEAR_META_STRUCTURE_OTHER(bitwise_and, Tensor);
+DECLEAR_META_STRUCTURE_OTHER(bitwise_or, Tensor);
+DECLEAR_META_STRUCTURE_OTHER(bitwise_xor, Tensor);
 
-struct structured_add_Tensor_functional : structured_add_Tensor {
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
-        outputs_[output_idx] = create_out(sizes, strides, options);
-        
-        structured_add_Tensor::set_output(output_idx, sizes, strides, options);
-    }
-    const Tensor& maybe_get_output(int64_t output_idx) override {
-        return *outputs_[output_idx];
-    }
-    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
+DECLEAR_META_STRUCTURE_SELF(bitwise_not, Tensor);
+DECLEAR_META_STRUCTURE_SELF(neg, Tensor);
+DECLEAR_META_STRUCTURE_SELF(abs, Tensor);
+DECLEAR_META_STRUCTURE_SELF(sin, Tensor);
+DECLEAR_META_STRUCTURE_SELF(cos, Tensor);
+DECLEAR_META_STRUCTURE_SELF(tan, Tensor);
+DECLEAR_META_STRUCTURE_SELF(exp, Tensor);
+
+#define DEFINE_FINAL_OP(name, overload) \
+struct structured_##name##_##overload##_functional : structured_##name##_##overload { \
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override { \
+        outputs_[output_idx] = create_out(sizes, strides, options); \
+        structured_##name##_##overload::set_output(output_idx, sizes, strides, options); \
+    } \
+    const Tensor& maybe_get_output(int64_t output_idx) override { \
+        return *outputs_[output_idx]; \
+    } \
+    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_; \
+}; \
+struct structured_##name##_##overload##_out : structured_##name##_##overload { \
+    structured_##name##_##overload##_out(Tensor& out0) : outputs_{ std::ref(out0) } {} \
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override { \
+        const auto& out = outputs_[output_idx].get(); \
+        structured_##name##_##overload::set_output(output_idx, sizes, strides, options); \
+    } \
+    const Tensor& maybe_get_output(int64_t output_idx) override { \
+        return outputs_[output_idx]; \
+    } \
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_; \
 };
 
-struct structured_add_Tensor_out : structured_add_Tensor {
-    structured_add_Tensor_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
-    
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
-        const auto& out = outputs_[output_idx].get();
-        // TODO: resize out
-        
-        structured_add_Tensor::set_output(output_idx, sizes, strides, options);
-    }
-    const Tensor& maybe_get_output(int64_t output_idx) override {
-        return outputs_[output_idx];
-    }
-    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
-};
+DEFINE_FINAL_OP(add, Tensor);
+DEFINE_FINAL_OP(sub, Tensor);
+DEFINE_FINAL_OP(mul, Tensor);
+DEFINE_FINAL_OP(div, Tensor);
+DEFINE_FINAL_OP(remainder, Tensor);
+DEFINE_FINAL_OP(bitwise_and, Tensor);
+DEFINE_FINAL_OP(bitwise_or, Tensor);
+DEFINE_FINAL_OP(bitwise_xor, Tensor);
 
-struct structured_sub_Tensor_functional : structured_sub_Tensor {
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
-        outputs_[output_idx] = create_out(sizes, strides, options);
-        
-        structured_sub_Tensor::set_output(output_idx, sizes, strides, options);
-    }
-    const Tensor& maybe_get_output(int64_t output_idx) override {
-        return *outputs_[output_idx];
-    }
-    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
-};
-
-struct structured_sub_Tensor_out : structured_sub_Tensor {
-    structured_sub_Tensor_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
-    
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
-        const auto& out = outputs_[output_idx].get();
-        // TODO: resize out
-        
-        structured_sub_Tensor::set_output(output_idx, sizes, strides, options);
-    }
-    const Tensor& maybe_get_output(int64_t output_idx) override {
-        return outputs_[output_idx];
-    }
-    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
-};
-
-struct structured_mul_Tensor_functional : structured_mul_Tensor {
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
-        outputs_[output_idx] = create_out(sizes, strides, options);
-        
-        structured_mul_Tensor::set_output(output_idx, sizes, strides, options);
-    }
-    const Tensor& maybe_get_output(int64_t output_idx) override {
-        return *outputs_[output_idx];
-    }
-    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
-};
-
-struct structured_mul_Tensor_out : structured_mul_Tensor {
-    structured_mul_Tensor_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
-    
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
-        const auto& out = outputs_[output_idx].get();
-        // TODO: resize out
-        
-        structured_mul_Tensor::set_output(output_idx, sizes, strides, options);
-    }
-    const Tensor& maybe_get_output(int64_t output_idx) override {
-        return outputs_[output_idx];
-    }
-    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
-};
-
-struct structured_div_Tensor_functional : structured_div_Tensor {
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
-        outputs_[output_idx] = create_out(sizes, strides, options);
-        
-        structured_div_Tensor::set_output(output_idx, sizes, strides, options);
-    }
-    const Tensor& maybe_get_output(int64_t output_idx) override {
-        return *outputs_[output_idx];
-    }
-    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
-};
-
-struct structured_div_Tensor_out : structured_div_Tensor {
-    structured_div_Tensor_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
-    
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
-        const auto& out = outputs_[output_idx].get();
-        // TODO: resize out
-        
-        structured_div_Tensor::set_output(output_idx, sizes, strides, options);
-    }
-    const Tensor& maybe_get_output(int64_t output_idx) override {
-        return outputs_[output_idx];
-    }
-    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
-};
+DEFINE_FINAL_OP(bitwise_not, Tensor);
+DEFINE_FINAL_OP(neg, Tensor);
+DEFINE_FINAL_OP(abs, Tensor);
+DEFINE_FINAL_OP(sin, Tensor);
+DEFINE_FINAL_OP(cos, Tensor);
+DEFINE_FINAL_OP(tan, Tensor);
+DEFINE_FINAL_OP(exp, Tensor);
 
 
 }

@@ -7,12 +7,7 @@
 
 #include <iostream>
 
-#include "TensorFactory.hpp"
-#include "TensorOperator.hpp"
-#include "ScalarOps.hpp"
-#include "Parallel.hpp"
-#include "Utils.hpp"
-#include "Dispatch.hpp"
+#include "OTensor.hpp"
 
 int main(int argc, const char * argv[]) {
     
@@ -22,31 +17,31 @@ int main(int argc, const char * argv[]) {
 
     auto b = otter::full({1, 3}, 9.0, ScalarType::Float);
     
-    auto c = otter::full({1, 3}, 5, ScalarType::Int);
+    auto c = otter::full({1, 3}, M_PI_2, ScalarType::Float);
     
-    auto out = a + b + c.to(ScalarType::Float);
-    out.print();
-    printer.print<float>(out);
+    auto zero = otter::zeros({1, 3}, ScalarType::Float);
     
-    auto test_t = (b + 17.0) / 2.0;
-    test_t.print();
-    printer.print<float>(test_t);
-//
-////    test_t.zero_();
-//
-//    printer.print<float>(test_t);
-//
-//    auto test_c = test_t.to(ScalarType::Int);
-//
-//    printer.print<int>(test_c);
+    auto sig_test = 1.0 / (1 + exp(-zero));
+
+    printer.print<float>(sig_test);
+
+    auto time_three = sig_test * 7;
+
+    printer.print<float>(time_three);
+
+    auto mod_two = time_three % 2;
+    printer.print<float>(mod_two);
     
-//    out -= b;
-//    printer.print<float>(out);
-//
-//    auto mul_out = b.mul(c);
-//    printer.print<float>(mul_out);
+    auto bitwise_eight = otter::full({1, 3}, 7, ScalarType::Int);
+    auto bitwise_four = otter::full({1, 3}, 4, ScalarType::Int);
+
+    auto bitwise_test = bitwise_eight & bitwise_four;
+
+    printer.print<int>(bitwise_test);
     
-//    auto test = otter::structured_add
+    bitwise_test = abs(~bitwise_test + 1);
     
+    printer.print<int>(bitwise_test);
+        
     return 0;
 }

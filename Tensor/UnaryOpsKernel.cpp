@@ -10,8 +10,39 @@
 #include "UnaryOps.hpp"
 #include "Dispatch.hpp"
 #include "UnaryOpsKernel.hpp"
+#include "Math.hpp"
 
 namespace otter {
+
+void bitwise_not_kernel(TensorIterator& iter) {
+    if (iter.dtype() == ScalarType::Bool) {
+        cpu_kernel(iter, [=](bool a) -> bool {
+            return !a;
+        });
+    } else {
+        OTTER_DISPATCH_INTEGRAL_TYPES(iter.dtype(), "bitwise_not_cpu", [&]() {
+            cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
+                return ~a;
+            });
+        });
+    }
+}
+
+void neg_kernel(TensorIterator& iter) {
+    OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "neg_cpu", [&]() {
+        cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
+            return -a;
+        });
+    });
+}
+
+void abs_kernel(TensorIterator& iter) {
+    OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "abs_cpu", [&]() {
+        cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
+            return abs_impl(a);
+        });
+    });
+}
 
 void sin_kernel(TensorIterator& iter) {
     OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "sin_cpu", [&]() {
@@ -21,7 +52,37 @@ void sin_kernel(TensorIterator& iter) {
     });
 }
 
+void cos_kernel(TensorIterator& iter) {
+    OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "cos_cpu", [&]() {
+        cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
+            return std::cos(a);
+        });
+    });
+}
+
+void tan_kernel(TensorIterator& iter) {
+    OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "tan_cpu", [&]() {
+        cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
+            return std::tan(a);
+        });
+    });
+}
+
+void exp_kernel(TensorIterator& iter) {
+    OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "tan_cpu", [&]() {
+        cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
+            return std::exp(a);
+        });
+    });
+}
+
+REGISTER_DISPATCH(bitwise_not_stub, &bitwise_not_kernel);
+REGISTER_DISPATCH(neg_stub, &neg_kernel);
+REGISTER_DISPATCH(abs_stub, &abs_kernel);
 REGISTER_DISPATCH(sin_stub, &sin_kernel);
+REGISTER_DISPATCH(cos_stub, &cos_kernel);
+REGISTER_DISPATCH(tan_stub, &tan_kernel);
+REGISTER_DISPATCH(exp_stub, &exp_kernel);
 
 
 }

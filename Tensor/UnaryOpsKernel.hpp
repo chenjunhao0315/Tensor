@@ -10,7 +10,19 @@
 
 namespace otter {
 
+void bitwise_not_kernel(TensorIterator& iter);
 
+void neg_kernel(TensorIterator& iter);
+
+void abs_kernel(TensorIterator& iter);
+
+void sin_kernel(TensorIterator& iter);
+
+void cos_kernel(TensorIterator& iter);
+
+void tan_kernel(TensorIterator& iter);
+
+void exp_kernel(TensorIterator& iter);
 
 
 }

@@ -154,6 +154,7 @@ public:
     IntArrayRef view_offsets() const { return view_offsets_; }
     
     ScalarType dtype(int arg = 0) const { return operands_[arg].current_dtype; }
+    ScalarType common_dtype() const { return common_dtype_; }
     
     void initialize_operands(TensorIteratorConfig& config);
     void compute_shape(const TensorIteratorConfig& config);
@@ -218,8 +219,9 @@ public:
         };
     }
     
-    static TensorIterator binary_op(TensorBase& out, const TensorBase& a, const TensorBase& b);
-    static TensorIterator borrowing_binary_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
+    void build_binary_float_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
+    
+    void build_borrowing_binary_float_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
     
     void build_binary_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
     void build_borrowing_binary_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
@@ -239,6 +241,7 @@ private:
     bool has_scalars_ = false;
     bool has_tensors_ = false;
     
+    Device common_device_;
     ScalarType common_dtype_;
 };
 
@@ -275,13 +278,45 @@ public:
         return iter;
     }
     
-    TensorIteratorConfig& resize_outputs(bool resize_outputs) {
-        resize_outputs_ = resize_outputs;
+    TensorIteratorConfig& check_all_same_dtype(const bool _check_all_same_dtype) {
+        check_all_same_dtype_ = _check_all_same_dtype;
         return *this;
     }
     
-    TensorIteratorConfig& promote_inputs_to_common_dtype(bool promote_inputs_to_common_dtype) {
-        promote_inputs_to_common_dtype_ = promote_inputs_to_common_dtype;
+    TensorIteratorConfig& check_all_same_device(const bool _check_all_same_device) {
+        check_all_same_device_ = _check_all_same_device;
+        return *this;
+    }
+    
+    TensorIteratorConfig& enforce_safe_casting_to_output(const bool _enforce_safe_casting_to_output) {
+        enforce_safe_casting_to_output_ = _enforce_safe_casting_to_output;
+        return *this;
+    }
+    
+    TensorIteratorConfig& promote_inputs_to_common_dtype(const bool _promote_inputs_to_common_dtype) {
+        promote_inputs_to_common_dtype_ = _promote_inputs_to_common_dtype;
+        if (_promote_inputs_to_common_dtype) {
+            check_all_same_dtype_ = false;
+        }
+        return *this;
+    }
+    
+    TensorIteratorConfig& promote_integer_inputs_to_float(const bool _promote_integer_inputs_to_float) {
+        promote_integer_inputs_to_float_ = _promote_integer_inputs_to_float;
+        assert(!promote_integer_inputs_to_float_ || promote_inputs_to_common_dtype_);
+        return *this;
+    }
+    
+    TensorIteratorConfig& cast_common_dtype_to_outputs(const bool _cast_common_dtype_to_outputs) {
+        cast_common_dtype_to_outputs_ = _cast_common_dtype_to_outputs;
+        if (_cast_common_dtype_to_outputs) {
+            check_all_same_dtype_ = false;
+        }
+        return *this;
+    }
+    
+    TensorIteratorConfig& resize_outputs(bool resize_outputs) {
+        resize_outputs_ = resize_outputs;
         return *this;
     }
     
@@ -292,7 +327,12 @@ private:
     int num_outputs_ = 0;
     
     bool resize_outputs_ = true;
+    bool check_all_same_dtype_ = false;
+    bool check_all_same_device_ = false;
+    bool enforce_safe_casting_to_output_ = false;
     bool promote_inputs_to_common_dtype_ = false;
+    bool cast_common_dtype_to_outputs_ = false;
+    bool promote_integer_inputs_to_float_ = false;
 };
 
 struct DimCounter {
@@ -308,8 +348,8 @@ struct DimCounter {
     int64_t offset_;
 };
 
-#define DECLEAR_META_STRUCTURE_SELF(name)    \
-struct structured_##name : public TensorIterator {   \
+#define DECLEAR_META_STRUCTURE_SELF(name, overload)    \
+struct structured_##name##_##overload : public TensorIterator {   \
     void meta(const otter::Tensor& self);   \
 }
 
@@ -323,8 +363,8 @@ struct structured_##name##_##overload : public TensorIterator  {    \
     void meta(const otter::Tensor& self, const otter::Tensor& other, const otter::Scalar& value);   \
 }
 
-#define DEFINE_META_FUNCTION_SELF(name)  \
-void structured_##name::meta
+#define DEFINE_META_FUNCTION_SELF(name, overload)  \
+void structured_##name##_##overload::meta
 
 #define DEFINE_META_FUNCTION_OTHER(name, overload)  \
 void structured_##name##_##overload::meta

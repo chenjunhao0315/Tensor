@@ -21,6 +21,15 @@ void mul_kernel(TensorIterator& iter);
 
 void div_true_kernel(TensorIterator& iter);
 
+void remainder_kernel(TensorIterator& iter);
+
+void bitwise_and_kernel(TensorIterator& iter);
+
+void bitwise_or_kernel(TensorIterator& iter);
+
+void bitwise_xor_kernel(TensorIterator& iter);
+
+
 }
 
 #endif /* BinaryOpsKernel_hpp */

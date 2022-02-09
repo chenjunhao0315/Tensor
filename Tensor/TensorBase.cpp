@@ -30,7 +30,7 @@ UndefinedTensorNucleus::UndefinedTensorNucleus()
 UndefinedTensorNucleus UndefinedTensorNucleus::_singleton;
 
 std::string TensorBase::toString() const {
-    return ::toString(this->unsafeGetTensorNucleus()->scalar_type()) + "TypeMeta";
+    return ::toString(this->unsafeGetTensorNucleus()->scalar_type()) + "Type";
 }
 
 

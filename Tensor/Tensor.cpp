@@ -7,6 +7,7 @@
 
 #include "Tensor.hpp"
 #include "Fill.hpp"
+#include "UnaryOps.hpp"
 #include "BinaryOps.hpp"
 #include "ScalarOps.hpp"
 #include "TensorFunction.hpp"
@@ -120,6 +121,214 @@ Tensor& Tensor::div_(const Scalar &other) {
 
 Tensor Tensor::div(const Scalar& other) const {
     return div(scalar_to_tensor(other));
+}
+
+Tensor& Tensor::remainder_(const Tensor &other) {
+    structured_remainder_Tensor_out op(*this);
+    op.meta(*this, other);
+    remainder_stub(Device::CPU, op);
+    
+    return *this;
+}
+
+Tensor Tensor::remainder(const Tensor& other) const {
+    structured_remainder_Tensor_functional op;
+    op.meta(*this, other);
+    remainder_stub(Device::CPU, op);
+    
+    return std::move(op.outputs_[0]).take();
+}
+
+Tensor& Tensor::remainder_(const Scalar &other) {
+    return remainder_(scalar_to_tensor(other));
+}
+
+Tensor Tensor::remainder(const Scalar& other) const {
+    return remainder(scalar_to_tensor(other));
+}
+
+Tensor& Tensor::bitwise_and_(const Tensor &other) {
+    structured_bitwise_and_Tensor_out op(*this);
+    op.meta(*this, other);
+    bitwise_and_stub(Device::CPU, op);
+    
+    return *this;
+}
+
+Tensor Tensor::bitwise_and(const Tensor& other) const {
+    structured_bitwise_and_Tensor_functional op;
+    op.meta(*this, other);
+    bitwise_and_stub(Device::CPU, op);
+    
+    return std::move(op.outputs_[0]).take();
+}
+
+Tensor& Tensor::bitwise_and_(const Scalar &other) {
+    return bitwise_and_(scalar_to_tensor(other));
+}
+
+Tensor Tensor::bitwise_and(const Scalar& other) const {
+    return bitwise_and(scalar_to_tensor(other));
+}
+
+Tensor& Tensor::bitwise_or_(const Tensor &other) {
+    structured_bitwise_or_Tensor_out op(*this);
+    op.meta(*this, other);
+    bitwise_or_stub(Device::CPU, op);
+    
+    return *this;
+}
+
+Tensor Tensor::bitwise_or(const Tensor& other) const {
+    structured_bitwise_or_Tensor_functional op;
+    op.meta(*this, other);
+    bitwise_or_stub(Device::CPU, op);
+    
+    return std::move(op.outputs_[0]).take();
+}
+
+Tensor& Tensor::bitwise_or_(const Scalar &other) {
+    return bitwise_or_(scalar_to_tensor(other));
+}
+
+Tensor Tensor::bitwise_or(const Scalar& other) const {
+    return bitwise_or(scalar_to_tensor(other));
+}
+
+Tensor& Tensor::bitwise_xor_(const Tensor &other) {
+    structured_bitwise_xor_Tensor_out op(*this);
+    op.meta(*this, other);
+    bitwise_xor_stub(Device::CPU, op);
+    
+    return *this;
+}
+
+Tensor Tensor::bitwise_xor(const Tensor& other) const {
+    structured_bitwise_xor_Tensor_functional op;
+    op.meta(*this, other);
+    bitwise_xor_stub(Device::CPU, op);
+    
+    return std::move(op.outputs_[0]).take();
+}
+
+Tensor& Tensor::bitwise_xor_(const Scalar &other) {
+    return bitwise_xor_(scalar_to_tensor(other));
+}
+
+Tensor Tensor::bitwise_xor(const Scalar& other) const {
+    return bitwise_xor(scalar_to_tensor(other));
+}
+
+Tensor& Tensor::bitwise_not_() {
+    structured_bitwise_not_Tensor_out op(*this);
+    op.meta(*this);
+    bitwise_not_stub(Device::CPU, op);
+    
+    return *this;
+}
+
+Tensor Tensor::bitwise_not() const {
+    structured_bitwise_not_Tensor_functional op;
+    op.meta(*this);
+    bitwise_not_stub(Device::CPU, op);
+    
+    return std::move(op.outputs_[0]).take();
+}
+
+Tensor& Tensor::neg_() {
+    structured_neg_Tensor_out op(*this);
+    op.meta(*this);
+    neg_stub(Device::CPU, op);
+    
+    return *this;
+}
+
+Tensor Tensor::neg() const {
+    structured_neg_Tensor_functional op;
+    op.meta(*this);
+    neg_stub(Device::CPU, op);
+    
+    return std::move(op.outputs_[0]).take();
+}
+
+Tensor& Tensor::abs_() {
+    structured_abs_Tensor_out op(*this);
+    op.meta(*this);
+    abs_stub(Device::CPU, op);
+    
+    return *this;
+}
+
+Tensor Tensor::abs() const {
+    structured_abs_Tensor_functional op;
+    op.meta(*this);
+    abs_stub(Device::CPU, op);
+    
+    return std::move(op.outputs_[0]).take();
+}
+
+Tensor& Tensor::sin_() {
+    structured_sin_Tensor_out op(*this);
+    op.meta(*this);
+    sin_stub(Device::CPU, op);
+    
+    return *this;
+}
+
+Tensor Tensor::sin() const {
+    structured_sin_Tensor_functional op;
+    op.meta(*this);
+    sin_stub(Device::CPU, op);
+    
+    return std::move(op.outputs_[0]).take();
+}
+
+Tensor& Tensor::cos_() {
+    structured_cos_Tensor_out op(*this);
+    op.meta(*this);
+    cos_stub(Device::CPU, op);
+    
+    return *this;
+}
+
+Tensor Tensor::cos() const {
+    structured_cos_Tensor_functional op;
+    op.meta(*this);
+    cos_stub(Device::CPU, op);
+    
+    return std::move(op.outputs_[0]).take();
+}
+
+Tensor& Tensor::tan_() {
+    structured_tan_Tensor_out op(*this);
+    op.meta(*this);
+    tan_stub(Device::CPU, op);
+    
+    return *this;
+}
+
+Tensor Tensor::tan() const {
+    structured_tan_Tensor_functional op;
+    op.meta(*this);
+    tan_stub(Device::CPU, op);
+    
+    return std::move(op.outputs_[0]).take();
+}
+
+Tensor& Tensor::exp_() {
+    structured_exp_Tensor_out op(*this);
+    op.meta(*this);
+    exp_stub(Device::CPU, op);
+    
+    return *this;
+}
+
+Tensor Tensor::exp() const {
+    structured_exp_Tensor_functional op;
+    op.meta(*this);
+    exp_stub(Device::CPU, op);
+    
+    return std::move(op.outputs_[0]).take();
 }
 
 

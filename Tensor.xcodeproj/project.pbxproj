@@ -50,6 +50,7 @@
 		76F336EC27AEEC9500E3AEF1 /* UnaryOps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336EA27AEEC9400E3AEF1 /* UnaryOps.cpp */; };
 		76F336EF27AEF75000E3AEF1 /* UnaryOpsKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336ED27AEF75000E3AEF1 /* UnaryOpsKernel.cpp */; };
 		76F336F227AF133300E3AEF1 /* TensorConversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F336F027AF133300E3AEF1 /* TensorConversion.cpp */; };
+		76F3378227B3AA7B00E3AEF1 /* Math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76F3378027B3AA7B00E3AEF1 /* Math.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -153,6 +154,9 @@
 		76F336EE27AEF75000E3AEF1 /* UnaryOpsKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UnaryOpsKernel.hpp; sourceTree = "<group>"; };
 		76F336F027AF133300E3AEF1 /* TensorConversion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorConversion.cpp; sourceTree = "<group>"; };
 		76F336F127AF133300E3AEF1 /* TensorConversion.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorConversion.hpp; sourceTree = "<group>"; };
+		76F3377F27B3068E00E3AEF1 /* OTensor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OTensor.hpp; sourceTree = "<group>"; };
+		76F3378027B3AA7B00E3AEF1 /* Math.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Math.cpp; sourceTree = "<group>"; };
+		76F3378127B3AA7B00E3AEF1 /* Math.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Math.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -273,6 +277,9 @@
 				76F336EE27AEF75000E3AEF1 /* UnaryOpsKernel.hpp */,
 				76F336F027AF133300E3AEF1 /* TensorConversion.cpp */,
 				76F336F127AF133300E3AEF1 /* TensorConversion.hpp */,
+				76F3377F27B3068E00E3AEF1 /* OTensor.hpp */,
+				76F3378027B3AA7B00E3AEF1 /* Math.cpp */,
+				76F3378127B3AA7B00E3AEF1 /* Math.hpp */,
 			);
 			path = Tensor;
 			sourceTree = "<group>";
@@ -374,6 +381,7 @@
 				76F336C427A5B9B800E3AEF1 /* Dispatch.cpp in Sources */,
 				76E6C53A27A510F30036A26F /* Parallel.cpp in Sources */,
 				76F336E327AD6DB000E3AEF1 /* RefPtr.cpp in Sources */,
+				76F3378227B3AA7B00E3AEF1 /* Math.cpp in Sources */,
 				76E6C51327A502A30036A26F /* Tensor.cpp in Sources */,
 				76E6C52827A505700036A26F /* SmallVector.cpp in Sources */,
 				76E6C50B27A502680036A26F /* main.cpp in Sources */,

@@ -52,6 +52,12 @@ struct TensorOptions {
         return t;
     }
     
+    TensorOptions dtype(ScalarType data_type) const noexcept {
+        TensorOptions t = *this;
+        t.set_dtype(data_type);
+        return t;
+    }
+    
     template <typename T>
     TensorOptions& dtype() {
         data_type_ = TypeMeta::Make<T>();
