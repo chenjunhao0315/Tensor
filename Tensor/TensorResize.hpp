@@ -68,13 +68,27 @@ inline TensorNucleus* resize_impl_cpu_(TensorNucleus* self, IntArrayRef size, In
     return self;
 }
 
+namespace native {
+
+const Tensor& resize_as_(const Tensor& self, const Tensor& the_template);
 const Tensor& resize_(const Tensor& self, IntArrayRef size);
 
+}
 
 
 inline void setStrided(const Tensor& self, IntArrayRef size, IntArrayRef stride, int64_t memory_offset) {
     assert(size.size() == stride.size());
     auto* self_ = self.unsafeGetTensorNucleus();
+    
+    assert(memory_offset >= 0);
+    self_->set_memory_offset(memory_offset);
+    if (self_->sizes() == size && self_->strides() == stride) {
+        return;
+    }
+    for (auto val : stride) {
+        assert(val >= 0);
+    }
+    self_->set_sizes_and_strides(size, stride);
 }
 
 

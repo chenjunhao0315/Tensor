@@ -15,6 +15,7 @@
 #include "TensorOptions.hpp"
 #include "Scalar.hpp"
 #include "ExclusivelyOwned.hpp"
+#include "WarpDimUtils.hpp"
 
 #define NOT_IMPLEMENTED fprintf(stderr, "NOT_IMPLEMENTED!")
 
@@ -37,26 +38,22 @@ public:
         memory_ = {};
     }
     
-    int64_t dim() const {
-        return perspective_view_.size();
-    }
+    int64_t dim() const;
     
-    virtual int64_t size(size_t idx) const {
-        // Maybe do some check
-        return perspective_view_.size_at(idx);
-    }
+    virtual int64_t size(size_t idx) const;
     
     IntArrayRef sizes() const {
         return perspective_view_.sizes_arrayref();
     }
     
-    virtual int64_t stride(size_t idx) const {
-        // Maybe do some check
-        return perspective_view_.stride_at(idx);
-    }
+    virtual int64_t stride(size_t idx) const;
     
     virtual IntArrayRef strides() const {
         return perspective_view_.strides_arrayref();
+    }
+    
+    virtual void set_memory_offset(int64_t memory_offset) {
+        memory_offset_ = memory_offset;
     }
     
     void set_sizes_and_strides(IntArrayRef newSizes, IntArrayRef newStrides) {
@@ -362,6 +359,16 @@ public:
         return tensor_nucleus_->dim();
     }
     
+    int64_t size(int64_t dim) const {
+        dim = maybe_wrap_dim(dim, this->dim(), false);
+        return sizes()[dim];
+    }
+    
+    int64_t stride(int64_t dim) const {
+        dim = maybe_wrap_dim(dim, this->dim(), false);
+        return strides()[dim];
+    }
+    
     TensorNucleus* unsafeGetTensorNucleus() const {
         return tensor_nucleus_.get();
     }
@@ -378,7 +385,7 @@ public:
         return std::move(tensor_nucleus_);
     }
     
-    int64_t memory_offset() {
+    int64_t memory_offset() const {
         return tensor_nucleus_->memory_offset();
     }
     
@@ -390,7 +397,7 @@ public:
         tensor_nucleus_.reset();
     }
     
-    bool is_same(const TensorBase& other) const {
+    bool is_same(const TensorBase& other) const noexcept {
         return tensor_nucleus_ == other.tensor_nucleus_;
     }
     

@@ -20,6 +20,14 @@ Allocator* GetAllocator(Device device) {
     return get_default_allocator();
 }
 
+static void deleteInefficientStdFunctionContext(void* ptr) {
+    delete static_cast<InefficientStdFunctionContext*>(ptr);
+}
+
+DataPtr InefficientStdFunctionContext::makeDataPtr(void* ptr, const std::function<void(void*)>& deleter, Device device) {
+    return {ptr, new InefficientStdFunctionContext({ptr, deleter}), &deleteInefficientStdFunctionContext, device};
+}
+
 void *otter_malloc_log(const size_t size, const char * const filename, const char * const funcname, const int line) {
     if (size == 0) return nullptr;
     void *ptr = malloc(size);

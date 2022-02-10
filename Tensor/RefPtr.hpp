@@ -181,6 +181,27 @@ inline Ptr<Target, NullType> make_otterptr(Args&&... args) {
     return Ptr<Target, NullType>::make(std::forward<Args>(args)...);
 }
 
+template <class TTarget1, class NullType1, class TTarget2, class NullType2>
+inline bool operator<(
+    const Ptr<TTarget1, NullType1>& lhs,
+    const Ptr<TTarget2, NullType2>& rhs) noexcept {
+  return lhs.get() < rhs.get();
+}
+
+template <class TTarget1, class NullType1, class TTarget2, class NullType2>
+inline bool operator==(
+    const Ptr<TTarget1, NullType1>& lhs,
+    const Ptr<TTarget2, NullType2>& rhs) noexcept {
+  return lhs.get() == rhs.get();
+}
+
+template <class TTarget1, class NullType1, class TTarget2, class NullType2>
+inline bool operator!=(
+    const Ptr<TTarget1, NullType1>& lhs,
+    const Ptr<TTarget2, NullType2>& rhs) noexcept {
+  return !operator==(lhs, rhs);
+}
+
 }
 
 #endif /* RefPtr_hpp */

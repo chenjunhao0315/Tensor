@@ -7,6 +7,7 @@
 
 #include "TensorFactory.hpp"
 #include "EmptyTensor.hpp"
+#include "RangeFactory.hpp"
 
 namespace otter {
 
@@ -32,6 +33,15 @@ Tensor empty_like(const Tensor& self, ScalarType dtype) {
     return result;
 }
 
+Tensor clone(const Tensor& src) {
+    Tensor self;
+    self = empty_like(src, src.options());
+    
+    self.copy_(src);
+    
+    return self;
+}
+
 Tensor full(IntArrayRef size, const Scalar& fill_value, ScalarType dtype) {
     auto result = empty(size, dtype);
     
@@ -46,6 +56,13 @@ Tensor ones(IntArrayRef size, ScalarType dtype) {
 
 Tensor zeros(IntArrayRef size, ScalarType dtype) {
     return empty_cpu(size, dtype);
+}
+
+Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, ScalarType dtype) {
+    assert(steps >= 0);
+    
+    Tensor result = empty({steps}, dtype);
+    return otter::linspace_out(start, end, steps, result);
 }
 
 

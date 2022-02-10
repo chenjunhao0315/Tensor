@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <memory>
 #include <cassert>
+#include <functional>
 
 #include "Device.hpp"
 
@@ -141,5 +142,16 @@ struct DefaultAllocator : public Allocator {
 static DefaultAllocator default_allocator;
 Allocator* get_default_allocator();
 Allocator* GetAllocator(Device device);
+
+struct InefficientStdFunctionContext {
+  std::unique_ptr<void, std::function<void(void*)>> ptr_;
+  InefficientStdFunctionContext(
+      std::unique_ptr<void, std::function<void(void*)>>&& ptr)
+      : ptr_(std::move(ptr)) {}
+  static DataPtr makeDataPtr(
+      void* ptr,
+      const std::function<void(void*)>& deleter,
+      Device device);
+};
 
 #endif /* Allocator_hpp */

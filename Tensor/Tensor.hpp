@@ -50,11 +50,20 @@ public:
         return fill_(value);
     }
     
-    template <typename T>
-    Tensor& resize_(ArrayRef<T> shape) {
-        tensor_nucleus_->Resize(shape);
-        return *this;
-    }
+    Tensor operator[](int64_t index) const;
+    Tensor select(int64_t dim, int64_t index) const;
+    
+    Tensor& copy_(const Tensor& src, bool non_blocking = false);
+    Tensor clone() const;
+    
+    Tensor permute(IntArrayRef dims) const;
+    
+    const Tensor& resize_(IntArrayRef shape) const;
+    const Tensor& resize_as_(const Tensor& the_template) const;
+    Tensor as_strided(IntArrayRef sizes, IntArrayRef strides) const;
+    Tensor as_strided(IntArrayRef sizes, IntArrayRef strides, int64_t memory_offset) const;
+    const Tensor& as_strided_(IntArrayRef sizes, IntArrayRef strides) const;
+    const Tensor& as_strided_(IntArrayRef sizes, IntArrayRef strides, int64_t memory_offset) const;
     
     Tensor operator~() const {
         return bitwise_not();

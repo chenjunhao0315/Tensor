@@ -111,9 +111,15 @@ struct OperandInfo {
         return *tensor_base_;
     }
     
+    const Tensor& original_tensor() const {
+        return original_tensor_storage_.getTensor();
+    }
+    
     const TensorBase& original_tensor_base() const {
         return *original_tensor_base_;
     }
+    
+    void restore_original_tensor();
     
     TensorOptions options() const {
         return TensorOptions(target_dtype).device(device_);
@@ -166,6 +172,7 @@ public:
     void allocate_or_resize_outputs();
     StrideVector compatible_stride(int element_size) const;
     DimVector invert_permutation(IntArrayRef input) const;
+    void cast_outputs();
     
     virtual void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options);
     const Tensor& maybe_get_output() { return maybe_get_output(0); }
@@ -229,6 +236,9 @@ public:
     void build_unary_float_op(const TensorBase& out, const TensorBase& a);
     void build_borrowing_unary_float_op(const TensorBase& out, const TensorBase& a);
     
+    static TensorIterator nullary_op(TensorBase& out);
+    static TensorIterator borrowing_nullary_op(const TensorBase& out);
+    static TensorIterator borrowing_nullary_op(TensorBase&& out) = delete;
     
 private:
     DimVector shape_;

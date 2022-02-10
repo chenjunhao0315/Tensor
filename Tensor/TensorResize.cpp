@@ -22,7 +22,7 @@ bool resize_output_check(const Tensor& output, IntArrayRef shape) {
 
 bool resize_output(const Tensor& output, IntArrayRef shape) {
     if (resize_output_check(output, shape)) {
-        resize_(output, shape);
+        native::resize_(output, shape);
         return true;
     } else {
         return false;
@@ -45,11 +45,13 @@ void resize_bytes_cpu(MemoryNucleus* memory, size_t size_bytes) {
     }
 }
 
-//const Tensor& resize_as_(const Tensor& self, const Tensor& the_template) {
-//    const Tensor& result = self.resize_(the_template.sizes());
-////    self.unsafeGetTensorImpl()->empty_tensor_restride(memory_format);
-//    return result;
-//}
+namespace native {
+
+const Tensor& resize_as_(const Tensor& self, const Tensor& the_template) {
+    const Tensor& result = self.resize_(the_template.sizes());
+    self.unsafeGetTensorNucleus()->empty_tensor_restride();
+    return result;
+}
 
 const Tensor& resize_(const Tensor& self, IntArrayRef size) {
     auto* self_ = self.unsafeGetTensorNucleus();
@@ -57,6 +59,8 @@ const Tensor& resize_(const Tensor& self, IntArrayRef size) {
     self_->empty_tensor_restride();
     return self;
 }
+
+}   // end namespace native
 
 
 }   // end namespace otter

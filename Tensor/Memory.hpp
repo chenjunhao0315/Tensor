@@ -74,6 +74,7 @@ private:
 class MemoryNucleus : public Ptr_quantum {
 public:
     MemoryNucleus(size_t size_bytes, DataPtr data_ptr, Allocator* allocator) : size_bytes_(size_bytes), data_ptr_(std::move(data_ptr)), allocator_(allocator) {}
+    
     MemoryNucleus(size_t size_bytes, Allocator* allocator) : MemoryNucleus(size_bytes, allocator->allocate(size_bytes), allocator) {}
     
     MemoryNucleus() = delete;
@@ -157,7 +158,9 @@ struct Memory {
 public:
     Memory() {}
     Memory(Ptr<MemoryNucleus> ptr) : memory_nucleus_(std::move(ptr)) {}
-    Memory(size_t size, Allocator* allocator) : memory_nucleus_(make_otterptr<MemoryNucleus>(size, allocator)) {}
+    Memory(size_t size, Allocator* allocator = nullptr) : memory_nucleus_(make_otterptr<MemoryNucleus>(size, allocator)) {}
+    
+    Memory(size_t size, DataPtr data_ptr, Allocator* allocator = nullptr) : memory_nucleus_(make_otterptr<MemoryNucleus>(size, std::move(data_ptr), allocator)) {}
     
     operator bool() const {
         return memory_nucleus_;

@@ -77,6 +77,23 @@ void cpu_kernel(TensorIterator& iter, func_t&& op, int64_t grain_size = otter::G
     //  iter.cast_outputs();
 }
 
+template <typename func_t>
+void cpu_serial_kernel(TensorIterator& iter, func_t&& op, const Range& range) {
+    using traits = function_traits<func_t>;
+    constexpr bool result_void = std::is_void<typename traits::result_type>::value;
+    assert(iter.ninputs() == traits::arity && ((result_void && iter.noutputs() == 0) || (!result_void && iter.noutputs() == 1)));
+
+    iter.serial_for_each([&](char** data, const int64_t* strides, int64_t n) {
+        basic_loop(data, strides, 0, n, std::forward<func_t>(op));
+    }, range);
+//  iter.cast_outputs();
+}
+
+template <typename func_t>
+void cpu_serial_kernel(TensorIterator& iter, func_t&& op) {
+    cpu_serial_kernel(iter, op, {0, iter.numel()});
+}
+
 }   // end namespace otter
 
 #endif /* Loop_hpp */

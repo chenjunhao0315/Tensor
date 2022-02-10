@@ -14,6 +14,8 @@
 
 namespace otter {
 
+size_t computeStorageNbytes(IntArrayRef sizes, IntArrayRef strides, size_t itemsize_bytes);
+
 Tensor empty_cpu(IntArrayRef size, TensorOptions option);
 Tensor empty_cpu(IntArrayRef size, ScalarType dtype);
 

@@ -10,6 +10,7 @@
 #include "Parallel.hpp"
 #include "Loop.hpp"
 #include "Dispatch.hpp"
+#include "TypeCast.hpp"
 
 namespace otter {
 namespace native {
@@ -23,7 +24,7 @@ Tensor to(const Tensor& self, ScalarType dtype) {
             OTTER_DISPATCH_ALL_TYPES(dtype, "to_dest_t", [&]() {
                 scalar_t *dst_data = (scalar_t*)result.data_ptr();
                 for (auto i : otter::irange(begin, end)) {
-                    dst_data[i] = static_cast<scalar_t>(src_data[i]);
+                    dst_data[i] = static_cast_with_inter_type<scalar_t, src_t>::apply(src_data[i]);
                 }
             });
         });

@@ -68,6 +68,12 @@ void OperandInfo::tensor(MaybeOwned<TensorBase> &&tensor) {
     *tensor_storage_ = make_tensor_ref(*tensor);
 }
 
+void OperandInfo::restore_original_tensor() {
+    assert(original_tensor_base_->defined());
+    tensor_base_ = std::move(original_tensor_base_);
+    *tensor_storage_ = std::exchange(*original_tensor_storage_, TensorRef{});
+}
+
 int64_t TensorIterator::numel() const {
     int64_t numel = 1;
     for (int64_t size: shape_) {
@@ -408,6 +414,20 @@ DimVector TensorIterator::invert_permutation(IntArrayRef input) const {
     return res;
 }
 
+void TensorIterator::cast_outputs() {
+    for (auto& op : operands_) {
+        if (op.is_output && op.original_tensor_base().defined() && op.original_tensor_base().scalar_type() != op.current_dtype) {
+            const auto &original_tensor = op.original_tensor();
+            const auto &tensor = op.tensor();
+            if (original_tensor.sizes() != tensor.sizes()){
+                original_tensor.resize_as_(tensor).as_strided_(tensor.sizes(), tensor.strides());
+            }
+//            original_tensor.copy_(tensor);
+            op.restore_original_tensor();
+        }
+    }
+}
+
 void TensorIterator::set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) {
     assert(output_idx < num_outputs_);
     auto& op = operands_[output_idx];
@@ -538,6 +558,23 @@ void TensorIterator::build_unary_float_op(const TensorBase &out, const TensorBas
 
 void TensorIterator::build_borrowing_unary_float_op(const TensorBase &out, const TensorBase &a) {
     this->build(UNARY_FLOAT_OP_CONFIG().add_output(out).add_input(a));
+}
+
+#define NULLARY_OP_CONFIG()                                     \
+  TensorIteratorConfig()                                        \
+    .check_all_same_dtype(false)                                \
+    .resize_outputs(false)
+
+TensorIterator TensorIterator::nullary_op(TensorBase& out) {
+  return NULLARY_OP_CONFIG()
+    .add_owned_output(out)
+    .build();
+}
+
+TensorIterator TensorIterator::borrowing_nullary_op(const TensorBase& out) {
+  return NULLARY_OP_CONFIG()
+    .add_output(out)
+    .build();
 }
 
 TensorIteratorConfig& TensorIteratorConfig::add_owned_output(const TensorBase& output) {

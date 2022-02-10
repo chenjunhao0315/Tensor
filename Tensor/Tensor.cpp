@@ -12,8 +12,56 @@
 #include "ScalarOps.hpp"
 #include "TensorFunction.hpp"
 #include "TensorConversion.hpp"
+#include "TensorResize.hpp"
+#include "TensorCopy.hpp"
+#include "TensorFactory.hpp"
+#include "TensorShape.hpp"
 
 namespace otter {
+
+Tensor Tensor::select(int64_t dim, int64_t index) const {
+    return otter::select(*this, dim, index);
+}
+
+Tensor Tensor::operator[](int64_t index) const {
+    return this->select(0, index);
+}
+
+Tensor& Tensor::copy_(const Tensor &src, bool non_blocking) {
+    return otter::copy_(*this, src, non_blocking);
+}
+
+Tensor Tensor::clone() const {
+    return otter::clone(*this);
+}
+
+Tensor Tensor::permute(IntArrayRef dims) const {
+    return otter::permute(*this, dims);
+};
+
+const Tensor& Tensor::resize_(IntArrayRef shape) const {
+    return native::resize_(*this, shape);
+}
+
+const Tensor& Tensor::resize_as_(const Tensor& the_template) const {
+    return native::resize_as_(*this, the_template);
+}
+
+Tensor Tensor::as_strided(IntArrayRef sizes, IntArrayRef strides) const {
+    return native::as_strided_tensorimpl(*this, sizes, strides);
+}
+
+Tensor Tensor::as_strided(IntArrayRef sizes, IntArrayRef strides, int64_t memory_offset) const {
+    return native::as_strided_tensorimpl(*this, sizes, strides, memory_offset);
+}
+
+const Tensor& Tensor::as_strided_(IntArrayRef sizes, IntArrayRef strides) const {
+    return native::as_strided_(*this, sizes, strides);
+}
+
+const Tensor& Tensor::as_strided_(IntArrayRef sizes, IntArrayRef strides, int64_t memory_offset) const {
+    return native::as_strided_(*this, sizes, strides, memory_offset);
+}
 
 Tensor& Tensor::zero_() {
     return native::zero_(*this);

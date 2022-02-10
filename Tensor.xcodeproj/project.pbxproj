@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7620AF6E27B4060A0081C210 /* RangeFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF6C27B4060A0081C210 /* RangeFactory.cpp */; };
+		7620AF7127B406F70081C210 /* RangeFactoryKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF6F27B406F70081C210 /* RangeFactoryKernel.cpp */; };
+		7620AF7427B4F3F50081C210 /* TensorMaker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF7227B4F3F50081C210 /* TensorMaker.cpp */; };
+		7620AF7727B536330081C210 /* TensorCopy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF7527B536330081C210 /* TensorCopy.cpp */; };
+		7620AF7A27B53BAE0081C210 /* TensorCopyKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF7827B53BAE0081C210 /* TensorCopyKernel.cpp */; };
+		7620AF7E27B550200081C210 /* TensorShape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF7C27B550200081C210 /* TensorShape.cpp */; };
+		7620AF8127B552B20081C210 /* WarpDimUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF7F27B552B20081C210 /* WarpDimUtils.cpp */; };
+		7620AF8327B583570081C210 /* libomp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7620AF8227B583570081C210 /* libomp.dylib */; };
+		7620AF8627B5899A0081C210 /* Formatting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF8427B589990081C210 /* Formatting.cpp */; };
 		76E6C50B27A502680036A26F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C50A27A502680036A26F /* main.cpp */; };
 		76E6C51327A502A30036A26F /* Tensor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51127A502A30036A26F /* Tensor.cpp */; };
 		76E6C51627A502F60036A26F /* Memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51427A502F60036A26F /* Memory.cpp */; };
@@ -20,7 +29,6 @@
 		76E6C52E27A505FE0036A26F /* TensorOptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C52C27A505FE0036A26F /* TensorOptions.cpp */; };
 		76E6C53127A506C50036A26F /* TensorFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C52F27A506C50036A26F /* TensorFactory.cpp */; };
 		76E6C53427A506E90036A26F /* Accumulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C53227A506E90036A26F /* Accumulator.cpp */; };
-		76E6C53727A50F4A0036A26F /* libomp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 76E6C53627A50F4A0036A26F /* libomp.dylib */; };
 		76E6C53A27A510F30036A26F /* Parallel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C53827A510F30036A26F /* Parallel.cpp */; };
 		76E6C53E27A511B50036A26F /* ParallelOpenMP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C53C27A511B50036A26F /* ParallelOpenMP.cpp */; };
 		76E6C54227A5124A0036A26F /* ThreadPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C54027A5124A0036A26F /* ThreadPool.cpp */; };
@@ -66,6 +74,24 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7620AF6C27B4060A0081C210 /* RangeFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RangeFactory.cpp; sourceTree = "<group>"; };
+		7620AF6D27B4060A0081C210 /* RangeFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RangeFactory.hpp; sourceTree = "<group>"; };
+		7620AF6F27B406F70081C210 /* RangeFactoryKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RangeFactoryKernel.cpp; sourceTree = "<group>"; };
+		7620AF7027B406F70081C210 /* RangeFactoryKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RangeFactoryKernel.hpp; sourceTree = "<group>"; };
+		7620AF7227B4F3F50081C210 /* TensorMaker.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorMaker.cpp; sourceTree = "<group>"; };
+		7620AF7327B4F3F50081C210 /* TensorMaker.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorMaker.hpp; sourceTree = "<group>"; };
+		7620AF7527B536330081C210 /* TensorCopy.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorCopy.cpp; sourceTree = "<group>"; };
+		7620AF7627B536330081C210 /* TensorCopy.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorCopy.hpp; sourceTree = "<group>"; };
+		7620AF7827B53BAE0081C210 /* TensorCopyKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorCopyKernel.cpp; sourceTree = "<group>"; };
+		7620AF7927B53BAE0081C210 /* TensorCopyKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorCopyKernel.hpp; sourceTree = "<group>"; };
+		7620AF7B27B53DF90081C210 /* TypeCast.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TypeCast.hpp; sourceTree = "<group>"; };
+		7620AF7C27B550200081C210 /* TensorShape.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorShape.cpp; sourceTree = "<group>"; };
+		7620AF7D27B550200081C210 /* TensorShape.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorShape.hpp; sourceTree = "<group>"; };
+		7620AF7F27B552B20081C210 /* WarpDimUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WarpDimUtils.cpp; sourceTree = "<group>"; };
+		7620AF8027B552B20081C210 /* WarpDimUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = WarpDimUtils.hpp; sourceTree = "<group>"; };
+		7620AF8227B583570081C210 /* libomp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libomp.dylib; path = ../../../../../usr/local/Cellar/llvm/13.0.1/lib/libomp.dylib; sourceTree = "<group>"; };
+		7620AF8427B589990081C210 /* Formatting.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Formatting.cpp; sourceTree = "<group>"; };
+		7620AF8527B589990081C210 /* Formatting.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Formatting.hpp; sourceTree = "<group>"; };
 		76E6C50727A502680036A26F /* Tensor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Tensor; sourceTree = BUILT_PRODUCTS_DIR; };
 		76E6C50A27A502680036A26F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		76E6C51127A502A30036A26F /* Tensor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Tensor.cpp; sourceTree = "<group>"; };
@@ -164,7 +190,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				76E6C53727A50F4A0036A26F /* libomp.dylib in Frameworks */,
+				7620AF8327B583570081C210 /* libomp.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -280,6 +306,23 @@
 				76F3377F27B3068E00E3AEF1 /* OTensor.hpp */,
 				76F3378027B3AA7B00E3AEF1 /* Math.cpp */,
 				76F3378127B3AA7B00E3AEF1 /* Math.hpp */,
+				7620AF6C27B4060A0081C210 /* RangeFactory.cpp */,
+				7620AF6D27B4060A0081C210 /* RangeFactory.hpp */,
+				7620AF6F27B406F70081C210 /* RangeFactoryKernel.cpp */,
+				7620AF7027B406F70081C210 /* RangeFactoryKernel.hpp */,
+				7620AF7227B4F3F50081C210 /* TensorMaker.cpp */,
+				7620AF7327B4F3F50081C210 /* TensorMaker.hpp */,
+				7620AF7527B536330081C210 /* TensorCopy.cpp */,
+				7620AF7627B536330081C210 /* TensorCopy.hpp */,
+				7620AF7827B53BAE0081C210 /* TensorCopyKernel.cpp */,
+				7620AF7927B53BAE0081C210 /* TensorCopyKernel.hpp */,
+				7620AF7B27B53DF90081C210 /* TypeCast.hpp */,
+				7620AF7C27B550200081C210 /* TensorShape.cpp */,
+				7620AF7D27B550200081C210 /* TensorShape.hpp */,
+				7620AF7F27B552B20081C210 /* WarpDimUtils.cpp */,
+				7620AF8027B552B20081C210 /* WarpDimUtils.hpp */,
+				7620AF8427B589990081C210 /* Formatting.cpp */,
+				7620AF8527B589990081C210 /* Formatting.hpp */,
 			);
 			path = Tensor;
 			sourceTree = "<group>";
@@ -287,6 +330,7 @@
 		76E6C53527A50F4A0036A26F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7620AF8227B583570081C210 /* libomp.dylib */,
 				76E6C53627A50F4A0036A26F /* libomp.dylib */,
 			);
 			name = Frameworks;
@@ -355,11 +399,16 @@
 				76F336D927A816E200E3AEF1 /* ExclusivelyOwned.cpp in Sources */,
 				76F336EF27AEF75000E3AEF1 /* UnaryOpsKernel.cpp in Sources */,
 				76E6C54E27A53AAA0036A26F /* TensorResize.cpp in Sources */,
+				7620AF8127B552B20081C210 /* WarpDimUtils.cpp in Sources */,
 				76F336F227AF133300E3AEF1 /* TensorConversion.cpp in Sources */,
 				76E6C55A27A57BE00036A26F /* C++17.cpp in Sources */,
+				7620AF8627B5899A0081C210 /* Formatting.cpp in Sources */,
+				7620AF7E27B550200081C210 /* TensorShape.cpp in Sources */,
 				76F336BE27A5B52300E3AEF1 /* BinaryOpsKernel.cpp in Sources */,
 				76E6C55127A553550036A26F /* FunctionRef.cpp in Sources */,
 				76F336D327A668D900E3AEF1 /* FillKernel.cpp in Sources */,
+				7620AF7127B406F70081C210 /* RangeFactoryKernel.cpp in Sources */,
+				7620AF7A27B53BAE0081C210 /* TensorCopyKernel.cpp in Sources */,
 				76E6C51627A502F60036A26F /* Memory.cpp in Sources */,
 				76E6C54527A5132B0036A26F /* Utils.cpp in Sources */,
 				76E6C52527A505250036A26F /* ArrayRef.cpp in Sources */,
@@ -375,9 +424,12 @@
 				76E6C51F27A504C80036A26F /* ScalarType.cpp in Sources */,
 				76F336EC27AEEC9500E3AEF1 /* UnaryOps.cpp in Sources */,
 				76F336C727A5CEEC00E3AEF1 /* DispatchStub.cpp in Sources */,
+				7620AF6E27B4060A0081C210 /* RangeFactory.cpp in Sources */,
 				76E6C52E27A505FE0036A26F /* TensorOptions.cpp in Sources */,
+				7620AF7427B4F3F50081C210 /* TensorMaker.cpp in Sources */,
 				76E6C51C27A504000036A26F /* DType.cpp in Sources */,
 				76F336E627AEA7E400E3AEF1 /* TensorOperator.cpp in Sources */,
+				7620AF7727B536330081C210 /* TensorCopy.cpp in Sources */,
 				76F336C427A5B9B800E3AEF1 /* Dispatch.cpp in Sources */,
 				76E6C53A27A510F30036A26F /* Parallel.cpp in Sources */,
 				76F336E327AD6DB000E3AEF1 /* RefPtr.cpp in Sources */,
@@ -517,12 +569,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				HEADER_SEARCH_PATHS = /usr/local/opt/llvm/lib/clang/13.0.0_2/include;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					/usr/local/Cellar/llvm/13.0.0_2/lib,
+				HEADER_SEARCH_PATHS = /usr/local/opt/llvm/lib/clang/13.0.1/include;
+				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/llvm/13.0.1/lib;
+				OTHER_CFLAGS = (
+					"-Xclang",
+					"-fopenmp",
 				);
-				OTHER_CFLAGS = "-fopenmp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -534,13 +586,13 @@
 				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = NO;
-				GCC_OPTIMIZATION_LEVEL = s;
-				HEADER_SEARCH_PATHS = /usr/local/opt/llvm/lib/clang/13.0.0_2/include;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					/usr/local/Cellar/llvm/13.0.0_2/lib,
+				GCC_OPTIMIZATION_LEVEL = 0;
+				HEADER_SEARCH_PATHS = /usr/local/opt/llvm/lib/clang/13.0.1/include;
+				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/llvm/13.0.1/lib;
+				OTHER_CFLAGS = (
+					"-Xclang",
+					"-fopenmp",
 				);
-				OTHER_CFLAGS = "-fopenmp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

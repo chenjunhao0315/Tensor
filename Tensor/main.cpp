@@ -5,43 +5,18 @@
 //  Created by 陳均豪 on 2022/1/29.
 //
 
-#include <iostream>
-
 #include "OTensor.hpp"
+#include "Parallel.hpp"
 
 int main(int argc, const char * argv[]) {
     
-    otter::TensorPrinter printer(10);
+    auto linspace = otter::linspace(-5, 5, 11, ScalarType::Float);
     
-    auto a = otter::ones({1, 3}, ScalarType::Float);
-
-    auto b = otter::full({1, 3}, 9.0, ScalarType::Float);
+    std::cout << linspace << std::endl;
     
-    auto c = otter::full({1, 3}, M_PI_2, ScalarType::Float);
+    auto sigmoid = 1 / (1 + exp(-linspace));
     
-    auto zero = otter::zeros({1, 3}, ScalarType::Float);
+    std::cout << sigmoid << std::endl;
     
-    auto sig_test = 1.0 / (1 + exp(-zero));
-
-    printer.print<float>(sig_test);
-
-    auto time_three = sig_test * 7;
-
-    printer.print<float>(time_three);
-
-    auto mod_two = time_three % 2;
-    printer.print<float>(mod_two);
-    
-    auto bitwise_eight = otter::full({1, 3}, 7, ScalarType::Int);
-    auto bitwise_four = otter::full({1, 3}, 4, ScalarType::Int);
-
-    auto bitwise_test = bitwise_eight & bitwise_four;
-
-    printer.print<int>(bitwise_test);
-    
-    bitwise_test = abs(~bitwise_test + 1);
-    
-    printer.print<int>(bitwise_test);
-        
     return 0;
 }
