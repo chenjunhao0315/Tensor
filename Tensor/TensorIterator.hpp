@@ -358,27 +358,6 @@ struct DimCounter {
     int64_t offset_;
 };
 
-#define DECLEAR_META_STRUCTURE_SELF(name, overload)    \
-struct structured_##name##_##overload : public TensorIterator {   \
-    void meta(const otter::Tensor& self);   \
-}
-
-#define DECLEAR_META_STRUCTURE_OTHER(name, overload)    \
-struct structured_##name##_##overload : public TensorIterator  {    \
-    void meta(const otter::Tensor& self, const otter::Tensor& other);   \
-}
-
-#define DECLEAR_META_STRUCTURE_OTHER_WITH_SCALAR(name, overload)    \
-struct structured_##name##_##overload : public TensorIterator  {    \
-    void meta(const otter::Tensor& self, const otter::Tensor& other, const otter::Scalar& value);   \
-}
-
-#define DEFINE_META_FUNCTION_SELF(name, overload)  \
-void structured_##name##_##overload::meta
-
-#define DEFINE_META_FUNCTION_OTHER(name, overload)  \
-void structured_##name##_##overload::meta
-
 namespace internal {
 
 inline void get_data_ptrs(char** ptrs, ArrayRef<char*> base, IntArrayRef strides, IntArrayRef counter) {

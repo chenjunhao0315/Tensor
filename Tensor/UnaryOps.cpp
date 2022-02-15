@@ -11,7 +11,7 @@
 namespace otter {
 
 #define DEFINE_UNARY_META_FUNCTION_SELF(name, overload) \
-DEFINE_META_FUNCTION_SELF(name, overload) (const Tensor& self) { \
+DEFINE_META_FUNCTION_OVERLOAD(name, overload) (const Tensor& self) { \
     build_borrowing_unary_float_op(maybe_get_output(), self); \
 }
 
@@ -30,6 +30,19 @@ DEFINE_DISPATCH(sin_stub);
 DEFINE_DISPATCH(cos_stub);
 DEFINE_DISPATCH(tan_stub);
 DEFINE_DISPATCH(exp_stub);
+
+#define DEFINE_UNARY_IMPL_FUNCTION(name, op) \
+DEFINE_IMPL_FUNCTION(name) (const Tensor& self, const Tensor& out) { \
+    op(Device::CPU, *this); \
+}
+
+DEFINE_UNARY_IMPL_FUNCTION(neg_out, neg_stub)
+DEFINE_UNARY_IMPL_FUNCTION(bitwise_not_out, bitwise_not_stub)
+DEFINE_UNARY_IMPL_FUNCTION(abs_out, abs_stub)
+DEFINE_UNARY_IMPL_FUNCTION(sin_out, sin_stub)
+DEFINE_UNARY_IMPL_FUNCTION(cos_out, cos_stub)
+DEFINE_UNARY_IMPL_FUNCTION(tan_out, tan_stub)
+DEFINE_UNARY_IMPL_FUNCTION(exp_out, exp_stub)
 
 #define DEFINE_UNARY_FUNCTION_SELF(name) \
 Tensor name(const Tensor& self) { return self.name(); } \

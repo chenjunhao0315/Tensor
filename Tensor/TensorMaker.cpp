@@ -5,6 +5,7 @@
 //  Created by 陳均豪 on 2022/2/10.
 //
 
+#include "Dispatch.hpp"
 #include "EmptyTensor.hpp"
 #include "TensorMaker.hpp"
 
@@ -69,6 +70,22 @@ DataPtr TensorMaker::makeDataPtrFromDeleter() {
 DataPtr TensorMaker::makeDataPtrFromContext() {
     return DataPtr{data_, ctx_.release(), ctx_.get_deleter(), device_};
 }
+
+template <typename T>
+Tensor tensor_cpu(ArrayRef<T> values, const TensorOptions& options) {
+    auto result = otter::empty_cpu({static_cast<long long>(values.size())}, options);
+    OTTER_DISPATCH_ALL_TYPES(result.scalar_type(), "tensor_cpu", [&] {
+        std::copy(values.begin(), values.end(), result.template data_ptr<scalar_t>());
+    });
+    return result;
+}
+
+#define TENSOR(T, _) \
+Tensor tensor(ArrayRef<T> values, const TensorOptions& options) { \
+    return tensor_cpu(values, options); \
+}
+OTTER_ALL_SCALAR_TYPES(TENSOR)
+#undef TENSOR
 
 
 }

@@ -49,14 +49,25 @@ namespace native {
 
 const Tensor& resize_as_(const Tensor& self, const Tensor& the_template) {
     const Tensor& result = self.resize_(the_template.sizes());
-    self.unsafeGetTensorNucleus()->empty_tensor_restride();
     return result;
 }
 
 const Tensor& resize_(const Tensor& self, IntArrayRef size) {
     auto* self_ = self.unsafeGetTensorNucleus();
     resize_impl_cpu_(self_, size, {});
-    self_->empty_tensor_restride();
+    return self;
+}
+
+const Tensor& resize_as_(const Tensor& self, const Tensor& the_template, MemoryFormat memory_format) {
+    const Tensor& result = self.resize_(the_template.sizes());
+    self.unsafeGetTensorNucleus()->empty_tensor_restride(memory_format);
+    return result;
+}
+
+const Tensor& resize_(const Tensor& self, IntArrayRef size, MemoryFormat memory_format) {
+    auto* self_ = self.unsafeGetTensorNucleus();
+    resize_impl_cpu_(self_, size, {});
+    self_->empty_tensor_restride(memory_format);
     return self;
 }
 

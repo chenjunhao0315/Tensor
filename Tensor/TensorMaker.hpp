@@ -66,7 +66,28 @@ inline Tensor from_blob(void* data, IntArrayRef sizes, ScalarType dtype) {
     return for_blob(data, sizes).dtype(dtype).make_tensor();
 }
 
+template <typename T>
+Tensor tensor_cpu(ArrayRef<T> values, const TensorOptions& options);
 
+#define TENSOR(T, S)                                                                    \
+Tensor tensor(ArrayRef<T> values, const TensorOptions& options);                        \
+inline Tensor tensor(std::initializer_list<T> values, const TensorOptions& options) {   \
+    return otter::tensor(ArrayRef<T>(values), options);                                 \
+}                                                                                       \
+inline Tensor tensor(T value, const TensorOptions& options) {                           \
+    return otter::tensor(ArrayRef<T>(value), options);                                  \
+}                                                                                       \
+inline Tensor tensor(ArrayRef<T> values) {                                              \
+    return otter::tensor(std::move(values), TensorOptions(ScalarType::S));              \
+}                                                                                       \
+inline Tensor tensor(std::initializer_list<T> values) {                                 \
+    return otter::tensor(ArrayRef<T>(values));                                          \
+}                                                                                       \
+inline Tensor tensor(T value) {                                                         \
+    return otter::tensor(ArrayRef<T>(value));                                           \
+}
+OTTER_ALL_SCALAR_TYPES(TENSOR)
+#undef TENSOR
 
 
 }

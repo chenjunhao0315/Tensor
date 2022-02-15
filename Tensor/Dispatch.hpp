@@ -40,7 +40,7 @@ inline ScalarType scalar_type(ScalarType s) {
         OTTER_CASE_TYPE(ScalarType::Float, float, __VA_ARGS__)       \
         OTTER_CASE_TYPE(ScalarType::Double, double, __VA_ARGS__)     \
         default:                                                \
-            fprintf(stderr, "Error\n");                         \
+            assert(false);                                      \
     }                                                           \
     }()
 

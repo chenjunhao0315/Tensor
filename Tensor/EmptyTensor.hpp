@@ -17,9 +17,11 @@ namespace otter {
 size_t computeStorageNbytes(IntArrayRef sizes, IntArrayRef strides, size_t itemsize_bytes);
 
 Tensor empty_cpu(IntArrayRef size, TensorOptions option);
+Tensor empty_cpu(IntArrayRef size, TensorOptions option, MemoryFormat memory_format);
 Tensor empty_cpu(IntArrayRef size, ScalarType dtype);
 
 Tensor empty_generic(IntArrayRef size, Allocator* allocator, ScalarType dtype);
+Tensor empty_generic(IntArrayRef size, Allocator* allocator, ScalarType dtype, MemoryFormat memory_format);
 
 Tensor empty_strided_cpu(IntArrayRef size, IntArrayRef stride, TensorOptions option);
 Tensor empty_strided_cpu(IntArrayRef size, IntArrayRef stride, ScalarType dtype);

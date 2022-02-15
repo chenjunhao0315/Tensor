@@ -16,10 +16,9 @@
 #include "Scalar.hpp"
 #include "ExclusivelyOwned.hpp"
 #include "WarpDimUtils.hpp"
+#include "MemoryFormat.hpp"
 
 #define NOT_IMPLEMENTED fprintf(stderr, "NOT_IMPLEMENTED!")
-
-struct TensorOptionsTODO {};
 
 namespace otter {
 struct TensorNucleus : public Ptr_quantum {
@@ -56,6 +55,40 @@ public:
         memory_offset_ = memory_offset;
     }
     
+    void refresh_contiguous() {
+        is_contiguous_ = compute_contiguous();
+        
+        switch (dim()) {
+            case 4:
+                is_channels_last_contiguous_ = compute_channels_last_contiguous_2d();
+                is_channels_last_ = compute_strides_like_channels_last_2d();
+                is_non_overlapping_and_dense_ = is_contiguous_ || is_channels_last_contiguous_ || compute_non_overlapping_and_dense();
+                break;
+            case 5:
+                is_channels_last_contiguous_ = compute_channels_last_contiguous_2d();
+                is_channels_last_ = compute_strides_like_channels_last_2d();
+                is_non_overlapping_and_dense_ = is_contiguous_ || is_channels_last_contiguous_ || compute_non_overlapping_and_dense();
+                break;
+            default:
+                is_channels_last_contiguous_ = false;
+                is_channels_last_ = false;
+                is_non_overlapping_and_dense_ = is_contiguous_ || compute_non_overlapping_and_dense();
+        }
+    }
+    
+    bool is_contiguous(MemoryFormat memory_format = MemoryFormat::Contiguous) const {
+        return is_contiguous_;
+    }
+    
+    bool is_non_overlapping_and_dense() const {
+        return is_non_overlapping_and_dense_;
+    }
+    
+    bool compute_contiguous() const;
+    bool compute_non_overlapping_and_dense() const;
+    bool compute_channels_last_contiguous_2d() const;
+    bool compute_strides_like_channels_last_2d() const;
+    
     void set_sizes_and_strides(IntArrayRef newSizes, IntArrayRef newStrides) {
         if (newSizes.size() != newStrides.size())
             fprintf(stderr, "[TensorNucleus] Dimensionality of sizes (%zu) must match dimensionality of strides(%zu)!\n", newSizes.size(), newStrides.size());
@@ -76,6 +109,7 @@ public:
             }
         }
         this->update_numel();
+        this->refresh_contiguous();
     }
     
     int64_t numel() const {
@@ -104,11 +138,6 @@ public:
     
     bool dtype_initialized() {
         return data_type_ != TypeMeta();
-    }
-    
-    template <typename T>
-    inline T* data() const {
-        return data_ptr_nucleus<T>();
     }
     
     template <typename T>
@@ -188,19 +217,34 @@ public:
     void set_sizes_contiguous(IntArrayRef newSizes) {
         perspective_view_.set_sizes(newSizes);
         this->update_numel();
-        this->empty_tensor_restride();
+        this->empty_tensor_restride(MemoryFormat::Contiguous);
     }
     
-    void empty_tensor_restride() {
-        const int64_t dim_ = dim();
-        perspective_view_.resize(dim_);
-        if (dim_ > 0) {
-            const int64_t last_idx = dim_ - 1;
-            perspective_view_.stride_at(last_idx) = 1;
-            for (int64_t i = last_idx; i--; ) {
-                perspective_view_.stride_at(i) = perspective_view_.stride_at(i + 1) * std::max<int64_t>(perspective_view_.size_at(i + 1), 1);
+    void empty_tensor_restride(MemoryFormat memory_format) {
+        switch (memory_format) {
+            case MemoryFormat::Contiguous: {
+                const int64_t dim_ = dim();
+                perspective_view_.resize(dim_);
+                if (dim_ > 0) {
+                    const int64_t last_idx = dim_ - 1;
+                    perspective_view_.stride_at(last_idx) = 1;
+                    for (int64_t i = last_idx; i--; ) {
+                        perspective_view_.stride_at(i) = perspective_view_.stride_at(i + 1) * std::max<int64_t>(perspective_view_.size_at(i + 1), 1);
+                    }
+                }
+                break;
+            }
+            case MemoryFormat::ChannelsLast: {
+                NOT_IMPLEMENTED;
+            }
+            case MemoryFormat::ChannelsLast3d: {
+                NOT_IMPLEMENTED;
+            }
+            case MemoryFormat::Preserve: {
+                assert(false);  // Unsupport
             }
         }
+        this->refresh_contiguous();
     }
     
     void set_storage_keep_dtype(Memory memory) {
@@ -223,7 +267,7 @@ public:
             perspective_view_.size_at(i) = src[i];
         }
         numel_ = new_numel;
-        this->empty_tensor_restride();
+        this->empty_tensor_restride(MemoryFormat::Contiguous);
         return numel_ != old_numel;
     }
     
@@ -286,6 +330,18 @@ private:
     
     TypeMeta data_type_;
     PerspectiveView perspective_view_;
+    
+    inline void init_bitfields() {
+        is_contiguous_ = true;
+        is_channels_last_ = false;
+        is_channels_last_contiguous_ = false;
+        is_non_overlapping_and_dense_ = true;
+    }
+    
+    bool is_contiguous_ : 1;
+    bool is_channels_last_ : 1;
+    bool is_channels_last_contiguous_ : 1;
+    bool is_non_overlapping_and_dense_ : 1;
 };
 
 class UndefinedTensorNucleus : public TensorNucleus {
@@ -328,17 +384,15 @@ public:
         }
     }
     
+    template <typename T>
+    T* data_ptr() const;
+    
     void* data_ptr() const {
         return this->unsafeGetTensorNucleus()->raw_data();
     }
     
     inline void* raw_data() const {
         return tensor_nucleus_->raw_data();
-    }
-    
-    template <typename T>
-    inline T* data() const {
-        return tensor_nucleus_.get()->data<T>();
     }
     
     inline void* raw_mutable_data(const TypeMeta meta) const {
@@ -455,6 +509,14 @@ public:
     
     void as_strided_(IntArrayRef newSizes, IntArrayRef newStrides) const {
         tensor_nucleus_.get()->set_sizes_and_strides(newSizes, newStrides);
+    }
+    
+    bool is_contiguous(MemoryFormat memory_format = MemoryFormat::Contiguous) const {
+        return tensor_nucleus_->is_contiguous(memory_format);
+    }
+    
+    bool is_non_overlapping_and_dense() const {
+        return tensor_nucleus_->is_non_overlapping_and_dense();
     }
     
 protected:

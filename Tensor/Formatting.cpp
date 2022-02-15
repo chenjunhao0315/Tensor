@@ -17,10 +17,28 @@
 
 namespace otter {
 
+//not all C++ compilers have default float so we define our own here
 inline std::ios_base& defaultfloat(std::ios_base& __base) {
     __base.unsetf(std::ios_base::floatfield);
     return __base;
 }
+//saves/restores number formatting inside scope
+struct FormatGuard {
+    FormatGuard(std::ostream & out)
+    : out(out), saved(nullptr) {
+        saved.copyfmt(out);
+    }
+    ~FormatGuard() {
+        out.copyfmt(saved);
+    }
+private:
+    std::ostream & out;
+    std::ios saved;
+};
+
+//std::ostream& operator<<(std::ostream & out, const DeprecatedTypeProperties& t) {
+//    return out << t.toString();
+//}
 
 static std::tuple<double, int64_t> __printFormat(std::ostream& stream, const Tensor& self) {
     auto size = self.numel();
@@ -28,7 +46,7 @@ static std::tuple<double, int64_t> __printFormat(std::ostream& stream, const Ten
         return std::make_tuple(1., 0);
     }
     bool intMode = true;
-    auto self_p = self.data<double>();
+    auto self_p = self.data_ptr<double>();
     for (const auto i : otter::irange(size)) {
         auto z = self_p[i];
         if(std::isfinite(z)) {
@@ -122,7 +140,7 @@ static void __printIndent(std::ostream &stream, int64_t indent)
 }
 
 static void printScale(std::ostream & stream, double scale) {
-    //    FormatGuard guard(stream);
+    FormatGuard guard(stream);
     stream << defaultfloat << scale << " *" << std::endl;
 }
 static void __printMatrix(std::ostream& stream, const Tensor& self, int64_t linesize, int64_t indent)
@@ -156,9 +174,9 @@ static void __printMatrix(std::ostream& stream, const Tensor& self, int64_t line
         }
         for (const auto l : otter::irange(self.size(0))) {
             Tensor row = self.select(0, l);
-            double *row_ptr = row.data<double>();
+            double *row_ptr = row.data_ptr<double>();
             for (const auto c : otter::irange(firstColumn, lastColumn+1)) {
-                stream << std::setw(sz) << row_ptr[c]/scale;
+                stream << std::setw(sz) << row_ptr[c] / scale;
                 if(c == lastColumn) {
                     stream << std::endl;
                     if(l != self.size(0)-1) {
@@ -180,7 +198,7 @@ static void __printMatrix(std::ostream& stream, const Tensor& self, int64_t line
 
 void __printTensor(std::ostream& stream, Tensor& self, int64_t linesize)
 {
-    std::vector<int64_t> counter(self.dim() - 2);
+    std::vector<int64_t> counter(self.dim()-2);
     bool start = true;
     bool finished = false;
     counter[0] = -1;
@@ -188,10 +206,10 @@ void __printTensor(std::ostream& stream, Tensor& self, int64_t linesize)
         counter[i] = 0;
     }
     while(true) {
-        for(int64_t i = 0; self.dim() - 2; i++) {
+        for(int64_t i = 0; self.dim()-2; i++) {
             counter[i] = counter[i] + 1;
             if(counter[i] >= self.size(i)) {
-                if(i == self.dim() - 3) {
+                if(i == self.dim()-3) {
                     finished = true;
                     break;
                 }
@@ -210,7 +228,7 @@ void __printTensor(std::ostream& stream, Tensor& self, int64_t linesize)
         }
         stream << "(";
         Tensor tensor = self;
-        for (const auto i : otter::irange(self.dim() - 2)) {
+        for (const auto i : otter::irange(self.dim()-2)) {
             tensor = tensor.select(0, counter[i]);
             stream << counter[i]+1 << ",";
         }
@@ -222,28 +240,29 @@ void __printTensor(std::ostream& stream, Tensor& self, int64_t linesize)
 void print(const Tensor & t, int64_t linesize) {
     print(std::cout,t,linesize);
 }
-
-std::ostream& print(std::ostream& stream, const Tensor& tensor_, int64_t linesize) {
-    // Maybe ostream guard
-    if (!tensor_.defined()) {
-        stream << "[Tensor] Undefined!";
+std::ostream& print(std::ostream& stream, const Tensor & tensor_, int64_t linesize) {
+    FormatGuard guard(stream);
+    if(!tensor_.defined()) {
+        stream << "[ Tensor (undefined) ]";
     } else {
-        Tensor tensor = tensor_.to(ScalarType::Double);
-        if (tensor.dim() == 0) {
-            stream << defaultfloat << tensor.data<double>()[0] << std::endl;
+        Tensor tensor;
+        tensor = tensor_.to(ScalarType::Double).contiguous();
+        if(tensor.dim() == 0) {
+            stream << defaultfloat << tensor.data_ptr<double>()[0] << std::endl;
             stream << "[ " << tensor_.toString() << "{}";
-        } else if (tensor.dim() == 1) {
+        } else if(tensor.dim() == 1) {
             if (tensor.numel() > 0) {
+                // NOLINTNEXTLINE(cppcoreguidelines-init-variables)
                 double scale;
+                // NOLINTNEXTLINE(cppcoreguidelines-init-variables)
                 int64_t sz;
-                
                 std::tie(scale, sz) =  __printFormat(stream, tensor);
                 if(scale != 1) {
                     printScale(stream, scale);
                 }
-                double* tensor_p = tensor.data<double>();
+                double* tensor_p = tensor.data_ptr<double>();
                 for (const auto i : otter::irange(tensor.size(0))) {
-                    stream << std::setw(sz) << tensor_p[i] / scale << std::endl;
+                    stream << std::setw(sz) << tensor_p[i]/scale << std::endl;
                 }
             }
             stream << "[ " << tensor_.toString() << "{" << tensor.size(0) << "}";
@@ -262,13 +281,11 @@ std::ostream& print(std::ostream& stream, const Tensor& tensor_, int64_t linesiz
             }
             stream << "}";
         }
-        
         stream << " ]";
     }
-    
     return stream;
 }
 
 
 
-}
+}   // namespace otter

@@ -72,6 +72,8 @@ namespace native {
 
 const Tensor& resize_as_(const Tensor& self, const Tensor& the_template);
 const Tensor& resize_(const Tensor& self, IntArrayRef size);
+const Tensor& resize_as_(const Tensor& self, const Tensor& the_template, MemoryFormat memory_format);
+const Tensor& resize_(const Tensor& self, IntArrayRef size, MemoryFormat memory_format);
 
 }
 

@@ -15,11 +15,19 @@
 
 namespace otter {
 
+namespace native {
+
 Tensor select(const Tensor& self, int64_t dim, int64_t index);
 
 Tensor permute(const Tensor& self, IntArrayRef dims);
 
-namespace native {
+Tensor& transpose_(Tensor& self, int64_t dim0, int64_t dim1);
+Tensor transpose(const Tensor& self, int64_t dim0, int64_t dim1);
+
+Tensor expand(const Tensor& self, IntArrayRef sizes);
+Tensor expand_as(const Tensor& self, const Tensor& other);
+
+Tensor view(const Tensor& self, IntArrayRef sizes);
 
 Tensor as_strided_tensorimpl(const Tensor& self, IntArrayRef size, IntArrayRef stride);
 Tensor as_strided_tensorimpl(const Tensor& self, IntArrayRef size, IntArrayRef stride, int64_t memory_offset_);

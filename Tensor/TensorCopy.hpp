@@ -11,9 +11,6 @@
 #include "DispatchStub.hpp"
 #include "TensorIterator.hpp"
 
-class Tensor;
-class TensorIterator;
-
 namespace otter {
 
 using copy_fn = void(*)(TensorIterator&, bool non_blocking);

@@ -74,7 +74,7 @@ void cpu_kernel(TensorIterator& iter, func_t&& op, int64_t grain_size = otter::G
     iter.for_each([&](char** data, const int64_t* strides, int64_t n) {
         basic_loop(data, strides, 0, n, std::forward<func_t>(op));
     }, grain_size);
-    //  iter.cast_outputs();
+    iter.cast_outputs();
 }
 
 template <typename func_t>
@@ -86,7 +86,7 @@ void cpu_serial_kernel(TensorIterator& iter, func_t&& op, const Range& range) {
     iter.serial_for_each([&](char** data, const int64_t* strides, int64_t n) {
         basic_loop(data, strides, 0, n, std::forward<func_t>(op));
     }, range);
-//  iter.cast_outputs();
+    iter.cast_outputs();
 }
 
 template <typename func_t>

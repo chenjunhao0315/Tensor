@@ -9,6 +9,7 @@
 #include "TensorIterator.hpp"
 #include "TensorResize.hpp"
 #include "Parallel.hpp"
+#include "ExpandUtils.hpp"
 
 namespace otter {
 
@@ -422,7 +423,7 @@ void TensorIterator::cast_outputs() {
             if (original_tensor.sizes() != tensor.sizes()){
                 original_tensor.resize_as_(tensor).as_strided_(tensor.sizes(), tensor.strides());
             }
-//            original_tensor.copy_(tensor);
+            original_tensor.copy_(tensor);
             op.restore_original_tensor();
         }
     }

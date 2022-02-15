@@ -15,12 +15,15 @@ namespace otter {
 Tensor empty(IntArrayRef size, ScalarType dtype);
 
 Tensor empty_strided(IntArrayRef size, IntArrayRef stride, ScalarType dtype);
+Tensor empty_strided(IntArrayRef size, IntArrayRef stride, TensorOptions options);
 
 Tensor empty_like(const Tensor& self);
 Tensor empty_like(const Tensor& self, const TensorOptions& options);
+Tensor empty_like(const Tensor& self, const TensorOptions& options, MemoryFormat memory_format);
 Tensor empty_like(const Tensor& self, ScalarType dtype);
 
 Tensor clone(const Tensor& src);
+Tensor clone(const Tensor& src, MemoryFormat memory_format);
 
 Tensor full(IntArrayRef size, const Scalar& fill_value, ScalarType dtype);
 

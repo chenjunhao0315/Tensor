@@ -9,6 +9,7 @@
 #define Tensor_hpp
 
 #include "TensorBase.hpp"
+#include "TensorAccessor.hpp"
 
 namespace otter {
 
@@ -30,6 +31,16 @@ public:
     explicit Tensor(const TensorBase &base): TensorBase(base) {}
     Tensor(TensorBase &&base): TensorBase(std::move(base)) {}
     
+    template<typename T, size_t N>
+    TensorAccessor<T,N> accessor() const& {
+        static_assert(N > 0, "accessor is used for indexing tensor, for scalars use *data_ptr<T>()");
+        // "TensorAccessor expected ", N, " dims but tensor has ", dim()"
+        assert(dim() == N);
+        return TensorAccessor<T,N>(data_ptr<T>(), sizes().data(), strides().data());
+    }
+    template<typename T, size_t N>
+    TensorAccessor<T,N> accessor() && = delete;
+    
     Tensor& operator=(const TensorBase& x) & {
         tensor_nucleus_ = x.getPtr();
         return *this;
@@ -50,13 +61,29 @@ public:
         return fill_(value);
     }
     
+    Tensor& operator=(const Tensor &rhs) && {
+        return copy_(rhs);
+    }
+    
+    Tensor& operator=(Tensor&& rhs) && {
+        return copy_(rhs);
+    }
+    
     Tensor operator[](int64_t index) const;
     Tensor select(int64_t dim, int64_t index) const;
     
-    Tensor& copy_(const Tensor& src, bool non_blocking = false);
+    Tensor& copy_(const Tensor& src, bool non_blocking = false) const; 
     Tensor clone() const;
+    Tensor clone(MemoryFormat memory_format) const;
+    Tensor contiguous(MemoryFormat memory_format = MemoryFormat::Contiguous) const;
     
     Tensor permute(IntArrayRef dims) const;
+    
+    Tensor& transpose_(int64_t dim0, int64_t dim1) const;
+    Tensor transpose(int64_t dim0, int64_t dim1) const;
+    
+    Tensor expand(IntArrayRef sizes) const;
+    Tensor expand_as(const Tensor& other) const;
     
     const Tensor& resize_(IntArrayRef shape) const;
     const Tensor& resize_as_(const Tensor& the_template) const;
@@ -64,6 +91,8 @@ public:
     Tensor as_strided(IntArrayRef sizes, IntArrayRef strides, int64_t memory_offset) const;
     const Tensor& as_strided_(IntArrayRef sizes, IntArrayRef strides) const;
     const Tensor& as_strided_(IntArrayRef sizes, IntArrayRef strides, int64_t memory_offset) const;
+    
+    Tensor view(IntArrayRef sizes) const;
     
     Tensor operator~() const {
         return bitwise_not();
@@ -122,66 +151,73 @@ public:
     
     Tensor to(ScalarType dtype) const;
     
-    Tensor& add_(const Tensor& other, const Scalar& alpha = 1);
+    Tensor& add_(const Tensor& other, const Scalar& alpha = 1) const;
     Tensor add(const Tensor& other, const Scalar& alpha = 1) const;
-    Tensor& add_(const Scalar& other, const Scalar& alpha = 1);
+    Tensor& add_(const Scalar& other, const Scalar& alpha = 1) const;
     Tensor add(const Scalar& other, const Scalar& alpha = 1) const;
     
-    Tensor& sub_(const Tensor& other, const Scalar& alpha = 1);
+    Tensor& sub_(const Tensor& other, const Scalar& alpha = 1) const;
     Tensor sub(const Tensor& other, const Scalar& alpha = 1) const;
-    Tensor& sub_(const Scalar& other, const Scalar& alpha = 1);
+    Tensor& sub_(const Scalar& other, const Scalar& alpha = 1) const;
     Tensor sub(const Scalar& other, const Scalar& alpha = 1) const;
     
-    Tensor& mul_(const Tensor& other);
+    Tensor& mul_(const Tensor& other) const;
     Tensor mul(const Tensor& other) const;
-    Tensor& mul_(const Scalar& other);
+    Tensor& mul_(const Scalar& other) const;
     Tensor mul(const Scalar& other) const;
     
-    Tensor& div_(const Tensor& other);
+    Tensor& div_(const Tensor& other) const;
     Tensor div(const Tensor& other) const;
-    Tensor& div_(const Scalar& other);
+    Tensor& div_(const Scalar& other) const;
     Tensor div(const Scalar& other) const;
     
-    Tensor& remainder_(const Tensor& other);
+    Tensor& remainder_(const Tensor& other) const;
     Tensor remainder(const Tensor& other) const;
-    Tensor& remainder_(const Scalar& other);
+    Tensor& remainder_(const Scalar& other) const;
     Tensor remainder(const Scalar& other) const;
     
-    Tensor& bitwise_and_(const Tensor& other);
+    Tensor& bitwise_and_(const Tensor& other) const;
     Tensor bitwise_and(const Tensor& other) const;
-    Tensor& bitwise_and_(const Scalar& other);
+    Tensor& bitwise_and_(const Scalar& other) const;
     Tensor bitwise_and(const Scalar& other) const;
     
-    Tensor& bitwise_or_(const Tensor& other);
+    Tensor& bitwise_or_(const Tensor& other) const;
     Tensor bitwise_or(const Tensor& other) const;
-    Tensor& bitwise_or_(const Scalar& other);
+    Tensor& bitwise_or_(const Scalar& other) const;
     Tensor bitwise_or(const Scalar& other) const;
     
-    Tensor& bitwise_xor_(const Tensor& other);
+    Tensor& bitwise_xor_(const Tensor& other) const;
     Tensor bitwise_xor(const Tensor& other) const;
-    Tensor& bitwise_xor_(const Scalar& other);
+    Tensor& bitwise_xor_(const Scalar& other) const;
     Tensor bitwise_xor(const Scalar& other) const;
     
-    Tensor& bitwise_not_();
+    Tensor& bitwise_not_() const;
     Tensor bitwise_not() const;
     
-    Tensor& neg_();
+    Tensor& neg_() const;
     Tensor neg() const;
     
-    Tensor& abs_();
+    Tensor& abs_() const;
     Tensor abs() const;
     
-    Tensor& sin_();
+    Tensor& sin_() const;
     Tensor sin() const;
     
-    Tensor& cos_();
+    Tensor& cos_() const;
     Tensor cos() const;
     
-    Tensor& tan_();
+    Tensor& tan_() const;
     Tensor tan() const;
     
-    Tensor& exp_();
+    Tensor& exp_() const;
     Tensor exp() const;
+    
+    Tensor dot(const Tensor& other) const;
+    
+    Tensor addmm(const Tensor& mat1, const Tensor& mat2, const Scalar& beta = 1, const Scalar& alpha = 1) const;
+    Tensor& addmm_(const Tensor& mat1, const Tensor& mat2, const Scalar& beta = 1, const Scalar& alpha = 1) const;
+    
+    Tensor mm(const Tensor& other) const;
     
 };
 
@@ -266,7 +302,7 @@ private:
 template <class T>
 void TensorPrinter::print(const Tensor& tensor) {
     int max_length = static_cast<int>(std::min(tensor.numel(), int64_t(limit_)));
-    const T* tensor_data = tensor.data<T>();
+    const T* tensor_data = tensor.data_ptr<T>();
     
     for (int i = 0; i < max_length - 1; ++i) {
         std::cout << tensor_data[i] << ",";

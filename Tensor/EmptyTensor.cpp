@@ -30,6 +30,12 @@ Tensor empty_cpu(IntArrayRef size, TensorOptions option) {
     return empty_cpu(size, dtype);
 }
 
+Tensor empty_cpu(IntArrayRef size, TensorOptions option, MemoryFormat memory_format) {
+    ScalarType dtype = typeMetaToScalarType(option.dtype());
+    
+    return empty_generic(size, GetAllocator(Device::CPU), dtype, memory_format);
+}
+
 Tensor empty_cpu(IntArrayRef size, ScalarType dtype) {
     return empty_generic(size, GetAllocator(Device::CPU), dtype);
 }
@@ -47,6 +53,29 @@ Tensor empty_generic(
     
     if (size.size() != 1 || size[0] != 0) {
         tensor.unsafeGetTensorNucleus()->set_sizes_contiguous(size);
+    }
+    
+    return tensor;
+}
+
+Tensor empty_generic(
+    IntArrayRef size,
+    Allocator* allocator,
+    ScalarType scalar_type,
+    MemoryFormat memory_format) {
+    int64_t nelements = multiply_integers(size);
+    TypeMeta dtype = scalarTypeToTypeMeta(scalar_type);
+    int64_t size_bytes = nelements * dtype.itemsize();
+    
+    Memory memory = make_otterptr<MemoryNucleus>(size_bytes, allocator);
+    Tensor tensor = otter::make_tensor<otter::TensorNucleus>(std::move(memory), dtype);
+    
+    if (size.size() != 1 || size[0] != 0) {
+        tensor.unsafeGetTensorNucleus()->set_sizes_contiguous(size);
+    }
+    
+    if (memory_format != MemoryFormat::Contiguous) {
+        tensor.unsafeGetTensorNucleus()->empty_tensor_restride(memory_format);
     }
     
     return tensor;

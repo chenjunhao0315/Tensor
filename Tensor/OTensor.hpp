@@ -11,9 +11,11 @@
 #include "TensorMaker.hpp"
 #include "TensorFactory.hpp"
 #include "TensorOperator.hpp"
+#include "TensorOptions.hpp"
 #include "UnaryOps.hpp"
 #include "BinaryOps.hpp"
 #include "Formatting.hpp"
+#include "TensorUtils.hpp"
 
 
 #endif /* OTensor_h */
