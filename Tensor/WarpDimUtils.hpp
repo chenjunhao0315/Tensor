@@ -8,28 +8,38 @@
 #ifndef WarpDimUtils_hpp
 #define WarpDimUtils_hpp
 
-#include <cassert>
+#include "ArrayRef.hpp"
+#include "Utils.hpp"
+#include "WarpDimMinimal.hpp"
+#include "Tensor.hpp"
 
 namespace otter {
 
-static inline int64_t maybe_wrap_dim(int64_t dim, int64_t dim_post_expr, bool wrap_scalar = true) {
-    if (dim_post_expr <= 0) {
-        if (!wrap_scalar) {
-            // "dimension specified as ", dim, " but tensor has no dimensions"
-            assert(false);
+static inline int64_t legacy_cat_wrap_dim(int64_t dim, const std::vector<std::vector<int64_t>>& tensor_sizes) {
+    for (auto& sizes : tensor_sizes) {
+        if (sizes == std::vector<int64_t>({0})) {
+            continue;
         }
-        dim_post_expr = 1; // this will make range [-1, 0]
+        return maybe_wrap_dim(dim, sizes.size());
     }
-
-    int64_t min = -dim_post_expr;
-    int64_t max = dim_post_expr - 1;
-    if (dim < min || dim > max) {
-        // "Dimension out of range (expected to be in range of [", min, ", ", max, "], but got ", dim, ")"
-        assert(false);
-    }
-    if (dim < 0)
-        dim += dim_post_expr;
     return dim;
+}
+
+static inline int64_t legacy_cat_wrap_dim(int64_t dim, TensorList tensors) {
+    for (auto& tensor : tensors) {
+        if (tensor.dim() == 1 && tensor.sizes()[0] == 0) {
+            continue;
+        }
+        return maybe_wrap_dim(dim, tensor.dim());
+    }
+    return dim;
+}
+
+// wrap negative dims in a vector
+static inline void wrap_all_dims(std::vector<int64_t>& dims_to_wrap, int64_t tensor_total_dims) {
+    for (const auto i : otter::irange(dims_to_wrap.size())) {
+        dims_to_wrap[i] = maybe_wrap_dim(dims_to_wrap[i], tensor_total_dims);
+    }
 }
 
 

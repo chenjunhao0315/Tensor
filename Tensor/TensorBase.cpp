@@ -11,11 +11,11 @@
 namespace otter {
 
 // TensorNucleus main constructor
-TensorNucleus::TensorNucleus(Memory&& memory, const TypeMeta data_type, TensorOptions) : memory_(std::move(memory)), data_type_(data_type), memory_offset_(0), numel_(0) {
+TensorNucleus::TensorNucleus(Memory&& memory, const TypeMeta data_type, Device device) : memory_(std::move(memory)), data_type_(data_type), memory_offset_(0), numel_(0), device_(device) {
     init_bitfields();
 }
 
-TensorNucleus::TensorNucleus(Memory&& memory, const TypeMeta data_type) : TensorNucleus(std::forward<Memory>(memory), data_type, TensorOptions{}) {
+TensorNucleus::TensorNucleus(Memory&& memory, const TypeMeta data_type) : TensorNucleus(std::forward<Memory>(memory), data_type, memory.device()) {
     init_bitfields();
 }
 
@@ -120,14 +120,14 @@ void TensorBase::print() const {
 }
 
 UndefinedTensorNucleus::UndefinedTensorNucleus()
-    : TensorNucleus({}, otter::TypeMeta()) {
+    : TensorNucleus({}, otter::TypeMeta(), Device::Undefined) {
 //  set_storage_access_should_throw();
 }
 
 UndefinedTensorNucleus UndefinedTensorNucleus::_singleton;
 
 std::string TensorBase::toString() const {
-    return ::toString(this->unsafeGetTensorNucleus()->scalar_type()) + "Type";
+    return otter::toString(this->unsafeGetTensorNucleus()->scalar_type()) + "Type";
 }
 
 #define DEFINE_ALL_TYPES_DATA_PTR(T, name) \

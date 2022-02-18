@@ -11,7 +11,8 @@
 #include <stdio.h>
 
 enum class Device : int16_t {
-    CPU
+    CPU,
+    Undefined
 };
 
 #endif /* Device_hpp */

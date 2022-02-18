@@ -10,6 +10,10 @@
 
 namespace otter {
 
+void check_dim_size(const Tensor& tensor, int64_t dim, int64_t dim_size, int64_t size) {
+    assert(tensor.dim() == dim && tensor.size(dim_size) == size);
+}
+
 template <typename ResultVec, typename NewShapeVec>
 ResultVec computeStride_impl(IntArrayRef oldshape, IntArrayRef oldstride, const NewShapeVec& newshape, ResultVec toResult(const IntArrayRef&)) {
     if (oldshape.empty()) {

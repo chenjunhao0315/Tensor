@@ -77,6 +77,14 @@ const Tensor& Tensor::resize_as_(const Tensor& the_template) const {
     return otter::native::resize_as_(*this, the_template);
 }
 
+const Tensor& Tensor::resize_(IntArrayRef shape, MemoryFormat memory_format) const {
+    return otter::native::resize_(*this, shape, memory_format);
+}
+
+const Tensor& Tensor::resize_as_(const Tensor& the_template, MemoryFormat memory_format) const {
+    return otter::native::resize_as_(*this, the_template, memory_format);
+}
+
 Tensor Tensor::as_strided(IntArrayRef sizes, IntArrayRef strides) const {
     return otter::native::as_strided_tensorimpl(*this, sizes, strides);
 }
@@ -95,6 +103,42 @@ const Tensor& Tensor::as_strided_(IntArrayRef sizes, IntArrayRef strides, int64_
 
 Tensor Tensor::view(IntArrayRef sizes) const {
     return otter::native::view(*this, sizes);
+}
+
+Tensor Tensor::reshape(IntArrayRef sizes) const {
+    return otter::native::reshape(*this, sizes);
+}
+
+Tensor Tensor::reshape_as(const Tensor &other) const {
+    return otter::native::reshape_as(*this, other);
+}
+
+Tensor Tensor::slice(int64_t dim, int64_t start, int64_t end, int64_t step) const {
+    return otter::native::slice(*this, dim, start, end, step);
+}
+
+Tensor Tensor::unsqueeze(int64_t dim) const {
+    return otter::native::unsqueeze(*this, dim);
+}
+
+Tensor& Tensor::unsqueeze_(int64_t dim) const {
+    return otter::native::unsqueeze_(const_cast<Tensor&>(*this), dim);
+}
+
+Tensor Tensor::squeeze(int64_t dim) const {
+    return otter::native::squeeze(*this, dim);
+}
+
+Tensor& Tensor::squeeze_(int64_t dim) const {
+    return otter::native::squeeze_(const_cast<Tensor&>(*this), dim);
+}
+
+Tensor Tensor::narrow(int64_t dim, int64_t start, int64_t length) const {
+    return otter::native::narrow(*this, dim, start, length);
+}
+
+Tensor Tensor::detach() const {
+    return otter::native::detach(*this);
 }
 
 Tensor& Tensor::zero_() {

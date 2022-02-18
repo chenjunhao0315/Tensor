@@ -87,6 +87,10 @@ public:
         return ArrayRef<T>(data() + N, M);
     }
     
+    ArrayRef<T> slice(size_t N) const {
+        return slice(N, size() - N);
+    }
+    
     constexpr const T& operator[](size_t idx) const {
         return data_[idx];
     }
@@ -147,6 +151,9 @@ bool operator!=(otter::ArrayRef<T> a1, const std::vector<T>& a2) {
 }
 
 using IntArrayRef = ArrayRef<int64_t>;
+
+class Tensor;
+using TensorList = ArrayRef<Tensor>;
 
 }   // end namespace otter
 

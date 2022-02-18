@@ -10,6 +10,7 @@
 #include "UnaryOps.hpp"
 #include "UnaryOpsKernel.hpp"
 #include "Math.hpp"
+#include "VecBase.hpp"
 
 namespace otter {
 
@@ -23,23 +24,28 @@ void bitwise_not_kernel(TensorIterator& iter) {
             cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
                 return ~a;
             });
+//            cpu_kernel_vec(iter, [=](scalar_t a) -> scalar_t { return ~a; }, [=](vec::Vectorized<scalar_t> a) { return ~a; });
         });
     }
 }
 
 void neg_kernel(TensorIterator& iter) {
     OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "neg_cpu", [&]() {
-        cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
-            return -a;
-        });
+        cpu_kernel_vec(
+            iter,
+            [=](scalar_t a) -> scalar_t { return -a; },
+            [=](vec::Vectorized<scalar_t> a) { return a.neg(); }
+        );
     });
 }
 
 void abs_kernel(TensorIterator& iter) {
     OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "abs_cpu", [&]() {
-        cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
-            return abs_impl(a);
-        });
+        cpu_kernel_vec(
+            iter,
+            [=](scalar_t a) -> scalar_t { return abs_impl(a); },
+            [=](vec::Vectorized<scalar_t> a) { return a.abs(); }
+        );
     });
 }
 
@@ -48,6 +54,11 @@ void sin_kernel(TensorIterator& iter) {
         cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
             return std::sin(a);
         });
+//        cpu_kernel_vec(
+//            iter,
+//            [=](scalar_t a) -> scalar_t { return std::sin(a); },
+//            [=](vec::Vectorized<scalar_t> a) { return a.sin(); }
+//        );
     });
 }
 
@@ -56,6 +67,11 @@ void cos_kernel(TensorIterator& iter) {
         cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
             return std::cos(a);
         });
+//        cpu_kernel_vec(
+//            iter,
+//            [=](scalar_t a) -> scalar_t { return std::cos(a); },
+//            [=](vec::Vectorized<scalar_t> a) { return a.cos(); }
+//        );
     });
 }
 
@@ -64,6 +80,11 @@ void tan_kernel(TensorIterator& iter) {
         cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
             return std::tan(a);
         });
+//        cpu_kernel_vec(
+//            iter,
+//            [=](scalar_t a) -> scalar_t { return std::tan(a); },
+//            [=](vec::Vectorized<scalar_t> a) { return a.tan(); }
+//        );
     });
 }
 
@@ -72,6 +93,11 @@ void exp_kernel(TensorIterator& iter) {
         cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
             return std::exp(a);
         });
+//        cpu_kernel_vec(
+//            iter,
+//            [=](scalar_t a) -> scalar_t { return std::exp(a); },
+//            [=](vec::Vectorized<scalar_t> a) { return a.exp(); }
+//        );
     });
 }
 

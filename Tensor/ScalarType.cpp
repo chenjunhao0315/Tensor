@@ -8,6 +8,8 @@
 #include <sstream>
 #include "ScalarType.hpp"
 
+namespace otter {
+
 
 std::string toString(ScalarType type) {
     switch(type) {
@@ -24,3 +26,5 @@ void report_overflow(const char* name) {
     oss << "value cannot be converted to type " << name << " without overflow";
     throw std::runtime_error(oss.str());
 }
+
+}   // end namespace otter

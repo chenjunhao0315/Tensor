@@ -13,6 +13,7 @@
 namespace otter {
 
 Tensor empty(IntArrayRef size, ScalarType dtype);
+Tensor empty(IntArrayRef size, TensorOptions options);
 
 Tensor empty_strided(IntArrayRef size, IntArrayRef stride, ScalarType dtype);
 Tensor empty_strided(IntArrayRef size, IntArrayRef stride, TensorOptions options);
@@ -28,7 +29,9 @@ Tensor clone(const Tensor& src, MemoryFormat memory_format);
 Tensor full(IntArrayRef size, const Scalar& fill_value, ScalarType dtype);
 
 Tensor zeros(IntArrayRef size, ScalarType dtype);
+Tensor zeros(IntArrayRef size, TensorOptions options);
 Tensor ones(IntArrayRef size, ScalarType dtype);
+Tensor ones(IntArrayRef size, TensorOptions options);
 
 Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, ScalarType dtype);
 

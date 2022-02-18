@@ -22,8 +22,12 @@ void add_kernel(TensorIterator& iter, const Scalar& alpha_scalar) {
     } else {
         OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "add_cpu", [&]() {
             auto alpha = alpha_scalar.to<scalar_t>();
-            cpu_kernel(iter, [=](scalar_t a, scalar_t b) -> scalar_t {
-                return a + alpha * b; });
+            auto alpha_vec = Vectorized<scalar_t>(alpha);
+            cpu_kernel_vec(
+                iter,
+                [=](scalar_t a, scalar_t b) __ubsan_ignore_undefined__ -> scalar_t { return a + alpha * b; },
+                [=](Vectorized<scalar_t> a, Vectorized<scalar_t> b) __ubsan_ignore_undefined__ { return vec::fmadd(b, alpha_vec, a);
+            });
         });
     }
 }
@@ -39,9 +43,10 @@ void mul_kernel(TensorIterator& iter) {
         });
     } else {
         OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "mul_cpu", [&]() {
-            cpu_kernel(iter, [=](scalar_t a, scalar_t b) -> scalar_t {
-                return a * b;
-            });
+            cpu_kernel_vec(iter,
+                [=](scalar_t a, scalar_t b) -> scalar_t { return a * b; },
+                [=](Vectorized<scalar_t> a, Vectorized<scalar_t> b) { return a * b; }
+            );
         });
     }
 }

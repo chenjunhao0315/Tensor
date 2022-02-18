@@ -15,7 +15,7 @@
 #include "TensorOptions.hpp"
 #include "Scalar.hpp"
 #include "ExclusivelyOwned.hpp"
-#include "WarpDimUtils.hpp"
+#include "WarpDimMinimal.hpp"
 #include "MemoryFormat.hpp"
 
 #define NOT_IMPLEMENTED fprintf(stderr, "NOT_IMPLEMENTED!")
@@ -29,7 +29,7 @@ public:
     TensorNucleus(TensorNucleus&&) = delete;
     TensorNucleus& operator=(TensorNucleus&&) = delete;
     
-    TensorNucleus(Memory&& memory, const TypeMeta data_type, TensorOptions);
+    TensorNucleus(Memory&& memory, const TypeMeta data_type, Device device);
     
     TensorNucleus(Memory&& memory, const TypeMeta data_type);
     
@@ -82,6 +82,10 @@ public:
     
     bool is_non_overlapping_and_dense() const {
         return is_non_overlapping_and_dense_;
+    }
+    
+    bool is_strides_like_channels_last() const {
+        return is_channels_last_;
     }
     
     bool compute_contiguous() const;
@@ -206,6 +210,11 @@ public:
     }
     
     const Memory& memory() const {
+        // Do some check
+        return memory_;
+    }
+    
+    inline const Memory& unsafe_memory() const {
         return memory_;
     }
     
@@ -344,7 +353,7 @@ private:
     bool is_non_overlapping_and_dense_ : 1;
 };
 
-class UndefinedTensorNucleus : public TensorNucleus {
+struct UndefinedTensorNucleus : public TensorNucleus {
 public:
     static constexpr inline TensorNucleus* singleton() {
         return &_singleton;
@@ -517,6 +526,18 @@ public:
     
     bool is_non_overlapping_and_dense() const {
         return tensor_nucleus_->is_non_overlapping_and_dense();
+    }
+    
+    MemoryFormat suggest_memory_format(bool channels_last_strides_exact_match = false) const {
+//        if (!is_mkldnn() && !is_sparse()) {
+        if (true) {
+            if (tensor_nucleus_->is_strides_like_channels_last()) {
+                if (!channels_last_strides_exact_match || get_channels_last_strides_2d(sizes()) == strides()) {
+                    return MemoryFormat::ChannelsLast;
+                }
+            }
+        }
+        return MemoryFormat::Contiguous;
     }
     
 protected:

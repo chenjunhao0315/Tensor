@@ -12,6 +12,10 @@
 #include <limits>
 #include <cmath>
 
+#include "TypeCast.hpp"
+
+namespace otter {
+
 #define OTTER_ALL_SCALAR_TYPES_WO_BOOL(_) \
 _(uint8_t, Byte)                                               \
 _(int8_t, Char)                                                \
@@ -73,6 +77,24 @@ static inline bool isFloatingType(ScalarType t) {
   return (
       t == ScalarType::Double || t == ScalarType::Float);
 }
+
+template <typename T>
+struct CppTypeToScalarType;
+
+#define SPECIALIZE_CppTypeToScalarType(cpp_type, scalar_type)                  \
+  template <>                                                                  \
+  struct CppTypeToScalarType<cpp_type>                                         \
+      : std::                                                                  \
+        integral_constant<otter::ScalarType, otter::ScalarType::scalar_type> { \
+  };
+
+OTTER_ALL_SCALAR_TYPES(SPECIALIZE_CppTypeToScalarType)
+
+#undef SPECIALIZE_CppTypeToScalarType
+
+
+
+
 
 template <typename To, typename From>
 typename std::enable_if<std::is_same<From, bool>::value, bool>::type overflows(From f) {
@@ -191,22 +213,6 @@ typename std::enable_if<std::is_floating_point<From>::value, bool>::type overflo
     return f < limit::lowest() || f > limit::max();
 }
 
-// Conversion
-template <typename dest_t, typename src_t>
-struct static_cast_with_inter_type {
-    static inline dest_t apply(src_t src) {
-        return static_cast<dest_t>(src);
-    }
-};
-
-// From any -> uint8_t
-template <typename src_t>
-struct static_cast_with_inter_type<uint8_t, src_t> {
-    static inline uint8_t apply(src_t src) {
-        return static_cast<uint8_t>(static_cast<int64_t>(src));
-    }
-};
-
 #define ERROR_UNSUPPORTED_CAST fprintf(stderr, "[ScalarType] Unsupported cast!\n")
 
 #define FETCH_AND_CAST_CASE(type, scalartype)   \
@@ -257,5 +263,7 @@ To checked_convert(From f, const char* name) {
     }
     return convert<To, From>(f);
 }
+
+}   // end namespace otter
 
 #endif /* ScalarType_hpp */

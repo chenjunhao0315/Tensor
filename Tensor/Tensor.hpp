@@ -87,12 +87,29 @@ public:
     
     const Tensor& resize_(IntArrayRef shape) const;
     const Tensor& resize_as_(const Tensor& the_template) const;
+    const Tensor& resize_(IntArrayRef shape, MemoryFormat memory_format) const;
+    const Tensor& resize_as_(const Tensor& the_template, MemoryFormat memory_format) const;
     Tensor as_strided(IntArrayRef sizes, IntArrayRef strides) const;
     Tensor as_strided(IntArrayRef sizes, IntArrayRef strides, int64_t memory_offset) const;
     const Tensor& as_strided_(IntArrayRef sizes, IntArrayRef strides) const;
     const Tensor& as_strided_(IntArrayRef sizes, IntArrayRef strides, int64_t memory_offset) const;
     
     Tensor view(IntArrayRef sizes) const;
+    
+    Tensor reshape(IntArrayRef sizes) const;
+    Tensor reshape_as(const Tensor& other) const;
+    
+    Tensor slice(int64_t dim = 0, int64_t start = INT64_MAX, int64_t end = 0, int64_t step = 1) const;
+    
+    Tensor unsqueeze(int64_t dim) const;
+    Tensor& unsqueeze_(int64_t dim) const;
+    
+    Tensor squeeze(int64_t dim) const;
+    Tensor& squeeze_(int64_t dim) const;
+    
+    Tensor narrow(int64_t dim, int64_t start, int64_t length) const;
+    
+    Tensor detach() const;
     
     Tensor operator~() const {
         return bitwise_not();

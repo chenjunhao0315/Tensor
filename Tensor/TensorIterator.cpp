@@ -10,6 +10,8 @@
 #include "TensorResize.hpp"
 #include "Parallel.hpp"
 #include "ExpandUtils.hpp"
+#include "MemoryOverlap.hpp"
+#include "DefaultDtype.hpp"
 
 namespace otter {
 
@@ -83,6 +85,10 @@ int64_t TensorIterator::numel() const {
     return numel;
 }
 
+void TensorIterator::unsafe_replace_operand(int arg, void* data) {
+    operands_[arg].data = data;
+}
+
 void TensorIterator::initialize_operands(TensorIteratorConfig &config) {
     for (auto& tensor : config.tensors_) {
         operands_.emplace_back(std::move(tensor));
@@ -99,6 +105,23 @@ void TensorIterator::initialize_operands(TensorIteratorConfig &config) {
             const auto& input = this->tensor(i);
             if (output.is_same(input)) {
                 operands_[i].is_read_write = true;
+            }
+        }
+    }
+}
+
+void TensorIterator::compute_mem_overlaps(const TensorIteratorConfig& config) {
+    if (!config.check_mem_overlap_) {
+        return;
+    }
+    for (const auto i : otter::irange(num_outputs_)) {
+        const auto& output = tensor_base(i);
+        if (!output.defined()) continue;
+        assert_no_internal_overlap(output);
+        for (const auto j : otter::irange(num_outputs_, ntensors())) {
+            const auto& input = tensor_base(j);
+            if (!input.is_same(output)) {
+                assert_no_partial_overlap(output, input);
             }
         }
     }
@@ -210,9 +233,9 @@ void TensorIterator::compute_types(const TensorIteratorConfig &config) {
 //        common_dtype_ = ;
 //    }
     
-//    if (config.promote_integer_inputs_to_float_ && c10::isIntegralType(common_dtype_, /*includeBool=*/true)) {
-//        common_dtype_ = c10::typeMetaToScalarType(c10::get_default_dtype());
-//    }
+    if (config.promote_integer_inputs_to_float_ && otter::isIntegralType(common_dtype_, true)) {
+        common_dtype_ = otter::get_default_dtype_as_scalartype();
+    }
     
     common_device_ = common_device;
     for (auto& op : operands_) {
@@ -458,6 +481,8 @@ const Tensor& TensorIterator::maybe_get_output(int64_t output_idx) {
 void TensorIterator::build(TensorIteratorConfig &config) {
     // Put all tensor into operands pool
     this->initialize_operands(config);
+    // Check memory overlap
+    this->compute_mem_overlaps(config);
     // Compute the proper output shape
     this->compute_shape(config);
     // Mark the output tensor which need to be resized
@@ -512,6 +537,7 @@ void TensorIterator::serial_for_each(loop2d_t loop, Range range) const {
 
 #define BINARY_FLOAT_OP_CONFIG()                \
 TensorIteratorConfig()                          \
+.set_check_mem_overlap(true)                    \
 .promote_inputs_to_common_dtype(true)           \
 .cast_common_dtype_to_outputs(true)             \
 .enforce_safe_casting_to_output(true)           \
@@ -533,6 +559,7 @@ void TensorIterator::build_borrowing_binary_float_op(const TensorBase& out, cons
 
 #define BINARY_OP_CONFIG()                          \
 TensorIteratorConfig()                              \
+.set_check_mem_overlap(true)                        \
 .promote_inputs_to_common_dtype(true)               \
 .cast_common_dtype_to_outputs(true)                 \
 .enforce_safe_casting_to_output(true)               \
@@ -547,6 +574,7 @@ void TensorIterator::build_borrowing_binary_op(const TensorBase& out, const Tens
 
 #define UNARY_FLOAT_OP_CONFIG()                                         \
 TensorIteratorConfig()                                                  \
+.set_check_mem_overlap(true)                                            \
 .promote_inputs_to_common_dtype(true)                                   \
 .promote_inputs_to_common_dtype(true)                                   \
 .cast_common_dtype_to_outputs(true)                                     \

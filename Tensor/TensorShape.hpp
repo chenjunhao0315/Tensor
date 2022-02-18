@@ -29,13 +29,31 @@ Tensor expand_as(const Tensor& self, const Tensor& other);
 
 Tensor view(const Tensor& self, IntArrayRef sizes);
 
+Tensor reshape(const Tensor& self, IntArrayRef sizes);
+Tensor reshape_as(const Tensor& self, const Tensor& other);
+
+Tensor detach(const Tensor& self);
+
 Tensor as_strided_tensorimpl(const Tensor& self, IntArrayRef size, IntArrayRef stride);
 Tensor as_strided_tensorimpl(const Tensor& self, IntArrayRef size, IntArrayRef stride, int64_t memory_offset_);
 const Tensor &as_strided_(const Tensor& self, IntArrayRef size, IntArrayRef stride);
 const Tensor &as_strided_(const Tensor& self, IntArrayRef size, IntArrayRef stride, int64_t memory_offset_);
 
-}
+Tensor slice(const Tensor& self, int64_t dim, int64_t start = INT64_MAX, int64_t end = 0, int64_t step = 1);
 
-}
+Tensor unsqueeze(const Tensor& self, int64_t dim);
+Tensor& unsqueeze_(Tensor& self, int64_t dim);
+
+Tensor squeeze(const Tensor& self, int64_t dim);
+Tensor& squeeze_(Tensor& self, int64_t dim);
+
+Tensor narrow(const Tensor& self, int64_t dim, int64_t start, int64_t length);
+
+Tensor& cat_out(TensorList tensors, int64_t dim, Tensor& out);
+Tensor cat(TensorList tensors, int64_t dim);
+
+}   // namespace native
+
+}   // namespace otter
 
 #endif /* TensorShape_hpp */

@@ -13,6 +13,14 @@
 namespace otter {
 
 template <typename T>
+static inline T div_round_up(T x, T y) {
+    int q = x / y;
+    int r = x % y;
+    if ((r!=0) && ((r<0) != (y<0))) --q;
+    return q;
+}
+
+template <typename T>
 static T abs_impl(T v) {
     return std::abs(v);
 }

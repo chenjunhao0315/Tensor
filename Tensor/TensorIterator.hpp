@@ -160,9 +160,11 @@ public:
     IntArrayRef view_offsets() const { return view_offsets_; }
     
     ScalarType dtype(int arg = 0) const { return operands_[arg].current_dtype; }
+    ScalarType input_dtype(int arg=0) const { return operands_[num_outputs_ + arg].current_dtype; }
     ScalarType common_dtype() const { return common_dtype_; }
     
     void initialize_operands(TensorIteratorConfig& config);
+    void compute_mem_overlaps(const TensorIteratorConfig& config);
     void compute_shape(const TensorIteratorConfig& config);
     void compute_types(const TensorIteratorConfig& config);
     void mark_resize_outputs(const TensorIteratorConfig& config);
@@ -195,6 +197,8 @@ public:
         assert(arg < num_outputs_);
         return tensor_base(arg);
     }
+    
+    void unsafe_replace_operand(int arg, void* data);
     
     template <typename loop1d_t, std::enable_if_t<std::is_convertible<loop1d_t, otter::FunctionRef<void(char**, const int64_t* strides, int64_t size)>>::value, int> = 0>
     void for_each(loop1d_t loop, int64_t grain_size = otter::GRAIN_SIZE) {
@@ -288,6 +292,11 @@ public:
         return iter;
     }
     
+    TensorIteratorConfig& set_check_mem_overlap(bool check_mem_overlap) {
+        check_mem_overlap_ = check_mem_overlap;
+        return *this;
+    }
+    
     TensorIteratorConfig& check_all_same_dtype(const bool _check_all_same_dtype) {
         check_all_same_dtype_ = _check_all_same_dtype;
         return *this;
@@ -337,6 +346,7 @@ private:
     int num_outputs_ = 0;
     
     bool resize_outputs_ = true;
+    bool check_mem_overlap_ = true;
     bool check_all_same_dtype_ = false;
     bool check_all_same_device_ = false;
     bool enforce_safe_casting_to_output_ = false;

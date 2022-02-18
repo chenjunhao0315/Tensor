@@ -6,6 +6,7 @@
 //
 
 #include "DispatchStub.hpp"
+#include <cassert>
 
 namespace otter {
 
@@ -29,7 +30,7 @@ void* DispatchStubImpl::get_call_ptr(Device device_type, void *DEFAULT) {
             return fptr;
         }
         default:
-            fprintf(stderr, "DispatchStub: unsupported device type");
+            assert(false);
     }
 }
 

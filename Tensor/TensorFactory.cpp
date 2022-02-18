@@ -15,6 +15,10 @@ Tensor empty(IntArrayRef size, ScalarType dtype) {
     return otter::empty_cpu(size, dtype);
 }
 
+Tensor empty(IntArrayRef size, TensorOptions options) {
+    return otter::empty_cpu(size, options);
+}
+
 Tensor empty_strided(IntArrayRef size, IntArrayRef stride, ScalarType dtype) {
     return otter::empty_strided_cpu(size, stride, dtype);
 }
@@ -75,8 +79,18 @@ Tensor ones(IntArrayRef size, ScalarType dtype) {
     return result.fill_(1);
 }
 
+Tensor ones(IntArrayRef size, TensorOptions options) {
+    auto result = empty(size, options);
+    
+    return result.fill_(1);
+}
+
 Tensor zeros(IntArrayRef size, ScalarType dtype) {
     return empty_cpu(size, dtype);
+}
+
+Tensor zeros(IntArrayRef size, TensorOptions options) {
+    return empty_cpu(size, options);
 }
 
 Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, ScalarType dtype) {
