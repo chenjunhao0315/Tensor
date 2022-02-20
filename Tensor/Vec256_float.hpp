@@ -11,12 +11,11 @@
 #include "VecIntrinsic.hpp"
 #include "VecBase.hpp"
 
+#include "Config.hpp"
 #include "Utils.hpp"
 
 namespace otter {
 namespace vec {
-
-//#define CPU_CAPABILITY_AVX2 1
 
 #if defined(CPU_CAPABILITY_AVX2)
 

@@ -28,6 +28,16 @@ void otter_free(void *ptr);
 #define otter_calloc(m, s)   otter_calloc_log(m, s, OTTER_LOC)
 #define otter_realloc(p, s)  otter_realloc_log(p, s, OTTER_LOC)
 
+#ifdef OTTER_MOBILE
+// Use 16-byte alignment on mobile
+// - ARM NEON AArch32 and AArch64
+// - x86[-64] < AVX
+constexpr size_t gAlignment = 16;
+#else
+// Use 64-byte alignment should be enough for computation up to AVX512.
+constexpr size_t gAlignment = 64;
+#endif
+
 using DeleterFnPtr = void (*)(void*);
 void deleteNothing(void*);
 
@@ -120,10 +130,13 @@ struct Allocator {
     }
 };
 
+void* alloc_cpu(size_t nbytes);
+void free_cpu(void* data);
+
 struct DefaultAllocator : public Allocator {
     DefaultAllocator() = default;
     DataPtr allocate(size_t nbytes) const override {
-        void* data = otter_calloc(1, nbytes);
+        void* data = alloc_cpu(nbytes);
         return {data, data, &ReportAndDelete, Device::CPU};
     }
 
@@ -131,7 +144,7 @@ struct DefaultAllocator : public Allocator {
         if (!ptr) {
             return;
         }
-        otter_free(ptr);
+        free_cpu(ptr);
     }
 
     DeleterFnPtr raw_deleter() const override {

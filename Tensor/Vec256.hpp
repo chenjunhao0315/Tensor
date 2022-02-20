@@ -11,6 +11,7 @@
 #include "VecIntrinsic.hpp"
 #include "VecBase.hpp"
 #include "Vec256_float.hpp"
+#include "Vec256_float_neon.hpp"
 
 namespace otter {
 namespace vec{

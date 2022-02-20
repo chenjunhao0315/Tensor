@@ -28,6 +28,31 @@ DataPtr InefficientStdFunctionContext::makeDataPtr(void* ptr, const std::functio
     return {ptr, new InefficientStdFunctionContext({ptr, deleter}), &deleteInefficientStdFunctionContext, device};
 }
 
+void* alloc_cpu(size_t nbytes) {
+    if (nbytes == 0) return nullptr;
+    
+    void* data;
+#ifdef __ANDROID__
+    data = memalign(gAlignment, nbytes);
+#elif defined(_MSC_VER)
+    data = _aligned_malloc(nbytes, gAlignment);
+#else
+    int err = posix_memalign(&data, gAlignment, nbytes);
+    if (err != 0) {
+        throw "DefaultCPUAllocator: can't allocate memory";
+    }
+#endif
+        return data;
+}
+
+void free_cpu(void* data) {
+#ifdef _MSC_VER
+    _aligned_free(data);
+#else
+    free(data);
+#endif
+}
+
 void *otter_malloc_log(const size_t size, const char * const filename, const char * const funcname, const int line) {
     if (size == 0) return nullptr;
     void *ptr = malloc(size);

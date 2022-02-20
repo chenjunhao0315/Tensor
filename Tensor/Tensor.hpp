@@ -72,9 +72,11 @@ public:
     Tensor operator[](int64_t index) const;
     Tensor select(int64_t dim, int64_t index) const;
     
-    Tensor& copy_(const Tensor& src, bool non_blocking = false) const; 
+    Tensor& copy_(const Tensor& src, bool non_blocking = false) const;
+    
     Tensor clone() const;
     Tensor clone(MemoryFormat memory_format) const;
+    
     Tensor contiguous(MemoryFormat memory_format = MemoryFormat::Contiguous) const;
     
     Tensor permute(IntArrayRef dims) const;

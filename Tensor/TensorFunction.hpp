@@ -17,27 +17,27 @@ Tensor create_out(IntArrayRef sizes, IntArrayRef strides, TensorOptions option);
 void resize_out(const Tensor &out, IntArrayRef sizes, IntArrayRef strides, const TensorOptions &options);
 void check_inplace(const Tensor &self, IntArrayRef sizes, const TensorOptions &options);
 
-#define DECLEAR_META_STRUCTURE_DUAL_NONE(name) \
+#define DECLARE_META_STRUCTURE_DUAL_NONE(name) \
 struct structured_##name : public TensorIterator {  \
     void meta(const Tensor& self, const Tensor& other);   \
 }
 
-#define DECLEAR_META_STRUCTURE_TRI_DUAL(name) \
+#define DECLARE_META_STRUCTURE_TRI_DUAL(name) \
 struct structured_##name : public TensorIterator { \
     void meta(const Tensor& self, const Tensor& mat1, const Tensor& mat2, const Scalar& beta, const Scalar& alpha); \
 }
 
-#define DECLEAR_META_STRUCTURE_SELF_OVERLOAD(name, overload)    \
+#define DECLARE_META_STRUCTURE_SELF_OVERLOAD(name, overload)    \
 struct structured_##name##_##overload : public TensorIterator {   \
     void meta(const Tensor& self);   \
 }
 
-#define DECLEAR_META_STRUCTURE_OTHER_OVERLOAD(name, overload)    \
+#define DECLARE_META_STRUCTURE_OTHER_OVERLOAD(name, overload)    \
 struct structured_##name##_##overload : public TensorIterator  {    \
     void meta(const Tensor& self, const Tensor& other);   \
 }
 
-#define DECLEAR_META_STRUCTURE_OTHER_WITH_SCALAR_OVERLOAD(name, overload)    \
+#define DECLARE_META_STRUCTURE_OTHER_WITH_SCALAR_OVERLOAD(name, overload)    \
 struct structured_##name##_##overload : public TensorIterator  {    \
     void meta(const Tensor& self, const Tensor& other, const Scalar& value);   \
 }
@@ -51,25 +51,25 @@ void structured_##name::impl
 #define DEFINE_META_FUNCTION_OVERLOAD(name, overload)  \
 void structured_##name##_##overload::meta
 
-DECLEAR_META_STRUCTURE_OTHER_WITH_SCALAR_OVERLOAD(add, Tensor);
-DECLEAR_META_STRUCTURE_OTHER_WITH_SCALAR_OVERLOAD(sub, Tensor);
-DECLEAR_META_STRUCTURE_OTHER_OVERLOAD(mul, Tensor);
-DECLEAR_META_STRUCTURE_OTHER_OVERLOAD(div, Tensor);
-DECLEAR_META_STRUCTURE_OTHER_OVERLOAD(remainder, Tensor);
-DECLEAR_META_STRUCTURE_OTHER_OVERLOAD(bitwise_and, Tensor);
-DECLEAR_META_STRUCTURE_OTHER_OVERLOAD(bitwise_or, Tensor);
-DECLEAR_META_STRUCTURE_OTHER_OVERLOAD(bitwise_xor, Tensor);
+DECLARE_META_STRUCTURE_OTHER_WITH_SCALAR_OVERLOAD(add, Tensor);
+DECLARE_META_STRUCTURE_OTHER_WITH_SCALAR_OVERLOAD(sub, Tensor);
+DECLARE_META_STRUCTURE_OTHER_OVERLOAD(mul, Tensor);
+DECLARE_META_STRUCTURE_OTHER_OVERLOAD(div, Tensor);
+DECLARE_META_STRUCTURE_OTHER_OVERLOAD(remainder, Tensor);
+DECLARE_META_STRUCTURE_OTHER_OVERLOAD(bitwise_and, Tensor);
+DECLARE_META_STRUCTURE_OTHER_OVERLOAD(bitwise_or, Tensor);
+DECLARE_META_STRUCTURE_OTHER_OVERLOAD(bitwise_xor, Tensor);
 
-DECLEAR_META_STRUCTURE_SELF_OVERLOAD(bitwise_not, Tensor);
-DECLEAR_META_STRUCTURE_SELF_OVERLOAD(neg, Tensor);
-DECLEAR_META_STRUCTURE_SELF_OVERLOAD(abs, Tensor);
-DECLEAR_META_STRUCTURE_SELF_OVERLOAD(sin, Tensor);
-DECLEAR_META_STRUCTURE_SELF_OVERLOAD(cos, Tensor);
-DECLEAR_META_STRUCTURE_SELF_OVERLOAD(tan, Tensor);
-DECLEAR_META_STRUCTURE_SELF_OVERLOAD(exp, Tensor);
+DECLARE_META_STRUCTURE_SELF_OVERLOAD(bitwise_not, Tensor);
+DECLARE_META_STRUCTURE_SELF_OVERLOAD(neg, Tensor);
+DECLARE_META_STRUCTURE_SELF_OVERLOAD(abs, Tensor);
+DECLARE_META_STRUCTURE_SELF_OVERLOAD(sin, Tensor);
+DECLARE_META_STRUCTURE_SELF_OVERLOAD(cos, Tensor);
+DECLARE_META_STRUCTURE_SELF_OVERLOAD(tan, Tensor);
+DECLARE_META_STRUCTURE_SELF_OVERLOAD(exp, Tensor);
 
-DECLEAR_META_STRUCTURE_TRI_DUAL(addmm);
-DECLEAR_META_STRUCTURE_DUAL_NONE(mm);
+DECLARE_META_STRUCTURE_TRI_DUAL(addmm);
+DECLARE_META_STRUCTURE_DUAL_NONE(mm);
 
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \

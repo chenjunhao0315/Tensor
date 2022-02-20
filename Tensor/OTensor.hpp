@@ -16,6 +16,7 @@
 #include "BinaryOps.hpp"
 #include "Formatting.hpp"
 #include "TensorUtils.hpp"
+#include "Convolution.hpp"
 
 
 #endif /* OTensor_h */

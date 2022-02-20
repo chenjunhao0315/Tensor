@@ -51,10 +51,11 @@ std::string get_parallel_info() {
     
     ss << "OtterParallel:\n\totter::get_num_threads() : "
     << otter::get_num_threads() << std::endl;
-//    ss << "\tat::get_num_interop_threads() : "
+//    ss << "\totter::get_num_interop_threads() : "
 //    << otter::get_num_interop_threads() << std::endl;
     
     ss << otter::get_openmp_version() << std::endl;
+    
 #ifdef _OPENMP
     ss << "\tomp_get_max_threads() : " << omp_get_max_threads() << std::endl;
 #endif
@@ -66,7 +67,7 @@ std::string get_parallel_info() {
     ss << "\tOMP_NUM_THREADS : "
     << get_env_var("OMP_NUM_THREADS", "[not set]") << std::endl;
     
-    ss << "ATen parallel backend: ";
+    ss << "OTTER parallel backend: ";
 #if OTTER_OPENMP
     ss << "OpenMP";
 #endif
