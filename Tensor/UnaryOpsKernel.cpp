@@ -101,6 +101,14 @@ void exp_kernel(TensorIterator& iter) {
     });
 }
 
+void sqrt_kernel(TensorIterator& iter) {
+    OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "sqrt_cpu", [&]() {
+        cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
+            return std::sqrt(a);
+        });
+    });
+}
+
 REGISTER_DISPATCH(bitwise_not_stub, &bitwise_not_kernel);
 REGISTER_DISPATCH(neg_stub, &neg_kernel);
 REGISTER_DISPATCH(abs_stub, &abs_kernel);
@@ -108,6 +116,7 @@ REGISTER_DISPATCH(sin_stub, &sin_kernel);
 REGISTER_DISPATCH(cos_stub, &cos_kernel);
 REGISTER_DISPATCH(tan_stub, &tan_kernel);
 REGISTER_DISPATCH(exp_stub, &exp_kernel);
+REGISTER_DISPATCH(sqrt_stub, &sqrt_kernel);
 
 
 }

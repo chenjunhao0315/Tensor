@@ -405,7 +405,32 @@ Tensor & wrapper_exp_(Tensor & self) {
     return self;
 }
 
-// end tan cpu
+// end exp cpu
+
+// exp cpu
+DEFINE_FINAL_OP_AFTER(sqrt_out)
+Tensor wrapper_sqrt(const Tensor & self) {
+    structured_sqrt_out_functional op;
+    op.meta(self);
+    op.impl(self, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+
+Tensor & wrapper_sqrt_out(const Tensor & self, Tensor & out) {
+    structured_sqrt_out_out op(out);
+    op.meta(self);
+    op.impl(self, op.outputs_[0]);
+    return out;
+}
+
+Tensor & wrapper_sqrt_(Tensor & self) {
+    structured_sqrt_out_inplace op(self);
+    op.meta(self);
+    op.impl(self, op.outputs_[0]);
+    return self;
+}
+
+// end exp cpu
 
 // addmm cpu
 struct structured_addmm_out_cpu_functional : structured_addmm_out_cpu {
@@ -675,6 +700,16 @@ Tensor & exp_out(Tensor & out, const Tensor & self) {
 }
 Tensor & exp_(Tensor & self) {
     return wrapper_exp_(self);
+}
+
+Tensor sqrt(const Tensor & self) {
+    return wrapper_sqrt(self);
+}
+Tensor & sqrt_out(Tensor & out, const Tensor & self) {
+    return wrapper_sqrt_out(self, out);
+}
+Tensor & sqrt_(Tensor & self) {
+    return wrapper_sqrt_(self);
 }
 
 Tensor addmm(const Tensor & self, const Tensor & mat1, const Tensor & mat2, const Scalar & beta, const Scalar & alpha) {

@@ -25,10 +25,10 @@ static T abs_impl(T v) {
     return std::abs(v);
 }
 
-template <>
-uint8_t abs_impl(uint8_t v) {
-    return v;
-}
+//template <>
+//uint8_t abs_impl(uint8_t v) {
+//    return v;
+//}
 
 
 

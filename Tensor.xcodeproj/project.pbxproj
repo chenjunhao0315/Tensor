@@ -48,6 +48,8 @@
 		7687217B27C28140006640CF /* LayerRegistry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687217927C28140006640CF /* LayerRegistry.cpp */; };
 		7687217E27C2A850006640CF /* ConvolutionLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687217C27C2A850006640CF /* ConvolutionLayer.cpp */; };
 		7687218127C2DDC7006640CF /* Normalization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687217F27C2DDC7006640CF /* Normalization.cpp */; };
+		7687218827C35B9F006640CF /* BatchNormalization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687218627C35B9F006640CF /* BatchNormalization.cpp */; };
+		7687218B27C3C28D006640CF /* BatchNormalizationKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687218927C3C28D006640CF /* BatchNormalizationKernel.cpp */; };
 		76E6C50B27A502680036A26F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C50A27A502680036A26F /* main.cpp */; };
 		76E6C51327A502A30036A26F /* Tensor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51127A502A30036A26F /* Tensor.cpp */; };
 		76E6C51627A502F60036A26F /* Memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51427A502F60036A26F /* Memory.cpp */; };
@@ -199,6 +201,10 @@
 		7687217D27C2A850006640CF /* ConvolutionLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConvolutionLayer.hpp; sourceTree = "<group>"; };
 		7687217F27C2DDC7006640CF /* Normalization.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Normalization.cpp; sourceTree = "<group>"; };
 		7687218027C2DDC7006640CF /* Normalization.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Normalization.hpp; sourceTree = "<group>"; };
+		7687218627C35B9F006640CF /* BatchNormalization.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BatchNormalization.cpp; sourceTree = "<group>"; };
+		7687218727C35B9F006640CF /* BatchNormalization.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BatchNormalization.hpp; sourceTree = "<group>"; };
+		7687218927C3C28D006640CF /* BatchNormalizationKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BatchNormalizationKernel.cpp; sourceTree = "<group>"; };
+		7687218A27C3C28D006640CF /* BatchNormalizationKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BatchNormalizationKernel.hpp; sourceTree = "<group>"; };
 		76E6C50727A502680036A26F /* Tensor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Tensor; sourceTree = BUILT_PRODUCTS_DIR; };
 		76E6C50A27A502680036A26F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		76E6C51127A502A30036A26F /* Tensor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Tensor.cpp; sourceTree = "<group>"; };
@@ -497,6 +503,10 @@
 			children = (
 				7687217F27C2DDC7006640CF /* Normalization.cpp */,
 				7687218027C2DDC7006640CF /* Normalization.hpp */,
+				7687218627C35B9F006640CF /* BatchNormalization.cpp */,
+				7687218727C35B9F006640CF /* BatchNormalization.hpp */,
+				7687218927C3C28D006640CF /* BatchNormalizationKernel.cpp */,
+				7687218A27C3C28D006640CF /* BatchNormalizationKernel.hpp */,
 			);
 			name = Normalization;
 			sourceTree = "<group>";
@@ -673,6 +683,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7687218B27C3C28D006640CF /* BatchNormalizationKernel.cpp in Sources */,
 				76E6C53427A506E90036A26F /* Accumulator.cpp in Sources */,
 				7687217B27C28140006640CF /* LayerRegistry.cpp in Sources */,
 				76E6C54227A5124A0036A26F /* ThreadPool.cpp in Sources */,
@@ -735,6 +746,7 @@
 				76F336EC27AEEC9500E3AEF1 /* UnaryOps.cpp in Sources */,
 				76F336C727A5CEEC00E3AEF1 /* DispatchStub.cpp in Sources */,
 				7620AF6E27B4060A0081C210 /* RangeFactory.cpp in Sources */,
+				7687218827C35B9F006640CF /* BatchNormalization.cpp in Sources */,
 				76E6C52E27A505FE0036A26F /* TensorOptions.cpp in Sources */,
 				7620AF7427B4F3F50081C210 /* TensorMaker.cpp in Sources */,
 				76E6C51C27A504000036A26F /* DType.cpp in Sources */,

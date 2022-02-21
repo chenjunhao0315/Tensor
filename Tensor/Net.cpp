@@ -155,7 +155,7 @@ void Net::compile() {
         
         int load_state = layer->load_param(pd);
         if (load_state != 0) {
-            fprintf(stderr, "Layer load %d %s failed or undefined\n", i, layer->name.c_str());
+            fprintf(stderr, "Layer load %lu %s failed or undefined\n", i, layer->name.c_str());
             continue;
         }
         

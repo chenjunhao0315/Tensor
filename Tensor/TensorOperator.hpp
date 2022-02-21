@@ -8,6 +8,7 @@
 #ifndef TensorOperator_hpp
 #define TensorOperator_hpp
 
+#include "UnaryOps.hpp"
 #include "TensorFactory.hpp"
 
 namespace otter {
@@ -43,6 +44,19 @@ AT_FORALL_BINARY_OPS(DEFINE_OPERATOR)
 #undef DEFINE_OPERATOR
 #undef AT_FORALL_BINARY_OPS
 
-}
+#define DECLEAR_UNARY_SELF(name) \
+Tensor name(const Tensor& self); \
+Tensor& name##_(Tensor& self)
+
+DECLEAR_UNARY_SELF(neg);
+DECLEAR_UNARY_SELF(bitwise_not);
+DECLEAR_UNARY_SELF(abs);
+DECLEAR_UNARY_SELF(sin);
+DECLEAR_UNARY_SELF(cos);
+DECLEAR_UNARY_SELF(tan);
+DECLEAR_UNARY_SELF(exp);
+DECLEAR_UNARY_SELF(sqrt);
+
+}   // end namespace otter
 
 #endif /* TensorOperator_hpp */

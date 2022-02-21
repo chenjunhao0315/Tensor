@@ -231,6 +231,9 @@ public:
     Tensor& exp_() const;
     Tensor exp() const;
     
+    Tensor& sqrt_() const;
+    Tensor sqrt() const;
+    
     Tensor dot(const Tensor& other) const;
     
     Tensor addmm(const Tensor& mat1, const Tensor& mat2, const Scalar& beta = 1, const Scalar& alpha = 1) const;

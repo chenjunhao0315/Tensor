@@ -337,6 +337,14 @@ Tensor Tensor::exp() const {
     return otter::cpu::exp(*this);
 }
 
+Tensor& Tensor::sqrt_() const {
+    return otter::cpu::sqrt_(const_cast<Tensor&>(*this));
+}
+
+Tensor Tensor::sqrt() const {
+    return otter::cpu::sqrt(*this);
+}
+
 Tensor Tensor::dot(const Tensor& other) const {
     return otter::dot(*this, other);
 }
