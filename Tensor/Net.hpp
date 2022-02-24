@@ -30,6 +30,7 @@ public:
     
     void addLayer(LayerOption option);
     void compile();
+    void summary();
     
     int find_blob_index_by_name(std::string name) const;
     void update_input_output_indexes();
@@ -39,10 +40,10 @@ public:
 public:
     NetOption option;
     
-//private:
+private:
     int forward_layer(int layer_index, std::vector<Tensor>& blob_tensors, const NetOption& opt) const;
     int do_forward_layer(const Layer* layer, std::vector<Tensor>& blob_mats, const NetOption& opt) const;
-//private:
+private:
     std::vector<Layer*> layers;
     std::vector<Blob> blobs;
     

@@ -10,7 +10,6 @@
 
 #include "DispatchStub.hpp"
 #include "Scalar.hpp"
-#include "TensorIterator.hpp"
 
 namespace otter {
 

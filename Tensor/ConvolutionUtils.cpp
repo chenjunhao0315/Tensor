@@ -5,6 +5,7 @@
 //  Created by 陳均豪 on 2022/2/15.
 //
 
+#include "Tensor.hpp"
 #include "ConvolutionUtils.hpp"
 
 namespace otter {
@@ -85,6 +86,27 @@ bool ConvParams::use_cpu_depthwise3x3_winograd(const Tensor& input, const Tensor
         !is_strided() &&
         !is_dilated() &&
         !transposed;
+#else
+    return false;
+#endif
+}
+
+bool ConvParams::use_cpu_1x1s1_optimization(const Tensor &input, const Tensor &weight) const {
+#if defined(__ARM_NEON__)
+    return (input.dim() == 4) &&
+        (weight.dim() == 4) &&
+        (weight.size(2) == 1) &&
+        (weight.size(3) == 1) &&
+        (stride[0] == 1) &&
+        (stride[1] == 1) &&
+        (dilation[0] == 1) &&
+        (dilation[1] == 1) &&
+        (input.device() == Device::CPU) &&
+        (input.scalar_type() == ScalarType::Float) &&
+        (input.is_contiguous()) &&
+        (weight.device() == Device::CPU) &&
+        (weight.scalar_type() == ScalarType::Float) &&
+        (weight.is_contiguous());
 #else
     return false;
 #endif

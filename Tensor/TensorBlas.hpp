@@ -9,9 +9,12 @@
 #define TensorBlas_hpp
 
 #include "DispatchStub.hpp"
-#include "Tensor.hpp"
+#include "ScalarType.hpp"
 
 namespace otter {
+
+class Scalar;
+class Tensor;
 
 Tensor dot(const Tensor& self, const Tensor& other);
 

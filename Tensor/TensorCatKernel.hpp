@@ -8,9 +8,6 @@
 #ifndef TensorCatKernel_hpp
 #define TensorCatKernel_hpp
 
-#include "TensorCat.hpp"
-#include "Tensor.hpp"
-
 namespace otter {
 
 void cat_serial_kernel(Tensor& result, TensorList tensors, int64_t dim);

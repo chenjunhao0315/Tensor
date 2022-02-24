@@ -8,7 +8,7 @@
 #ifndef Device_hpp
 #define Device_hpp
 
-#include <stdio.h>
+#include <cstdint>
 
 enum class Device : int16_t {
     CPU,

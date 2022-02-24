@@ -18,6 +18,7 @@
 #include "TensorShape.hpp"
 #include "TensorBlas.hpp"
 #include "TensorProperties.hpp"
+#include "TensorScalar.hpp"
 
 namespace otter {
 
@@ -31,10 +32,6 @@ Tensor Tensor::operator[](int64_t index) const {
 
 Tensor& Tensor::copy_(const Tensor &src, bool non_blocking) const {
     return otter::copy_(const_cast<Tensor&>(*this), src, non_blocking);
-}
-
-Tensor Tensor::clone() const {
-    return otter::clone(*this);
 }
 
 Tensor Tensor::clone(MemoryFormat memory_format) const {
@@ -147,6 +144,10 @@ Tensor& Tensor::zero_() {
 
 Tensor& Tensor::fill_(const Scalar &value) {
     return native::fill_out(*this, value);
+}
+
+Tensor& Tensor::fill_(const Tensor &value) {
+    return native::fill_(*this, value);
 }
 
 Tensor Tensor::to(ScalarType dtype) const {
@@ -359,6 +360,19 @@ Tensor& Tensor::addmm_(const Tensor &mat1, const Tensor &mat2, const Scalar& bet
 
 Tensor Tensor::mm(const Tensor &other) const {
     return otter::cpu::mm(*this, other);
+}
+
+#define DEFINE_ITEM(T, name)      \
+    template <>                         \
+    T Tensor::item() const {            \
+        return item().to##name();       \
+    }
+
+OTTER_ALL_SCALAR_TYPES(DEFINE_ITEM)
+#undef DEFINE_ITEM
+
+Scalar Tensor::item() const {
+    return otter::item(*this);
 }
 
 

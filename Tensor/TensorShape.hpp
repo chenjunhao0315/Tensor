@@ -8,12 +8,11 @@
 #ifndef TensorShape_hpp
 #define TensorShape_hpp
 
-#include "Tensor.hpp"
-#include "WarpDimUtils.hpp"
-#include "Utils.hpp"
-#include "TensorResize.hpp"
+#include "ArrayRef.hpp"
 
 namespace otter {
+
+class Tensor;
 
 namespace native {
 

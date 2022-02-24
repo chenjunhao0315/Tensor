@@ -8,9 +8,9 @@
 #ifndef TensorProperties_hpp
 #define TensorProperties_hpp
 
-#include "Tensor.hpp"
-
 namespace otter {
+
+class Tensor;
 
 Tensor contiguous(const Tensor& self);
 

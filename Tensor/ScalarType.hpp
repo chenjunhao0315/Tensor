@@ -92,10 +92,6 @@ OTTER_ALL_SCALAR_TYPES(SPECIALIZE_CppTypeToScalarType)
 
 #undef SPECIALIZE_CppTypeToScalarType
 
-
-
-
-
 template <typename To, typename From>
 typename std::enable_if<std::is_same<From, bool>::value, bool>::type overflows(From f) {
     return false;

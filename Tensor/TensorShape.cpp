@@ -5,6 +5,10 @@
 //  Created by 陳均豪 on 2022/2/10.
 //
 
+#include "Tensor.hpp"
+#include "WarpDimUtils.hpp"
+#include "Utils.hpp"
+#include "TensorResize.hpp"
 #include "TensorUtils.hpp"
 #include "ExpandUtils.hpp"
 #include "TensorShape.hpp"

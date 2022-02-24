@@ -9,7 +9,7 @@
 #define TensorCat_hpp
 
 #include "DispatchStub.hpp"
-#include "Tensor.hpp"
+#include "ArrayRef.hpp"
 
 namespace otter {
 

@@ -9,9 +9,10 @@
 #define BatchNormalization_hpp
 
 #include "DispatchStub.hpp"
-#include "Tensor.hpp"
 
 namespace otter {
+
+class Tensor;
 
 using batchnorm_fn = void (*)(Tensor&, const Tensor&, const Tensor&, const Tensor&, const Tensor&, const Tensor&, const Tensor&, const Tensor&, bool, double);
 using batchnorm_alpha_beta_fn = void (*)(Tensor&, const Tensor&, const Tensor&, const Tensor&);

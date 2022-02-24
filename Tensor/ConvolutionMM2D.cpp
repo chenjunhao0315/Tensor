@@ -5,6 +5,7 @@
 //  Created by 陳均豪 on 2022/2/15.
 //
 
+#include "Tensor.hpp"
 #include "ConvolutionMM2D.hpp"
 #include "TensorUtils.hpp"
 #include "TensorFactory.hpp"
@@ -13,7 +14,6 @@
 #include "Parallel.hpp"
 #include "Unfold2D.hpp"
 #include "TensorBlas.hpp"
-#include "Formatting.hpp"
 
 namespace otter {
 

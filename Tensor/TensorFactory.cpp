@@ -47,19 +47,14 @@ Tensor empty_like(const Tensor& self, ScalarType dtype) {
 
 Tensor clone(const Tensor& src, MemoryFormat memory_format) {
     Tensor self;
-    self = empty_like(src, src.options(), memory_format);
-    
-    self.copy_(src);
-    
-    return self;
-}
-
-Tensor clone(const Tensor& src) {
-    Tensor self;
-    if (self.is_non_overlapping_and_dense()) {
-        self = empty_strided(src.sizes(), src.strides(), src.options());
+    if (memory_format == MemoryFormat::Preserve) {
+        if (self.is_non_overlapping_and_dense()) {
+            self = empty_strided(src.sizes(), src.strides(), src.options());
+        } else {
+            self = empty_like(src);
+        }
     } else {
-        self = empty_like(src);
+        self = empty_like(src, src.options(), memory_format);
     }
     
     self.copy_(src);
@@ -100,7 +95,13 @@ Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, ScalarTyp
     return otter::linspace_out(start, end, steps, result);
 }
 
+Tensor rand(IntArrayRef size, ScalarType dtype) {
+    return ones(size, dtype);
+}
 
+Tensor rand(IntArrayRef size, TensorOptions options) {
+    return ones(size, options);
+}
 
 
 }

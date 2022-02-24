@@ -17,7 +17,7 @@
 namespace otter {
 namespace vec {
 
-#if defined(CPU_CAPABILITY_AVX2)
+#if CPU_CAPABILITY_AVX2
 
 template <>
 class Vectorized<float> {

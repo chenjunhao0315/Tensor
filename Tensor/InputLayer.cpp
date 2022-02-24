@@ -28,7 +28,15 @@ int InputLayer::prase_param(LayerOption &option, ParamDict& pd) {
     pd.set((int)InputParam::Height, h);
     pd.set((int)InputParam::Width, w);
     
-    pd.set(30, tensor({n, c, h, w}));
+    return 0;
+}
+
+int InputLayer::compute_output_shape(ParamDict &pd) {
+    int n = pd.get((int)InputParam::Batch, 0);
+    int c = pd.get((int)InputParam::Channel, 0);
+    int h = pd.get((int)InputParam::Height, 0);
+    int w = pd.get((int)InputParam::Width, 0);
+    pd.set(OUTPUT_SHAPE_HINT, tensor({n, c, h, w}, ScalarType::Int));
     
     return 0;
 }

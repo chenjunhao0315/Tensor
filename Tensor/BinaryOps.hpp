@@ -9,10 +9,11 @@
 #define BinaryOps_hpp
 
 #include "DispatchStub.hpp"
-#include "Scalar.hpp"
-#include "TensorIterator.hpp"
 
 namespace otter {
+
+class Scalar;
+class TensorIterator;
 
 using structured_binary_fn = void(*)(TensorIterator&);
 using structured_binary_fn_alpha = void(*)(TensorIterator&, const Scalar& alpha);

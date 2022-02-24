@@ -8,8 +8,6 @@
 #ifndef TensorCopyKernel_hpp
 #define TensorCopyKernel_hpp
 
-class TensorIterator;
-
 namespace otter {
 
 void copy_kernel(TensorIterator& iter, bool non_blocking);

@@ -8,9 +8,9 @@
 #ifndef TensorPixel_hpp
 #define TensorPixel_hpp
 
-#include "Tensor.hpp"
-
 namespace otter {
+
+class Tensor;
 
 Tensor from_rgb(const unsigned char* rgb, int h, int w, int stride);
 

@@ -5,6 +5,8 @@
 //  Created by 陳均豪 on 2022/2/12.
 //
 
+#include "Scalar.hpp"
+#include "Utils.hpp"
 #include "Dispatch.hpp"
 #include "TensorBlas.hpp"
 #include "TensorBlasKernel.hpp"

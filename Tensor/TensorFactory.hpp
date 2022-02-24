@@ -8,9 +8,15 @@
 #ifndef TensorFactory_hpp
 #define TensorFactory_hpp
 
-#include "Tensor.hpp"
+#include "MemoryFormat.hpp"
+#include "ScalarType.hpp"
+#include "ArrayRef.hpp"
 
 namespace otter {
+
+class Scalar;
+class Tensor;
+class TensorOptions;
 
 Tensor empty(IntArrayRef size, ScalarType dtype);
 Tensor empty(IntArrayRef size, TensorOptions options);
@@ -23,8 +29,7 @@ Tensor empty_like(const Tensor& self, const TensorOptions& options);
 Tensor empty_like(const Tensor& self, const TensorOptions& options, MemoryFormat memory_format);
 Tensor empty_like(const Tensor& self, ScalarType dtype);
 
-Tensor clone(const Tensor& src);
-Tensor clone(const Tensor& src, MemoryFormat memory_format);
+Tensor clone(const Tensor& src, MemoryFormat memory_format = MemoryFormat::Preserve);
 
 Tensor full(IntArrayRef size, const Scalar& fill_value, ScalarType dtype);
 
@@ -34,6 +39,9 @@ Tensor ones(IntArrayRef size, ScalarType dtype);
 Tensor ones(IntArrayRef size, TensorOptions options);
 
 Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, ScalarType dtype);
+
+Tensor rand(IntArrayRef size, ScalarType dtype);
+Tensor rand(IntArrayRef size, TensorOptions options);
 
 
 }   // namespace otter

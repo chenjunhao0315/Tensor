@@ -15,6 +15,7 @@
 #include <vector>
 #include <thread>
 #include <queue>
+#include <condition_variable>
 
 namespace otter {
 

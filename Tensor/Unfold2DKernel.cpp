@@ -5,6 +5,7 @@
 //  Created by 陳均豪 on 2022/2/15.
 //
 
+#include "Utils.hpp"
 #include "Dispatch.hpp"
 #include "Unfold2D.hpp"
 #include "Unfold2DKernel.hpp"

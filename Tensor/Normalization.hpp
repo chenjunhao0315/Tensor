@@ -8,9 +8,11 @@
 #ifndef Normalization_hpp
 #define Normalization_hpp
 
-#include "Tensor.hpp"
+#include <tuple>
 
 namespace otter {
+
+class Tensor;
 
 std::tuple<Tensor, Tensor, Tensor> batchnorm_cpu(const Tensor& self, const Tensor& weight, const Tensor& bias, const Tensor& running_mean, const Tensor& running_var, bool train, double momentum, double eps);
 

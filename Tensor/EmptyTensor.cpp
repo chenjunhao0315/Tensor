@@ -82,7 +82,7 @@ Tensor empty_generic(
 }
 
 Tensor empty_strided_cpu(IntArrayRef size, IntArrayRef stride, TensorOptions option) {
-    ScalarType dtype = ScalarType::Float;
+    ScalarType dtype = typeMetaToScalarType(option.dtype());
     
     return empty_strided_cpu(size, stride, dtype);
 }

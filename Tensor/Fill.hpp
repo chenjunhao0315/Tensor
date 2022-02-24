@@ -8,11 +8,13 @@
 #ifndef Fill_hpp
 #define Fill_hpp
 
-#include "Scalar.hpp"
 #include "DispatchStub.hpp"
-#include "TensorIterator.hpp"
 
 namespace otter {
+
+class Tensor;
+class Scalar;
+class TensorIterator;
 
 DECLARE_DISPATCH(void(*)(TensorIterator&, const Scalar&), fill_stub);
 
@@ -20,6 +22,7 @@ namespace native {
 Tensor& fill_out(Tensor& self, const Scalar& value);
 
 Tensor& fill_(Tensor& self, const Scalar& value);
+Tensor& fill_(Tensor& self, const Tensor& value);
 
 Tensor& zero_cpu_(Tensor& self, int64_t numel);
 

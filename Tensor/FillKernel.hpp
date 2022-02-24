@@ -8,4 +8,13 @@
 #ifndef FillKernel_hpp
 #define FillKernel_hpp
 
+namespace otter {
+
+class Scalar;
+class TensorIterator;
+
+void fill_kernel(TensorIterator& iter, const Scalar& value_scalar);
+
+}
+
 #endif /* FillKernel_hpp */

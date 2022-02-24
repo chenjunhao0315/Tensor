@@ -8,9 +8,11 @@
 #ifndef ConvolutionMM2D_hpp
 #define ConvolutionMM2D_hpp
 
-#include "Tensor.hpp"
+#include "ArrayRef.hpp"
 
 namespace otter {
+
+class Tensor;
 
 Tensor& slow_conv2d_forward_out_cpu(
     const Tensor& self,

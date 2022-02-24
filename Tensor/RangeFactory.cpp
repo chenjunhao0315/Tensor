@@ -5,6 +5,8 @@
 //  Created by 陳均豪 on 2022/2/9.
 //
 
+#include "Tensor.hpp"
+#include "TensorIterator.hpp"
 #include "RangeFactory.hpp"
 
 namespace otter {

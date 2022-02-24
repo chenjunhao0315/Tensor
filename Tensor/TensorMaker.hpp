@@ -12,6 +12,8 @@
 
 namespace otter {
 
+class Tensor;
+
 namespace detail {
 
 inline void noopDelete(void*) {}

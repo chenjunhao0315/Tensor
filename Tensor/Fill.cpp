@@ -5,6 +5,8 @@
 //  Created by 陳均豪 on 2022/1/30.
 //
 
+#include "Tensor.hpp"
+#include "TensorIterator.hpp"
 #include "Accumulator.hpp"
 #include "Fill.hpp"
 
@@ -23,6 +25,11 @@ Tensor& fill_out(Tensor& self, const Scalar& value) {
 
 Tensor& fill_(Tensor& self, const Scalar& value) {
     return fill_out(self, value);
+}
+
+Tensor& fill_(Tensor& self, const Tensor& value) {
+    OTTER_CHECK(value.dim() == 1, "Only support for 1D tensor");
+    return fill_out(self, value.item());
 }
 
 Tensor& zero_cpu_(Tensor& self, int64_t numel) {

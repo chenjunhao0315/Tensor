@@ -8,9 +8,6 @@
 #ifndef BinaryOpsKernel_hpp
 #define BinaryOpsKernel_hpp
 
-#include "TensorIterator.hpp"
-#include "Scalar.hpp"
-
 namespace otter {
 
 void add_kernel(TensorIterator& iter, const Scalar& alpha_scalar);

@@ -154,7 +154,7 @@ void batchnorm_cpu_channel_last_impl(Tensor& output, const Tensor& input, const 
                 Vec beta_vec = Vec::loadu(beta_data + d, n_channel - d);
                 Vec data_vec = Vec::loadu(input_data + offset + d, n_channel - d);
                 Vec output_vec = data_vec * alpha_vec + beta_vec;
-                output_vec.store(output_data + offset + d, n_channel - d);
+                output_vec.store(output_data + offset + d, static_cast<int>(n_channel - d));
             }
         }
     });
@@ -273,7 +273,7 @@ void batchnorm_cpu_alpha_beta_channel_last_impl(Tensor& output, const Tensor& in
                 Vec beta_vec = Vec::loadu(beta_data + d, n_channel - d);
                 Vec data_vec = Vec::loadu(input_data + offset + d, n_channel - d);
                 Vec output_vec = data_vec * alpha_vec + beta_vec;
-                output_vec.store(output_data + offset + d, n_channel - d);
+                output_vec.store(output_data + offset + d, static_cast<int>(n_channel - d));
             }
         }
     });

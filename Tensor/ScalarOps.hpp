@@ -8,9 +8,11 @@
 #ifndef ScalarOps_hpp
 #define ScalarOps_hpp
 
-#include "Tensor.hpp"
+#include "Scalar.hpp"
 
 namespace otter {
+
+class Tensor;
 
 Tensor& scalar_fill(Tensor& self, const Scalar& value);
 Tensor scalar_tensor(const Scalar& s, ScalarType dtype);

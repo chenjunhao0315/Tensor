@@ -29,7 +29,12 @@ public:
     
     virtual int prase_param(LayerOption& option, ParamDict& pd);
     
+    virtual int compute_output_shape(ParamDict& pd);
+    
     virtual int load_param(const ParamDict& pd);
+    
+    virtual int init_model();
+    virtual int load_model();
     
     virtual std::string type() const { return "Undefined"; }
     
@@ -38,8 +43,8 @@ public:
     virtual int forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
     virtual int forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const;
     
-    virtual int forward_inplace(const Tensor& bottom_blob, const NetOption& opt) const;
-    virtual int forward_inplace(const std::vector<Tensor>& bottom_blobs, const NetOption& opt) const;
+    virtual int forward_inplace(Tensor& bottom_blob, const NetOption& opt) const;
+    virtual int forward_inplace(std::vector<Tensor>& bottom_blobs, const NetOption& opt) const;
     
 public:
     bool support_inplace;
@@ -52,6 +57,8 @@ public:
     std::vector<Tensor> top_shapes;
     std::string name;
 };
+
+#define OUTPUT_SHAPE_HINT 30
 
 #define opt_find(opt, type) \
     (opt.find(type) != opt.end())
@@ -68,6 +75,6 @@ public:
 #define opt_check_string(opt, type) \
     (opt.find(type) != opt.end())
 
-}
+}   // end namespace otter
 
 #endif /* Layer_hpp */

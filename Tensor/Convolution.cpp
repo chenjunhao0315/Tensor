@@ -5,9 +5,12 @@
 //  Created by 陳均豪 on 2022/2/15.
 //
 
+#include "Tensor.hpp"
 #include "TensorShape.hpp"
 #include "Convolution.hpp"
 #include "DepthwiseConvKernel.hpp"
+#include "DilatedConvolution.hpp"
+#include "Convolution1x1s1.hpp"
 
 namespace otter {
 
@@ -39,16 +42,16 @@ static void check_shape_forward(const Tensor& input, const IntArrayRef& weight_s
     OTTER_CHECK(!params.is_stride_nonpos(), "non-positive stride is not supported");
     
     OTTER_CHECK(weight_dim == k,
-    "Expected ", weight_dim, "-dimensional input for ", weight_dim,
-    "-dimensional weight ", weight_sizes, ", but got ", k, "-dimensional input of size ",
-    input.sizes(), " instead");
+                "Expected ", weight_dim, "-dimensional input for ", weight_dim,
+                "-dimensional weight ", weight_sizes, ", but got ", k, "-dimensional input of size ",
+                input.sizes(), " instead");
     OTTER_CHECK(weight_sizes[0] >= groups,
-    "Given groups=", groups, ", expected weight to be at least ", groups,
-    " at dimension 0, but got weight of size ", weight_sizes, " instead");
+                "Given groups=", groups, ", expected weight to be at least ", groups,
+                " at dimension 0, but got weight of size ", weight_sizes, " instead");
     OTTER_CHECK(weight_sizes[0] % groups == 0,
-    "Given groups=", groups, ", expected weight to be divisible by ",
-    groups, " at dimension 0, but got weight of size [", weight_sizes,
-    "] instead");
+                "Given groups=", groups, ", expected weight to be divisible by ",
+                groups, " at dimension 0, but got weight of size [", weight_sizes,
+                "] instead");
     
     if (!transposed) {
         std::vector<int64_t> input_shape;
@@ -108,6 +111,11 @@ ConvBackend select_proper_conv_backend(
                 } else {
                     if (false) {    // NNpack
                         
+                    } else if (params.use_cpu_1x1s1_optimization(input, weight)) {
+                        if (weight.size(0) >= 64 && weight.size(1) >= 64)
+                            return ConvBackend::Slow_gemm_1x1s1;
+                        else
+                            return ConvBackend::Slow1x1s1;
                     } else {
                         return ConvBackend::Slow2d;
                     }
@@ -199,6 +207,9 @@ Tensor convolution(
             output = convolution_depthwise3x3_winograd_stub(Device::CPU, input, weight, bias, params.stride, params.padding, params.groups);
             break;
         case ConvBackend::Slow2d:
+        case ConvBackend::SlowDilated2d:
+        case ConvBackend::Slow1x1s1:
+        case ConvBackend::Slow_gemm_1x1s1:
             if (params.groups == 1) {
                 output = otter::convolution_nogroup_backend(input.contiguous(), weight, bias, backend, params);
             } else {
@@ -229,6 +240,12 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
     switch (backend) {
         case ConvBackend::Slow2d:
             return otter::slow_conv2d(self, weight, bias, kernel_size, params.stride, params.padding);
+        case ConvBackend::SlowDilated2d:
+            return otter::slow_conv_dilated2d(self, weight, bias, kernel_size, params.stride, params.padding, params.dilation);
+        case ConvBackend::Slow1x1s1:
+            return Tensor();
+        case ConvBackend::Slow_gemm_1x1s1:
+            return otter::conv_gemm_1x1s1(self, weight, bias, kernel_size, params.stride, params.padding);
         default:
             assert(false);  // Unsupported nogroup conv backend
     }

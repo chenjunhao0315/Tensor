@@ -9,9 +9,11 @@
 #define ConvolutionUtils_hpp
 
 #include <vector>
-#include "Tensor.hpp"
+#include "ArrayRef.hpp"
 
 namespace otter {
+
+class Tensor;
 
 struct ConvParams {
     std::vector<int64_t> stride;
@@ -30,6 +32,7 @@ struct ConvParams {
     bool is_output_padding_neg() const;
     bool is_stride_nonpos() const;
     bool use_cpu_depthwise3x3_winograd(const Tensor& input, const Tensor& weight) const;
+    bool use_cpu_1x1s1_optimization(const Tensor& input, const Tensor& weight) const;
 };
 
 enum class ConvBackend {
@@ -37,6 +40,8 @@ enum class ConvBackend {
     SlowDilated2d,
     SlowDilated3d,
     Slow2d,
+    Slow1x1s1,
+    Slow_gemm_1x1s1,
     Slow3d,
     Overrideable
 };
@@ -49,6 +54,25 @@ inline std::vector<int64_t> expand_param_if_needed(IntArrayRef list_param, const
     } else {
         return list_param.vec();
     }
+}
+
+inline std::vector<int64_t> calculate_conv_output_size(
+    const IntArrayRef input_size,
+    const IntArrayRef weight_size,
+    const IntArrayRef stride,
+    const IntArrayRef padding) {
+    
+    const auto calc_output_dimension = [](
+        const int64_t input, const int64_t kernel, const int64_t stride, const int64_t padding) {
+            return 1 + (input - kernel + 2 * padding) / stride;
+        };
+
+    return std::vector<int64_t> {
+        input_size[0],
+        weight_size[0],
+        calc_output_dimension(input_size[2], weight_size[2], stride[0], padding[0]),
+        calc_output_dimension(input_size[3], weight_size[3], stride[1], padding[1]),
+    };
 }
 
 }

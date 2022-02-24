@@ -8,7 +8,7 @@
 #ifndef RefPtr_hpp
 #define RefPtr_hpp
 
-#include "utility"
+#include <utility>
 
 namespace otter {
 

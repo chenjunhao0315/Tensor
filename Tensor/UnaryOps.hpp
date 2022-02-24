@@ -9,10 +9,11 @@
 #define UnaryOps_hpp
 
 #include "DispatchStub.hpp"
-#include "Scalar.hpp"
-#include "TensorIterator.hpp"
 
 namespace otter {
+
+class TensorIterator;
+class Scalar;
 
 using unary_fn = void(*)(TensorIterator&);
 using unary_fn_with_scalar = void(*)(TensorIterator&, const Scalar& a);

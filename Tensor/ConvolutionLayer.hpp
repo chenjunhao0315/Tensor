@@ -18,12 +18,20 @@ public:
     
     virtual int prase_param(LayerOption& option, ParamDict& pd);
     
+    virtual int compute_output_shape(ParamDict& pd);
+    
     virtual int load_param(const ParamDict& pd);
+    
+    virtual int init_model();
     
     virtual int forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
     
     virtual std::string type() const { return "Convoltuion"; }
 public:
+    int in_channels;
+    int out_channels;
+    int kernel_height;
+    int kernel_width;
     int stride_height;
     int stride_width;
     int padding_height;
@@ -35,11 +43,19 @@ public:
     
     int groups;
     
+    int bias_term;
+    
+    int weight_data_size;
+    
     Tensor weight_data;
     Tensor bias_data;
 };
 
 enum class ConvParam : int {
+    In_channels,
+    Out_channels,
+    Kernel_height,
+    Kernel_width,
     Stride_height,
     Stride_width,
     Padding_height,
@@ -48,7 +64,9 @@ enum class ConvParam : int {
     Dilation_width,
     Output_padding_height,
     Output_padding_width,
-    Group
+    Group,
+    Bias_term,
+    Weight_data_size
 };
 
 }

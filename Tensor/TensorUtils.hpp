@@ -8,10 +8,11 @@
 #ifndef TensorUtils_hpp
 #define TensorUtils_hpp
 
-#include "Tensor.hpp"
 #include "Utils.hpp"
 
 namespace otter {
+
+class Tensor;
 
 void check_dim_size(const Tensor& tensor, int64_t dim, int64_t dim_size, int64_t size);
 

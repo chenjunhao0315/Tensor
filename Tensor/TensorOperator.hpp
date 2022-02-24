@@ -9,6 +9,7 @@
 #define TensorOperator_hpp
 
 #include "UnaryOps.hpp"
+#include "Tensor.hpp"
 #include "TensorFactory.hpp"
 
 namespace otter {

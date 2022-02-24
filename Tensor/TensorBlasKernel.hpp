@@ -8,8 +8,6 @@
 #ifndef TensorBlasKernel_hpp
 #define TensorBlasKernel_hpp
 
-#include <functional>
-
 namespace otter {
 
 template <typename scalar_t>

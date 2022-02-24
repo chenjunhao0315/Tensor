@@ -9,10 +9,12 @@
 #define RangeFactory_hpp
 
 #include "DispatchStub.hpp"
-#include "TensorIterator.hpp"
-#include "Scalar.hpp"
 
 namespace otter {
+
+class Tensor;
+class Scalar;
+class TensorIterator;
 
 Tensor& linspace_out(const Scalar& start, const Scalar& end, int64_t steps, Tensor& result);
 

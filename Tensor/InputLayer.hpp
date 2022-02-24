@@ -18,7 +18,11 @@ public:
     
     virtual int prase_param(LayerOption& option, ParamDict& pd);
     
+    virtual int compute_output_shape(ParamDict& pd);
+    
     virtual int load_param(const ParamDict& pd);
+    
+    virtual int init_model() { return 0; }
     
     virtual std::string type() const { return "Input"; }
     

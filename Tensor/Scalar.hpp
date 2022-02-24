@@ -8,6 +8,8 @@
 #ifndef Scalar_hpp
 #define Scalar_hpp
 
+#include <stdexcept>
+
 #include "DType.hpp"
 #include "ScalarType.hpp"
 

@@ -19,7 +19,8 @@ Net::Net() {
 }
 
 Net::~Net() {
-    
+    for (auto layer : layers)
+        delete layer;
 }
 
 void Net::init_blobs_and_layers(size_t blob_count, size_t layer_count) {
@@ -36,6 +37,10 @@ void Net::addLayer(LayerOption option) {
         option["name"] = std::to_string(layer_options.size());
     }
     
+    if (!opt_check_string(option, "output")) {
+        option["output"] = option["name"];
+    }
+    
     if (!opt_check_string(option, "input_id")) {
         option["input_id"] = "0";
     }
@@ -47,6 +52,8 @@ void Net::addLayer(LayerOption option) {
         LayerOption auto_option;
         auto_option["type"] = "BatchNormalization";
         auto_option["name"] = "bn_" + option["name"];
+        auto_option["input"] = option["output"];
+        auto_option["output"] = auto_option["name"];
         blob_count_++;
         layer_options.push_back(auto_option);
     }
@@ -79,6 +86,14 @@ void Net::compile() {
     for (const auto i : otter::irange(layer_count)) {
         LayerOption& option = layer_options[i];
         
+        // auto graph connection
+        if (i > 0) {
+            if (!opt_check_string(option, "input")) {
+                option["input"] = layer_options[i - 1]["output"];
+            }
+        }
+        //
+        
         std::string type = option["type"];
         std::string name = option["name"];
         int bottom_count = (type == "Input") ? 0 : (int)std::count(option["input"].begin(), option["input"].end(), ',') + 1;
@@ -87,7 +102,7 @@ void Net::compile() {
         Layer* layer = LayerRegistry::CreateLayer(type);
         layer->name = name;
         
-        printf("Create layer %d Type: %s Name: %s\n", (int)i, layer->type().c_str(), name.c_str());
+//        printf("Create layer %d Type: %s Name: %s\n", (int)i, layer->type().c_str(), name.c_str());
         
         layer->bottoms.resize(bottom_count);
         std::stringstream bottom_list(option["input"]);
@@ -102,7 +117,6 @@ void Net::compile() {
                 bottom_blob_index = blob_index;
                 blob.name = std::string(bottom_name);
                 
-                printf("New Blob index: %d name: %s\n", blob_index, bottom_name.c_str());
                 blob_index++;
             }
             
@@ -120,7 +134,6 @@ void Net::compile() {
             
             Blob& blob = blobs[blob_index];
             blob.name = blob_name;
-            printf("New Blob name: %s\n", blob_name.c_str());
 
             blob.producer = (int)i;
             layer->tops[j] = blob_index;
@@ -134,15 +147,6 @@ void Net::compile() {
             continue;
         }
         
-        Tensor shape_hints = pd.get(30, Tensor());
-        if (shape_hints.defined()) {
-            for (const auto j : otter::irange(top_count)) {
-                Blob& blob = blobs[layer->tops[j]];
-                
-                blob.shape = shape_hints.clone();
-            }
-        }
-        
         layer->bottom_shapes.resize(bottom_count);
         for (int j = 0; j < bottom_count; j++) {
             layer->bottom_shapes[j] = blobs[layer->bottoms[j]].shape;
@@ -153,23 +157,34 @@ void Net::compile() {
             layer->top_shapes[j] = blobs[layer->tops[j]].shape;
         }
         
+        int output_shape_state = layer->compute_output_shape(pd);
+        if (output_shape_state != 0) {
+            fprintf(stderr, "Layer %s output_shape use default or undefined\n", layer->name.c_str());
+        }
+        Tensor shape_hints = pd.get(OUTPUT_SHAPE_HINT, Tensor());
+        if (shape_hints.defined()) {
+            for (const auto j : otter::irange(top_count)) {
+                Blob& blob = blobs[layer->tops[j]];
+                
+                blob.shape = shape_hints.clone();
+            }
+        }
+        
         int load_state = layer->load_param(pd);
         if (load_state != 0) {
             fprintf(stderr, "Layer load %lu %s failed or undefined\n", i, layer->name.c_str());
             continue;
         }
         
+        bool init = true;
+        if (init)
+            layer->init_model();
+        
         layers[i] = layer;
     }
     
     this->update_input_output_indexes();
     this->update_input_output_names();
-    
-    // Debug
-    for (int i = 0; i < blobs.size(); ++i) {
-        printf("Blob %d name: %s producer: %d consumer: %d shape: ", i, blobs[i].name.c_str(), blobs[i].producer, blobs[i].consumer);
-        std::cout << blobs[i].shape << std::endl;
-    }
 }
 
 int Net::find_blob_index_by_name(std::string name) const {
@@ -216,6 +231,28 @@ void Net::update_input_output_names()
         int blob_index = output_blob_indexes[i];
         output_blob_names.push_back(blobs[blob_index].name.c_str());
     }
+}
+
+void Net::summary() {
+    printf("=============================================================\n");
+    printf("Layer count: %d Blob count: %d\n", (int)layers.size(), blob_count_);
+    printf("-------------------------------------------------------------\n");
+    printf("Layer(type)      Name          Input(blob)   Output(blob)\n");
+    printf("=============================================================\n");
+    for (const auto i : otter::irange(layers.size())) {
+        fprintf(stderr, "%-17s%-13s %-13s %-13s", layers[i]->type().c_str(), layers[i]->name.c_str(), layer_options[i]["input"].c_str(), layer_options[i]["output"].c_str());
+        fprintf(stderr, "\n");
+    }
+    printf("=============================================================\n");
+    for (const auto i : otter::irange(blobs.size())) {
+        auto shape_a = blobs[i].shape.accessor<int, 1>();
+        int n = shape_a[0];
+        int c = shape_a[1];
+        int h = shape_a[2];
+        int w = shape_a[3];
+        printf("Blob %-2d name: %-10s producer: %-2d consumer: %-2d shape: (%d, %d, %d, %d)\n", (int)i, blobs[i].name.c_str(), blobs[i].producer, blobs[i].consumer, n, c, h, w);
+    }
+    printf("=============================================================\n");
 }
 
 int Net::forward_layer(int layer_index, std::vector<Tensor>& blob_tensors, const NetOption& opt) const {

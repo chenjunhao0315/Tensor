@@ -69,13 +69,17 @@ public:
         return copy_(rhs);
     }
     
+    template <typename T>
+    T item() const;
+    
+    Scalar item() const;
+    
     Tensor operator[](int64_t index) const;
     Tensor select(int64_t dim, int64_t index) const;
     
     Tensor& copy_(const Tensor& src, bool non_blocking = false) const;
     
-    Tensor clone() const;
-    Tensor clone(MemoryFormat memory_format) const;
+    Tensor clone(MemoryFormat memory_format = MemoryFormat::Preserve) const;
     
     Tensor contiguous(MemoryFormat memory_format = MemoryFormat::Contiguous) const;
     
@@ -167,6 +171,7 @@ public:
     
     Tensor& zero_();
     Tensor& fill_(const Scalar& value);
+    Tensor& fill_(const Tensor& value);
     
     Tensor to(ScalarType dtype) const;
     
