@@ -134,6 +134,10 @@ Tensor Tensor::narrow(int64_t dim, int64_t start, int64_t length) const {
     return otter::native::narrow(*this, dim, start, length);
 }
 
+Tensor Tensor::unfold(int64_t dim, int64_t size, int64_t step) const {
+    return otter::native::unfold(*this, dim, size, step);
+}
+
 Tensor Tensor::detach() const {
     return otter::native::detach(*this);
 }

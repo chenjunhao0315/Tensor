@@ -23,7 +23,7 @@ Tensor& slow_conv2d_forward_out_cpu(
     IntArrayRef padding,
     Tensor& output);
 
-Tensor slow_conv2d_out(
+Tensor& slow_conv2d_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,

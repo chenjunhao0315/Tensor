@@ -6,13 +6,8 @@
 //
 
 #include "OTensor.hpp"
-#include "TensorShape.hpp"
-#include "Convolution.hpp"
 #include "Clock.hpp"
-#include "TensorPixel.hpp"
-#include "Parallel.hpp"
 #include "Net.hpp"
-#include "Normalization.hpp"
 
 using namespace std;
 
@@ -35,7 +30,7 @@ int main(int argc, const char * argv[]) {
     net.addLayer(otter::LayerOption{{"type", "Convolution"}, {"name", "conv_2"}, {"out_channels", "16"}, {"kernel", "1"}, {"padding", "0"}, {"stride", "1"}, {"batchnorm", "true"}});
     net.addLayer(otter::LayerOption{{"type", "Convolution"}, {"name", "conv_3"}, {"out_channels", "16"}, {"kernel", "3"}, {"padding", "1"}, {"stride", "1"}, {"groups", "16"}, {"batchnorm", "true"}});
     net.compile();
-    net.summary();
+//    net.summary();
 
     otter::Clock c;
     auto extractor = net.create_extractor();

@@ -51,6 +51,8 @@ Tensor narrow(const Tensor& self, int64_t dim, int64_t start, int64_t length);
 Tensor& cat_out(TensorList tensors, int64_t dim, Tensor& out);
 Tensor cat(TensorList tensors, int64_t dim);
 
+Tensor unfold(const Tensor& self, int64_t dim, int64_t size, int64_t step);
+
 }   // namespace native
 
 }   // namespace otter

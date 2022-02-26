@@ -10,7 +10,6 @@
 #include "Convolution.hpp"
 #include "DepthwiseConvKernel.hpp"
 #include "DilatedConvolution.hpp"
-#include "Convolution1x1s1.hpp"
 
 namespace otter {
 
@@ -111,11 +110,8 @@ ConvBackend select_proper_conv_backend(
                 } else {
                     if (false) {    // NNpack
                         
-                    } else if (params.use_cpu_1x1s1_optimization(input, weight)) {
-                        if (weight.size(0) >= 64 && weight.size(1) >= 64)
-                            return ConvBackend::Slow_gemm_1x1s1;
-                        else
-                            return ConvBackend::Slow1x1s1;
+                    } else if (params.use_cpu_neon()) {
+                        return ConvBackend::Slow2dNeon;
                     } else {
                         return ConvBackend::Slow2d;
                     }
@@ -207,9 +203,8 @@ Tensor convolution(
             output = convolution_depthwise3x3_winograd_stub(Device::CPU, input, weight, bias, params.stride, params.padding, params.groups);
             break;
         case ConvBackend::Slow2d:
+        case ConvBackend::Slow2dNeon:
         case ConvBackend::SlowDilated2d:
-        case ConvBackend::Slow1x1s1:
-        case ConvBackend::Slow_gemm_1x1s1:
             if (params.groups == 1) {
                 output = otter::convolution_nogroup_backend(input.contiguous(), weight, bias, backend, params);
             } else {
@@ -242,10 +237,8 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
             return otter::slow_conv2d(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::SlowDilated2d:
             return otter::slow_conv_dilated2d(self, weight, bias, kernel_size, params.stride, params.padding, params.dilation);
-        case ConvBackend::Slow1x1s1:
-            return Tensor();
-        case ConvBackend::Slow_gemm_1x1s1:
-            return otter::conv_gemm_1x1s1(self, weight, bias, kernel_size, params.stride, params.padding);
+        case ConvBackend::Slow2dNeon:
+            return otter::slow_conv2d(self, weight, bias, kernel_size, params.stride, params.padding); // Temp
         default:
             assert(false);  // Unsupported nogroup conv backend
     }

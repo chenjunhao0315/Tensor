@@ -115,6 +115,8 @@ public:
     
     Tensor narrow(int64_t dim, int64_t start, int64_t length) const;
     
+    Tensor unfold(int64_t dim, int64_t size, int64_t step) const;
+    
     Tensor detach() const;
     
     Tensor operator~() const {

@@ -81,7 +81,8 @@ Tensor ones(IntArrayRef size, TensorOptions options) {
 }
 
 Tensor zeros(IntArrayRef size, ScalarType dtype) {
-    return empty_cpu(size, dtype);
+    auto result = empty_cpu(size, dtype);
+    return result.zero_();
 }
 
 Tensor zeros(IntArrayRef size, TensorOptions options) {

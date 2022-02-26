@@ -283,7 +283,7 @@ Tensor slow_conv2d(
     return out;
 }
 
-Tensor slow_conv2d_out(
+Tensor& slow_conv2d_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
