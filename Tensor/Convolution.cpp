@@ -102,15 +102,13 @@ ConvBackend select_proper_conv_backend(
         return ConvBackend::Winograd3x3Depthwise;
     } else if (input.device() == Device::CPU) { // or input.is_cuda()
         if (params.transposed) {
-            
+            // unsupported
         } else {
             if (input.dim() == 4) {
                 if (params.is_dilated()) {
                     return ConvBackend::SlowDilated2d;
                 } else {
-                    if (false) {    // NNpack
-                        
-                    } else if (params.use_cpu_neon()) {
+                    if (params.use_cpu_neon()) {
                         return ConvBackend::Slow2dNeon;
                     } else {
                         return ConvBackend::Slow2d;

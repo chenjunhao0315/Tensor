@@ -26,7 +26,7 @@ public:
     
     virtual std::string type() const { return "BatchNorm"; }
 public:
-    float eps;
+    float eps; 
     
     Tensor alpha;
     Tensor beta;

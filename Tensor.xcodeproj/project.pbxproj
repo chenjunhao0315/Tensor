@@ -25,6 +25,10 @@
 		7620AF8327B583570081C210 /* libomp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7620AF8227B583570081C210 /* libomp.dylib */; };
 		7620AF8627B5899A0081C210 /* Formatting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF8427B589990081C210 /* Formatting.cpp */; };
 		7620AF8927B593C00081C210 /* TensorUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF8727B593C00081C210 /* TensorUtils.cpp */; };
+		7628DEDE27CDF5E600B136FA /* Activation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628DEDC27CDF5E600B136FA /* Activation.cpp */; };
+		7628DEE127CDF85100B136FA /* ActivationKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628DEDF27CDF85100B136FA /* ActivationKernel.cpp */; };
+		7628DEE427CE096600B136FA /* LReluLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628DEE227CE096600B136FA /* LReluLayer.cpp */; };
+		7628DEE727CE155400B136FA /* ShortCutLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628DEE527CE155400B136FA /* ShortCutLayer.cpp */; };
 		762E3B2D27BACA050075F983 /* TensorAccessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B2B27BACA050075F983 /* TensorAccessor.cpp */; };
 		762E3B3027BB5D260075F983 /* ConvolutionMM2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B2E27BB5D260075F983 /* ConvolutionMM2D.cpp */; };
 		762E3B3327BB79950075F983 /* Unfold2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B3127BB79950075F983 /* Unfold2D.cpp */; };
@@ -158,6 +162,14 @@
 		7620AF8527B589990081C210 /* Formatting.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Formatting.hpp; sourceTree = "<group>"; };
 		7620AF8727B593C00081C210 /* TensorUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorUtils.cpp; sourceTree = "<group>"; };
 		7620AF8827B593C00081C210 /* TensorUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorUtils.hpp; sourceTree = "<group>"; };
+		7628DEDC27CDF5E600B136FA /* Activation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Activation.cpp; sourceTree = "<group>"; };
+		7628DEDD27CDF5E600B136FA /* Activation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Activation.hpp; sourceTree = "<group>"; };
+		7628DEDF27CDF85100B136FA /* ActivationKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ActivationKernel.cpp; sourceTree = "<group>"; };
+		7628DEE027CDF85100B136FA /* ActivationKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ActivationKernel.hpp; sourceTree = "<group>"; };
+		7628DEE227CE096600B136FA /* LReluLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LReluLayer.cpp; sourceTree = "<group>"; };
+		7628DEE327CE096600B136FA /* LReluLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LReluLayer.hpp; sourceTree = "<group>"; };
+		7628DEE527CE155400B136FA /* ShortCutLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShortCutLayer.cpp; sourceTree = "<group>"; };
+		7628DEE627CE155400B136FA /* ShortCutLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShortCutLayer.hpp; sourceTree = "<group>"; };
 		762E3B2B27BACA050075F983 /* TensorAccessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorAccessor.cpp; sourceTree = "<group>"; };
 		762E3B2C27BACA050075F983 /* TensorAccessor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorAccessor.hpp; sourceTree = "<group>"; };
 		762E3B2E27BB5D260075F983 /* ConvolutionMM2D.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionMM2D.cpp; sourceTree = "<group>"; };
@@ -423,6 +435,10 @@
 				76BA778B27C66DC000AA896B /* DilatedConvolution.hpp */,
 				76BA778D27C674DA00AA896B /* DilatedConvolutionUtils.cpp */,
 				76BA778E27C674DA00AA896B /* DilatedConvolutionUtils.hpp */,
+				76BA779327C6CCB700AA896B /* im2col.cpp */,
+				76BA779427C6CCB700AA896B /* im2col.hpp */,
+				76BA779627C6CD2300AA896B /* vol2col.cpp */,
+				76BA779727C6CD2300AA896B /* vol2col.hpp */,
 			);
 			name = Convolution;
 			sourceTree = "<group>";
@@ -434,6 +450,8 @@
 				76F336C327A5B9B800E3AEF1 /* Dispatch.hpp */,
 				76F336C527A5CEEC00E3AEF1 /* DispatchStub.cpp */,
 				76F336C627A5CEEC00E3AEF1 /* DispatchStub.hpp */,
+				76F336D427A7AD1600E3AEF1 /* TensorFunction.cpp */,
+				76F336D527A7AD1600E3AEF1 /* TensorFunction.hpp */,
 				7620AF7C27B550200081C210 /* TensorShape.cpp */,
 				7620AF7D27B550200081C210 /* TensorShape.hpp */,
 				76F336EA27AEEC9400E3AEF1 /* UnaryOps.cpp */,
@@ -474,6 +492,10 @@
 				76E6C54D27A53AAA0036A26F /* TensorResize.hpp */,
 				76F336F027AF133300E3AEF1 /* TensorConversion.cpp */,
 				76F336F127AF133300E3AEF1 /* TensorConversion.hpp */,
+				7628DEDC27CDF5E600B136FA /* Activation.cpp */,
+				7628DEDD27CDF5E600B136FA /* Activation.hpp */,
+				7628DEDF27CDF85100B136FA /* ActivationKernel.cpp */,
+				7628DEE027CDF85100B136FA /* ActivationKernel.hpp */,
 			);
 			name = Ops;
 			sourceTree = "<group>";
@@ -510,6 +532,10 @@
 				7687217D27C2A850006640CF /* ConvolutionLayer.hpp */,
 				76E5EC7927C4A6D800A2B38A /* BatchNormalizationLayer.cpp */,
 				76E5EC7A27C4A6D800A2B38A /* BatchNormalizationLayer.hpp */,
+				7628DEE227CE096600B136FA /* LReluLayer.cpp */,
+				7628DEE327CE096600B136FA /* LReluLayer.hpp */,
+				7628DEE527CE155400B136FA /* ShortCutLayer.cpp */,
+				7628DEE627CE155400B136FA /* ShortCutLayer.hpp */,
 			);
 			name = Layer;
 			sourceTree = "<group>";
@@ -604,8 +630,6 @@
 				76E6C55927A57BE00036A26F /* C++17.hpp */,
 				76F336C827A5D02700E3AEF1 /* Device.cpp */,
 				76F336C927A5D02700E3AEF1 /* Device.hpp */,
-				76F336D427A7AD1600E3AEF1 /* TensorFunction.cpp */,
-				76F336D527A7AD1600E3AEF1 /* TensorFunction.hpp */,
 				76F336DA27A817D000E3AEF1 /* in_place.hpp */,
 				76F336E427AEA7E300E3AEF1 /* TensorOperator.cpp */,
 				76F336E527AEA7E300E3AEF1 /* TensorOperator.hpp */,
@@ -644,10 +668,6 @@
 				7687216027C0E31C006640CF /* Module.hpp */,
 				76BA779027C6CA8F00AA896B /* TensorScalar.cpp */,
 				76BA779127C6CA8F00AA896B /* TensorScalar.hpp */,
-				76BA779327C6CCB700AA896B /* im2col.cpp */,
-				76BA779427C6CCB700AA896B /* im2col.hpp */,
-				76BA779627C6CD2300AA896B /* vol2col.cpp */,
-				76BA779727C6CD2300AA896B /* vol2col.hpp */,
 			);
 			path = Tensor;
 			sourceTree = "<group>";
@@ -766,8 +786,10 @@
 				76E6C53E27A511B50036A26F /* ParallelOpenMP.cpp in Sources */,
 				76F336E927AED61200E3AEF1 /* ScalarOps.cpp in Sources */,
 				7687216427C0E379006640CF /* Layer.cpp in Sources */,
+				7628DEE127CDF85100B136FA /* ActivationKernel.cpp in Sources */,
 				76BA778C27C66DC000AA896B /* DilatedConvolution.cpp in Sources */,
 				76E6C54827A513A10036A26F /* TensorIterator.cpp in Sources */,
+				7628DEE427CE096600B136FA /* LReluLayer.cpp in Sources */,
 				7687217227C1475B006640CF /* LayerDeclaration.cpp in Sources */,
 				76E6C55727A57AAD0036A26F /* Function_Trait.cpp in Sources */,
 				762E3B3927BBBA8C0075F983 /* Convolution.cpp in Sources */,
@@ -785,6 +807,7 @@
 				7687216B27C12334006640CF /* Net.cpp in Sources */,
 				76F336EC27AEEC9500E3AEF1 /* UnaryOps.cpp in Sources */,
 				76BA779527C6CCB700AA896B /* im2col.cpp in Sources */,
+				7628DEDE27CDF5E600B136FA /* Activation.cpp in Sources */,
 				76F336C727A5CEEC00E3AEF1 /* DispatchStub.cpp in Sources */,
 				7620AF6E27B4060A0081C210 /* RangeFactory.cpp in Sources */,
 				7687218827C35B9F006640CF /* BatchNormalization.cpp in Sources */,
@@ -796,6 +819,7 @@
 				76F0064627B6BF60009D67F5 /* TensorLinearAlgebra.cpp in Sources */,
 				762E3B4527BCBAA10075F983 /* VecBase.cpp in Sources */,
 				762E3B4B27BCFD750075F983 /* TensorIteratorDynamicCasting.cpp in Sources */,
+				7628DEE727CE155400B136FA /* ShortCutLayer.cpp in Sources */,
 				762E3B5627BEA4A20075F983 /* MemoryOverlap.cpp in Sources */,
 				76F336C427A5B9B800E3AEF1 /* Dispatch.cpp in Sources */,
 				76E6C53A27A510F30036A26F /* Parallel.cpp in Sources */,

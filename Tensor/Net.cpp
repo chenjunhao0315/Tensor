@@ -66,6 +66,8 @@ void Net::addLayer(LayerOption option) {
         std::transform(abbreviate.begin(), abbreviate.end(), abbreviate.begin(),
             [](unsigned char c){ return std::tolower(c); });
         auto_option["name"] = abbreviate + "_" + option["name"];
+        auto_option["input"] = layer_options[layer_options.size() - 1]["output"];
+        auto_option["output"] = auto_option["name"];
         blob_count_++;
         layer_options.push_back(auto_option);
     }

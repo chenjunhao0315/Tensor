@@ -240,6 +240,9 @@ public:
     void build_unary_float_op(const TensorBase& out, const TensorBase& a);
     void build_borrowing_unary_float_op(const TensorBase& out, const TensorBase& a);
     
+    void build_unary_op(const TensorBase& out, const TensorBase& a);
+    void build_borrowing_unary_op(const TensorBase& out, const TensorBase& a);
+    
     static TensorIterator nullary_op(TensorBase& out);
     static TensorIterator borrowing_nullary_op(const TensorBase& out);
     static TensorIterator borrowing_nullary_op(TensorBase&& out) = delete;

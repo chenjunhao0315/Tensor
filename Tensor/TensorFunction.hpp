@@ -27,6 +27,11 @@ struct structured_##name : public TensorIterator { \
     void meta(const Tensor& self, const Tensor& mat1, const Tensor& mat2, const Scalar& beta, const Scalar& alpha); \
 }
 
+#define DECLARE_META_STRUCTURE_SIN_SIN(name) \
+struct structured_##name : public TensorIterator { \
+    void meta(const Tensor& self, const Scalar& alpha); \
+}
+
 #define DECLARE_META_STRUCTURE_SELF_OVERLOAD(name, overload)    \
 struct structured_##name##_##overload : public TensorIterator {   \
     void meta(const Tensor& self);   \
@@ -71,6 +76,8 @@ DECLARE_META_STRUCTURE_SELF_OVERLOAD(sqrt, Tensor);
 
 DECLARE_META_STRUCTURE_TRI_DUAL(addmm);
 DECLARE_META_STRUCTURE_DUAL_NONE(mm);
+
+DECLARE_META_STRUCTURE_SIN_SIN(leaky_relu);
 
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \
@@ -180,6 +187,10 @@ struct structured_mm_out_cpu : structured_mm {
     void impl(const Tensor & self, const Tensor & other, const Tensor & out);
 };
 
+struct structured_leaky_relu_out : structured_leaky_relu {
+    void impl(const Tensor & self, const Scalar & alpha, const Tensor & out);
+};
+
 namespace cpu {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha);
@@ -253,6 +264,10 @@ Tensor & addmm_(Tensor & self, const Tensor & mat1, const Tensor & mat2, const S
 Tensor mm(const Tensor & self, const Tensor & other);
 Tensor & mm_out(Tensor & out, const Tensor & self, const Tensor & other);
 Tensor & mm_(Tensor & self, const Tensor & other);
+
+Tensor leaky_relu(const Tensor & self, const Scalar& negative_slope);
+Tensor & leaky_relu_out(Tensor & out, Tensor & self, const Scalar & negative_slope);
+Tensor & leaky_relu_(Tensor & self, const Scalar & negative_slope);
 
 }
 

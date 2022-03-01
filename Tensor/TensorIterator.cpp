@@ -589,6 +589,25 @@ void TensorIterator::build_borrowing_unary_float_op(const TensorBase &out, const
     this->build(UNARY_FLOAT_OP_CONFIG().add_output(out).add_input(a));
 }
 
+#define UNARY_OP_CONFIG()                                \
+  TensorIteratorConfig()                                 \
+    .set_check_mem_overlap(true)                         \
+    .cast_common_dtype_to_outputs(false)                 \
+    .enforce_safe_casting_to_output(false)               \
+    .check_all_same_dtype(true)
+
+void TensorIterator::build_unary_op(const TensorBase& out, const TensorBase& a) {
+  build(UNARY_OP_CONFIG()
+      .add_owned_output(out)
+      .add_owned_input(a));
+}
+
+void TensorIterator::build_borrowing_unary_op(const TensorBase& out, const TensorBase& a) {
+  build(UNARY_OP_CONFIG()
+      .add_output(out)
+      .add_input(a));
+}
+
 #define NULLARY_OP_CONFIG()                                     \
   TensorIteratorConfig()                                        \
     .check_all_same_dtype(false)                                \

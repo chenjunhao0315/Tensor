@@ -72,7 +72,7 @@ bool ConvParams::use_cpu_depthwise3x3_winograd(const Tensor& input, const Tensor
     // Currently only 3x3 depthwise convolutions on tensors of float are supported.
     return (input.dim() == 4) &&
         (input.size(1) == groups) &&
-        (weight.dim() == 4 ) &&
+        (weight.dim() == 4) &&
         (weight.size(0) % input.size(1) == 0) &&
         (weight.size(1) == 1) &&
         (weight.size(2) == 3) &&
@@ -93,7 +93,10 @@ bool ConvParams::use_cpu_depthwise3x3_winograd(const Tensor& input, const Tensor
 
 bool ConvParams::use_cpu_neon() const {
 #if defined(__ARM_NEON__)
-    return true;
+    return (input.scalar_type() == ScalarType::Float) &&
+    (input.scalar_type() == ScalarType::Float) &&
+    (input.device() == Device::CPU) &&
+    (weight.device() == Device::CPU);
 #else
     return false;
 #endif

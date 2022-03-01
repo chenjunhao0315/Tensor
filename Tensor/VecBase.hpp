@@ -50,6 +50,21 @@ struct is_floating_point:
 std::integral_constant<bool, std::is_floating_point<T>::value> {
 };
 
+template<size_t n> struct int_of_size;
+
+#define DEFINE_INT_OF_SIZE(int_t) \
+template<> struct int_of_size<sizeof(int_t)> { using type = int_t; }
+
+DEFINE_INT_OF_SIZE(int64_t);
+DEFINE_INT_OF_SIZE(int32_t);
+DEFINE_INT_OF_SIZE(int16_t);
+DEFINE_INT_OF_SIZE(int8_t);
+
+#undef DEFINE_INT_OF_SIZE
+
+template <typename T>
+using int_same_size_t = typename int_of_size<sizeof(T)>::type;
+
 template <class T>
 struct Vectorized {
 private:
@@ -83,6 +98,35 @@ public:
     
     const char* as_bytes() const {
         return reinterpret_cast<const char*>(values);
+    }
+    
+    template <int64_t mask_>
+    static Vectorized<T> blend(const Vectorized<T>& a, const Vectorized<T>& b) {
+        int64_t mask = mask_;
+        Vectorized vector;
+        for (const auto i : otter::irange(size())) {
+            if (mask & 0x01) {
+                vector[i] = b[i];
+            } else {
+                vector[i] = a[i];
+            }
+            mask = mask >> 1;
+        }
+        return vector;
+    }
+    
+    static Vectorized<T> blendv(const Vectorized<T>& a, const Vectorized<T>& b, const Vectorized<T>& mask) {
+        Vectorized vector;
+        int_same_size_t<T> buffer[size()];
+        mask.store(buffer);
+        for (const auto i : otter::irange(size())) {
+            if (buffer[i] & 0x01) {
+                 vector[i] = b[i];
+            } else {
+                vector[i] = a[i];
+            }
+        }
+        return vector;
     }
     
     static Vectorized<T> loadu(const void* ptr) {

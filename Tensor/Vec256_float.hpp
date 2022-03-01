@@ -40,6 +40,15 @@ public:
     operator __m256() const {
         return values;
     }
+    
+    template <int64_t mask>
+    static Vectorized<float> blend(const Vectorized<float>& a, const Vectorized<float>& b) {
+        return _mm256_blend_ps(a.values, b.values, mask);
+    }
+    static Vectorized<float> blendv(const Vectorized<float>& a, const Vectorized<float>& b, const Vectorized<float>& mask) {
+        return _mm256_blendv_ps(a.values, b.values, mask.values);
+    }
+    
     static Vectorized<float> loadu(const void* ptr, int64_t count = size()) {
         if (count == size())
             return _mm256_loadu_ps(reinterpret_cast<const float*>(ptr));

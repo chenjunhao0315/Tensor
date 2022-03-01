@@ -407,7 +407,7 @@ Tensor & wrapper_exp_(Tensor & self) {
 
 // end exp cpu
 
-// exp cpu
+// sqrt cpu
 DEFINE_FINAL_OP_AFTER(sqrt_out)
 Tensor wrapper_sqrt(const Tensor & self) {
     structured_sqrt_out_functional op;
@@ -430,7 +430,7 @@ Tensor & wrapper_sqrt_(Tensor & self) {
     return self;
 }
 
-// end exp cpu
+// end sqrt cpu
 
 // addmm cpu
 struct structured_addmm_out_cpu_functional : structured_addmm_out_cpu {
@@ -547,8 +547,32 @@ Tensor & wrapper_mm_(Tensor & self, const Tensor & other) {
     op.impl(self, other, op.outputs_[0]);
     return self;
 }
-
 // end addmm cpu
+
+// leaky_relu cpu
+DEFINE_FINAL_OP_AFTER(leaky_relu_out)
+Tensor wrapper_leaky_relu(const Tensor & self, const Scalar & negative_slope) {
+    structured_leaky_relu_out_functional op;
+    op.meta(self, negative_slope);
+    op.impl(self, negative_slope, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+
+Tensor & wrapper_leaky_relu_out(const Tensor & self, const Scalar & negative_slope, Tensor & out) {
+    structured_leaky_relu_out_out op(out);
+    op.meta(self, negative_slope);
+    op.impl(self, negative_slope, op.outputs_[0]);
+    return out;
+}
+
+Tensor & wrapper_leaky_relu_(Tensor & self, const Scalar & negative_slope) {
+    structured_leaky_relu_out_inplace op(self);
+    op.meta(self, negative_slope);
+    op.impl(self, negative_slope, op.outputs_[0]);
+    return self;
+}
+
+// end sqrt cpu
 
 namespace cpu {
 
@@ -730,6 +754,16 @@ Tensor & mm_out(Tensor & out, const Tensor & self, const Tensor & other) {
 }
 Tensor & mm_(Tensor & self, const Tensor & other) {
     return wrapper_mm_(self, other);
+}
+
+Tensor leaky_relu(const Tensor & self, const Scalar& negative_slope) {
+    return wrapper_leaky_relu(self, negative_slope);
+}
+Tensor & leaky_relu_out(Tensor & out, Tensor & self, const Scalar & negative_slope) {
+    return wrapper_leaky_relu_out(self, negative_slope, out);
+}
+Tensor & leaky_relu_(Tensor & self, const Scalar & negative_slope) {
+    return wrapper_leaky_relu_(self, negative_slope);
 }
 
 }

@@ -18,6 +18,28 @@ namespace vec {
 
 #if defined(__aarch64__)
 
+template<int index, bool mask_val>
+struct BlendRegs {
+    static float32x4_t impl(
+                            const float32x4_t& a, const float32x4_t& b, float32x4_t& res);
+};
+
+template<int index>
+struct BlendRegs<index, true>{
+    static float32x4_t impl(
+                            const float32x4_t& a, const float32x4_t& b, float32x4_t& res) {
+        return vsetq_lane_f32(vgetq_lane_f32(b, index), res, index);
+    }
+};
+
+template<int index>
+struct BlendRegs<index, false>{
+    static float32x4_t impl(
+                            const float32x4_t& a, const float32x4_t& b, float32x4_t& res) {
+        return vsetq_lane_f32(vgetq_lane_f32(a, index), res, index);
+    }
+};
+
 template <>
 class Vectorized<float> {
 private:
@@ -37,6 +59,55 @@ public:
     Vectorized(float32x4_t val0, float32x4_t val1) : values{val0, val1} {}
     operator float32x4x2_t() const {
         return values;
+    }
+    template <int64_t mask>
+    static Vectorized<float> blend(const Vectorized<float>& a, const Vectorized<float>& b) {
+        Vectorized<float> vec;
+        // 0.
+        vec.values.val[0] =
+        BlendRegs<0, (mask & 0x01)!=0>::impl(
+                                             a.values.val[0], b.values.val[0], vec.values.val[0]);
+        vec.values.val[0] =
+        BlendRegs<1, (mask & 0x02)!=0>::impl(
+                                             a.values.val[0], b.values.val[0], vec.values.val[0]);
+        vec.values.val[0] =
+        BlendRegs<2, (mask & 0x04)!=0>::impl(
+                                             a.values.val[0], b.values.val[0], vec.values.val[0]);
+        vec.values.val[0] =
+        BlendRegs<3, (mask & 0x08)!=0>::impl(
+                                             a.values.val[0], b.values.val[0], vec.values.val[0]);
+        // 1.
+        vec.values.val[1] =
+        BlendRegs<0, (mask & 0x10)!=0>::impl(
+                                             a.values.val[1], b.values.val[1], vec.values.val[1]);
+        vec.values.val[1] =
+        BlendRegs<1, (mask & 0x20)!=0>::impl(
+                                             a.values.val[1], b.values.val[1], vec.values.val[1]);
+        vec.values.val[1] =
+        BlendRegs<2, (mask & 0x40)!=0>::impl(
+                                             a.values.val[1], b.values.val[1], vec.values.val[1]);
+        vec.values.val[1] =
+        BlendRegs<3, (mask & 0x80)!=0>::impl(
+                                             a.values.val[1], b.values.val[1], vec.values.val[1]);
+        return vec;
+    }
+    static Vectorized<float> blendv(const Vectorized<float>& a, const Vectorized<float>& b,
+                                    const Vectorized<float>& mask) {
+        // TODO
+        // NB: This requires that each value, i.e., each uint value,
+        // of the mask either all be zeros or all be 1s.
+        // We perhaps need some kind of an assert?
+        // But that will affect performance.
+        Vectorized<float> vec(mask.values);
+        vec.values.val[0] = vbslq_f32(
+                                      vreinterpretq_u32_f32(vec.values.val[0]),
+                                      b.values.val[0],
+                                      a.values.val[0]);
+        vec.values.val[1] = vbslq_f32(
+                                      vreinterpretq_u32_f32(vec.values.val[1]),
+                                      b.values.val[1],
+                                      a.values.val[1]);
+        return vec;
     }
     static Vectorized<float> set(const Vectorized<float>& a, const Vectorized<float>& b,
                                  int64_t count = size()) {
