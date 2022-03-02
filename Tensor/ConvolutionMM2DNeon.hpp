@@ -1,12 +1,12 @@
 //
-//  ConvolutionMM2D.hpp
+//  ConvolutionMM2DNeon.hpp
 //  Tensor
 //
-//  Created by 陳均豪 on 2022/2/15.
+//  Created by 陳均豪 on 2022/2/26.
 //
 
-#ifndef ConvolutionMM2D_hpp
-#define ConvolutionMM2D_hpp
+#ifndef ConvolutionMM2DNeon_hpp
+#define ConvolutionMM2DNeon_hpp
 
 #include "ArrayRef.hpp"
 
@@ -14,16 +14,7 @@ namespace otter {
 
 class Tensor;
 
-Tensor& slow_conv2d_forward_out_cpu(
-    const Tensor& self,
-    const Tensor& weight_,
-    const Tensor& bias_,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
-    IntArrayRef padding,
-    Tensor& output);
-
-Tensor& slow_conv2d_out(
+Tensor& slow_conv2d_neon_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
@@ -31,8 +22,8 @@ Tensor& slow_conv2d_out(
     IntArrayRef stride,
     IntArrayRef padding,
     Tensor& output);
-
-Tensor slow_conv2d(
+    
+Tensor slow_conv2d_neon(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
@@ -40,7 +31,6 @@ Tensor slow_conv2d(
     IntArrayRef stride,
     IntArrayRef padding);
 
+}
 
-}   // end namespace otter
-
-#endif /* ConvolutionMM2D_hpp */
+#endif /* ConvolutionMM2DNeon_hpp */

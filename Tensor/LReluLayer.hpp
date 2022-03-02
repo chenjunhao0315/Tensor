@@ -16,7 +16,7 @@ class LReluLayer : public Layer {
 public:
     LReluLayer();
     
-    virtual int prase_param(LayerOption& option, ParamDict& pd);  
+    virtual int parse_param(LayerOption& option, ParamDict& pd);  
     
     virtual int load_param(const ParamDict& pd);
     

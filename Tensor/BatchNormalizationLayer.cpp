@@ -17,7 +17,7 @@ BatchNormalizationLayer::BatchNormalizationLayer() {
     support_inplace = true;
 }
 
-int BatchNormalizationLayer::prase_param(LayerOption& option, ParamDict &pd) {
+int BatchNormalizationLayer::parse_param(LayerOption& option, ParamDict &pd) {
     pd.clear();
     float eps = opt_find_float(option, "eps", 0.00001f);
     

@@ -79,6 +79,10 @@ DECLARE_META_STRUCTURE_DUAL_NONE(mm);
 
 DECLARE_META_STRUCTURE_SIN_SIN(leaky_relu);
 
+struct structured_max_pool2d_with_indices : public TensorIterator {
+    void meta(const Tensor & self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode);
+};
+
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override { \
@@ -191,6 +195,10 @@ struct structured_leaky_relu_out : structured_leaky_relu {
     void impl(const Tensor & self, const Scalar & alpha, const Tensor & out);
 };
 
+struct structured_max_pool2d_with_indices_out_cpu : public structured_max_pool2d_with_indices {
+    void impl(const Tensor & self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode, const Tensor & out, const Tensor & indices);
+};
+
 namespace cpu {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha);
@@ -268,6 +276,9 @@ Tensor & mm_(Tensor & self, const Tensor & other);
 Tensor leaky_relu(const Tensor & self, const Scalar& negative_slope);
 Tensor & leaky_relu_out(Tensor & out, Tensor & self, const Scalar & negative_slope);
 Tensor & leaky_relu_(Tensor & self, const Scalar & negative_slope);
+
+std::tuple<Tensor, Tensor> max_pool2d_with_indices(const Tensor & self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode);
+std::tuple<Tensor&, Tensor&> max_pool2d_with_indices_out(Tensor & out, Tensor & indices, const Tensor & self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode);
 
 }
 

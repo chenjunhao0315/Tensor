@@ -262,7 +262,53 @@ public:
     Vectorized<float> neg() const {
         return Vectorized<float>(vnegq_f32(values.val[0]), vnegq_f32(values.val[1]));
     }
+    Vectorized<float> operator==(const Vectorized<float>& other) const {
+        float32x4_t r0 =
+        vreinterpretq_f32_u32(vceqq_f32(values.val[0], other.values.val[0]));
+        float32x4_t r1 =
+        vreinterpretq_f32_u32(vceqq_f32(values.val[1], other.values.val[1]));
+        return Vectorized<float>(r0, r1);
+    }
     
+    Vectorized<float> operator!=(const Vectorized<float>& other) const {
+        float32x4_t r0 = vreinterpretq_f32_u32(
+                                               vmvnq_u32(vceqq_f32(values.val[0], other.values.val[0])));
+        float32x4_t r1 = vreinterpretq_f32_u32(
+                                               vmvnq_u32(vceqq_f32(values.val[1], other.values.val[1])));
+        return Vectorized<float>(r0, r1);
+    }
+    
+    Vectorized<float> operator<(const Vectorized<float>& other) const {
+        float32x4_t r0 =
+        vreinterpretq_f32_u32(vcltq_f32(values.val[0], other.values.val[0]));
+        float32x4_t r1 =
+        vreinterpretq_f32_u32(vcltq_f32(values.val[1], other.values.val[1]));
+        return Vectorized<float>(r0, r1);
+    }
+    
+    Vectorized<float> operator<=(const Vectorized<float>& other) const {
+        float32x4_t r0 =
+        vreinterpretq_f32_u32(vcleq_f32(values.val[0], other.values.val[0]));
+        float32x4_t r1 =
+        vreinterpretq_f32_u32(vcleq_f32(values.val[1], other.values.val[1]));
+        return Vectorized<float>(r0, r1);
+    }
+    
+    Vectorized<float> operator>(const Vectorized<float>& other) const {
+        float32x4_t r0 =
+        vreinterpretq_f32_u32(vcgtq_f32(values.val[0], other.values.val[0]));
+        float32x4_t r1 =
+        vreinterpretq_f32_u32(vcgtq_f32(values.val[1], other.values.val[1]));
+        return Vectorized<float>(r0, r1);
+    }
+    
+    Vectorized<float> operator>=(const Vectorized<float>& other) const {
+        float32x4_t r0 =
+        vreinterpretq_f32_u32(vcgeq_f32(values.val[0], other.values.val[0]));
+        float32x4_t r1 =
+        vreinterpretq_f32_u32(vcgeq_f32(values.val[1], other.values.val[1]));
+        return Vectorized<float>(r0, r1);
+    }
     
 };
 

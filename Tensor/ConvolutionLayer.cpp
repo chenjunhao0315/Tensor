@@ -19,7 +19,7 @@ ConvolutionLayer::ConvolutionLayer() {
     support_inplace = false;
 }
 
-int ConvolutionLayer::prase_param(LayerOption& option, ParamDict& pd) {
+int ConvolutionLayer::parse_param(LayerOption& option, ParamDict& pd) {
     pd.clear();
     int in_channels   = opt_find_int(option, "in_channels", 1);
     int out_channels  = opt_find_int(option, "out_channels", 1);

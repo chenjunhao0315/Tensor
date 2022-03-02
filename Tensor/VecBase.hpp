@@ -18,6 +18,7 @@
 #include "Macro.hpp"
 #include "Math.hpp"
 #include "VecIntrinsic.hpp"
+#include "TypeCast.hpp"
 
 // These macros helped us unify vec_base.h
 #ifdef CPU_CAPABILITY_AVX512
@@ -121,7 +122,7 @@ public:
         mask.store(buffer);
         for (const auto i : otter::irange(size())) {
             if (buffer[i] & 0x01) {
-                 vector[i] = b[i];
+                vector[i] = b[i];
             } else {
                 vector[i] = a[i];
             }
@@ -158,6 +159,18 @@ public:
             ret[i] = f(values[i]);
         }
         return ret;
+    }
+    
+    Vectorized<T> isnan() const {
+        Vectorized<T> vector;
+        for (int64_t i = 0; i != size(); i++) {
+            if (std::isnan(values[i])) {
+                std::memset(static_cast<void*>(vector.values + i), 0xFF, sizeof(T));
+            } else {
+                std::memset(static_cast<void*>(vector.values + i), 0, sizeof(T));
+            }
+        }
+        return vector;
     }
     
     template <typename other_t_abs = T, typename std::enable_if<!is_floating_point<other_t_abs>::value, int>::type = 0>
@@ -255,6 +268,29 @@ public:
         }
         return ret;
     }
+    
+private:
+    template <typename Op>
+    inline Vectorized<T> binary_pred(const Vectorized<T>& other, Op op) const {
+        // All bits are set to 1 if the pred is true, otherwise 0.
+        Vectorized<T> vector;
+        for (int64_t i = 0; i != size(); i++) {
+            if (op(values[i], other.values[i])) {
+                std::memset(static_cast<void*>(vector.values + i), 0xFF, sizeof(T));
+            } else {
+                std::memset(static_cast<void*>(vector.values + i), 0, sizeof(T));
+            }
+        }
+        return vector;
+    }
+    
+public:
+    Vectorized<T> operator==(const Vectorized<T>& other) const { return binary_pred(other, std::equal_to<T>()); }
+    Vectorized<T> operator!=(const Vectorized<T>& other) const { return binary_pred(other, std::not_equal_to<T>()); }
+    Vectorized<T> operator>=(const Vectorized<T>& other) const { return binary_pred(other, std::greater_equal<T>()); }
+    Vectorized<T> operator<=(const Vectorized<T>& other) const { return binary_pred(other, std::less_equal<T>()); }
+    Vectorized<T> operator>(const Vectorized<T>& other) const { return binary_pred(other, std::greater<T>()); }
+    Vectorized<T> operator<(const Vectorized<T>& other) const { return binary_pred(other, std::less<T>()); }
 };
 
 struct Vectorizedi;
@@ -341,6 +377,137 @@ inline operator||(const Vectorized<T> &a, const Vectorized<T> &b) {
     }
     return c;
 }
+
+template<typename dst_t, typename src_t>
+struct CastImpl {
+    static inline Vectorized<dst_t> apply(const Vectorized<src_t>& src) {
+        src_t src_arr[Vectorized<src_t>::size()];
+        src.store(static_cast<void*>(src_arr));
+        return Vectorized<dst_t>::loadu(static_cast<const void*>(src_arr));
+    }
+};
+
+template<typename scalar_t>
+struct CastImpl<scalar_t, scalar_t> {
+    static inline Vectorized<scalar_t> apply(const Vectorized<scalar_t>& src) {
+        return src;
+    }
+};
+
+template<typename dst_t, typename src_t>
+inline Vectorized<dst_t> cast(const Vectorized<src_t>& src) {
+    return CastImpl<dst_t, src_t>::apply(src);
+}
+
+template <typename src_T, typename dst_T>
+inline void convert(const src_T *src, dst_T *dst, int64_t n) {
+#ifndef _MSC_VER
+# pragma unroll
+#endif
+    for (const auto i : otter::irange(n)) {
+        (void)i; //Suppress unused variable warning
+        *dst = otter::static_cast_with_inter_type<dst_T, src_T>::apply(*src);
+        src++;
+        dst++;
+    }
+}
+
+#if defined(CPU_CAPABILITY_AVX2) || defined(CPU_CAPABILITY_AVX512)
+template <class T, typename Op>
+static inline Vectorized<T> bitwise_binary_op(const Vectorized<T> &a, const Vectorized<T> &b, Op op) {
+    int_vector buffer;
+#if defined(CPU_CAPABILITY_AVX2)
+    int_vector a_buffer = _mm256_load_si256(reinterpret_cast<const int_vector*>((const T*)a));
+    int_vector b_buffer = _mm256_load_si256(reinterpret_cast<const int_vector*>((const T*)b));
+#elif defined(CPU_CAPABILITY_AVX512)
+    int_vector a_buffer = _mm512_load_si512(reinterpret_cast<const int_vector*>((const T*)a));
+    int_vector b_buffer = _mm512_load_si512(reinterpret_cast<const int_vector*>((const T*)b));
+#endif
+    buffer = op(a_buffer, b_buffer);
+    __otter_align__ T results[Vectorized<T>::size()];
+    
+#if defined(CPU_CAPABILITY_AVX2)
+    _mm256_store_si256(reinterpret_cast<int_vector*>(results), buffer);
+#elif defined(CPU_CAPABILITY_AVX512)
+    _mm512_store_si512(reinterpret_cast<int_vector*>(results), buffer);
+#endif
+    return Vectorized<T>::loadu(results);
+}
+
+template<class T, typename std::enable_if_t<!std::is_base_of<Vectorizedi, Vectorized<T>>::value, int> = 0>
+inline Vectorized<T> operator&(const Vectorized<T>& a, const Vectorized<T>& b) {
+    // We enclose _mm512_and_si512 or _mm256_and_si256 with lambda because it is always_inline
+#if defined(CPU_CAPABILITY_AVX2)
+    return bitwise_binary_op(a, b, [](int_vector a, int_vector b) { return _mm256_and_si256(a, b); });
+#elif defined(CPU_CAPABILITY_AVX512)
+    return bitwise_binary_op(a, b, [](int_vector a, int_vector b) { return _mm512_and_si512(a, b); });
+#endif
+}
+template<class T, typename std::enable_if_t<!std::is_base_of<Vectorizedi, Vectorized<T>>::value, int> = 0>
+inline Vectorized<T> operator|(const Vectorized<T>& a, const Vectorized<T>& b) {
+    // We enclose _mm512_or_si512 or _mm256_or_si256 with lambda because it is always_inline
+#if defined(CPU_CAPABILITY_AVX2)
+    return bitwise_binary_op(a, b, [](int_vector a, int_vector b) { return _mm256_or_si256(a, b); });
+#elif defined(CPU_CAPABILITY_AVX512)
+    return bitwise_binary_op(a, b, [](int_vector a, int_vector b) { return _mm512_or_si512(a, b); });
+#endif
+}
+template<class T, typename std::enable_if_t<!std::is_base_of<Vectorizedi, Vectorized<T>>::value, int> = 0>
+inline Vectorized<T> operator^(const Vectorized<T>& a, const Vectorized<T>& b) {
+    // We enclose _mm512_xor_si512 or _mm256_xor_si256 with lambda because it is always_inline
+#if defined(CPU_CAPABILITY_AVX2)
+    return bitwise_binary_op(a, b, [](int_vector a, int_vector b) { return _mm256_xor_si256(a, b); });
+#elif defined(CPU_CAPABILITY_AVX512)
+    return bitwise_binary_op(a, b, [](int_vector a, int_vector b) { return _mm512_xor_si512(a, b); });
+#endif
+}
+
+#else
+
+template <typename T>
+auto load(char const* data) -> T {
+    T ret;
+    std::memcpy(&ret, data, sizeof(ret));
+    return ret;
+}
+
+template<class T, typename Op>
+static inline Vectorized<T> bitwise_binary_op(const Vectorized<T> &a, const Vectorized<T> &b, Op op) {
+    static constexpr uint32_t element_no = VECTOR_WIDTH / sizeof(intmax_t);
+    __otter_align__ intmax_t buffer[element_no];
+    static_assert(VECTOR_WIDTH % sizeof(intmax_t) == 0, "VECTOR_WIDTH not a multiple of sizeof(intmax_t)");
+    static_assert(sizeof(buffer) == sizeof(Vectorized<T>), "sizeof(buffer) must match sizeof(Vectorized<T>)");
+    // We should be using memcpy in order to respect the strict aliasing rule
+    // see: https://github.com/pytorch/pytorch/issues/66119
+    // Using char* is defined in the C11 standard 6.5 Expression paragraph 7
+    // (http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf)
+    const auto* a_data = a.as_bytes();
+    const auto* b_data = b.as_bytes();
+    // load each intmax_t chunk and process; increase pointers by sizeof(intmax_t)
+    for (auto& out : buffer) {
+        out = op(load<intmax_t>(a_data), load<intmax_t>(b_data));
+        a_data += sizeof(intmax_t);
+        b_data += sizeof(intmax_t);
+    }
+    assert(a_data == a.as_bytes() + sizeof(a));
+    assert(b_data == b.as_bytes() + sizeof(b));
+    return Vectorized<T>::loadu(buffer);
+}
+
+template<class T, typename std::enable_if_t<!std::is_base_of<Vectorizedi, Vectorized<T>>::value, int> = 0>
+inline Vectorized<T> operator&(const Vectorized<T>& a, const Vectorized<T>& b) {
+    return bitwise_binary_op(a, b, std::bit_and<intmax_t>());
+}
+template<class T, typename std::enable_if_t<!std::is_base_of<Vectorizedi, Vectorized<T>>::value, int> = 0>
+inline Vectorized<T> operator|(const Vectorized<T>& a, const Vectorized<T>& b) {
+    return bitwise_binary_op(a, b, std::bit_or<intmax_t>());
+}
+template<class T, typename std::enable_if_t<!std::is_base_of<Vectorizedi, Vectorized<T>>::value, int> = 0>
+inline Vectorized<T> operator^(const Vectorized<T>& a, const Vectorized<T>& b) {
+    return bitwise_binary_op(a, b, std::bit_xor<intmax_t>());
+}
+
+#endif // defined(CPU_CAPABILITY_AVX2) || defined(CPU_CAPABILITY_AVX512)
 
 
 }   // end namespace vec

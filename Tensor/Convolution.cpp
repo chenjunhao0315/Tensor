@@ -10,6 +10,7 @@
 #include "Convolution.hpp"
 #include "DepthwiseConvKernel.hpp"
 #include "DilatedConvolution.hpp"
+#include "ConvolutionMM2DNeon.hpp"
 
 namespace otter {
 
@@ -108,7 +109,7 @@ ConvBackend select_proper_conv_backend(
                 if (params.is_dilated()) {
                     return ConvBackend::SlowDilated2d;
                 } else {
-                    if (params.use_cpu_neon()) {
+                    if (params.use_cpu_neon(input, weight)) {
                         return ConvBackend::Slow2dNeon;
                     } else {
                         return ConvBackend::Slow2d;
@@ -236,7 +237,7 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
         case ConvBackend::SlowDilated2d:
             return otter::slow_conv_dilated2d(self, weight, bias, kernel_size, params.stride, params.padding, params.dilation);
         case ConvBackend::Slow2dNeon:
-            return otter::slow_conv2d(self, weight, bias, kernel_size, params.stride, params.padding); // Temp
+            return otter::slow_conv2d_neon(self, weight, bias, kernel_size, params.stride, params.padding);
         default:
             assert(false);  // Unsupported nogroup conv backend
     }

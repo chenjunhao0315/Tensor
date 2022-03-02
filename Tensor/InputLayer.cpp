@@ -17,7 +17,7 @@ InputLayer::InputLayer() {
     support_inplace = true;
 }
 
-int InputLayer::prase_param(LayerOption &option, ParamDict& pd) {
+int InputLayer::parse_param(LayerOption &option, ParamDict& pd) {
     pd.clear();
     int n = opt_find_int(option, "batchsize", 1);
     int c = opt_find_int(option, "channel", 1);

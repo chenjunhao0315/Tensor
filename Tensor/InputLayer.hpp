@@ -16,7 +16,7 @@ class InputLayer : public Layer {
 public:
     InputLayer();
     
-    virtual int prase_param(LayerOption& option, ParamDict& pd);
+    virtual int parse_param(LayerOption& option, ParamDict& pd);
     
     virtual int compute_output_shape(ParamDict& pd);
     

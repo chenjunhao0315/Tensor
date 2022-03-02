@@ -10,6 +10,7 @@
 
 #include "Allocator.hpp"
 #include "DType.hpp"
+#include "MemoryFormat.hpp"
 
 namespace otter {
 
@@ -71,6 +72,12 @@ struct TensorOptions {
         return t;
     }
     
+    TensorOptions memory_format(MemoryFormat memory_format) const noexcept {
+        TensorOptions t = *this;
+        t.set_memory_format(memory_format);
+        return t;
+    }
+    
 private:
     void set_device(Device device) & noexcept {
         device_ = device;
@@ -92,15 +99,22 @@ private:
         has_required_grad_ = true;
     }
     
+    void set_memory_format(MemoryFormat memory_format) noexcept {
+        memory_format_ = memory_format;
+        has_memory_format_ = true;
+    }
+    
     
     Device device_ = Device::CPU;
     TypeMeta data_type_ = TypeMeta::Make<float>();
+    MemoryFormat memory_format_ = MemoryFormat::Contiguous;
     
     bool required_grad_ : 1;
     
     bool has_device_ : 1;
     bool has_data_type_ : 1;
     bool has_required_grad_ : 1;
+    bool has_memory_format_ : 1;
 };
 
 }   // end namespace otter

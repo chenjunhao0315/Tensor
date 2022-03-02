@@ -45,7 +45,8 @@ void Net::addLayer(LayerOption option) {
         option["input_id"] = "0";
     }
     
-    blob_count_++;   // TODO: Check Split layer or etc. which will produce multi blobs
+    blob_count_ += (int)std::count(option["output"].begin(), option["output"].end(), ',') + 1;
+//    blob_count_++;   // TODO: Check Split layer or etc. which will produce multi blobs
     layer_options.push_back(option);
     
     if (opt_check_string(option, "batchnorm")) {
@@ -73,7 +74,99 @@ void Net::addLayer(LayerOption option) {
     }
 }
 
+void Net::graph_construct() {
+    size_t layer_count = layer_options.size();
+    size_t additional_layer_count = 0;
+    std::unordered_map<std::string, int> layer_map;
+    
+    // construct layer_map
+#define MAP_UPDATE  \
+    for (const auto i : otter::irange(layer_options.size())) {   \
+        std::stringstream top_list(layer_options[i]["output"]); \
+        std::string top_name;   \
+        std::getline(top_list, top_name, ',');  \
+        layer_map[top_name] = (int)i;    \
+    }
+    
+    MAP_UPDATE
+    
+    for (const auto i : otter::irange(layer_count)) {
+        LayerOption& layer = layer_options[i];
+        
+        if (i > 0) {
+            if (!opt_check_string(layer, "input")) {
+                std::stringstream bottom_list(layer_options[i - 1]["output"]);
+                std::string bottom_name;
+                std::getline(bottom_list, bottom_name, ',');
+                EARSE_SPACE(bottom_name);
+                layer["input"] = bottom_name;
+            }
+        }
+        
+        int input_count = (layer["type"] == "Input") ? 0 : (int)std::count(layer["input"].begin(), layer["input"].end(), ',') + 1;
+        std::stringstream input_list(layer["input"]);
+        for (const auto j : otter::irange(input_count)) {
+            std::string input_name;
+            std::getline(input_list, input_name, ',');
+            EARSE_SPACE(input_name);
+            layer_options[layer_map[input_name]]["consume_name"] += (layer["name"] + ",");
+        }
+    }
+    for (const auto i : otter::irange(layer_options.size())) {
+        LayerOption& option = layer_options[i];
+        printf("type: %s name: %s consume_name: %s\n", option["type"].c_str(), option["name"].c_str(), option["consume_name"].c_str());
+    }
+    
+    for (auto i : otter::irange(layer_options.size())) {
+//        printf("process name: %s\n", layer_options[i]["name"].c_str());
+        int consume_count = (int)std::count(layer_options[i]["consume_name"].begin(), layer_options[i]["consume_name"].end(), ',');
+        if (consume_count > 1) {
+            ++additional_layer_count;
+            LayerOption auto_opt;
+            auto_opt["type"] = "Split";
+            auto_opt["name"] = "auto_sp_" + std::to_string(additional_layer_count);
+            std::stringstream bottom_list(layer_options[i]["output"]);
+            std::string bottom_name;
+            std::getline(bottom_list, bottom_name, ',');
+            EARSE_SPACE(bottom_name);
+            auto_opt["input"] = bottom_name;
+            std::stringstream consume_list(layer_options[i]["consume_name"]);
+            for (const auto k : otter::irange(consume_count)) {
+                std::string split_name ="asp_" + std::to_string(i) + "_" + std::to_string(k);
+                auto_opt["output"] += split_name;
+                if (k < consume_count - 1)
+                    auto_opt["output"] += ", ";
+                std::string consume_name;
+                std::getline(consume_list, consume_name, ',');
+                EARSE_SPACE(consume_name);
+//                printf("change %d %s input to %s\n", layer_map[consume_name], layer_options[layer_map[consume_name]]["name"].c_str(), split_name.c_str());
+                LayerOption& target_change_layer = layer_options[layer_map[consume_name]];
+                std::string target_name = layer_options[i]["name"];
+                EARSE_SPACE(target_name);
+                
+                size_t target_index = target_change_layer["input"].find(target_name);
+                target_change_layer["input"].replace(target_index, split_name.length(), split_name);
+            }
+            layer_options.insert(layer_options.begin() + i + 1, auto_opt);
+            for (const auto i : otter::irange(layer_options.size())) {
+                LayerOption& option = layer_options[i];
+                printf("type: %s name: %s\n", option["type"].c_str(), option["name"].c_str());
+            }
+            MAP_UPDATE
+        }
+    }
+    blob_count_ = 0;
+    for (const auto i : otter::irange(layer_options.size())) {
+        LayerOption& option = layer_options[i];
+        blob_count_ += (int)std::count(option["output"].begin(), option["output"].end(), ',') + 1;
+    }
+}
+
 void Net::compile() {
+    
+    if (option.lightmode) {
+        graph_construct();
+    }
     
     size_t layer_count = layer_options.size();
     size_t blob_count  = blob_count_;
@@ -91,7 +184,11 @@ void Net::compile() {
         // auto graph connection
         if (i > 0) {
             if (!opt_check_string(option, "input")) {
-                option["input"] = layer_options[i - 1]["output"];
+                std::stringstream bottom_list(layer_options[i - 1]["output"]);
+                std::string bottom_name;
+                std::getline(bottom_list, bottom_name, ',');
+                EARSE_SPACE(bottom_name);
+                option["input"] = bottom_name;
             }
         }
         //
@@ -123,6 +220,9 @@ void Net::compile() {
             }
             
             Blob& blob = blobs[bottom_blob_index];
+            if (blob.consumer != -1) {
+                printf("[Net] Light mode should be disable\n");
+            }
             blob.consumer = (int)i;
             layer->bottoms[j] = bottom_blob_index;
         }
@@ -143,11 +243,8 @@ void Net::compile() {
             blob_index++;
         }
         
-        int pd_state = layer->prase_param(option, pd);
-        if (pd_state != 0) {
-            fprintf(stderr, "ParamDict load %s failed or undefined\n", name.c_str());
-            continue;
-        }
+        int pd_state = layer->parse_param(option, pd);
+        OTTER_CHECK(pd_state == 0, "ParamDict load ", name, " failed or undefined");
         
         layer->bottom_shapes.resize(bottom_count);
         for (int j = 0; j < bottom_count; j++) {
@@ -160,9 +257,8 @@ void Net::compile() {
         }
         
         int output_shape_state = layer->compute_output_shape(pd);
-        if (output_shape_state != 0) {
-            fprintf(stderr, "Layer %s output_shape use default or undefined\n", layer->name.c_str());
-        }
+        OTTER_CHECK(output_shape_state == 0, "Layer ", layer->name, " output_shape use default or undefined");
+        
         Tensor shape_hints = pd.get(OUTPUT_SHAPE_HINT, Tensor());
         if (shape_hints.defined()) {
             for (const auto j : otter::irange(top_count)) {
@@ -173,10 +269,7 @@ void Net::compile() {
         }
         
         int load_state = layer->load_param(pd);
-        if (load_state != 0) {
-            fprintf(stderr, "Layer load %lu %s failed or undefined\n", i, layer->name.c_str());
-            continue;
-        }
+        OTTER_CHECK(load_state == 0, "Layer load ", i, " ", layer->name, " failed or undefined");
         
         bool init = true;
         if (init)

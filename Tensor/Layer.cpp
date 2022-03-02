@@ -18,7 +18,7 @@ Layer::~Layer() {
     
 }
 
-int Layer::prase_param(LayerOption& option, ParamDict& pd) {
+int Layer::parse_param(LayerOption& option, ParamDict& pd) {
     return -1;
 }
 

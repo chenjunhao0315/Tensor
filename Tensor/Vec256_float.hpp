@@ -82,6 +82,11 @@ public:
         }
         return loadu(tmp);
     }
+    
+    Vectorized<float> isnan() const {
+        return _mm256_cmp_ps(values, _mm256_set1_ps(0.0f), _CMP_UNORD_Q);
+    }
+    
     Vectorized<float> abs() const {
         auto mask = _mm256_set1_ps(-0.f);
         return _mm256_andnot_ps(mask, values);
@@ -89,6 +94,30 @@ public:
     
     Vectorized<float> neg() const {
         return _mm256_xor_ps(_mm256_set1_ps(-0.f), values);
+    }
+    
+    Vectorized<float> operator==(const Vectorized<float>& other) const {
+        return _mm256_cmp_ps(values, other.values, _CMP_EQ_OQ);
+    }
+    
+    Vectorized<float> operator!=(const Vectorized<float>& other) const {
+        return _mm256_cmp_ps(values, other.values, _CMP_NEQ_UQ);
+    }
+    
+    Vectorized<float> operator<(const Vectorized<float>& other) const {
+        return _mm256_cmp_ps(values, other.values, _CMP_LT_OQ);
+    }
+    
+    Vectorized<float> operator<=(const Vectorized<float>& other) const {
+        return _mm256_cmp_ps(values, other.values, _CMP_LE_OQ);
+    }
+    
+    Vectorized<float> operator>(const Vectorized<float>& other) const {
+        return _mm256_cmp_ps(values, other.values, _CMP_GT_OQ);
+    }
+    
+    Vectorized<float> operator>=(const Vectorized<float>& other) const {
+        return _mm256_cmp_ps(values, other.values, _CMP_GE_OQ);
     }
 };
 
@@ -110,6 +139,21 @@ Vectorized<float> inline operator*(const Vectorized<float>& a, const Vectorized<
 template <>
 Vectorized<float> inline operator/(const Vectorized<float>& a, const Vectorized<float>& b) {
     return _mm256_div_ps(a, b);
+}
+
+template <>
+Vectorized<float> inline operator&(const Vectorized<float>& a, const Vectorized<float>& b) {
+  return _mm256_and_ps(a, b);
+}
+
+template <>
+Vectorized<float> inline operator|(const Vectorized<float>& a, const Vectorized<float>& b) {
+  return _mm256_or_ps(a, b);
+}
+
+template <>
+Vectorized<float> inline operator^(const Vectorized<float>& a, const Vectorized<float>& b) {
+  return _mm256_xor_ps(a, b);
 }
 
 

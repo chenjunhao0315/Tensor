@@ -549,6 +549,48 @@ Tensor & wrapper_mm_(Tensor & self, const Tensor & other) {
 }
 // end addmm cpu
 
+// max_pool2d
+struct structured_max_pool2d_with_indices_out_cpu_functional final : public structured_max_pool2d_with_indices_out_cpu {
+
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 2> outputs_;
+};
+
+std::tuple<Tensor, Tensor> wrapper_max_pool2d_with_indices(const Tensor & self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode) {
+    structured_max_pool2d_with_indices_out_cpu_functional op;
+    op.meta(self, kernel_size, stride, padding, dilation, ceil_mode);
+    op.impl(self, kernel_size, stride, padding, dilation, ceil_mode, *op.outputs_[0], *op.outputs_[1]);
+    return std::make_tuple(std::move(op.outputs_[0]).take(), std::move(op.outputs_[1]).take());
+}
+    
+struct structured_max_pool2d_with_indices_out_cpu_out final : public structured_max_pool2d_with_indices_out_cpu {
+    structured_max_pool2d_with_indices_out_cpu_out(Tensor& out0, Tensor& out1) : outputs_{ std::ref(out0), std::ref(out1) } {}
+
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+    }
+
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 2> outputs_;
+};
+
+std::tuple<Tensor &, Tensor &> wrapper_max_pool2d_with_indices_out_out(const Tensor & self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode, Tensor & out, Tensor & indices) {
+    structured_max_pool2d_with_indices_out_cpu_out op(out, indices);
+    op.meta(self, kernel_size, stride, padding, dilation, ceil_mode);
+    op.impl(self, kernel_size, stride, padding, dilation, ceil_mode, op.outputs_[0], op.outputs_[1]);
+    return std::forward_as_tuple(out, indices);
+}
+
+// end max_pool2d
+
 // leaky_relu cpu
 DEFINE_FINAL_OP_AFTER(leaky_relu_out)
 Tensor wrapper_leaky_relu(const Tensor & self, const Scalar & negative_slope) {
@@ -571,8 +613,7 @@ Tensor & wrapper_leaky_relu_(Tensor & self, const Scalar & negative_slope) {
     op.impl(self, negative_slope, op.outputs_[0]);
     return self;
 }
-
-// end sqrt cpu
+// end leaky_relu cpu
 
 namespace cpu {
 
@@ -766,7 +807,13 @@ Tensor & leaky_relu_(Tensor & self, const Scalar & negative_slope) {
     return wrapper_leaky_relu_(self, negative_slope);
 }
 
+std::tuple<Tensor, Tensor> max_pool2d_with_indices(const Tensor & self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode) {
+    return wrapper_max_pool2d_with_indices(self, kernel_size, stride, padding, dilation, ceil_mode);
 }
 
-
+std::tuple<Tensor &, Tensor &> max_pool2d_with_indices_out(Tensor & out, Tensor & indices, const Tensor & self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode) {
+    return wrapper_max_pool2d_with_indices_out_out(self, kernel_size, stride, padding, dilation, ceil_mode, out, indices);
 }
+
+}   // end namespace cpu
+}   // end namesapce otter

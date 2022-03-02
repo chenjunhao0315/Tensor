@@ -96,6 +96,12 @@ Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, ScalarTyp
     return otter::linspace_out(start, end, steps, result);
 }
 
+Tensor range(const Scalar& start, const Scalar& end, const Scalar& step, ScalarType dtype) {
+    Tensor result = empty({}, dtype);
+    
+    return otter::range_out(start, end, step, result);
+}
+
 Tensor rand(IntArrayRef size, ScalarType dtype) {
     return ones(size, dtype);
 }

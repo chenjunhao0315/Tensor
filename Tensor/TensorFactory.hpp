@@ -40,6 +40,8 @@ Tensor ones(IntArrayRef size, TensorOptions options);
 
 Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, ScalarType dtype);
 
+Tensor range(const Scalar& start, const Scalar& end, const Scalar& step, ScalarType dtype);
+
 Tensor rand(IntArrayRef size, ScalarType dtype);
 Tensor rand(IntArrayRef size, TensorOptions options);
 

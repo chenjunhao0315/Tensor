@@ -32,7 +32,7 @@ struct ConvParams {
     bool is_output_padding_neg() const;
     bool is_stride_nonpos() const;
     bool use_cpu_depthwise3x3_winograd(const Tensor& input, const Tensor& weight) const;
-    bool use_cpu_neon() const;
+    bool use_cpu_neon(const Tensor& input, const Tensor& weight) const;
 };
 
 enum class ConvBackend {

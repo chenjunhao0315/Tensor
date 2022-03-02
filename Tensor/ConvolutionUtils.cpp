@@ -91,7 +91,7 @@ bool ConvParams::use_cpu_depthwise3x3_winograd(const Tensor& input, const Tensor
 #endif
 }
 
-bool ConvParams::use_cpu_neon() const {
+bool ConvParams::use_cpu_neon(const Tensor& input, const Tensor& weight) const {
 #if defined(__ARM_NEON__)
     return (input.scalar_type() == ScalarType::Float) &&
     (input.scalar_type() == ScalarType::Float) &&

@@ -16,7 +16,7 @@ LReluLayer::LReluLayer() {
     support_inplace = true;
 }
 
-int LReluLayer::prase_param(LayerOption& option, ParamDict &pd) {
+int LReluLayer::parse_param(LayerOption& option, ParamDict &pd) {
     pd.clear();
     
     float neg_slope = opt_find_float(option, "alpha", 0.1);

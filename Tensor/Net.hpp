@@ -29,6 +29,7 @@ public:
     void init_blobs_and_layers(size_t blob_count, size_t layer_count);
     
     void addLayer(LayerOption option);
+    void graph_construct();
     void compile();
     void summary();
     

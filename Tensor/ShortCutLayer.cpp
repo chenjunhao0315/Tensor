@@ -17,7 +17,7 @@ ShortCutLayer::ShortCutLayer() {
     support_inplace = false;
 }
 
-int ShortCutLayer::prase_param(LayerOption& option, ParamDict &pd) {
+int ShortCutLayer::parse_param(LayerOption& option, ParamDict &pd) {
     // alpha beta
     
     return 0;
@@ -30,6 +30,12 @@ int ShortCutLayer::load_param(const ParamDict &pd) {
 }
 
 int ShortCutLayer::init_model() {
+    return 0;
+}
+
+int ShortCutLayer::compute_output_shape(ParamDict &pd) {
+    pd.set(OUTPUT_SHAPE_HINT, bottom_shapes[0]);
+    
     return 0;
 }
 
