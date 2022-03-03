@@ -194,5 +194,7 @@ int main(int argc, const char * argv[]) {
     
     auto pull_test = otter::tensor({1, 2, 3}, otter::ScalarType::Float);
 
+    cout << pull_test << endl;
+
     return 0;
 }
