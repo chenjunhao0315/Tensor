@@ -97,7 +97,7 @@ public:
         return values;
     }
     
-    const char* as_bytes() const {
+    auto as_bytes() const -> const char* {
         return reinterpret_cast<const char*>(values);
     }
     

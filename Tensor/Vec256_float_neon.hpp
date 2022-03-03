@@ -248,6 +248,20 @@ public:
         store(tmp);
         return tmp[idx];
     }
+    Vectorized<float> isnan() const {
+        __otter_align__ float tmp[size()];
+        __otter_align__ float res[size()];
+        store(tmp);
+        for (const auto i : otter::irange(size())) {
+            if (std::isnan(tmp[i])) {
+                std::memset(static_cast<void*>(&res[i]), 0xFF, sizeof(float));
+            } else {
+                std::memset(static_cast<void*>(&res[i]), 0, sizeof(float));
+            }
+        }
+        return loadu(res);
+    };
+    
     Vectorized<float> map(float (*const f)(float)) const {
         __otter_align__ float tmp[size()];
         store(tmp);
@@ -337,6 +351,39 @@ template <>
 Vectorized<float> inline operator/(const Vectorized<float>& a, const Vectorized<float>& b) {
     float32x4_t r0 = vdivq_f32(a.get_low(), b.get_low());
     float32x4_t r1 = vdivq_f32(a.get_high(), b.get_high());
+    return Vectorized<float>(r0, r1);
+}
+
+template <>
+Vectorized<float> inline operator&(const Vectorized<float>& a, const Vectorized<float>& b) {
+    float32x4_t r0 = vreinterpretq_f32_u32(vandq_u32(
+                                                     vreinterpretq_u32_f32(a.get_low()),
+                                                     vreinterpretq_u32_f32(b.get_low())));
+    float32x4_t r1 = vreinterpretq_f32_u32(vandq_u32(
+                                                     vreinterpretq_u32_f32(a.get_high()),
+                                                     vreinterpretq_u32_f32(b.get_high())));
+    return Vectorized<float>(r0, r1);
+}
+
+template <>
+Vectorized<float> inline operator|(const Vectorized<float>& a, const Vectorized<float>& b) {
+    float32x4_t r0 = vreinterpretq_f32_u32(vorrq_u32(
+                                                     vreinterpretq_u32_f32(a.get_low()),
+                                                     vreinterpretq_u32_f32(b.get_low())));
+    float32x4_t r1 = vreinterpretq_f32_u32(vorrq_u32(
+                                                     vreinterpretq_u32_f32(a.get_high()),
+                                                     vreinterpretq_u32_f32(b.get_high())));
+    return Vectorized<float>(r0, r1);
+}
+
+template <>
+Vectorized<float> inline operator^(const Vectorized<float>& a, const Vectorized<float>& b) {
+    float32x4_t r0 = vreinterpretq_f32_u32(veorq_u32(
+                                                     vreinterpretq_u32_f32(a.get_low()),
+                                                     vreinterpretq_u32_f32(b.get_low())));
+    float32x4_t r1 = vreinterpretq_f32_u32(veorq_u32(
+                                                     vreinterpretq_u32_f32(a.get_high()),
+                                                     vreinterpretq_u32_f32(b.get_high())));
     return Vectorized<float>(r0, r1);
 }
 

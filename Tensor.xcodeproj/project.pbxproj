@@ -34,6 +34,10 @@
 		7628E02927CEA4B600B136FA /* SplitLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E02727CEA4B600B136FA /* SplitLayer.cpp */; };
 		7628E02C27CF1C5B00B136FA /* MaxPoolLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E02A27CF1C5B00B136FA /* MaxPoolLayer.cpp */; };
 		7628E02F27CF543800B136FA /* Padding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E02D27CF543700B136FA /* Padding.cpp */; };
+		7628E17A27CFCE5700B136FA /* DropoutLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E17827CFCE5700B136FA /* DropoutLayer.cpp */; };
+		7628E17D27CFCFCB00B136FA /* Dropout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E17B27CFCFCB00B136FA /* Dropout.cpp */; };
+		7628E18027CFDB5900B136FA /* ConcatLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E17E27CFDB5900B136FA /* ConcatLayer.cpp */; };
+		7628E2D427D10CDA00B136FA /* UpSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E2D227D10CDA00B136FA /* UpSample.cpp */; };
 		762E3B2D27BACA050075F983 /* TensorAccessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B2B27BACA050075F983 /* TensorAccessor.cpp */; };
 		762E3B3027BB5D260075F983 /* ConvolutionMM2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B2E27BB5D260075F983 /* ConvolutionMM2D.cpp */; };
 		762E3B3327BB79950075F983 /* Unfold2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B3127BB79950075F983 /* Unfold2D.cpp */; };
@@ -185,6 +189,14 @@
 		7628E02B27CF1C5B00B136FA /* MaxPoolLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MaxPoolLayer.hpp; sourceTree = "<group>"; };
 		7628E02D27CF543700B136FA /* Padding.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Padding.cpp; sourceTree = "<group>"; };
 		7628E02E27CF543800B136FA /* Padding.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Padding.hpp; sourceTree = "<group>"; };
+		7628E17827CFCE5700B136FA /* DropoutLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DropoutLayer.cpp; sourceTree = "<group>"; };
+		7628E17927CFCE5700B136FA /* DropoutLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DropoutLayer.hpp; sourceTree = "<group>"; };
+		7628E17B27CFCFCB00B136FA /* Dropout.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Dropout.cpp; sourceTree = "<group>"; };
+		7628E17C27CFCFCB00B136FA /* Dropout.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Dropout.hpp; sourceTree = "<group>"; };
+		7628E17E27CFDB5900B136FA /* ConcatLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConcatLayer.cpp; sourceTree = "<group>"; };
+		7628E17F27CFDB5900B136FA /* ConcatLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConcatLayer.hpp; sourceTree = "<group>"; };
+		7628E2D227D10CDA00B136FA /* UpSample.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UpSample.cpp; sourceTree = "<group>"; };
+		7628E2D327D10CDA00B136FA /* UpSample.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UpSample.hpp; sourceTree = "<group>"; };
 		762E3B2B27BACA050075F983 /* TensorAccessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorAccessor.cpp; sourceTree = "<group>"; };
 		762E3B2C27BACA050075F983 /* TensorAccessor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorAccessor.hpp; sourceTree = "<group>"; };
 		762E3B2E27BB5D260075F983 /* ConvolutionMM2D.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionMM2D.cpp; sourceTree = "<group>"; };
@@ -548,10 +560,10 @@
 				7687216327C0E379006640CF /* Layer.hpp */,
 				7687217027C1475B006640CF /* LayerDeclaration.cpp */,
 				7687217127C1475B006640CF /* LayerDeclaration.hpp */,
-				7687217327C14890006640CF /* InputLayer.cpp */,
-				7687217427C14890006640CF /* InputLayer.hpp */,
 				7687217627C14A28006640CF /* ParamDict.cpp */,
 				7687217727C14A28006640CF /* ParamDict.hpp */,
+				7687217327C14890006640CF /* InputLayer.cpp */,
+				7687217427C14890006640CF /* InputLayer.hpp */,
 				7687217C27C2A850006640CF /* ConvolutionLayer.cpp */,
 				7687217D27C2A850006640CF /* ConvolutionLayer.hpp */,
 				76E5EC7927C4A6D800A2B38A /* BatchNormalizationLayer.cpp */,
@@ -564,6 +576,10 @@
 				7628E02827CEA4B600B136FA /* SplitLayer.hpp */,
 				7628E02A27CF1C5B00B136FA /* MaxPoolLayer.cpp */,
 				7628E02B27CF1C5B00B136FA /* MaxPoolLayer.hpp */,
+				7628E17827CFCE5700B136FA /* DropoutLayer.cpp */,
+				7628E17927CFCE5700B136FA /* DropoutLayer.hpp */,
+				7628E17E27CFDB5900B136FA /* ConcatLayer.cpp */,
+				7628E17F27CFDB5900B136FA /* ConcatLayer.hpp */,
 			);
 			name = Layer;
 			sourceTree = "<group>";
@@ -693,6 +709,10 @@
 				76BA779127C6CA8F00AA896B /* TensorScalar.hpp */,
 				7628E02D27CF543700B136FA /* Padding.cpp */,
 				7628E02E27CF543800B136FA /* Padding.hpp */,
+				7628E17B27CFCFCB00B136FA /* Dropout.cpp */,
+				7628E17C27CFCFCB00B136FA /* Dropout.hpp */,
+				7628E2D227D10CDA00B136FA /* UpSample.cpp */,
+				7628E2D327D10CDA00B136FA /* UpSample.hpp */,
 			);
 			path = Tensor;
 			sourceTree = "<group>";
@@ -795,6 +815,7 @@
 				76F336BE27A5B52300E3AEF1 /* BinaryOpsKernel.cpp in Sources */,
 				760382D027C0096300CD599F /* TensorCatKernel.cpp in Sources */,
 				76BA778F27C674DA00AA896B /* DilatedConvolutionUtils.cpp in Sources */,
+				7628E2D427D10CDA00B136FA /* UpSample.cpp in Sources */,
 				760384B527C0492200CD599F /* TensorPixel.cpp in Sources */,
 				7687216127C0E31C006640CF /* Module.cpp in Sources */,
 				76E6C55127A553550036A26F /* FunctionRef.cpp in Sources */,
@@ -804,6 +825,7 @@
 				7620AF7A27B53BAE0081C210 /* TensorCopyKernel.cpp in Sources */,
 				762E3B3F27BC9F400075F983 /* Clock.cpp in Sources */,
 				76E6C51627A502F60036A26F /* Memory.cpp in Sources */,
+				7628E18027CFDB5900B136FA /* ConcatLayer.cpp in Sources */,
 				760382D627C019AE00CD599F /* DepthwiseConvKernel.cpp in Sources */,
 				76E6C54527A5132B0036A26F /* Utils.cpp in Sources */,
 				762E3B2D27BACA050075F983 /* TensorAccessor.cpp in Sources */,
@@ -841,6 +863,7 @@
 				76F336C727A5CEEC00E3AEF1 /* DispatchStub.cpp in Sources */,
 				7620AF6E27B4060A0081C210 /* RangeFactory.cpp in Sources */,
 				7687218827C35B9F006640CF /* BatchNormalization.cpp in Sources */,
+				7628E17D27CFCFCB00B136FA /* Dropout.cpp in Sources */,
 				76E6C52E27A505FE0036A26F /* TensorOptions.cpp in Sources */,
 				7620AF7427B4F3F50081C210 /* TensorMaker.cpp in Sources */,
 				76E6C51C27A504000036A26F /* DType.cpp in Sources */,
@@ -850,6 +873,7 @@
 				762E3B4527BCBAA10075F983 /* VecBase.cpp in Sources */,
 				762E3B4B27BCFD750075F983 /* TensorIteratorDynamicCasting.cpp in Sources */,
 				7628DEE727CE155400B136FA /* ShortCutLayer.cpp in Sources */,
+				7628E17A27CFCE5700B136FA /* DropoutLayer.cpp in Sources */,
 				762E3B5627BEA4A20075F983 /* MemoryOverlap.cpp in Sources */,
 				76F336C427A5B9B800E3AEF1 /* Dispatch.cpp in Sources */,
 				76E6C53A27A510F30036A26F /* Parallel.cpp in Sources */,
@@ -916,7 +940,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -974,6 +998,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;

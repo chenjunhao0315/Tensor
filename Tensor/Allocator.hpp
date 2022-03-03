@@ -13,6 +13,7 @@
 #include <cassert>
 #include <functional>
 
+#include "Config.hpp"
 #include "Device.hpp"
 
 #ifndef OTTER_LOC
@@ -28,7 +29,7 @@ void otter_free(void *ptr);
 #define otter_calloc(m, s)   otter_calloc_log(m, s, OTTER_LOC)
 #define otter_realloc(p, s)  otter_realloc_log(p, s, OTTER_LOC)
 
-#ifdef OTTER_MOBILE
+#if OTTER_MOBILE
 // Use 16-byte alignment on mobile
 // - ARM NEON AArch32 and AArch64
 // - x86[-64] < AVX

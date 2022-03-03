@@ -37,6 +37,7 @@ Tensor zeros(IntArrayRef size, ScalarType dtype);
 Tensor zeros(IntArrayRef size, TensorOptions options);
 Tensor ones(IntArrayRef size, ScalarType dtype);
 Tensor ones(IntArrayRef size, TensorOptions options);
+Tensor ones_like(const Tensor& self, TensorOptions options);
 
 Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, ScalarType dtype);
 

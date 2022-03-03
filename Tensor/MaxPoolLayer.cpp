@@ -82,6 +82,7 @@ int MaxPoolLayer::compute_output_shape(ParamDict &pd) {
     int dilation_height = pd.get((int)MaxPoolParam::Dilation_height, 1);
     int dilation_width  = pd.get((int)MaxPoolParam::Dilation_width,  1);
     int ceil_mode       = pd.get((int)MaxPoolParam::Ceil_mode, 0);
+    int darknet_mode    = pd.get((int)MaxPoolParam::Darknet_mode, 0);
     
     int out_height;
     int out_width;
@@ -118,9 +119,9 @@ int MaxPoolLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const Net
     if (darknet_mode) {
         auto bottom_blob_pad = otter::constant_pad(bottom_blob, {0, kernel_height - 1, 0, kernel_width - 1}, 0);
         top_blob = otter::max_pool2d(bottom_blob_pad, {kernel_height, kernel_width}, {stride_height, stride_width}, {0, 0}, {1, 1}, false);
+    } else {
+        top_blob = otter::max_pool2d(bottom_blob, {kernel_height, kernel_width}, {stride_height, stride_width}, {padding_height, padding_width}, {dilation_height, dilation_width}, ceil_mode);
     }
-    
-    top_blob = otter::max_pool2d(bottom_blob, {kernel_height, kernel_width}, {stride_height, stride_width}, {padding_height, padding_width}, {dilation_height, dilation_width}, ceil_mode);
     return 0;
 }
 

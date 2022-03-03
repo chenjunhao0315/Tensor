@@ -112,12 +112,8 @@ void Net::graph_construct() {
             layer_options[layer_map[input_name]]["consume_name"] += (layer["name"] + ",");
         }
     }
-    for (const auto i : otter::irange(layer_options.size())) {
-        LayerOption& option = layer_options[i];
-        printf("type: %s name: %s consume_name: %s\n", option["type"].c_str(), option["name"].c_str(), option["consume_name"].c_str());
-    }
     
-    for (auto i : otter::irange(layer_options.size())) {
+    for (size_t i = 0; i < layer_options.size(); ++i) {
 //        printf("process name: %s\n", layer_options[i]["name"].c_str());
         int consume_count = (int)std::count(layer_options[i]["consume_name"].begin(), layer_options[i]["consume_name"].end(), ',');
         if (consume_count > 1) {
@@ -145,13 +141,15 @@ void Net::graph_construct() {
                 EARSE_SPACE(target_name);
                 
                 size_t target_index = target_change_layer["input"].find(target_name);
-                target_change_layer["input"].replace(target_index, split_name.length(), split_name);
+                if (target_index == std::string::npos) target_index = 0;
+//                OTTER_CHECK(target_index != std::string::npos, "[Net] Fail to consturct graph, please check the topology");
+                target_change_layer["input"].replace(target_index, std::max(split_name.length(), target_name.length()), split_name);
             }
             layer_options.insert(layer_options.begin() + i + 1, auto_opt);
-            for (const auto i : otter::irange(layer_options.size())) {
-                LayerOption& option = layer_options[i];
-                printf("type: %s name: %s\n", option["type"].c_str(), option["name"].c_str());
-            }
+//            for (const auto i : otter::irange(layer_options.size())) {
+//                LayerOption& option = layer_options[i];
+//                printf("type: %s name: %s input: %s\n", option["type"].c_str(), option["name"].c_str(), option["input"].c_str());
+//            }
             MAP_UPDATE
         }
     }

@@ -35,7 +35,7 @@ void* alloc_cpu(size_t nbytes) {
     void* data;
 #ifdef __ANDROID__
     data = memalign(gAlignment, nbytes);
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) || defined(_WIN32)
     data = _aligned_malloc(nbytes, gAlignment);
 #else
     int err = posix_memalign(&data, gAlignment, nbytes);

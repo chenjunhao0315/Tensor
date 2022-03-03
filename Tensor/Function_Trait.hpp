@@ -9,6 +9,7 @@
 #define Function_Trait_hpp
 
 #include <tuple>
+#include <cstddef>
 
 // Modified from https://stackoverflow.com/questions/7943525/is-it-possible-to-figure-out-the-parameter-type-and-return-type-of-a-lambda
 

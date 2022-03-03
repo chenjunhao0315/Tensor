@@ -83,6 +83,10 @@ struct structured_max_pool2d_with_indices : public TensorIterator {
     void meta(const Tensor & self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode);
 };
 
+struct structured_upsample_nearest2d : public TensorIterator {
+    void meta(const Tensor & self, IntArrayRef output_size, double scales_h, double scales_w);
+};
+
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override { \
