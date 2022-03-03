@@ -38,6 +38,7 @@
 		7628E17D27CFCFCB00B136FA /* Dropout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E17B27CFCFCB00B136FA /* Dropout.cpp */; };
 		7628E18027CFDB5900B136FA /* ConcatLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E17E27CFDB5900B136FA /* ConcatLayer.cpp */; };
 		7628E2D427D10CDA00B136FA /* UpSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E2D227D10CDA00B136FA /* UpSample.cpp */; };
+		7628E2D727D1168C00B136FA /* UpSampleKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E2D527D1168C00B136FA /* UpSampleKernel.cpp */; };
 		762E3B2D27BACA050075F983 /* TensorAccessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B2B27BACA050075F983 /* TensorAccessor.cpp */; };
 		762E3B3027BB5D260075F983 /* ConvolutionMM2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B2E27BB5D260075F983 /* ConvolutionMM2D.cpp */; };
 		762E3B3327BB79950075F983 /* Unfold2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B3127BB79950075F983 /* Unfold2D.cpp */; };
@@ -197,6 +198,8 @@
 		7628E17F27CFDB5900B136FA /* ConcatLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConcatLayer.hpp; sourceTree = "<group>"; };
 		7628E2D227D10CDA00B136FA /* UpSample.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UpSample.cpp; sourceTree = "<group>"; };
 		7628E2D327D10CDA00B136FA /* UpSample.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UpSample.hpp; sourceTree = "<group>"; };
+		7628E2D527D1168C00B136FA /* UpSampleKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UpSampleKernel.cpp; sourceTree = "<group>"; };
+		7628E2D627D1168C00B136FA /* UpSampleKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UpSampleKernel.hpp; sourceTree = "<group>"; };
 		762E3B2B27BACA050075F983 /* TensorAccessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorAccessor.cpp; sourceTree = "<group>"; };
 		762E3B2C27BACA050075F983 /* TensorAccessor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorAccessor.hpp; sourceTree = "<group>"; };
 		762E3B2E27BB5D260075F983 /* ConvolutionMM2D.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionMM2D.cpp; sourceTree = "<group>"; };
@@ -713,6 +716,8 @@
 				7628E17C27CFCFCB00B136FA /* Dropout.hpp */,
 				7628E2D227D10CDA00B136FA /* UpSample.cpp */,
 				7628E2D327D10CDA00B136FA /* UpSample.hpp */,
+				7628E2D527D1168C00B136FA /* UpSampleKernel.cpp */,
+				7628E2D627D1168C00B136FA /* UpSampleKernel.hpp */,
 			);
 			path = Tensor;
 			sourceTree = "<group>";
@@ -842,6 +847,7 @@
 				76E6C54827A513A10036A26F /* TensorIterator.cpp in Sources */,
 				7628DEE427CE096600B136FA /* LReluLayer.cpp in Sources */,
 				7687217227C1475B006640CF /* LayerDeclaration.cpp in Sources */,
+				7628E2D727D1168C00B136FA /* UpSampleKernel.cpp in Sources */,
 				76E6C55727A57AAD0036A26F /* Function_Trait.cpp in Sources */,
 				762E3B3927BBBA8C0075F983 /* Convolution.cpp in Sources */,
 				76F336D027A660D800E3AEF1 /* Fill.cpp in Sources */,

@@ -47,7 +47,7 @@ void* alloc_cpu(size_t nbytes) {
 }
 
 void free_cpu(void* data) {
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(_WIN32)
     _aligned_free(data);
 #else
     free(data);
