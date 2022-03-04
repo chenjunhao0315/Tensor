@@ -64,7 +64,7 @@ private:
 class Data : public Ref {
 public:
     ~Data() { otter_free(cpu_data_); }
-    Data() : cpu_data_(nullptr), Ref() {}
+    Data() : Ref(), cpu_data_(nullptr) {}
     Data(size_t size) : Data() { cpu_data_ = otter_calloc(1, size); }
     void *cpu_data() { return cpu_data_; }
 private:
@@ -73,7 +73,7 @@ private:
 
 class MemoryNucleus : public Ptr_quantum {
 public:
-    MemoryNucleus(size_t size_bytes, DataPtr data_ptr, Allocator* allocator) : size_bytes_(size_bytes), data_ptr_(std::move(data_ptr)), allocator_(allocator) {}
+    MemoryNucleus(size_t size_bytes, DataPtr data_ptr, Allocator* allocator) : data_ptr_(std::move(data_ptr)), size_bytes_(size_bytes), allocator_(allocator) {}
     
     MemoryNucleus(size_t size_bytes, Allocator* allocator) : MemoryNucleus(size_bytes, allocator->allocate(size_bytes), allocator) {}
     

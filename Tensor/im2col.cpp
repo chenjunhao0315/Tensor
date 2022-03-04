@@ -10,7 +10,7 @@
 #include "TensorFactory.hpp"
 #include "Dispatch.hpp"
 #include "Parallel.hpp"
-#include "Unfold2d.hpp"
+#include "Unfold2D.hpp"
 
 namespace otter {
 

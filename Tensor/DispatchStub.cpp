@@ -32,6 +32,7 @@ void* DispatchStubImpl::get_call_ptr(Device device_type, void *DEFAULT) {
         default:
             assert(false);
     }
+    return nullptr;
 }
 
 void* DispatchStubImpl::choose_cpu_impl(void *DEFAULT) {

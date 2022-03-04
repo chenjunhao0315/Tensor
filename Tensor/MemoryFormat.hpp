@@ -39,6 +39,7 @@ inline std::vector<int64_t> get_channels_last_strides_2d(IntArrayRef sizes) {
         default:
             assert(false);  // "ChannelsLast2d doesn't support size ", sizes.size());
     }
+    return {};
 }
 
 inline bool is_channels_last_strides_2d_s4(const IntArrayRef sizes, const IntArrayRef strides) {
@@ -90,6 +91,7 @@ inline bool is_channels_last_strides_2d(const IntArrayRef sizes, const IntArrayR
         default:
             return false;
     }
+    return false;
 }
 
 

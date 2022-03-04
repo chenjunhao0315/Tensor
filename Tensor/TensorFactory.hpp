@@ -16,7 +16,7 @@ namespace otter {
 
 class Scalar;
 class Tensor;
-class TensorOptions;
+struct TensorOptions;
 
 Tensor empty(IntArrayRef size, ScalarType dtype);
 Tensor empty(IntArrayRef size, TensorOptions options);

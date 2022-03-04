@@ -20,7 +20,7 @@ namespace otter {
 
 constexpr int64_t GRAIN_SIZE = 32768;
 
-class DimCounter;
+struct DimCounter;
 class TensorIteratorConfig;
 
 class TensorRef {
