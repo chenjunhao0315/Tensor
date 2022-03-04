@@ -106,6 +106,7 @@ void Net::graph_construct() {
         int input_count = (layer["type"] == "Input") ? 0 : (int)std::count(layer["input"].begin(), layer["input"].end(), ',') + 1;
         std::stringstream input_list(layer["input"]);
         for (const auto j : otter::irange(input_count)) {
+            (void)j;
             std::string input_name;
             std::getline(input_list, input_name, ',');
             EARSE_SPACE(input_name);
@@ -328,7 +329,7 @@ void Net::update_input_output_names()
 
 void Net::summary() {
     printf("=============================================================\n");
-    printf("Layer count: %d Blob count: %d\n", (int)layers.size(), blob_count_);
+    printf("Layer count: %d Blob count: %zu\n", (int)layers.size(), blob_count_);
     printf("-------------------------------------------------------------\n");
     printf("Layer(type)      Name          Input(blob)   Output(blob)\n");
     printf("=============================================================\n");

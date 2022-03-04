@@ -50,9 +50,8 @@ inline std::vector<int64_t> expand_param_if_needed(IntArrayRef list_param, const
         return std::vector<int64_t>(expected_dim, list_param[0]);
     } else if ((int64_t)list_param.size() != expected_dim) {
         assert(false);  // Expected param to be a single integer value or a list of expected_dim values to match the convolution dimension, but got param_name = list_param
-    } else {
-        return list_param.vec();
     }
+    return list_param.vec();
 }
 
 inline std::vector<int64_t> calculate_conv_output_size(

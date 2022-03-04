@@ -205,8 +205,9 @@ template <typename func_t>
 void cpu_kernel(TensorIterator& iter, func_t&& op, int64_t grain_size = otter::GRAIN_SIZE) {
     using traits = function_traits<func_t>;
     
-    assert(iter.ninputs() == traits::arity);
-    assert(iter.noutputs() == 1);
+    OTTER_CHECK(iter.ninputs() == traits::arity, "Cpu kernel input not match");
+    OTTER_CHECK(iter.noutputs() == 1, "Cpu kernel output not match");
+    OTTER_CHECK(!needs_dynamic_casting<func_t>::check(iter), "Cpu kernel check cast fail");
     
     iter.for_each([&](char** data, const int64_t* strides, int64_t n) {
         basic_loop(data, strides, 0, n, std::forward<func_t>(op));
@@ -217,13 +218,12 @@ void cpu_kernel(TensorIterator& iter, func_t&& op, int64_t grain_size = otter::G
 template <bool check_dynamic_cast=true, typename func_t, typename vec_func_t>
 void cpu_kernel_vec(TensorIterator& iter, func_t&& op, vec_func_t&& vop, int64_t grain_size = otter::GRAIN_SIZE) {
     using traits = function_traits<func_t>;
-    // this could be extended to work with void return types
-    assert(iter.ninputs() == traits::arity);
-    assert(iter.noutputs() == 1);
-    // dynamic casting not currently supported on CPU, but some kernels (like Fill)
-    // explicitly dynamic_cast, so we give the opt-out of checking.
+    
+    OTTER_CHECK(iter.ninputs() == traits::arity, "Cpu kernel input not match");
+    OTTER_CHECK(iter.noutputs() == 1, "Cpu kernel output not match");
+    
     otter::if_constexpr<check_dynamic_cast>([&] {
-        assert(!needs_dynamic_casting<func_t>::check(iter));
+        OTTER_CHECK(!needs_dynamic_casting<func_t>::check(iter), "Cpu kernel check cast fail");
     });
     
     iter.for_each(make_vectorized_loop2d(op, vop), grain_size);
@@ -234,7 +234,7 @@ template <typename func_t>
 void cpu_serial_kernel(TensorIterator& iter, func_t&& op, const Range& range) {
     using traits = function_traits<func_t>;
     constexpr bool result_void = std::is_void<typename traits::result_type>::value;
-    assert(iter.ninputs() == traits::arity && ((result_void && iter.noutputs() == 0) || (!result_void && iter.noutputs() == 1)));
+    OTTER_CHECK(iter.ninputs() == traits::arity && ((result_void && iter.noutputs() == 0) || (!result_void && iter.noutputs() == 1)), "Cpu serial kernel check fail");
     
     iter.serial_for_each([&](char** data, const int64_t* strides, int64_t n) {
         basic_loop(data, strides, 0, n, std::forward<func_t>(op));
@@ -251,10 +251,10 @@ template <typename func_t, typename vec_func_t>
 void cpu_serial_kernel_vec(TensorIterator& iter, func_t&& op, vec_func_t&& vop, const Range& range) {
     using traits = function_traits<func_t>;
     // this could be extended to work with void return types
-    assert(iter.ninputs() == traits::arity);
-    assert(iter.noutputs() == 1);
+    OTTER_CHECK(iter.ninputs() == traits::arity, "Cpu kernel input not match");
+    OTTER_CHECK(iter.noutputs() == 1, "Cpu kernel output not match");
     // dynamic casting not currently supported on CPU
-    assert(!needs_dynamic_casting<func_t>::check(iter));
+    OTTER_CHECK(!needs_dynamic_casting<func_t>::check(iter), "Cpu kernel check cast fail");
 
     iter.serial_for_each(make_vectorized_loop2d(op, vop), range);
     iter.cast_outputs();

@@ -311,7 +311,7 @@ Tensor narrow(const Tensor& self, int64_t dim, int64_t start, int64_t length) {
 inline void check_cat_no_zero_dim(TensorList tensors) {
     for (const auto i : otter::irange(tensors.size())) {
         auto& t = tensors[i];
-        assert(t.dim() > 0);
+        OTTER_CHECK(t.dim() > 0, "Dimension of concated tensor should > 0 but get ", t.dim());
     }
 }
 

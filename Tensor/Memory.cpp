@@ -15,9 +15,9 @@ Memory_Tiny::~Memory_Tiny() {
     }
 }
 
-Memory_Tiny::Memory_Tiny() : cpu_data_(nullptr), size_(0), state_(UNINITIALIZED) {}
+Memory_Tiny::Memory_Tiny() : cpu_data_(nullptr), state_(UNINITIALIZED), size_(0) {}
 
-Memory_Tiny::Memory_Tiny(size_t size) : cpu_data_(nullptr), size_(size), state_(UNINITIALIZED) {}
+Memory_Tiny::Memory_Tiny(size_t size) : cpu_data_(nullptr), state_(UNINITIALIZED), size_(size) {}
 
 Memory_Tiny::Memory_Tiny(const Memory_Tiny &other) {
     size_ = other.size_;

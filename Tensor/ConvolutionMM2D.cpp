@@ -39,16 +39,29 @@ static inline void slow_conv2d_shape_check(
     int64_t pad_height, int64_t pad_width,
     bool weight_optional) {
     
-    assert(kernel_height > 0 && kernel_width > 0);
-    assert(stride_height > 0 && stride_width > 0);
+    OTTER_CHECK(
+          kernel_width > 0 && kernel_height > 0,
+          "kernel size should be greater than zero, but got kernel_height: ",
+          kernel_height,
+          " kernel_width: ",
+          kernel_width);
+    OTTER_CHECK(
+          stride_width > 0 && stride_height > 0,
+          "stride should be greater than zero, but got stride_height: ",
+          stride_height,
+          " stride_width: ",
+          stride_width);
     
     if (weight.defined()) {
-        assert(weight.numel() > 0 && (weight.dim() == 2 || weight.dim() == 4));
+        OTTER_CHECK(
+                weight.numel() > 0 && (weight.dim() == 2 || weight.dim() == 4),
+                "non-empty 2D or 4D weight tensor expected, but got: ",
+                weight.sizes());
         if (bias.defined()) {
             check_dim_size(bias, 1, 0, weight.size(0));
         }
     } else {
-        assert(weight_optional);
+        OTTER_CHECK(weight_optional, "weight tensor is undefined");
     }
     
     int64_t ndim = input.dim();
@@ -56,9 +69,11 @@ static inline void slow_conv2d_shape_check(
     int64_t dim_height = 2;
     int64_t dim_width  = 3;
     
-    assert(ndim == 4);  // Expect 4D input tensor
+    OTTER_CHECK(ndim == 4, "Expected 4D input tensor, but got: ", input.sizes());
     for (const auto dim : otter::irange(2, ndim)) {
-        assert(input.size(dim) != 0);
+        OTTER_CHECK(input.size(dim) != 0,
+                        "Expected non-zero size for input dimension ", dim,
+                        ", but got input shape: ", input.sizes(), ". Only the batch and channel dimensions support size 0.");
     }
     
     const int64_t input_height = input.size(dim_height);

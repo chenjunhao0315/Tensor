@@ -101,6 +101,7 @@ class TaskThreadPool : public ThreadPool {
 public:
     explicit TaskThreadPool(size_t pool_size, int numa_node_id = -1) : ThreadPool((int)pool_size, numa_node_id,
         [numa_node_id]() {
+            (void)numa_node_id;
 //          setThreadName("CaffeTaskThread");
 //          NUMABind(numa_node_id);
         }) {}

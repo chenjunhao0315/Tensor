@@ -79,16 +79,18 @@ const Tensor& resize_(const Tensor& self, IntArrayRef size, MemoryFormat memory_
 
 
 inline void setStrided(const Tensor& self, IntArrayRef size, IntArrayRef stride, int64_t memory_offset) {
-    assert(size.size() == stride.size());
+    OTTER_CHECK(size.size() == stride.size(), "mismatch in length of strides and shape");
     auto* self_ = self.unsafeGetTensorNucleus();
     
-    assert(memory_offset >= 0);
+    OTTER_CHECK(memory_offset >= 0, "Tensor: invalid storage offset ", memory_offset);
     self_->set_memory_offset(memory_offset);
     if (self_->sizes() == size && self_->strides() == stride) {
         return;
     }
     for (auto val : stride) {
-        assert(val >= 0);
+        OTTER_CHECK(val >= 0,
+                    "as_strided: Negative strides are not supported at the moment, "
+                    "got strides: ", stride);
     }
     self_->set_sizes_and_strides(size, stride);
 }
