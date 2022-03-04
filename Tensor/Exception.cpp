@@ -51,4 +51,40 @@ std::ostream& operator<<(std::ostream& out, const SourceLocation& loc) {
     return out;
 }
 
+void torchCheckFail(
+    const char* func,
+    const char* file,
+    uint32_t line,
+    const std::string& msg) {
+    throw otter::Error({func, file, line}, msg);
+}
+
+void torchCheckFail(
+    const char* func,
+    const char* file,
+    uint32_t line,
+    const char* msg) {
+    throw otter::Error({func, file, line}, msg);
+}
+
+void torchInternalAssertFail(
+    const char* func,
+    const char* file,
+    uint32_t line,
+    const char* condMsg,
+    const char* userMsg) {
+    torchCheckFail(func, file, line, otter::str(condMsg, userMsg));
+}
+
+// This should never be called. It is provided in case of compilers
+// that don't do any dead code stripping in debug builds.
+void torchInternalAssertFail(
+    const char* func,
+    const char* file,
+    uint32_t line,
+    const char* condMsg,
+    const std::string& userMsg) {
+    torchCheckFail(func, file, line, otter::str(condMsg, userMsg));
+}
+
 }   // end namespace otter

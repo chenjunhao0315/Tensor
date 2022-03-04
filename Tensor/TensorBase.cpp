@@ -10,7 +10,7 @@
 namespace otter {
 
 // TensorNucleus main constructor
-TensorNucleus::TensorNucleus(Memory&& memory, const TypeMeta data_type, Device device) : memory_(std::move(memory)), data_type_(data_type), memory_offset_(0), numel_(0), device_(device) {
+TensorNucleus::TensorNucleus(Memory&& memory, const TypeMeta data_type, Device device) : device_(device), memory_(std::move(memory)), memory_offset_(0), numel_(0), data_type_(data_type) {
     init_bitfields();
 }
 

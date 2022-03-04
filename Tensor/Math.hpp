@@ -9,6 +9,7 @@
 #define Math_hpp
 
 #include "cmath"
+#include "Macro.hpp"
 
 namespace otter {
 
@@ -25,10 +26,10 @@ static T abs_impl(T v) {
     return std::abs(v);
 }
 
-//template <>
-//uint8_t abs_impl(uint8_t v) {
-//    return v;
-//}
+template <>
+OTTER_UNUSED uint8_t abs_impl(uint8_t v) {
+    return v;
+}
 
 
 

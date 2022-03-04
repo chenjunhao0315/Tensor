@@ -120,7 +120,7 @@ void cpu_max_pool_channels_last_impl(
     using Vec = vec::Vectorized<scalar_t>;
     using integer_t = vec::int_same_size_t<scalar_t>;
     using iVec = vec::Vectorized<integer_t>;
-    OTTER_CHECK(input_height * input_width <= std::numeric_limits<integer_t>::max(), "Check fail");
+    OTTER_INTERNAL_ASSERT(input_height * input_width <= std::numeric_limits<integer_t>::max());
 
     // parallel on dim N, H, W
     otter::parallel_for(0, nbatch * output_height * output_width, 0, [&](int64_t begin, int64_t end) {
