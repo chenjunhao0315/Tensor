@@ -12,6 +12,7 @@
 #include <ostream>
 #include <sstream>
 
+#include "Macro.hpp"
 #include "StringUtils.hpp"
 
 namespace otter {
@@ -86,6 +87,47 @@ void otterCheckFail(const char* func, const char* file, uint32_t line, const std
 if (!(cond)) { \
     otter::otterCheckFail(__func__, __FILE__, static_cast<uint32_t>(__LINE__), OTTER_CHECK_MSG(cond, "", __VA_ARGS__)); \
 }
+
+[[noreturn]] void torchCheckFail(
+    const char* func,
+    const char* file,
+    uint32_t line,
+    const std::string& msg);
+[[noreturn]] void torchCheckFail(
+    const char* func,
+    const char* file,
+    uint32_t line,
+    const char* msg);
+
+[[noreturn]] void torchInternalAssertFail(
+    const char* func,
+    const char* file,
+    uint32_t line,
+    const char* condMsg,
+    const char* userMsg);
+[[noreturn]] inline void torchInternalAssertFail(
+    const char* func,
+    const char* file,
+    uint32_t line,
+    const char* condMsg,
+    otter::CompileTimeEmptyString userMsg) {
+    torchCheckFail(func, file, line, condMsg);
+}
+[[noreturn]] void torchInternalAssertFail(
+    const char* func,
+    const char* file,
+    uint32_t line,
+    const char* condMsg,
+    const std::string& userMsg);
+
+#define OTTER_INTERNAL_ASSERT(cond, ...)                              \
+  if (OTTER_UNLIKELY(!(cond))) {                               \
+    otter::torchCheckFail(                                    \
+        __func__,                                                     \
+        __FILE__,                                                     \
+        static_cast<uint32_t>(__LINE__),                              \
+        #cond " INTERNAL ASSERT FAILED at " OTTER_STRINGIZE(__FILE__)); \
+  }
 
 }   // end namespace otter
 

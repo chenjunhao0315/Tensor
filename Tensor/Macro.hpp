@@ -30,5 +30,22 @@ __attribute__((no_sanitize("signed-integer-overflow")))
 #define OTTER_UNLIKELY(expr) (expr)
 #endif
 
+#if defined(_MSC_VER) && !defined(__clang__)
+#define OTTER_UNUSED __pragma(warning(suppress : 4100 4101))
+#else
+#define OTTER_UNUSED __attribute__((__unused__))
+#endif //_MSC_VER
+
+#if defined(__GNUC__) || defined(__ICL) || defined(__clang__)
+#define OTTER_LIKELY(expr) (__builtin_expect(static_cast<bool>(expr), 1))
+#define OTTER_UNLIKELY(expr) (__builtin_expect(static_cast<bool>(expr), 0))
+#else
+#define OTTER_LIKELY(expr) (expr)
+#define OTTER_UNLIKELY(expr) (expr)
+#endif
+
+#define OTTER_STRINGIZE_IMPL(x) #x
+#define OTTER_STRINGIZE(x) OTTER_STRINGIZE_IMPL(x)
+
 
 #endif /* Macro_h */

@@ -12,6 +12,28 @@
 
 namespace otter {
 
+template <int out_ndims, typename scale_type, class F>
+void upsample_generic_Nd_kernel_impl(
+    const Tensor& output,
+    const Tensor& input,
+    bool align_corners,
+    const scale_type& scales) {
+    
+    // input can be NCHW, NCL or NCKHW
+    auto shape = input.sizes().vec();
+    auto strides = input.strides().vec();
+    auto oshape = output.sizes();
+
+    OTTER_INTERNAL_ASSERT(shape.size() == oshape.size() && shape.size() == 2 + out_ndims);
+    OTTER_INTERNAL_ASSERT(strides.size() == 2 + out_ndims);
+
+    for (const auto i : otter::irange(out_ndims)) {
+        shape[i + 2] = oshape[i + 2];
+        strides[i + 2] = 0;
+    }
+    auto restrided_input = input.as_strided(shape, strides);
+}
+
 void upsample_nearest2d_kernel_impl(
     const Tensor& output,
     const Tensor& input,
