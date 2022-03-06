@@ -8,10 +8,6 @@
 #include "OTensor.hpp"
 #include "Clock.hpp"
 #include "Net.hpp"
-#include "TensorFunction.hpp"
-#include "Pool.hpp"
-#include "Padding.hpp"
-#include "UpSample.hpp"
 
 using namespace std;
 
