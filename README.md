@@ -1,4 +1,4 @@
-# Neural_Network
+# Tensor
 
 ## About
 This is a project to implement the tensor calcuation library and (inference) neural netowrk in c++, can see it as a subset of [PyTorch][9] and [ncnn][10], the differnece is that I remove all codes that relate to CPU.
