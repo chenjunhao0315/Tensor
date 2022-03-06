@@ -23,6 +23,8 @@ public:
     virtual int load_param(const ParamDict &pd);
     
     virtual int forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
+    
+    virtual std::string type() const { return "Upsample"; }
 private:
     int mode;
     int output_height;

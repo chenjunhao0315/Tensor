@@ -1,20 +1,20 @@
 //
-//  ConcatLayer.hpp
+//  Yolov3DetectionOutputLayer.hpp
 //  Tensor
 //
-//  Created by 陳均豪 on 2022/3/3.
+//  Created by 陳均豪 on 2022/3/6.
 //
 
-#ifndef ConcatLayer_hpp
-#define ConcatLayer_hpp
+#ifndef Yolov3DetectionOutputLayer_hpp
+#define Yolov3DetectionOutputLayer_hpp
 
 #include "Layer.hpp"
 
 namespace otter {
 
-class ConcatLayer : public Layer {
+class Yolov3DetectionOutputLayer : public Layer {
 public:
-    ConcatLayer();
+    Yolov3DetectionOutputLayer();
     
     virtual int parse_param(LayerOption& option, ParamDict& pd);
     
@@ -24,15 +24,9 @@ public:
     
     virtual int forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const;
     
-    virtual std::string type() const { return "Concat"; }
-private:
-    int axis;
-};
-
-enum class ConcatParam {
-    Axis
+    virtual std::string type() const { return "Yolov3"; }
 };
 
 }
 
-#endif /* ConcatLayer_hpp */
+#endif /* Yolov3DetectionOutputLayer_hpp */

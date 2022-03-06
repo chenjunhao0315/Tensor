@@ -65,6 +65,7 @@
 		7687218827C35B9F006640CF /* BatchNormalization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687218627C35B9F006640CF /* BatchNormalization.cpp */; };
 		7687218B27C3C28D006640CF /* BatchNormalizationKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687218927C3C28D006640CF /* BatchNormalizationKernel.cpp */; };
 		769279D427D49BC90088BD9F /* UpsampleLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 769279D227D49BC90088BD9F /* UpsampleLayer.cpp */; };
+		76927B3527D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76927B3327D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp */; };
 		76BA778C27C66DC000AA896B /* DilatedConvolution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA778A27C66DC000AA896B /* DilatedConvolution.cpp */; };
 		76BA778F27C674DA00AA896B /* DilatedConvolutionUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA778D27C674DA00AA896B /* DilatedConvolutionUtils.cpp */; };
 		76BA779227C6CA8F00AA896B /* TensorScalar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA779027C6CA8F00AA896B /* TensorScalar.cpp */; };
@@ -257,6 +258,8 @@
 		7687218A27C3C28D006640CF /* BatchNormalizationKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BatchNormalizationKernel.hpp; sourceTree = "<group>"; };
 		769279D227D49BC90088BD9F /* UpsampleLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UpsampleLayer.cpp; sourceTree = "<group>"; };
 		769279D327D49BC90088BD9F /* UpsampleLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UpsampleLayer.hpp; sourceTree = "<group>"; };
+		76927B3327D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Yolov3DetectionOutputLayer.cpp; sourceTree = "<group>"; };
+		76927B3427D4E2780088BD9F /* Yolov3DetectionOutputLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Yolov3DetectionOutputLayer.hpp; sourceTree = "<group>"; };
 		76BA778A27C66DC000AA896B /* DilatedConvolution.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DilatedConvolution.cpp; sourceTree = "<group>"; };
 		76BA778B27C66DC000AA896B /* DilatedConvolution.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DilatedConvolution.hpp; sourceTree = "<group>"; };
 		76BA778D27C674DA00AA896B /* DilatedConvolutionUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DilatedConvolutionUtils.cpp; sourceTree = "<group>"; };
@@ -437,6 +440,17 @@
 		760382C427BF4D0800CD599F /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				76F336DA27A817D000E3AEF1 /* in_place.hpp */,
+				76E6C55827A57BE00036A26F /* C++17.cpp */,
+				76E6C55927A57BE00036A26F /* C++17.hpp */,
+				76E6C54F27A553550036A26F /* FunctionRef.cpp */,
+				76E6C55027A553550036A26F /* FunctionRef.hpp */,
+				76E6C55527A57AAD0036A26F /* Function_Trait.cpp */,
+				76E6C55627A57AAD0036A26F /* Function_Trait.hpp */,
+				76E6C52927A505D50036A26F /* MaybeOwned.cpp */,
+				76E6C52A27A505D50036A26F /* MaybeOwned.hpp */,
+				76F336D727A816E200E3AEF1 /* ExclusivelyOwned.cpp */,
+				76F336D827A816E200E3AEF1 /* ExclusivelyOwned.hpp */,
 				76E6C54327A5132B0036A26F /* Utils.cpp */,
 				76E6C54427A5132B0036A26F /* Utils.hpp */,
 				76E6C52327A505250036A26F /* ArrayRef.cpp */,
@@ -450,6 +464,8 @@
 				762E3B3D27BC9F3F0075F983 /* Clock.cpp */,
 				762E3B3E27BC9F3F0075F983 /* Clock.hpp */,
 				7620AF7B27B53DF90081C210 /* TypeCast.hpp */,
+				76F3378027B3AA7B00E3AEF1 /* Math.cpp */,
+				76F3378127B3AA7B00E3AEF1 /* Math.hpp */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -596,6 +612,8 @@
 				7628E17F27CFDB5900B136FA /* ConcatLayer.hpp */,
 				769279D227D49BC90088BD9F /* UpsampleLayer.cpp */,
 				769279D327D49BC90088BD9F /* UpsampleLayer.hpp */,
+				76927B3327D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp */,
+				76927B3427D4E2780088BD9F /* Yolov3DetectionOutputLayer.hpp */,
 			);
 			name = Layer;
 			sourceTree = "<group>";
@@ -624,6 +642,41 @@
 				7687218A27C3C28D006640CF /* BatchNormalizationKernel.hpp */,
 			);
 			name = Normalization;
+			sourceTree = "<group>";
+		};
+		769279D527D4C7480088BD9F /* core */ = {
+			isa = PBXGroup;
+			children = (
+				76E6C54627A513A10036A26F /* TensorIterator.cpp */,
+				76E6C54727A513A10036A26F /* TensorIterator.hpp */,
+				76E6C52C27A505FE0036A26F /* TensorOptions.cpp */,
+				76E6C52D27A505FE0036A26F /* TensorOptions.hpp */,
+				762E3B2B27BACA050075F983 /* TensorAccessor.cpp */,
+				762E3B2C27BACA050075F983 /* TensorAccessor.hpp */,
+				76E6C52027A504FC0036A26F /* PerspectiveView.cpp */,
+				76E6C52127A504FC0036A26F /* PerspectiveView.hpp */,
+				76E6C52F27A506C50036A26F /* TensorFactory.cpp */,
+				76E6C53027A506C50036A26F /* TensorFactory.hpp */,
+				76F336DB27A8FCE600E3AEF1 /* EmptyTensor.cpp */,
+				76F336DC27A8FCE600E3AEF1 /* EmptyTensor.hpp */,
+				76E6C55227A578980036A26F /* Loop.cpp */,
+				76E6C55327A578980036A26F /* Loop.hpp */,
+				76F336E427AEA7E300E3AEF1 /* TensorOperator.cpp */,
+				76F336E527AEA7E300E3AEF1 /* TensorOperator.hpp */,
+				7620AF7227B4F3F50081C210 /* TensorMaker.cpp */,
+				7620AF7327B4F3F50081C210 /* TensorMaker.hpp */,
+				7620AF7F27B552B20081C210 /* WarpDimUtils.cpp */,
+				7620AF8027B552B20081C210 /* WarpDimUtils.hpp */,
+				7620AF8427B589990081C210 /* Formatting.cpp */,
+				7620AF8527B589990081C210 /* Formatting.hpp */,
+				7620AF8727B593C00081C210 /* TensorUtils.cpp */,
+				7620AF8827B593C00081C210 /* TensorUtils.hpp */,
+				76F0064127B67E4C009D67F5 /* TensorProperties.cpp */,
+				76F0064227B67E4C009D67F5 /* TensorProperties.hpp */,
+				76F0064A27B7FC09009D67F5 /* ExpandUtils.cpp */,
+				76F0064B27B7FC09009D67F5 /* ExpandUtils.hpp */,
+			);
+			name = core;
 			sourceTree = "<group>";
 		};
 		76E6C4FE27A502680036A26F = {
@@ -666,47 +719,7 @@
 				760384B227C045BA00CD599F /* Ops */,
 				7687216527C0E569006640CF /* Layer */,
 				7687216C27C1233A006640CF /* Net */,
-				76E6C54627A513A10036A26F /* TensorIterator.cpp */,
-				76E6C54727A513A10036A26F /* TensorIterator.hpp */,
-				76E6C52C27A505FE0036A26F /* TensorOptions.cpp */,
-				76E6C52D27A505FE0036A26F /* TensorOptions.hpp */,
-				76E6C52F27A506C50036A26F /* TensorFactory.cpp */,
-				76E6C53027A506C50036A26F /* TensorFactory.hpp */,
-				76F336DB27A8FCE600E3AEF1 /* EmptyTensor.cpp */,
-				76F336DC27A8FCE600E3AEF1 /* EmptyTensor.hpp */,
-				76E6C52027A504FC0036A26F /* PerspectiveView.cpp */,
-				76E6C52127A504FC0036A26F /* PerspectiveView.hpp */,
-				76E6C52927A505D50036A26F /* MaybeOwned.cpp */,
-				76E6C52A27A505D50036A26F /* MaybeOwned.hpp */,
-				76F336D727A816E200E3AEF1 /* ExclusivelyOwned.cpp */,
-				76F336D827A816E200E3AEF1 /* ExclusivelyOwned.hpp */,
-				76E6C54F27A553550036A26F /* FunctionRef.cpp */,
-				76E6C55027A553550036A26F /* FunctionRef.hpp */,
-				76E6C55527A57AAD0036A26F /* Function_Trait.cpp */,
-				76E6C55627A57AAD0036A26F /* Function_Trait.hpp */,
-				76E6C55227A578980036A26F /* Loop.cpp */,
-				76E6C55327A578980036A26F /* Loop.hpp */,
-				76E6C55827A57BE00036A26F /* C++17.cpp */,
-				76E6C55927A57BE00036A26F /* C++17.hpp */,
-				76F336DA27A817D000E3AEF1 /* in_place.hpp */,
-				76F336E427AEA7E300E3AEF1 /* TensorOperator.cpp */,
-				76F336E527AEA7E300E3AEF1 /* TensorOperator.hpp */,
-				7620AF7227B4F3F50081C210 /* TensorMaker.cpp */,
-				7620AF7327B4F3F50081C210 /* TensorMaker.hpp */,
-				76F3378027B3AA7B00E3AEF1 /* Math.cpp */,
-				76F3378127B3AA7B00E3AEF1 /* Math.hpp */,
-				7620AF7F27B552B20081C210 /* WarpDimUtils.cpp */,
-				7620AF8027B552B20081C210 /* WarpDimUtils.hpp */,
-				7620AF8427B589990081C210 /* Formatting.cpp */,
-				7620AF8527B589990081C210 /* Formatting.hpp */,
-				7620AF8727B593C00081C210 /* TensorUtils.cpp */,
-				7620AF8827B593C00081C210 /* TensorUtils.hpp */,
-				76F0064127B67E4C009D67F5 /* TensorProperties.cpp */,
-				76F0064227B67E4C009D67F5 /* TensorProperties.hpp */,
-				76F0064A27B7FC09009D67F5 /* ExpandUtils.cpp */,
-				76F0064B27B7FC09009D67F5 /* ExpandUtils.hpp */,
-				762E3B2B27BACA050075F983 /* TensorAccessor.cpp */,
-				762E3B2C27BACA050075F983 /* TensorAccessor.hpp */,
+				769279D527D4C7480088BD9F /* core */,
 				762E3B4627BCE31A0075F983 /* IsContiguous.cpp */,
 				762E3B4727BCE31A0075F983 /* IsContiguous.hpp */,
 				762E3B4927BCFD750075F983 /* TensorIteratorDynamicCasting.cpp */,
@@ -805,6 +818,7 @@
 				760382C027BF4AAB00CD599F /* DefaultDtype.cpp in Sources */,
 				760382C727BFD6DE00CD599F /* WarpDimMinimal.cpp in Sources */,
 				76F336EF27AEF75000E3AEF1 /* UnaryOpsKernel.cpp in Sources */,
+				76927B3527D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp in Sources */,
 				7687217E27C2A850006640CF /* ConvolutionLayer.cpp in Sources */,
 				76E6C54E27A53AAA0036A26F /* TensorResize.cpp in Sources */,
 				7620AF8127B552B20081C210 /* WarpDimUtils.cpp in Sources */,

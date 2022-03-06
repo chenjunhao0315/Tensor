@@ -5,6 +5,8 @@ This is a project to implement the tensor calcuation library and (inference) neu
 
 The netowrk structure is same as [Neural Network][11] with some enhancement and is inspired by [ConvNetJS][1], [Darknet][2], [Caffe][4] and [ncnn][10].
 
+It aims to enhance the performance on mobile phone platform.
+
 The main purpose of this project is used for NTHU電機系實作專題.
 
 ## Feature
@@ -12,7 +14,6 @@ The main purpose of this project is used for NTHU電機系實作專題.
 * C++17
 * No dependencies
 * Multi-thread support with OpenMp
-* Run only on CPU
 * Symobolic operation
 * Arm optimization
 
@@ -110,7 +111,7 @@ cout << t1 << endl;
 ```
 
 #### from blob
-Create a tensor with data from outer data
+Create a tensor with data from outer data. **Note**: It didn't copy the data.
 `otter::form_blob(data, shape, dtype)`
 ```c++
 float data[] = {1, 4, 9};
@@ -121,6 +122,33 @@ cout << t1 << endl;
 // 9
 //[ FloatType{3} ]
 ```
+### Accessment
+#### access to tensor data
+Use the tensor accessor to access the tensor data
+`auto accessor = Tensor.accessor<dtype, dim>();`
+```c++
+auto t1 = otter::ones({1, 3, 3, 3}, otter::ScalarType::Float);
+auto t1_a = t1.accessor<float, 4>();
+
+// use t1_a[][][][][] as naive multi-dimension array
+t1_a[0][0][0][0] = 2;
+//(1,1,.,.) = 
+//  2  1  1
+//  1  1  1
+//  1  1  1
+//
+//(1,2,.,.) = 
+//  1  1  1
+//  1  1  1
+//  1  1  1
+//
+//(1,3,.,.) = 
+//  1  1  1
+//  1  1  1
+//  1  1  1
+//[ FloatType{1,3,3,3} ]
+```
+
 ### Operation
 #### add
 Element-wise addition
@@ -128,8 +156,8 @@ Element-wise addition
 ```
 add(Tensor) -> Tensor
 add(Scalar) -> Tensor
-add_(Tensor) -> Tensor&	// inplace
-add_(Scalar) -> Tensor&	// inplace
+add_(Tensor) -> Tensor&    // inplace
+add_(Scalar) -> Tensor&    // inplace
 ```
 ```c++
 auto t1 = otter::range(1, 10, 2, otter::ScalarType::Float);
@@ -174,8 +202,8 @@ Element-wise substraction
 ```c++
 sub(Tensor) -> Tensor
 sub(Scalar) -> Tensor
-sub_(Tensor) -> Tensor&	// inplace
-sub_(Scalar) -> Tensor&	// inplace
+sub_(Tensor) -> Tensor&    // inplace
+sub_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
@@ -188,8 +216,8 @@ Element-wise multiplication
 ```c++
 mul(Tensor) -> Tensor
 mul(Scalar) -> Tensor
-mul_(Tensor) -> Tensor&	// inplace
-mul_(Scalar) -> Tensor&	// inplace
+mul_(Tensor) -> Tensor&    // inplace
+mul_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
@@ -202,8 +230,8 @@ Element-wise divition
 ```c++
 div(Tensor) -> Tensor
 div(Scalar) -> Tensor
-div_(Tensor) -> Tensor&	// inplace
-div_(Scalar) -> Tensor&	// inplace
+div_(Tensor) -> Tensor&    // inplace
+div_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
@@ -216,8 +244,8 @@ Element-wise remainder
 ```c++
 remainder(Tensor) -> Tensor
 remainder(Scalar) -> Tensor
-remainder_(Tensor) -> Tensor&	// inplace
-remainder_(Scalar) -> Tensor&	// inplace
+remainder_(Tensor) -> Tensor&    // inplace
+remainder_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
@@ -230,8 +258,8 @@ Bit-wise and
 ```c++
 bitwise_and(Tensor) -> Tensor
 bitwise_and(Scalar) -> Tensor
-bitwise_and_(Tensor) -> Tensor&	// inplace
-bitwise_and_(Scalar) -> Tensor&	// inplace
+bitwise_and_(Tensor) -> Tensor&    // inplace
+bitwise_and_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
@@ -244,8 +272,8 @@ Bit-wise or
 ```c++
 bitwise_or(Tensor) -> Tensor
 bitwise_or(Scalar) -> Tensor
-bitwise_or_(Tensor) -> Tensor&	// inplace
-bitwise_or_(Scalar) -> Tensor&	// inplace
+bitwise_or_(Tensor) -> Tensor&    // inplace
+bitwise_or_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
@@ -258,8 +286,8 @@ Bit-wise xor
 ```c++
 bitwise_xor(Tensor) -> Tensor
 bitwise_xor(Scalar) -> Tensor
-bitwise_xor_(Tensor) -> Tensor&	// inplace
-bitwise_xor_(Scalar) -> Tensor&	// inplace
+bitwise_xor_(Tensor) -> Tensor&    // inplace
+bitwise_xor_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
@@ -272,8 +300,8 @@ Bit-wise not
 ```c++
 bitwise_not(Tensor) -> Tensor
 bitwise_not(Scalar) -> Tensor
-bitwise_not_(Tensor) -> Tensor&	// inplace
-bitwise_not_(Scalar) -> Tensor&	// inplace
+bitwise_not_(Tensor) -> Tensor&    // inplace
+bitwise_not_(Scalar) -> Tensor&    // inplace
 ```
 ##### Unary operation
 ```c++
@@ -380,7 +408,7 @@ dot(Tensor) -> Tensor
 #### Vision layers
 
 * Convolution layer (depthwise support)
-* Pooling layer (maxpooling)
+* MaxPool layer
 * UpSample layer
 
 #### Common layers
@@ -415,7 +443,7 @@ dot(Tensor) -> Tensor
 Declear the nerual network.
 
 ```cpp
-Net nn();
+Net nn;
 ```
 
 #### Add layers
@@ -530,10 +558,10 @@ The data flow of network is based on **Tensor**. To forward propagation, we need
 ```cpp
 Tensor input = otter::ones({1, 3, 28, 28}, otter::ScalarType::Float);
 
-auto extractor = nn.create_extractor();	// create an extractor
-extractor.input("data", input);	// pass input data in
-Tensor output;	// tensor that output will be stored
-extractor.extract("output", output, 0);	// extract the result
+auto extractor = nn.create_extractor();    // create an extractor
+extractor.input("data", input);    // pass input data in
+Tensor output;    // tensor that output will be stored
+extractor.extract("output", output, 0);    // extract the result
 ```
 
 #### Backward Propagation
@@ -584,5 +612,6 @@ g++ -Os -fopenmp -mavx2 -o otter *.cpp
 [9]: https://github.com/pytorch/pytorch
 [10]: https://github.com/Tencent/ncnn
 [11]: https://github.com/chenjunhao0315/Neural_Network
+
 
 

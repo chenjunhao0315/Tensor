@@ -21,6 +21,8 @@ public:
     virtual int load_param(const ParamDict &pd);
     
     virtual int forward_inplace(Tensor& bottom_blob, const NetOption& opt) const;
+    
+    virtual std::string type() const { return "Dropout"; }
 private:
     float probability;
 };

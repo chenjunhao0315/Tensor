@@ -125,11 +125,11 @@ foreach(p LIB BIN INCLUDE CMAKE)
 endforeach()
 
 #look for all *.h files in src folder
-file(GLOB headers "${CMAKE_CURRENT_LIST_DIR}/*.hpp")
+file(GLOB headers "${CMAKE_CURRENT_LIST_DIR}/Tensor/*.hpp")
 #add also files in the include folder
 
 #look for all *.c files in src folder
-file(GLOB sources "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
+file(GLOB sources "${CMAKE_CURRENT_LIST_DIR}/Tensor/*.cpp")
 #add also .cpp files
 
 if(BUILD_AS_CPP)

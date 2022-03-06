@@ -15,14 +15,13 @@
 #define OTTER_AVX 1
 
 #if OTTER_MOBLE
-#if OTTER_AVX
 
+#else
+#if OTTER_AVX
 #define CPU_CAPABILITY_AVX2 1
 #else
 #define CPU_CAPABILITY_AVX2 0
 #endif
-#else
-#define CPU_CAPABILITY_AVX2 0
 #endif
 
 
