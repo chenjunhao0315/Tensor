@@ -423,7 +423,7 @@ Net nn();
 It will add layer to neural network, checking the structure of input tensor at some layer, for instance, Concat layer, the input width and height should be the same as all input.
 
 ```cpp
-nn.addLayer(LayerOption{{"type", "XXX"}, {"option", "YYY"}, {"input_name", "ZZZ"}, {"name", "WWW"}});    // The options are unordered
+nn.addLayer(LayerOption{{"type", "XXX"}, {"option", "YYY"}, {"input", "ZZZ"}, {"name", "WWW"}});    // The options are unordered
 ```
 
 ##### Data layer
