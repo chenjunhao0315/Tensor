@@ -52,6 +52,7 @@ int UpsampleLayer::load_param(const ParamDict &pd) {
     output_width = pd.get((int)UpsampleParam::Output_width, 0);
     scale_height = pd.get((int)UpsampleParam::Height_scale, 0.f);
     scale_width = pd.get((int)UpsampleParam::Width_scale, 0.f);
+    stride = pd.get((int)UpsampleParam::Stride, -1);
     
     return 0;
 }
