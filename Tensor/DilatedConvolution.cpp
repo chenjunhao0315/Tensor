@@ -153,14 +153,14 @@ void slow_conv_dilated_all_cpu_template(
     // The rear part of output tensor sizes:
     auto output_size = otter::get_output_size<dim>( input, kernel_size, stride_size, pad_size, dilation_size);
     int64_t batchSize = input.size(0);
-    int64_t nInputPlane = weight.size(1);
+    int64_t n_input_planes = weight.size(1);
     int64_t nOutputPlane = weight.size(0);
     // Temporary buffer:
     Tensor columns = otter::empty({0}, options);
     if (output.defined() || grad_weight.defined() || grad_input.defined()) {
         const int64_t m = otter::multiply_integers(kernel_size);
         const int64_t n = otter::multiply_integers(output_size);
-        columns.resize_({nInputPlane * m, n});
+        columns.resize_({n_input_planes * m, n});
     }
     // Initialize
     if (grad_weight.defined()) {
@@ -194,7 +194,7 @@ void slow_conv_dilated_all_cpu_template(
                 // Extract columns:
                 hvol2col<scalar_t, dim>(
                     input_n.data_ptr<scalar_t>(),
-                    nInputPlane,
+                    (int)n_input_planes,
                     input_size,
                     output_size,
                     kernel_size,
@@ -244,7 +244,7 @@ void slow_conv_dilated_all_cpu_template(
                 
                 col2hvol<scalar_t, dim>(
                     columns.data_ptr<scalar_t>(),
-                    nInputPlane,
+                    (int)n_input_planes,
                     input_size,
                     output_size,
                     kernel_size,
@@ -259,7 +259,7 @@ void slow_conv_dilated_all_cpu_template(
                 // Extract columns:
                 hvol2col<scalar_t, dim>(
                     input_n.data_ptr<scalar_t>(),
-                    nInputPlane,
+                    (int)n_input_planes,
                     input_size,
                     output_size,
                     kernel_size,

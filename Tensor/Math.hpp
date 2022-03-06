@@ -15,10 +15,10 @@ namespace otter {
 
 template <typename T>
 static inline T div_round_up(T x, T y) {
-    int q = x / y;
-    int r = x % y;
+    int64_t q = x / y;
+    int64_t r = x % y;
     if ((r!=0) && ((r<0) != (y<0))) --q;
-    return q;
+    return static_cast<T>(q);
 }
 
 template <typename T>

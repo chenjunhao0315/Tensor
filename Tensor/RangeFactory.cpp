@@ -54,7 +54,7 @@ Tensor& range_out(const Scalar& start, const Scalar& end, const Scalar& step, Te
         scalar_t *data_ptr = r.data_ptr<scalar_t>();
 
         otter::parallel_for(0, size, otter::GRAIN_SIZE, [&](int64_t p_begin, int64_t p_end) {
-            int is = p_begin;
+            int64_t is = p_begin;
             for (int64_t i = p_begin; i < p_end; ++i, ++is) {
                 data_ptr[i] = xstart + is * xstep;
             }

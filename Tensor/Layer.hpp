@@ -9,7 +9,7 @@
 #define Layer_hpp
 
 #include "Tensor.hpp"
-
+#include "NetOption.hpp"
 #include "ParamDict.hpp"
 
 #include <unordered_map>
@@ -17,8 +17,6 @@
 namespace otter {
 
 using LayerOption = std::unordered_map<std::string, std::string>;
-
-class NetOption;
 
 class Layer {
 public:

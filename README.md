@@ -1,7 +1,7 @@
 # Tensor
 
 ## About
-This is a project to implement the tensor calcuation library and (inference) neural netowrk in c++, can see it as a subset of [PyTorch][9] and [ncnn][10], the differnece is that I remove all codes that relate to CPU.
+This is a project to implement the tensor calcuation library and (inference) neural netowrk in c++, can see it as a subset of [PyTorch][9] and [ncnn][10], the differnece is that I remove all codes that not relate to CPU.
 
 The netowrk structure is same as [Neural Network][11] with some enhancement and is inspired by [ConvNetJS][1], [Darknet][2], [Caffe][4] and [ncnn][10].
 
@@ -132,6 +132,7 @@ auto t1_a = t1.accessor<float, 4>();
 
 // use t1_a[][][][][] as naive multi-dimension array
 t1_a[0][0][0][0] = 2;
+cout << t1 << endl;
 //(1,1,.,.) = 
 //  2  1  1
 //  1  1  1

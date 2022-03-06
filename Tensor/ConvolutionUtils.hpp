@@ -41,6 +41,7 @@ enum class ConvBackend {
     SlowDilated3d,
     Slow2d,
     Slow2dNeon,
+    Slow2dNeon_1x1s1,
     Slow3d,
     Overrideable
 };

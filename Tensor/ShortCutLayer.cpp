@@ -62,8 +62,18 @@ int ShortCutLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<
         const Tensor& bottom_blob_next = bottom_blobs[i];
         ShortCutBackend backend = shortcut_check_and_select_backend(bottom_blob, bottom_blob_next);
         switch (backend) {
-            case ShortCutBackend::Darknet_shortcut: break;
-            case ShortCutBackend::Eltwise_add: output = output + bottom_blob_next; break;
+            case ShortCutBackend::Darknet_shortcut: {
+                // TODO: darknet version shortcut
+                break;
+            }
+            case ShortCutBackend::Eltwise_add: {
+                if (opt.use_non_lib_optimize) {
+                    // TODO: shortcut enhancement
+                } else {
+                    output = output + bottom_blob_next;
+                }
+                break;
+            }
         }
     }
     

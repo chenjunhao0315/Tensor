@@ -176,7 +176,7 @@ static void __printMatrix(std::ostream& stream, const Tensor& self, int64_t line
             Tensor row = self.select(0, l);
             double *row_ptr = row.data_ptr<double>();
             for (const auto c : otter::irange(firstColumn, lastColumn+1)) {
-                stream << std::setw(sz) << row_ptr[c] / scale;
+                stream << std::setw((int)sz) << row_ptr[c] / scale;
                 if(c == lastColumn) {
                     stream << std::endl;
                     if(l != self.size(0)-1) {
@@ -262,7 +262,7 @@ std::ostream& print(std::ostream& stream, const Tensor & tensor_, int64_t linesi
                 }
                 double* tensor_p = tensor.data_ptr<double>();
                 for (const auto i : otter::irange(tensor.size(0))) {
-                    stream << std::setw(sz) << tensor_p[i]/scale << std::endl;
+                    stream << std::setw((int)sz) << tensor_p[i] / scale << std::endl;
                 }
             }
             stream << "[ " << tensor_.toString() << "{" << tensor.size(0) << "}";

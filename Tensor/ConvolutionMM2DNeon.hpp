@@ -31,6 +31,23 @@ Tensor slow_conv2d_neon(
     IntArrayRef stride,
     IntArrayRef padding);
 
+Tensor& slow_conv2d_1x1s1_neon_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor slow_conv2d_1x1s1_neon(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding);
+
 }
 
 #endif /* ConvolutionMM2DNeon_hpp */

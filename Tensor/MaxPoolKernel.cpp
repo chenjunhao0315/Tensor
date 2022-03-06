@@ -146,7 +146,7 @@ void cpu_max_pool_channels_last_impl(
             int64_t* ind = indices_data + i * channels;
 
             // Pass I: init out lane
-            iVec index0_vec = iVec(ih0 * input_width + iw0);
+            iVec index0_vec = iVec(static_cast<int>(ih0 * input_width + iw0));
             Vec out_vec = Vec(-std::numeric_limits<scalar_t>::infinity());
             int64_t d1 = 0;
             for (; d1 < len; d1 += Vec::size()) {
@@ -164,7 +164,7 @@ void cpu_max_pool_channels_last_impl(
 
                     int64_t d2 = 0;
                     for (; d2 < len; d2 += Vec::size()) {
-                        iVec index_vec = iVec(ih * input_width + iw);
+                        iVec index_vec = iVec(static_cast<int>(ih * input_width + iw));
                         Vec val_vec = Vec::loadu(in + d2);
                         iVec maxindex_vec = iVec::loadu(index_buffer.get() + d2);
                         Vec maxval_vec = Vec::loadu(out + d2);

@@ -12,6 +12,7 @@ namespace otter {
 NetOption::NetOption() {
     lightmode = true;
     train = false;
+    use_non_lib_optimize = false;
 }
 
 }

@@ -304,7 +304,7 @@ void Net::update_input_output_indexes() {
 
     for (size_t i = 0; i < blobs.size(); i++) {
         if (blobs[i].producer != -1 && blobs[i].consumer == -1) {
-            output_blob_indexes.push_back(i);
+            output_blob_indexes.push_back((int)i);
         }
     }
 }

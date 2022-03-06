@@ -110,7 +110,11 @@ ConvBackend select_proper_conv_backend(
                     return ConvBackend::SlowDilated2d;
                 } else {
                     if (params.use_cpu_neon(input, weight)) {
-                        return ConvBackend::Slow2dNeon;
+                        if (input.size(1) >= 64 && weight.size(0) >= 64 && params.stride[0] == 1 && params.stride[1] == 1 && weight.size(2) == 1 && weight.size(3) == 1) {
+                            return ConvBackend::Slow2dNeon_1x1s1;
+                        } else {
+                            return ConvBackend::Slow2dNeon;
+                        }
                     } else {
                         return ConvBackend::Slow2d;
                     }
@@ -203,6 +207,7 @@ Tensor convolution(
             break;
         case ConvBackend::Slow2d:
         case ConvBackend::Slow2dNeon:
+        case ConvBackend::Slow2dNeon_1x1s1:
         case ConvBackend::SlowDilated2d:
             if (params.groups == 1) {
                 output = otter::convolution_nogroup_backend(input.contiguous(), weight, bias, backend, params);
@@ -210,9 +215,9 @@ Tensor convolution(
                 std::vector<Tensor> outputs(params.groups);
                 input = input.contiguous();
                 for (const auto g : otter::irange(params.groups)) {
-                    auto input_g = subtensor(input, 1, params.groups, g);
-                    auto weight_g = subtensor(weight, 0, params.groups, g);
-                    auto bias_g = subtensor(bias, 0, params.groups, g);
+                    auto input_g = subtensor(input, 1, static_cast<int>(params.groups), static_cast<int>(g));
+                    auto weight_g = subtensor(weight, 0, static_cast<int>(params.groups), static_cast<int>(g));
+                    auto bias_g = subtensor(bias, 0, static_cast<int>(params.groups), static_cast<int>(g));
                     outputs[g] = otter::convolution_nogroup_backend(input_g, weight_g, bias_g, backend, params);
                 }
                 output = otter::native::cat(outputs, 1);
@@ -238,6 +243,8 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
             return otter::slow_conv_dilated2d(self, weight, bias, kernel_size, params.stride, params.padding, params.dilation);
         case ConvBackend::Slow2dNeon:
             return otter::slow_conv2d_neon(self, weight, bias, kernel_size, params.stride, params.padding);
+        case ConvBackend::Slow2dNeon_1x1s1:
+            return otter::slow_conv2d_1x1s1_neon(self, weight, bias, kernel_size, params.stride, params.padding);
         default:
             assert(false);  // Unsupported nogroup conv backend
     }
