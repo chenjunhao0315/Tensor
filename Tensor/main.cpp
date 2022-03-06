@@ -11,6 +11,7 @@
 #include "TensorFunction.hpp"
 #include "Pool.hpp"
 #include "Padding.hpp"
+#include "UpSample.hpp"
 
 using namespace std;
 
@@ -20,6 +21,7 @@ int main(int argc, const char * argv[]) {
     net.addLayer(otter::LayerOption{{"type", "LRelu"}, {"name", "lr_1"}});
     net.addLayer(otter::LayerOption{{"type", "LRelu"}, {"name", "lr_2"}, {"input", "data"}});
     net.addLayer(otter::LayerOption{{"type", "Concat"}, {"name", "c_1"}, {"input", "lr_2, lr_1"}});
+    net.addLayer(otter::LayerOption{{"type", "Upsample"}, {"name", "up_1"}, {"darknet_mode", "true"}, {"stride", "2"}});
     net.compile();
     net.summary();
 
@@ -27,8 +29,7 @@ int main(int argc, const char * argv[]) {
     auto ex = net.create_extractor();
     ex.input("data", in);
     otter::Tensor out;
-    ex.extract("c_1", out, 0);
+    ex.extract("up_1", out, 0);
     cout << out << endl;
-
     return 0;
 }

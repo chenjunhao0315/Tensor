@@ -15,6 +15,8 @@ namespace otter {
 namespace native {
 Tensor& fill_out(Tensor& self, const Scalar& value) {
     auto iter = TensorIteratorConfig()
+        .set_check_mem_overlap(false)  // Fill is idempotent, so overlap is okay
+        .check_all_same_dtype(false)
         .add_output(self)
         .resize_outputs(false)
         .build();

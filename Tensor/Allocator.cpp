@@ -15,8 +15,8 @@ Allocator* get_default_allocator() {
 
 Allocator* GetAllocator(Device device) {
     switch (device) {
-        case Device::CPU: get_default_allocator(); break;
-        default: get_default_allocator();
+        case Device::CPU: return get_default_allocator(); break;
+        default: return get_default_allocator();
     }
     return get_default_allocator();
 }

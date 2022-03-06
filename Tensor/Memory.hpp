@@ -63,9 +63,9 @@ private:
 
 class Data : public Ref {
 public:
-    ~Data() { otter_free(cpu_data_); }
+    ~Data() { free_cpu(cpu_data_); }
     Data() : Ref(), cpu_data_(nullptr) {}
-    Data(size_t size) : Data() { cpu_data_ = otter_calloc(1, size); }
+    Data(size_t size) : Data() { cpu_data_ = alloc_cpu(size); }
     void *cpu_data() { return cpu_data_; }
 private:
     void *cpu_data_;

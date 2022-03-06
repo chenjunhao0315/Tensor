@@ -169,8 +169,12 @@ void TensorIterator::compute_types(const TensorIteratorConfig &config) {
     
     for (auto& op : operands_) {
         if (!op.is_type_defined()) {
-            has_undefined_outputs = true;
-            
+            if (config.static_dtype_ != ScalarType::Undefined) {
+                op.target_dtype = config.static_dtype_;
+            } else {
+                has_undefined_outputs = true;
+            }
+
             if (has_undefined_outputs) {
                 continue;
             }
@@ -649,6 +653,24 @@ TensorIteratorConfig& TensorIteratorConfig::add_borrowed_output(const TensorBase
     tensors_.push_back(MaybeOwned<TensorBase>::borrowed(output));
     num_outputs_++;
     
+    return *this;
+}
+
+TensorIteratorConfig& TensorIteratorConfig::declare_static_dtype_and_device(ScalarType dtype, Device device) {
+    OTTER_CHECK(!check_all_same_dtype_, "check_all_same_dtype(false) must be called before declare_static_dtype(...)");
+    static_dtype_ = dtype;
+    static_device_ = device;
+    return *this;
+}
+
+TensorIteratorConfig& TensorIteratorConfig::declare_static_dtype(ScalarType dtype) {
+    OTTER_CHECK(!check_all_same_dtype_, "check_all_same_dtype(false) must be called before declare_static_dtype(...)");
+    static_dtype_ = dtype;
+    return *this;
+}
+
+TensorIteratorConfig& TensorIteratorConfig::declare_static_device(Device device) {
+    static_device_ = device;
     return *this;
 }
 

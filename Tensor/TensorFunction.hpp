@@ -203,6 +203,10 @@ struct structured_max_pool2d_with_indices_out_cpu : public structured_max_pool2d
     void impl(const Tensor & self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode, const Tensor & out, const Tensor & indices);
 };
 
+struct structured_upsample_nearest2d_out_cpu : public structured_upsample_nearest2d {
+    void impl(const Tensor & self, IntArrayRef output_size, double scales_h, double scales_w, const Tensor & out);
+};
+
 namespace cpu {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha);
@@ -283,6 +287,9 @@ Tensor & leaky_relu_(Tensor & self, const Scalar & negative_slope);
 
 std::tuple<Tensor, Tensor> max_pool2d_with_indices(const Tensor & self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode);
 std::tuple<Tensor&, Tensor&> max_pool2d_with_indices_out(Tensor & out, Tensor & indices, const Tensor & self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode);
+
+Tensor upsample_nearest2d(const Tensor & self, IntArrayRef output_size, double scales_h, double scales_w);
+Tensor & upsample_nearest2d_out(Tensor & out, const Tensor & self, IntArrayRef output_size, double scales_h, double scales_w);
 
 }
 
