@@ -78,6 +78,20 @@ static inline bool isFloatingType(ScalarType t) {
       t == ScalarType::Double || t == ScalarType::Float);
 }
 
+template <ScalarType N>
+struct ScalarTypeToCPPType;
+
+#define SPECIALIZE_ScalarTypeToCPPType(cpp_type, scalar_type)                \
+template <>                                                                \
+struct ScalarTypeToCPPType<ScalarType::scalar_type> {                 \
+    using type = cpp_type;                                                   \
+    static type t;                                                           \
+};
+
+OTTER_ALL_SCALAR_TYPES(SPECIALIZE_ScalarTypeToCPPType)
+
+#undef SPECIALIZE_ScalarTypeToCPPType
+
 template <typename T>
 struct CppTypeToScalarType;
 
@@ -185,7 +199,8 @@ inline constexpr bool less_than_lowest(const T& x) {
 
 // skip isnan and isinf check for integral types
 template <typename To, typename From>
-typename std::enable_if<std::is_integral<From>::value && !std::is_same<From, bool>::value, bool>::type overflows(From f) {
+typename std::enable_if<std::is_integral<From>::value && !std::is_same<From, bool>::value, bool>::type
+overflows(From f) {
     using limit = std::numeric_limits<typename scalar_value_type<To>::type>;
     if (!limit::is_signed && std::numeric_limits<From>::is_signed) {
         // allow for negative numbers to wrap using two's complement arithmetic.
@@ -198,7 +213,8 @@ typename std::enable_if<std::is_integral<From>::value && !std::is_same<From, boo
 }
 
 template <typename To, typename From>
-typename std::enable_if<std::is_floating_point<From>::value, bool>::type overflows(From f) {
+typename std::enable_if<std::is_floating_point<From>::value, bool>::type
+overflows(From f) {
     using limit = std::numeric_limits<typename scalar_value_type<To>::type>;
     if (limit::has_infinity && std::isinf(static_cast<double>(f))) {
         return false;

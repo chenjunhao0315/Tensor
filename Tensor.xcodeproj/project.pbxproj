@@ -64,6 +64,7 @@
 		7687218127C2DDC7006640CF /* Normalization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687217F27C2DDC7006640CF /* Normalization.cpp */; };
 		7687218827C35B9F006640CF /* BatchNormalization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687218627C35B9F006640CF /* BatchNormalization.cpp */; };
 		7687218B27C3C28D006640CF /* BatchNormalizationKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687218927C3C28D006640CF /* BatchNormalizationKernel.cpp */; };
+		769279D427D49BC90088BD9F /* UpsampleLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 769279D227D49BC90088BD9F /* UpsampleLayer.cpp */; };
 		76BA778C27C66DC000AA896B /* DilatedConvolution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA778A27C66DC000AA896B /* DilatedConvolution.cpp */; };
 		76BA778F27C674DA00AA896B /* DilatedConvolutionUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA778D27C674DA00AA896B /* DilatedConvolutionUtils.cpp */; };
 		76BA779227C6CA8F00AA896B /* TensorScalar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA779027C6CA8F00AA896B /* TensorScalar.cpp */; };
@@ -254,6 +255,8 @@
 		7687218727C35B9F006640CF /* BatchNormalization.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BatchNormalization.hpp; sourceTree = "<group>"; };
 		7687218927C3C28D006640CF /* BatchNormalizationKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BatchNormalizationKernel.cpp; sourceTree = "<group>"; };
 		7687218A27C3C28D006640CF /* BatchNormalizationKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BatchNormalizationKernel.hpp; sourceTree = "<group>"; };
+		769279D227D49BC90088BD9F /* UpsampleLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UpsampleLayer.cpp; sourceTree = "<group>"; };
+		769279D327D49BC90088BD9F /* UpsampleLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UpsampleLayer.hpp; sourceTree = "<group>"; };
 		76BA778A27C66DC000AA896B /* DilatedConvolution.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DilatedConvolution.cpp; sourceTree = "<group>"; };
 		76BA778B27C66DC000AA896B /* DilatedConvolution.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DilatedConvolution.hpp; sourceTree = "<group>"; };
 		76BA778D27C674DA00AA896B /* DilatedConvolutionUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DilatedConvolutionUtils.cpp; sourceTree = "<group>"; };
@@ -583,6 +586,8 @@
 				7628E17927CFCE5700B136FA /* DropoutLayer.hpp */,
 				7628E17E27CFDB5900B136FA /* ConcatLayer.cpp */,
 				7628E17F27CFDB5900B136FA /* ConcatLayer.hpp */,
+				769279D227D49BC90088BD9F /* UpsampleLayer.cpp */,
+				769279D327D49BC90088BD9F /* UpsampleLayer.hpp */,
 			);
 			name = Layer;
 			sourceTree = "<group>";
@@ -889,6 +894,7 @@
 				76E6C51327A502A30036A26F /* Tensor.cpp in Sources */,
 				76E6C52827A505700036A26F /* SmallVector.cpp in Sources */,
 				76E6C50B27A502680036A26F /* main.cpp in Sources */,
+				769279D427D49BC90088BD9F /* UpsampleLayer.cpp in Sources */,
 				762E3B3C27BBBDBE0075F983 /* ConvolutionUtils.cpp in Sources */,
 				76E6C51927A5038F0036A26F /* Allocator.cpp in Sources */,
 				76E6C53127A506C50036A26F /* TensorFactory.cpp in Sources */,

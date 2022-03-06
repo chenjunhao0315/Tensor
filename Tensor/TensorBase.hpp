@@ -77,6 +77,9 @@ public:
     }
     
     bool is_contiguous(MemoryFormat memory_format = MemoryFormat::Contiguous) const {
+        if (memory_format == MemoryFormat::ChannelsLast) {
+            return is_channels_last_contiguous_;
+        }
         return is_contiguous_;
     }
     

@@ -288,6 +288,10 @@ public:
     TensorIteratorConfig& add_borrowed_input(const TensorBase&& input) = delete;
     TensorIteratorConfig& add_borrowed_output(const TensorBase&& output) = delete;
     
+    TensorIteratorConfig& declare_static_dtype_and_device(ScalarType dtype, Device device);
+    TensorIteratorConfig& declare_static_dtype(ScalarType dtype);
+    TensorIteratorConfig& declare_static_device(Device device);
+    
     TensorIterator build() {
         TensorIterator iter;
         iter.build(*this);
@@ -347,6 +351,9 @@ private:
     
     int num_inputs_ = 0;
     int num_outputs_ = 0;
+    
+    ScalarType static_dtype_ = ScalarType::Undefined;
+    Device static_device_ = Device::Undefined;
     
     bool resize_outputs_ = true;
     bool check_mem_overlap_ = true;
