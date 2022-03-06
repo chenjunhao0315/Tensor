@@ -538,6 +538,14 @@
 				7628E02227CE7A6200B136FA /* Pool.hpp */,
 				7628E02427CE7BEB00B136FA /* MaxPoolKernel.cpp */,
 				7628E02527CE7BEB00B136FA /* MaxPoolKernel.hpp */,
+				7628E02D27CF543700B136FA /* Padding.cpp */,
+				7628E02E27CF543800B136FA /* Padding.hpp */,
+				7628E17B27CFCFCB00B136FA /* Dropout.cpp */,
+				7628E17C27CFCFCB00B136FA /* Dropout.hpp */,
+				7628E2D227D10CDA00B136FA /* UpSample.cpp */,
+				7628E2D327D10CDA00B136FA /* UpSample.hpp */,
+				7628E2D527D1168C00B136FA /* UpSampleKernel.cpp */,
+				7628E2D627D1168C00B136FA /* UpSampleKernel.hpp */,
 			);
 			name = Ops;
 			sourceTree = "<group>";
@@ -715,14 +723,6 @@
 				7687216027C0E31C006640CF /* Module.hpp */,
 				76BA779027C6CA8F00AA896B /* TensorScalar.cpp */,
 				76BA779127C6CA8F00AA896B /* TensorScalar.hpp */,
-				7628E02D27CF543700B136FA /* Padding.cpp */,
-				7628E02E27CF543800B136FA /* Padding.hpp */,
-				7628E17B27CFCFCB00B136FA /* Dropout.cpp */,
-				7628E17C27CFCFCB00B136FA /* Dropout.hpp */,
-				7628E2D227D10CDA00B136FA /* UpSample.cpp */,
-				7628E2D327D10CDA00B136FA /* UpSample.hpp */,
-				7628E2D527D1168C00B136FA /* UpSampleKernel.cpp */,
-				7628E2D627D1168C00B136FA /* UpSampleKernel.hpp */,
 			);
 			path = Tensor;
 			sourceTree = "<group>";

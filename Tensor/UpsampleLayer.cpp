@@ -25,8 +25,8 @@ int UpsampleLayer::parse_param(LayerOption& option, ParamDict& pd) {
     }
     int output_height = opt_find_int(option, "output_height", 0);
     int output_width = opt_find_int(option, "output_width", 0);
-    float height_scale = opt_find_float(option, "height_scale", 0.f);
-    float width_scale = opt_find_float(option, "width_scale", 0.f);
+    float scale_height = opt_find_float(option, "scale_height", 0.f);
+    float scale_width = opt_find_float(option, "scale_width", 0.f);
     
     int stride = -1;
     if (opt_check_string(option, "darknet_mode")) {
@@ -38,8 +38,8 @@ int UpsampleLayer::parse_param(LayerOption& option, ParamDict& pd) {
     pd.set((int)UpsampleParam::Mode, mode);
     pd.set((int)UpsampleParam::Output_height, output_height);
     pd.set((int)UpsampleParam::Output_width, output_width);
-    pd.set((int)UpsampleParam::Height_scale, height_scale);
-    pd.set((int)UpsampleParam::Width_scale, width_scale);
+    pd.set((int)UpsampleParam::Height_scale, scale_height);
+    pd.set((int)UpsampleParam::Width_scale, scale_width);
     pd.set((int)UpsampleParam::Stride, stride);
     
     
@@ -50,8 +50,8 @@ int UpsampleLayer::load_param(const ParamDict &pd) {
     mode = pd.get((int)UpsampleParam::Mode, 0);
     output_height = pd.get((int)UpsampleParam::Output_height, 0);
     output_width = pd.get((int)UpsampleParam::Output_width, 0);
-    height_scale = pd.get((int)UpsampleParam::Height_scale, 0.f);
-    width_scale = pd.get((int)UpsampleParam::Width_scale, 0.f);
+    scale_height = pd.get((int)UpsampleParam::Height_scale, 0.f);
+    scale_width = pd.get((int)UpsampleParam::Width_scale, 0.f);
     
     return 0;
 }
@@ -80,7 +80,7 @@ int UpsampleLayer::compute_output_shape(ParamDict& pd) {
 
 int UpsampleLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const {
     if (mode == 0) {
-        top_blob = otter::cpu::upsample_nearest2d(bottom_blob, {output_height, output_width}, height_scale, width_scale);
+        top_blob = otter::cpu::upsample_nearest2d(bottom_blob, {output_height, output_width}, scale_height, scale_width);
     }
     
     return 0;

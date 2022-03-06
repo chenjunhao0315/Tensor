@@ -27,8 +27,8 @@ private:
     int mode;
     int output_height;
     int output_width;
-    float height_scale;
-    float width_scale;
+    float scale_height;
+    float scale_width;
     int stride;
 };
 
