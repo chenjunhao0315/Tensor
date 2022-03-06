@@ -171,202 +171,202 @@ cout << t3 << endl;
 #### sub
 Element-wise substraction
 ##### member function
-```
+```c++
 sub(Tensor) -> Tensor
 sub(Scalar) -> Tensor
 sub_(Tensor) -> Tensor&	// inplace
 sub_(Scalar) -> Tensor&	// inplace
 ```
 ##### binaray operation
-```
+```c++
 TensorC = TesorA - TensorB
 ```
 
 #### mul
 Element-wise multiplication
 ##### member function
-```
+```c++
 mul(Tensor) -> Tensor
 mul(Scalar) -> Tensor
 mul_(Tensor) -> Tensor&	// inplace
 mul_(Scalar) -> Tensor&	// inplace
 ```
 ##### binaray operation
-```
+```c++
 TensorC = TesorA * TensorB
 ```
 
 #### div
 Element-wise divition
 ##### member function
-```
+```c++
 div(Tensor) -> Tensor
 div(Scalar) -> Tensor
 div_(Tensor) -> Tensor&	// inplace
 div_(Scalar) -> Tensor&	// inplace
 ```
 ##### binaray operation
-```
+```c++
 TensorC = TesorA / TensorB
 ```
 
 #### remainder
 Element-wise remainder
 ##### member function
-```
+```c++
 remainder(Tensor) -> Tensor
 remainder(Scalar) -> Tensor
 remainder_(Tensor) -> Tensor&	// inplace
 remainder_(Scalar) -> Tensor&	// inplace
 ```
 ##### binaray operation
-```
+```c++
 TensorC = TesorA % TensorB
 ```
 
 #### bitwise and
 Bit-wise and
 ##### member function
-```
+```c++
 bitwise_and(Tensor) -> Tensor
 bitwise_and(Scalar) -> Tensor
 bitwise_and_(Tensor) -> Tensor&	// inplace
 bitwise_and_(Scalar) -> Tensor&	// inplace
 ```
 ##### binaray operation
-```
+```c++
 TensorC = TesorA & TensorB
 ```
 
 #### bitwise or
 Bit-wise or
 ##### member function
-```
+```c++
 bitwise_or(Tensor) -> Tensor
 bitwise_or(Scalar) -> Tensor
 bitwise_or_(Tensor) -> Tensor&	// inplace
 bitwise_or_(Scalar) -> Tensor&	// inplace
 ```
 ##### binaray operation
-```
+```c++
 TensorC = TesorA & TensorB
 ```
 
 #### bitwise xor
 Bit-wise xor
 ##### member function
-```
+```c++
 bitwise_xor(Tensor) -> Tensor
 bitwise_xor(Scalar) -> Tensor
 bitwise_xor_(Tensor) -> Tensor&	// inplace
 bitwise_xor_(Scalar) -> Tensor&	// inplace
 ```
 ##### binaray operation
-```
+```c++
 TensorC = TesorA ^ TensorB
 ```
 
 #### bitwise not
 Bit-wise not
 ##### member function
-```
+```c++
 bitwise_not(Tensor) -> Tensor
 bitwise_not(Scalar) -> Tensor
 bitwise_not_(Tensor) -> Tensor&	// inplace
 bitwise_not_(Scalar) -> Tensor&	// inplace
 ```
 ##### Unary operation
-```
+```c++
 TensorB = ~TesorA
 ```
 
 #### neg
 Element-wise neg
 ##### member function
-```
+```c++
 neg() -> Tensor
 neg_() -> Tensor&
 ```
 ##### Unary operation
-```
+```c++
 TensorB = -TesorA
 ```
 
 #### abs
 Element-wise abs
 ##### member function
-```
+```c++
 abs() -> Tensor
 abs_() -> Tensor&
 ```
 ##### Unary operation
-```
+```c++
 TensorB = otter::abs(TesorA)
 ```
 
 #### sin
 Element-wise sin
 ##### member function
-```
+```c++
 sin() -> Tensor
 sin_() -> Tensor&
 ```
 ##### Unary operation
-```
+```c++
 TensorB = otter::sin(TesorA)
 ```
 
 #### cos
 Element-wise cos
 ##### member function
-```
+```c++
 cos() -> Tensor
 cos_() -> Tensor&
 ```
 ##### Unary operation
-```
+```c++
 TensorB = otter::cos(TesorA)
 ```
 
 #### tan
 Element-wise tan
 ##### member function
-```
+```c++
 tan() -> Tensor
 tan_() -> Tensor&
 ```
 ##### Unary operation
-```
+```c++
 TensorB = otter::tan(TesorA)
 ```
 #### exp
 Element-wise exp
 ##### member function
-```
+```c++
 exp() -> Tensor
 exp_() -> Tensor&
 ```
 ##### Unary operation
-```
+```c++
 TensorB = otter::exp(TesorA)
 ```
 
 #### sqrt
 Element-wise sqrt
 ##### member function
-```
+```c++
 sqrt() -> Tensor
 sqrt_() -> Tensor&
 ```
 ##### Unary operation
-```
+```c++
 TensorB = otter::sqrt(TesorA)
 ```
 
 ### dot
 Dot operation. **Note**: 1D tensor, same data type, same data size
 ##### member function
-```
+```c++
 dot(Tensor) -> Tensor
 ```
 
