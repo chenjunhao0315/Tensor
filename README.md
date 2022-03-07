@@ -1,7 +1,7 @@
 # Tensor
 
 ## About
-This is a project to implement the tensor calcuation library and (inference) neural netowrk in c++, can see it as a subset of [PyTorch][9] and [ncnn][10], the differnece is that I remove all codes that not relate to CPU.
+This is a project to implement the tensor calcuation library and (inference) neural netowrk in c++, can see it as a revision of [PyTorch][9] and [ncnn][10], the differnece is that I remove all codes that not relate to CPU, maybe will support GPU after but not now.
 
 The netowrk structure is same as [Neural Network][11] with some enhancement and is inspired by [ConvNetJS][1], [Darknet][2], [Caffe][4] and [ncnn][10].
 
@@ -602,17 +602,21 @@ g++ -Os -fopenmp -mavx2 -o otter *.cpp
 
 * `$ ./otter`
 
+## Reference
+[ConvNetjs][1]
+[Darknet][2]
+[Caffe][4]
+[PyTorch][9]
+[ncnn][10]
+[Neural Network][11]
+
 [1]: https://cs.stanford.edu/people/karpathy/convnetjs/
 [2]: https://github.com/pjreddie/darknet
-[3]: https://netron.app
 [4]: https://github.com/BVLC/caffe
-[5]: https://chrischoy.github.io/research/making-caffe-layer/
-[6]: https://arxiv.org/pdf/1604.02878.pdf
-[7]: https://arxiv.org/pdf/1804.02767.pdf
-[8]: https://www.youtube.com/watch?v=XJ7HLz9VYz0&list=PLRqwX-V7Uu6aCibgK1PTWWu9by6XFdCfh
 [9]: https://github.com/pytorch/pytorch
 [10]: https://github.com/Tencent/ncnn
 [11]: https://github.com/chenjunhao0315/Neural_Network
+
 
 
 
