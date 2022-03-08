@@ -11,6 +11,7 @@
 #include "Tensor.hpp"
 #include "NetOption.hpp"
 #include "ParamDict.hpp"
+#include "Initializer.hpp"
 
 #include <unordered_map>
 
@@ -32,7 +33,7 @@ public:
     virtual int load_param(const ParamDict& pd);
     
     virtual int init_model();
-    virtual int load_model();
+    virtual int load_model(const Initializer& initializer);
     
     virtual std::string type() const { return "Undefined"; }
     

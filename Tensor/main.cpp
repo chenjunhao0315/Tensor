@@ -8,6 +8,9 @@
 #include "OTensor.hpp"
 #include "Clock.hpp"
 #include "Net.hpp"
+#include "Normalization.hpp"
+#include "Padding.hpp"
+#include "Pool.hpp"
 
 using namespace std;
 
@@ -124,15 +127,24 @@ int main(int argc, const char * argv[]) {
     net.addLayer(otter::LayerOption{{"type", "Convolution"}, {"name", "conv_84"}, {"out_channels", "255"}, {"kernel", "1"}, {"padding", "0"}, {"stride", "1"}});
     net.addLayer(otter::LayerOption{{"type", "Yolov3DetectionOutput"}, {"name", "yolo"}, {"input", "conv_79, conv_84"}});
     net.compile();
-    net.summary();
+//    net.summary();
 
-    auto in = otter::ones({1, 3, 320, 320}, otter::ScalarType::Float);
-    otter::Clock clock;
-    auto ex = net.create_extractor();
-    ex.input("data", in);
-    otter::Tensor out;
-    ex.extract("yolo", out, 0);
-    clock.stop_and_show();
-    out.print();
+//    net.load_weight("yolo-fastest-1.1-xl.dam");
+//
+//    auto in = otter::full({1, 3, 320, 320}, 0.5, otter::ScalarType::Float);
+//    otter::Clock clock;
+//    auto ex = net.create_extractor();
+//    ex.input("data", in);
+//    otter::Tensor out;
+//    ex.extract("conv_84", out, 0);
+//    clock.stop_and_show();
+//    out.print();
+//
+//    cout << out << endl;
+    
+//    auto t1 = otter::range(1, 27, 1, otter::ScalarType::Float).view({1, 3, 3, 3});
+//    auto t2 = t1[0];
+//    cout << t2.slice(0, 1, 3);
+    
     return 0;
 }

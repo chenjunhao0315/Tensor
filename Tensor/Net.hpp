@@ -13,6 +13,7 @@
 #include "Layer.hpp"
 #include "Blob.hpp"
 #include "NetOption.hpp"
+#include "DataReader.hpp"
 
 namespace otter {
 
@@ -30,8 +31,13 @@ public:
     
     void addLayer(LayerOption option);
     void graph_construct();
-    void compile();
+    void compile(CompileMode comopile_mode = CompileMode::Initial);
     void summary();
+    
+    int checkVerison(const DataReader& dr);
+    int load_weight(const DataReader& dr);
+    int load_weight(const char *weight_path);
+    int load_weight(FILE *f);
     
     int find_blob_index_by_name(std::string name) const;
     void update_input_output_indexes();

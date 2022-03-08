@@ -20,8 +20,6 @@ public:
     
     virtual int load_param(const ParamDict& pd);
     
-    virtual int init_model();
-    
     virtual int compute_output_shape(ParamDict &pd);
     
     virtual int forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const;

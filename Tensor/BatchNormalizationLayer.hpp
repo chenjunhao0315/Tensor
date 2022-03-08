@@ -22,12 +22,18 @@ public:
     
     virtual int init_model();
     
+    virtual int load_model(const Initializer& initializer);
+    
     virtual int forward_inplace(Tensor& bottom_blob, const NetOption& opt) const;
     
     virtual std::string type() const { return "BatchNorm"; }
 public:
     float eps; 
     
+    Tensor var_data;
+    Tensor mean_data;
+    Tensor bias_data;
+    Tensor scale_data;
     Tensor alpha;
     Tensor beta;
 };

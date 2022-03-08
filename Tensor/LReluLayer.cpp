@@ -32,10 +32,6 @@ int LReluLayer::load_param(const ParamDict &pd) {
     return 0;
 }
 
-int LReluLayer::init_model() {
-    return 0;
-}
-
 int LReluLayer::forward_inplace(Tensor &bottom_blob, const NetOption &opt) const {
     if (opt.use_non_lib_optimize) {
         // TODO: leaky relu enhancement

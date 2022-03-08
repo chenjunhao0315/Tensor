@@ -15,17 +15,9 @@ SplitLayer::SplitLayer() {
     support_inplace = false;
 }
 
-int SplitLayer::parse_param(LayerOption& option, ParamDict& pd) {
-    return 0;
-}
-
 int SplitLayer::compute_output_shape(ParamDict &pd) {
     pd.set(OUTPUT_SHAPE_HINT, bottom_shapes[0]);
     
-    return 0;
-}
-
-int SplitLayer::load_param(const ParamDict &pd) {
     return 0;
 }
 

@@ -10,6 +10,7 @@
 
 #include "cmath"
 #include "Macro.hpp"
+#include <cstdint>
 
 namespace otter {
 

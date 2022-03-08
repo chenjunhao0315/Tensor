@@ -59,7 +59,13 @@ int ConvolutionLayer::parse_param(LayerOption& option, ParamDict& pd) {
         if (output_padding_width < 0)  output_padding_width  = output_padding;
     }
     int groups = opt_find_int(option, "groups", 1);
-    int bias_term = (opt_find(option, "bias")) ? 1 : 0;
+    int bias_term = (!opt_find(option, "batchnorm")) ? 1 : 0;
+    if (opt_find(option, "bias_term")) {
+        if (option["bias_term"] == "false")
+            bias_term = 0;
+        else
+            bias_term = 1;
+    }
     
     pd.set((int)ConvParam::In_channels, in_channels);
     pd.set((int)ConvParam::Out_channels, out_channels);
@@ -130,6 +136,15 @@ int ConvolutionLayer::init_model() {
     weight_data = otter::rand({out_channels, in_channels / groups, kernel_height, kernel_width}, ScalarType::Float);
     if (bias_term)
         bias_data = otter::rand({out_channels}, ScalarType::Float);
+    
+    return 0;
+}
+
+int ConvolutionLayer::load_model(const Initializer& initializer) {
+    if (bias_term) {
+        bias_data = initializer.load({out_channels});
+    }
+    weight_data = initializer.load({out_channels, in_channels / groups, kernel_height, kernel_width});
     
     return 0;
 }

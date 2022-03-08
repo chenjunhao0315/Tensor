@@ -25,6 +25,24 @@ public:
     virtual int forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const;
     
     virtual std::string type() const { return "Yolov3"; }
+    
+public:
+    int num_class;
+    int num_box;
+    
+    Tensor biases;
+    Tensor mask;
+    Tensor anchors_scale;
+    
+public:
+    struct BBox {
+        int label;
+        float score;
+        float xmin;
+        float ymin;
+        float xmax;
+        float ymax;
+    };
 };
 
 }

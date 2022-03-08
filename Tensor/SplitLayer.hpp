@@ -16,11 +16,7 @@ class SplitLayer : public Layer {
 public:
     SplitLayer();
     
-    virtual int parse_param(LayerOption& option, ParamDict& pd);
-    
     virtual int compute_output_shape(ParamDict &pd);
-    
-    virtual int load_param(const ParamDict &pd);
     
     virtual int forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const;
     

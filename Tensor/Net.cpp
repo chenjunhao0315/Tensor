@@ -9,8 +9,7 @@
 
 #include "Net.hpp"
 #include "LayerRegistry.hpp"
-
-#include "Formatting.hpp"
+#include "Initializer.hpp"
 
 namespace otter {
 
@@ -142,15 +141,11 @@ void Net::graph_construct() {
                 EARSE_SPACE(target_name);
                 
                 size_t target_index = target_change_layer["input"].find(target_name);
-                if (target_index == std::string::npos) target_index = 0;
-//                OTTER_CHECK(target_index != std::string::npos, "[Net] Fail to consturct graph, please check the topology");
+                if (target_index == std::string::npos)
+                    target_index = 0;
                 target_change_layer["input"].replace(target_index, std::max(split_name.length(), target_name.length()), split_name);
             }
             layer_options.insert(layer_options.begin() + i + 1, auto_opt);
-//            for (const auto i : otter::irange(layer_options.size())) {
-//                LayerOption& option = layer_options[i];
-//                printf("type: %s name: %s input: %s\n", option["type"].c_str(), option["name"].c_str(), option["input"].c_str());
-//            }
             MAP_UPDATE
         }
     }
@@ -161,7 +156,7 @@ void Net::graph_construct() {
     }
 }
 
-void Net::compile() {
+void Net::compile(CompileMode comopile_mode) {
     
     if (option.lightmode) {
         graph_construct();
@@ -270,8 +265,7 @@ void Net::compile() {
         int load_state = layer->load_param(pd);
         OTTER_CHECK(load_state == 0, "Layer load ", i, " ", layer->name, " failed or undefined");
         
-        bool init = true;
-        if (init)
+        if (comopile_mode == CompileMode::Initial)
             layer->init_model();
         
         layers[i] = layer;
@@ -473,6 +467,65 @@ int Net::do_forward_layer(const Layer* layer, std::vector<Tensor>& blob_tensors,
     }
     
     return 0;
+}
+
+int Net::checkVerison(const DataReader &dr) {
+    int check_major, check_minor;
+    
+    dr.read(&check_major, sizeof(int));
+    dr.read(&check_minor, sizeof(int));
+    
+    printf("Model: v%d.%d\n", check_major, check_minor);
+    
+    return 0;
+}
+
+int Net::load_weight(const DataReader& dr) {
+    if (layers.size() == 0) {
+        fprintf(stderr, "[Net] Empty graph!\n");
+        return -1;
+    }
+    
+    checkVerison(dr);
+    
+    int layer_count = (int)layers.size();
+    
+    InitializerFromDataReader initializer(dr);
+    
+    for (const auto i : otter::irange(layer_count)) {
+        Layer* layer = layers[i];
+        
+        if (!layer) {
+            fprintf(stderr, "[Net] Load weight error at layer %d, please check the network topology.\n", i);
+            return -1;
+        }
+        
+        int layer_status = layer->load_model(initializer);
+        if (layer_status != 0) {
+            fprintf(stderr, "[Net] layer %d %s load weight fail!\n", i, layer->name.c_str());
+            return -1;
+        }
+    }
+    
+    
+    return 0;
+}
+
+int Net::load_weight(FILE *f) {
+    DataReaderFromStdio dr(f);
+    return load_weight(dr);
+}
+
+int Net::load_weight(const char *weight_path) {
+    FILE* fp = fopen(weight_path, "rb");
+    if (!fp) {
+        fprintf(stderr, "Open weight file fail!\n");
+        return -1;
+    }
+    
+    int status = load_weight(fp);
+    fclose(fp);
+    return status;
 }
 
 Extractor Net::create_extractor() const {

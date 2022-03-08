@@ -36,7 +36,7 @@ void batchnorm_cpu_collect_linear_and_constant_terms(
             invstd = save_invstd_a[c];
         } else {
             mean   = running_mean_a[c];
-            invstd = std::sqrt(running_var_a[c] + static_cast<scalar_t>(eps));
+            invstd = 1 / std::sqrt(running_var_a[c] + static_cast<scalar_t>(eps));
         }
         scalar_t weight_v = weight_data ? weight_data[c] : 1;
         scalar_t bias_v = bias_data ? bias_data[c] : 0;
@@ -85,8 +85,8 @@ void batchnorm_cpu_contiguous_impl(Tensor& output, const Tensor& input, const Te
                     Vec output_vec = data_vec * alpha_vec + beta_vec;
                     output_vec.store(output_data + offset + d, static_cast<int>(image_size - d));
                 }
+                data_index_step(n, n_batch, c, n_channel);
             }
-            data_index_step(n, n_batch, c, n_channel);
         });
     } else {
         const int64_t loop_size = image_size - (image_size % Vec::size());

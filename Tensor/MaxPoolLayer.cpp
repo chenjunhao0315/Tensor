@@ -120,7 +120,10 @@ int MaxPoolLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const Net
         if (opt.use_non_lib_optimize) {
             // TODO: darknet version pooling
         } else {
-            auto bottom_blob_pad = otter::constant_pad(bottom_blob, {0, kernel_height - 1, 0, kernel_width - 1}, 0);
+            int height_offset = (kernel_height - 1) / 2;
+            int width_offset = (kernel_width - 1) / 2;
+            
+            auto bottom_blob_pad = otter::constant_pad(bottom_blob, {height_offset, kernel_height - height_offset - 1, width_offset, kernel_width - width_offset - 1}, -10000000);
             top_blob = otter::max_pool2d(bottom_blob_pad, {kernel_height, kernel_width}, {stride_height, stride_width}, {0, 0}, {1, 1}, false);
         }
     } else {

@@ -118,8 +118,13 @@ inline bool operator!=(std::nullptr_t, const DataPtr& dp) noexcept {
 
 struct Allocator {
     virtual ~Allocator() = default;
+    
     virtual DataPtr allocate(size_t n) const = 0;
-    virtual DeleterFnPtr raw_deleter() const { return nullptr; }
+    
+    virtual DeleterFnPtr raw_deleter() const {
+        return nullptr;
+    }
+    
     void* raw_allocate(size_t n) {
         auto dptr = allocate(n);
         assert(dptr.get() == dptr.get_context());
@@ -127,6 +132,7 @@ struct Allocator {
     }
     void raw_deallocate(void* ptr) {
         auto d = raw_deleter();
+        assert(d);
         d(ptr);
     }
 };
@@ -134,26 +140,6 @@ struct Allocator {
 void* alloc_cpu(size_t nbytes);
 void free_cpu(void* data);
 
-struct DefaultAllocator : public Allocator {
-    DefaultAllocator() = default;
-    DataPtr allocate(size_t nbytes) const override {
-        void* data = alloc_cpu(nbytes);
-        return {data, data, &ReportAndDelete, Device::CPU};
-    }
-
-    static void ReportAndDelete(void* ptr) {
-        if (!ptr) {
-            return;
-        }
-        free_cpu(ptr);
-    }
-
-    DeleterFnPtr raw_deleter() const override {
-        return &ReportAndDelete;
-    }
-};
-
-static DefaultAllocator default_allocator;
 Allocator* get_default_allocator();
 Allocator* GetAllocator(Device device);
 

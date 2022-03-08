@@ -20,6 +20,11 @@ public:
     bool use_non_lib_optimize;
 };
 
+enum class CompileMode {
+    Inference,
+    Initial
+};
+
 }
 
 #endif /* NetOption_hpp */

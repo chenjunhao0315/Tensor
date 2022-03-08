@@ -29,10 +29,6 @@ int ShortCutLayer::load_param(const ParamDict &pd) {
     return 0;
 }
 
-int ShortCutLayer::init_model() {
-    return 0;
-}
-
 int ShortCutLayer::compute_output_shape(ParamDict &pd) {
     pd.set(OUTPUT_SHAPE_HINT, bottom_shapes[0]);
     
