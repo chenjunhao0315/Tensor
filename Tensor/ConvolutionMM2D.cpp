@@ -90,12 +90,12 @@ static inline void slow_conv2d_shape_check(
     assert(output_height >= 1 && output_width >= 1);
     
     if (weight.defined()) {
-        int64_t n_input_plane = weight.size(1);
+        int64_t input_channels = weight.size(1);
         if (weight.dim() == 2) {
-            n_input_plane /= (kernel_height * kernel_width);
+            input_channels /= (kernel_height * kernel_width);
         }
         if (input.size(1) != 0) {
-            check_dim_size(input, ndim, dim_planes, n_input_plane);
+            check_dim_size(input, ndim, dim_planes, input_channels);
         }
     }
 
@@ -129,19 +129,18 @@ static Tensor compute_columns2d(
     const int64_t dim_planes = 1;
     const int64_t dim_height = 2;
     const int64_t dim_width  = 3;
-    const int64_t n_input_planes  = input.size(dim_planes);
+    const int64_t input_channels  = input.size(dim_planes);
     const int64_t input_height    = input.size(dim_height);
     const int64_t input_width     = input.size(dim_width);
     const int64_t output_height   = (input_height + 2 * pad_height - kernel_height) / stride_height + 1;
     const int64_t output_width    = (input_width  + 2 * pad_width  - kernel_width ) / stride_width  + 1;
     const int64_t batch_size      = input.size(dim_batch);
-    //
     
     Tensor columns;
     if ((kernel_height == 1) && (stride_height == 1) && (pad_height == 0) && (kernel_width == 1) && (stride_width == 1) && (pad_width == 0)) {
-        columns = input.view({batch_size, n_input_planes, output_height * output_width}).detach();
+        columns = input.view({batch_size, input_channels, output_height * output_width}).detach();
     } else {
-        columns = otter::empty({batch_size, n_input_planes * kernel_height * kernel_width, output_height * output_width}, input.options());
+        columns = otter::empty({batch_size, input_channels * kernel_height * kernel_width, output_height * output_width}, input.options());
         OTTER_DISPATCH_ALL_TYPES(input.scalar_type(), "slow_conv2d_cpu", [&] {
             auto input_a   = input.accessor<scalar_t, 4>();
             auto columns_a = columns.accessor<scalar_t, 3>();
@@ -159,7 +158,7 @@ static Tensor compute_columns2d(
                         kernel_height, kernel_width,
                         stride_height, stride_width,
                         pad_height, pad_width,
-                        n_input_planes, input_height, input_width,
+                        input_channels, input_height, input_width,
                         output_height, output_width);
                 }
             });
@@ -179,14 +178,14 @@ static void slow_conv2d_update_output_frame(
     int64_t kernel_height, int64_t kernel_width,
     int64_t stride_height, int64_t stride_width,
     int64_t pad_height, int64_t pad_width,
-    int64_t n_input_planes, int64_t input_height, int64_t input_width,
-    int64_t n_output_planes, int64_t output_height, int64_t output_width) {
+    int64_t input_channels, int64_t input_height, int64_t input_width,
+    int64_t output_channels, int64_t output_height, int64_t output_width) {
     
     const int64_t beta = (has_bias) ? 1 : 0;
     
     const int64_t m = output_height * output_width;
-    const int64_t n = n_output_planes;
-    const int64_t k = n_input_planes * kernel_height * kernel_width;
+    const int64_t n = output_channels;
+    const int64_t k = input_channels * kernel_height * kernel_width;
     
     const int64_t lda = m;
     const int64_t ldb = k;
@@ -237,17 +236,17 @@ Tensor& slow_conv2d_forward_out_cpu(
     const int64_t dim_height = 2;
     const int64_t dim_width  = 3;
     
-    const int64_t n_input_planes  = input.size(dim_planes);
+    const int64_t input_channels  = input.size(dim_planes);
     const int64_t input_height    = input.size(dim_height);
     const int64_t input_width     = input.size(dim_width);
-    const int64_t n_output_planes = weight_.size(0);
+    const int64_t output_channels = weight_.size(0);
     const int64_t output_height   = (input_height + 2 * pad_height - kernel_height) / stride_height + 1;
     const int64_t output_width    = (input_width  + 2 * pad_width  - kernel_width ) / stride_width  + 1;
     
     const int64_t batch_size      = input.size(dim_batch);
     
     Tensor finput = compute_columns2d(input, padding, stride, kernel_size);
-    output.resize_({batch_size, n_output_planes, output_height, output_width});
+    output.resize_({batch_size, output_channels, output_height, output_width});
     if (bias_.defined()) {
         output.copy_(bias_.reshape({-1, 1, 1}));
     }
@@ -275,8 +274,8 @@ Tensor& slow_conv2d_forward_out_cpu(
                     kernel_height, kernel_width,
                     stride_height, stride_width,
                     pad_height, pad_width,
-                    n_input_planes, input_height, input_width,
-                    n_output_planes, output_height, output_width);
+                    input_channels, input_height, input_width,
+                    output_channels, output_height, output_width);
             }
         });
     });

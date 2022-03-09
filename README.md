@@ -150,6 +150,196 @@ cout << t1 << endl;
 //[ FloatType{1,3,3,3} ]
 ```
 
+### Shape
+#### view
+View a tensor as different shape. **Note**: Share the same physical memory
+`Tensor.view(shape) -> Tensor`
+```c++
+auto t1 = otter::range(1, 8, 1, otter::ScalarType::Float);
+auto t2 = t1.view({1, 2, 2, 2});
+cout << t1 << endl;
+cout << t2 << endl;
+// 1
+// 2
+// 3
+// 4
+// 5
+// 6
+// 7
+// 8
+//[ FloatType{8} ]
+//(1,1,.,.) = 
+//  1  2
+//  3  4
+//
+//(1,2,.,.) = 
+//  5  6
+//  7  8
+//[ FloatType{1,2,2,2} ]
+```
+
+#### reshape
+Reshape a tensor, very like `view`. 
+`Tensor.reshape(shape) -> Tensor`
+```c++
+auto t1 = otter::range(1, 8, 1, otter::ScalarType::Float);
+auto t2 = t1.reshape({1, 2, 2, 2});
+cout << t1 << endl;
+cout << t2 << endl;
+// 1
+// 2
+// 3
+// 4
+// 5
+// 6
+// 7
+// 8
+//[ FloatType{8} ]
+//(1,1,.,.) = 
+//  1  2
+//  3  4
+//
+//(1,2,.,.) = 
+//  5  6
+//  7  8
+//[ FloatType{1,2,2,2} ]
+```
+
+### Index
+#### operator []
+Use operator `[]` to index the tensor.
+```c++
+auto t1 = otter::range(1, 8, 1, otter::ScalarType::Float);
+auto t2 = t1.view({1, 2, 2, 2});
+auto t3 = t2[0][0];
+auto t4 = t2[0][1];
+    
+cout << t2 << endl;
+cout << t3 << endl;
+cout << t4 << endl;
+//(1,1,.,.) = 
+//  1  2
+//  3  4
+//
+//(1,2,.,.) = 
+//  5  6
+//  7  8
+//[ FloatType{1,2,2,2} ]
+// 1  2
+// 3  4
+//[ FloatType{2,2} ]
+// 5  6
+// 7  8
+//[ FloatType{2,2} ]
+```
+
+#### slice
+Slice the Tensor from row direction or cloumn direction. **Note**: direction: 0 -> row direction 1-> column direction
+`Tensor.slice(direction, start, end, step) -> Tensor`
+```c++
+auto t1 = otter::range(1, 18, 1, otter::ScalarType::Float).view({-1, 6});    // auto assign dimension 0
+cout << t1 << endl;
+auto t2 = t1.slice(1, 2, 6);    // slice the column direction from 2 to 5
+cout << t2 << endl;
+auto t3 = t1.slice(0, 1, 3);    // slice the row direction from 1 to 2
+cout << t3 << endl;
+//  1   2   3   4   5   6
+//  7   8   9  10  11  12
+// 13  14  15  16  17  18
+//[ FloatType{3,6} ]
+//  3   4   5   6
+//  9  10  11  12
+// 15  16  17  18
+//[ FloatType{3,4} ]
+//  7   8   9  10  11  12
+// 13  14  15  16  17  18
+//[ FloatType{2,6} ]
+```
+
+### Permutation
+#### permute
+Permute the axis in Tensor.
+`Tensor.permute(order) -> Tensor`
+Example HWC -> CHW
+```c++
+auto t1 = otter::tensor({1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3}).view({2, 2, 3});
+cout << t1 << endl;
+auto t2 = t1.permute({2, 0, 1});
+cout << t2 << endl;
+//(1,.,.) = 
+//  1  2  3
+//  1  2  3
+//
+//(2,.,.) = 
+//  1  2  3
+//  1  2  3
+//[ IntType{2,2,3} ]
+//(1,.,.) = 
+//  1  1
+//  1  1
+//
+//(2,.,.) = 
+//  2  2
+//  2  2
+//
+//(3,.,.) = 
+//  3  3
+//  3  3
+//[ IntType{3,2,2} ]
+```
+
+#### transpose
+Transpose two axis.
+`Tensor.transpose(dim0, dim1) -> Tensor`
+```c++
+auto t1 = otter::range(1, 12, 1, otter::ScalarType::Float).view({3, 4});
+auto t2 = t1.transpose(1, 0);
+cout << t1 << endl;
+cout << t2 << endl;
+//  1   2   3   4
+//  5   6   7   8
+//  9  10  11  12
+//[ FloatType{3,4} ]
+//  1   5   9
+//  2   6  10
+//  3   7  11
+//  4   8  12
+```
+
+### Type conversion
+Convert data dtype in Tensor with casting.
+`Tensor.to(dtype) -> Tensor`
+```c++
+auto t1 = otter::tensor({1.5, 2.5, 3.5});
+cout << t1 << endl;
+auto t2 = t1.to(otter::ScalarType::Int);
+cout << t2 << endl;
+// 1.5000
+// 2.5000
+// 3.5000
+//[ DoubleType{3} ]
+// 1
+// 2
+// 3
+//[ IntType{3} ]
+```
+
+### Copy
+#### clone
+Use `.clone()` to make a deep copy.
+`Tensor.clone() -> Tensor`
+```c++
+auto t1 = otter::empty({1}, otter::ScalarType::Float);
+auto t2 = t1;    // shadow copy
+auto t3 = t1.clone();    // deep copy
+cout << "t1 physical address: " << t1.data_ptr<float>() << endl;    // original data
+cout << "t2 physical address: " << t2.data_ptr<float>() << endl;    // shadow copy
+cout << "t3 physical address: " << t3.data_ptr<float>() << endl;    // deep copy
+// t1 physical address: 0x105c08140
+// t2 physical address: 0x105c08140
+// t3 physical address: 0x105c0a140
+```
+
 ### Operation
 #### add
 Element-wise addition
@@ -602,13 +792,13 @@ g++ -Os -fopenmp -mavx2 -o otter *.cpp
 
 * `$ ./otter`
 
-## Reference
-[ConvNetjs][1]
-[Darknet][2]
-[Caffe][4]
-[PyTorch][9]
-[ncnn][10]
-[Neural Network][11]
+## Thanks for and reference
+- [ConvNetjs][1]
+- [Darknet][2]
+- [Caffe][4]
+- [PyTorch][9]
+- [ncnn][10]
+- [Neural Network][11]
 
 [1]: https://cs.stanford.edu/people/karpathy/convnetjs/
 [2]: https://github.com/pjreddie/darknet
@@ -616,7 +806,3 @@ g++ -Os -fopenmp -mavx2 -o otter *.cpp
 [9]: https://github.com/pytorch/pytorch
 [10]: https://github.com/Tencent/ncnn
 [11]: https://github.com/chenjunhao0315/Neural_Network
-
-
-
-

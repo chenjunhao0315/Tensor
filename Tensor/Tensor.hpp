@@ -175,7 +175,7 @@ public:
     Tensor& fill_(const Scalar& value);
     Tensor& fill_(const Tensor& value);
     
-    Tensor to(ScalarType dtype) const;
+    Tensor to(ScalarType dtype, bool non_blocking = false, bool copy = false, MemoryFormat memory_format = MemoryFormat::Preserve) const;
     
     Tensor& add_(const Tensor& other, const Scalar& alpha = 1) const;
     Tensor add(const Tensor& other, const Scalar& alpha = 1) const;

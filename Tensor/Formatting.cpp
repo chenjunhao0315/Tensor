@@ -152,7 +152,7 @@ static void __printMatrix(std::ostream& stream, const Tensor& self, int64_t line
     std::tie(scale, sz) = __printFormat(stream, self);
     
     __printIndent(stream, indent);
-    int64_t nColumnPerLine = (linesize-indent)/(sz+1);
+    int64_t nColumnPerLine = (linesize-indent) / (sz + 1);
     int64_t firstColumn = 0;
     int64_t lastColumn = -1;
     while(firstColumn < self.size(1)) {
@@ -165,7 +165,7 @@ static void __printMatrix(std::ostream& stream, const Tensor& self, int64_t line
             if(firstColumn != 0) {
                 stream << std::endl;
             }
-            stream << "Columns " << firstColumn+1 << " to " << lastColumn+1;
+            stream << "Columns " << firstColumn + 1 << " to " << lastColumn + 1;
             __printIndent(stream, indent);
         }
         if(scale != 1) {
@@ -175,7 +175,7 @@ static void __printMatrix(std::ostream& stream, const Tensor& self, int64_t line
         for (const auto l : otter::irange(self.size(0))) {
             Tensor row = self.select(0, l);
             double *row_ptr = row.data_ptr<double>();
-            for (const auto c : otter::irange(firstColumn, lastColumn+1)) {
+            for (const auto c : otter::irange(firstColumn, lastColumn + 1)) {
                 stream << std::setw((int)sz) << row_ptr[c] / scale;
                 if(c == lastColumn) {
                     stream << std::endl;
@@ -198,7 +198,7 @@ static void __printMatrix(std::ostream& stream, const Tensor& self, int64_t line
 
 void __printTensor(std::ostream& stream, Tensor& self, int64_t linesize)
 {
-    std::vector<int64_t> counter(self.dim()-2);
+    std::vector<int64_t> counter(self.dim() - 2);
     bool start = true;
     bool finished = false;
     counter[0] = -1;
@@ -206,10 +206,10 @@ void __printTensor(std::ostream& stream, Tensor& self, int64_t linesize)
         counter[i] = 0;
     }
     while(true) {
-        for(int64_t i = 0; self.dim()-2; i++) {
+        for(int64_t i = 0; self.dim() - 2; i++) {
             counter[i] = counter[i] + 1;
             if(counter[i] >= self.size(i)) {
-                if(i == self.dim()-3) {
+                if(i == self.dim() - 3) {
                     finished = true;
                     break;
                 }
@@ -230,7 +230,7 @@ void __printTensor(std::ostream& stream, Tensor& self, int64_t linesize)
         Tensor tensor = self;
         for (const auto i : otter::irange(self.dim()-2)) {
             tensor = tensor.select(0, counter[i]);
-            stream << counter[i]+1 << ",";
+            stream << counter[i] + 1 << ",";
         }
         stream << ".,.) = " << std::endl;
         __printMatrix(stream, tensor, linesize, 1);

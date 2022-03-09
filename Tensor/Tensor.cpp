@@ -154,8 +154,8 @@ Tensor& Tensor::fill_(const Tensor &value) {
     return native::fill_(*this, value);
 }
 
-Tensor Tensor::to(ScalarType dtype) const {
-    return native::to(*this, dtype);
+Tensor Tensor::to(ScalarType dtype, bool non_blocking, bool copy, MemoryFormat memory_format) const {
+    return native::to(*this, dtype, non_blocking, copy, memory_format);
 }
 
 Tensor& Tensor::add_(const Tensor &other, const Scalar &alpha) const {

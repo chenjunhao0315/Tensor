@@ -125,26 +125,22 @@ int main(int argc, const char * argv[]) {
     net.addLayer(otter::LayerOption{{"type", "Convolution"}, {"name", "conv_82"}, {"out_channels", "144"}, {"kernel", "5"}, {"padding", "2"}, {"stride", "1"}, {"groups", "144"}, {"batchnorm", "true"}, {"activation", "LRelu"}});
     net.addLayer(otter::LayerOption{{"type", "Convolution"}, {"name", "conv_83"}, {"out_channels", "144"}, {"kernel", "1"}, {"padding", "0"}, {"stride", "1"}, {"batchnorm", "true"}});
     net.addLayer(otter::LayerOption{{"type", "Convolution"}, {"name", "conv_84"}, {"out_channels", "255"}, {"kernel", "1"}, {"padding", "0"}, {"stride", "1"}});
-    net.addLayer(otter::LayerOption{{"type", "Yolov3DetectionOutput"}, {"name", "yolo"}, {"input", "conv_79, conv_84"}});
+    net.addLayer(otter::LayerOption{{"type", "Yolov3DetectionOutput"}, {"name", "yolo"}, {"input", "conv_79, conv_84"}, {"mask", "3, 4, 5, 0, 1, 2"}, {"anchor", "12,18 37,49 52,132 115,73 119,199 242,238"}, {"num_class", "80"}, {"num_box", "3"}, {"anchors_scale", "32, 16"}});
     net.compile();
-//    net.summary();
+    net.summary();
 
-//    net.load_weight("yolo-fastest-1.1-xl.dam");
-//
-//    auto in = otter::full({1, 3, 320, 320}, 0.5, otter::ScalarType::Float);
-//    otter::Clock clock;
-//    auto ex = net.create_extractor();
-//    ex.input("data", in);
-//    otter::Tensor out;
-//    ex.extract("conv_84", out, 0);
-//    clock.stop_and_show();
-//    out.print();
-//
-//    cout << out << endl;
-    
-//    auto t1 = otter::range(1, 27, 1, otter::ScalarType::Float).view({1, 3, 3, 3});
-//    auto t2 = t1[0];
-//    cout << t2.slice(0, 1, 3);
+    net.load_weight("yolo-fastest-1.1-xl.dam");
+
+    auto in = otter::full({1, 3, 320, 320}, 0.5, otter::ScalarType::Float);
+    otter::Clock clock;
+    auto ex = net.create_extractor();
+    ex.input("data", in);
+    otter::Tensor out;
+    ex.extract("yolo", out, 0);
+    clock.stop_and_show();
+    out.print();
+
+    cout << out << endl;
     
     return 0;
 }

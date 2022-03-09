@@ -29,6 +29,10 @@ public:
 public:
     int num_class;
     int num_box;
+    float confidence_threshold;
+    float nms_threshold;
+    
+    float scale_x_y;
     
     Tensor biases;
     Tensor mask;
@@ -42,7 +46,25 @@ public:
         float ymin;
         float xmax;
         float ymax;
+        float area;
     };
+    
+    void qsort_descent_inplace(std::vector<BBox>& datas, int left, int right) const;
+    void qsort_descent_inplace(std::vector<BBox>& datas) const;
+    void nms_sorted_bboxes(std::vector<BBox>& bboxes, std::vector<size_t>& picked, float nms_threshold) const;
+};
+
+enum class Yolov3DetectionParam {
+    Num_class,
+    Num_box,
+    Confidence_threshold,
+    Nms_threshold,
+    Biases,
+    Mask,
+    Anchors_scale,
+    Scale_x_y,
+    Input_height,
+    Input_width
 };
 
 }

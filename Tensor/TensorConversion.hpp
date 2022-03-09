@@ -11,11 +11,14 @@
 #include "Tensor.hpp"
 
 namespace otter {
-
 namespace native{
-Tensor to(const Tensor& self, ScalarType dtype);
-}
 
-}
+Tensor to(const Tensor& self, ScalarType dtype);
+
+Tensor to(const Tensor& self, ScalarType dtype, bool non_blocking, bool copy, MemoryFormat optional_memory_format);
+
+
+}   // end namespace native
+}   // end namespace otter
 
 #endif /* TensorConversion_hpp */

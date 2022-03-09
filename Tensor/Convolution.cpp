@@ -120,7 +120,6 @@ ConvBackend select_proper_conv_backend(
                     }
                 }
             } else if (input.dim() == 5 && (params.is_dilated())) {
-//            } else if (input.dim() == 5 && (input.is_cuda() || params.is_dilated())) {
                 return ConvBackend::SlowDilated3d;
             } else if (input.dim() == 5) { /* dim == 5, CPU, non-dilated */
                 /* CPU implementation has specialized MM kernels
@@ -138,12 +137,12 @@ ConvBackend select_proper_conv_backend(
 }
 
 static auto view3d(const Tensor& tensor) -> Tensor {
-    assert(tensor.dim() == 4);   // "expected 4D tensor, got tensor with ", tensor.ndimension(), " dimensions instead");
+    OTTER_CHECK(tensor.dim() == 4, "expected 4D tensor, got tensor with ", tensor.dim(), " dimensions instead");
     return tensor.squeeze(2);
 }
 
 static auto view4d(const Tensor& tensor) -> Tensor {
-    assert(tensor.dim() == 3);   // "expected 3D tensor, got tensor with ", tensor.ndimension(), " dimensions instead");
+    OTTER_CHECK(tensor.dim() == 3, "expected 3D tensor, got tensor with ", tensor.dim(), " dimensions instead");
     return tensor.unsqueeze(2);
 }
 
@@ -173,7 +172,7 @@ Tensor convolution(
     auto k = weight.dim();
     auto dim = k - 2;
     
-    assert(k > 0);  // "weight should have at least three dimensions"
+    OTTER_CHECK(k > 0, "weight should have at least three dimensions");
     
     auto weight_sizes = weight.sizes();
     
@@ -196,7 +195,7 @@ Tensor convolution(
         weight = view4d(weight);
     }
     
-    bool need_backward = false; // TODO: haha
+    bool need_backward = false; // TODO: backward propogation
     ConvBackend backend = select_proper_conv_backend(input, weight, bias, need_backward, params);
     
     Tensor output;
@@ -246,7 +245,7 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
         case ConvBackend::Slow2dNeon_1x1s1:
             return otter::slow_conv2d_1x1s1_neon(self, weight, bias, kernel_size, params.stride, params.padding);
         default:
-            assert(false);  // Unsupported nogroup conv backend
+            OTTER_CHECK(false, "Unsupported nogroup conv backend");
     }
     
     return Tensor();
