@@ -140,7 +140,7 @@ int main(int argc, const char * argv[]) {
     clock.stop_and_show();
     out.print();
 
-    cout << out << endl;
+//    cout << out << endl;
     
     return 0;
 }
