@@ -8,6 +8,18 @@
 #ifndef Vision_hpp
 #define Vision_hpp
 
-#include <stdio.h>
+namespace otter {
+class Tensor;
+
+namespace cv {
+
+Tensor load_image_rgb(const char* filename);
+
+Tensor load_image_stb(const char* filename, int channels);
+
+void cvtColor(Tensor& input, Tensor& output);
+
+}   // end namespace cv
+}   // end namespace otter
 
 #endif /* Vision_hpp */

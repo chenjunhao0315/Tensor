@@ -8,9 +8,7 @@
 #include "OTensor.hpp"
 #include "Clock.hpp"
 #include "Net.hpp"
-#include "Normalization.hpp"
-#include "Padding.hpp"
-#include "Pool.hpp"
+#include "Vision.hpp"
 
 using namespace std;
 
@@ -139,7 +137,6 @@ int main(int argc, const char * argv[]) {
     ex.extract("yolo", out, 0);
     clock.stop_and_show();
     out.print();
-
 //    cout << out << endl;
     
     return 0;

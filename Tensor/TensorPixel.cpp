@@ -14,9 +14,10 @@
 #endif // __ARM_NEON__
 
 namespace otter {
+namespace cv {
 
 Tensor from_rgb(const unsigned char* rgb, int h, int w, int stride) {
-    auto result = empty({1, 3, h, w}, otter::ScalarType::Float);
+    auto result = empty({3, h, w}, otter::ScalarType::Byte);
     OTTER_CHECK(result.defined(), "Tensor create failed!");
     
     const int wgap = stride - w * 3;
@@ -25,10 +26,10 @@ Tensor from_rgb(const unsigned char* rgb, int h, int w, int stride) {
         h = 1;
     }
     
-    auto accessor = result.accessor<float, 4>()[0];
-    float* ptr0 = accessor[0].data();
-    float* ptr1 = accessor[1].data();
-    float* ptr2 = accessor[2].data();
+    auto accessor = result.accessor<uint8_t, 3>()[0];
+    uint8_t* ptr0 = accessor[0].data();
+    uint8_t* ptr1 = accessor[1].data();
+    uint8_t* ptr2 = accessor[2].data();
     
     for (int y = 0; y < h; ++y) {
 #if __ARM_NEON__
@@ -126,4 +127,5 @@ Tensor from_rgb(const unsigned char* rgb, int h, int w, int stride) {
     return result;
 }
 
+}   // end namespace cv
 }   // end namespace otter
