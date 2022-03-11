@@ -7,23 +7,23 @@
 namespace otter {
 namespace cv {
 
-    using namespace std;
+using namespace std;
 
-    struct BBox {
-        int label;
-        float score;
-        int x_high;
-        int x_low;
-        int y_high;
-        int y_low;
-    };
+struct BBox {
+    int label;
+    float score;
+    int x_high;
+    int x_low;
+    int y_high;
+    int y_low;
+};
 
-    struct Point {
-        float x;
-        float y;
-    };
+struct Point {
+    float x;
+    float y;
+};
 
-    Point Center(otter::Tensor& t1, otter::Tensor& t2, int N);
+Point Center(otter::Tensor& t1, otter::Tensor& t2, int N);
 
 
 
