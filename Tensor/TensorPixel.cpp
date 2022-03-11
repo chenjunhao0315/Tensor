@@ -26,7 +26,7 @@ Tensor from_rgb(const unsigned char* rgb, int h, int w, int stride) {
         h = 1;
     }
     
-    auto accessor = result.accessor<uint8_t, 3>()[0];
+    auto accessor = result.accessor<uint8_t, 3>();
     uint8_t* ptr0 = accessor[0].data();
     uint8_t* ptr1 = accessor[1].data();
     uint8_t* ptr2 = accessor[2].data();
