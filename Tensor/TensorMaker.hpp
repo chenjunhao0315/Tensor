@@ -56,7 +56,6 @@ private:
     std::unique_ptr<void, ContextDeleter> ctx_{nullptr, detail::noopDelete};
     
     TensorOptions opts_{};
-    ScalarType dtype_ = ScalarType::Undefined;
     Device device_ = Device::CPU;
 };
 
