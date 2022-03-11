@@ -92,7 +92,8 @@ Tensor zeros(IntArrayRef size, ScalarType dtype) {
 }
 
 Tensor zeros(IntArrayRef size, TensorOptions options) {
-    return empty_cpu(size, options);
+    auto result = empty_cpu(size, options);
+    return result.zero_();
 }
 
 Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, ScalarType dtype) {

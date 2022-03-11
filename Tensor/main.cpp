@@ -126,7 +126,7 @@ int main(int argc, const char * argv[]) {
     net.addLayer(otter::LayerOption{{"type", "Convolution"}, {"name", "conv_83"}, {"out_channels", "144"}, {"kernel", "1"}, {"padding", "0"}, {"stride", "1"}, {"batchnorm", "true"}});
     net.addLayer(otter::LayerOption{{"type", "Convolution"}, {"name", "conv_84"}, {"out_channels", "255"}, {"kernel", "1"}, {"padding", "0"}, {"stride", "1"}});
     net.addLayer(otter::LayerOption{{"type", "Yolov3DetectionOutput"}, {"name", "yolo"}, {"input", "conv_79, conv_84"}, {"mask", "3, 4, 5, 0, 1, 2"}, {"anchor", "12,18 37,49 52,132 115,73 119,199 242,238"}, {"num_class", "80"}, {"num_box", "3"}, {"anchors_scale", "32, 16"}});
-    net.compile();
+    net.compile(otter::CompileMode::Inference);
     net.summary();
 
     net.load_weight("yolo-fastest-1.1-xl.dam");
