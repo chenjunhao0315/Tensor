@@ -73,7 +73,7 @@ bool to_will_alias(
     return (self.scalar_type() == dtype) &&
     (self.device() == device) &&
     !copy &&
-    (self.suggest_memory_format() == memory_format);
+    (memory_format == MemoryFormat::Preserve || self.suggest_memory_format() == memory_format);
 }
 
 Tensor to_impl(const Tensor& self, ScalarType dtype, Device device, bool non_blocking, bool copy, MemoryFormat optional_memory_format) {

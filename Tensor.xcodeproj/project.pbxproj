@@ -238,6 +238,8 @@
 		762E3B5527BEA4A20075F983 /* MemoryOverlap.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MemoryOverlap.hpp; sourceTree = "<group>"; };
 		76486AE827DBC8FF0078FF9B /* Vision.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Vision.cpp; sourceTree = "<group>"; };
 		76486AE927DBC8FF0078FF9B /* Vision.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Vision.hpp; sourceTree = "<group>"; };
+		76486AED27DBD0F60078FF9B /* stb_image_write.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image_write.h; sourceTree = "<group>"; };
+		76486AEE27DBD0F60078FF9B /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
 		7687215F27C0E31C006640CF /* Module.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Module.cpp; sourceTree = "<group>"; };
 		7687216027C0E31C006640CF /* Module.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Module.hpp; sourceTree = "<group>"; };
 		7687216227C0E379006640CF /* Layer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Layer.cpp; sourceTree = "<group>"; };
@@ -589,6 +591,26 @@
 			name = vec;
 			sourceTree = "<group>";
 		};
+		76486AEB27DBCDF70078FF9B /* cv */ = {
+			isa = PBXGroup;
+			children = (
+				76486AE827DBC8FF0078FF9B /* Vision.cpp */,
+				76486AE927DBC8FF0078FF9B /* Vision.hpp */,
+				760384B327C0492200CD599F /* TensorPixel.cpp */,
+				760384B427C0492200CD599F /* TensorPixel.hpp */,
+			);
+			name = cv;
+			sourceTree = "<group>";
+		};
+		76486AEC27DBD02B0078FF9B /* 3rdparty */ = {
+			isa = PBXGroup;
+			children = (
+				76486AED27DBD0F60078FF9B /* stb_image_write.h */,
+				76486AEE27DBD0F60078FF9B /* stb_image.h */,
+			);
+			path = 3rdparty;
+			sourceTree = "<group>";
+		};
 		7687216527C0E569006640CF /* Layer */ = {
 			isa = PBXGroup;
 			children = (
@@ -707,6 +729,7 @@
 		76E6C50927A502680036A26F /* Tensor */ = {
 			isa = PBXGroup;
 			children = (
+				76486AEC27DBD02B0078FF9B /* 3rdparty */,
 				76E6C50A27A502680036A26F /* main.cpp */,
 				76E6C53B27A511570036A26F /* Config.hpp */,
 				762E3B4C27BD499D0075F983 /* Macro.hpp */,
@@ -738,14 +761,11 @@
 				760382C927BFFD7600CD599F /* Exception.hpp */,
 				760382CB27BFFE2F00CD599F /* StringUtils.cpp */,
 				760382CC27BFFE2F00CD599F /* StringUtils.hpp */,
-				760384B327C0492200CD599F /* TensorPixel.cpp */,
-				760384B427C0492200CD599F /* TensorPixel.hpp */,
 				7687215F27C0E31C006640CF /* Module.cpp */,
 				7687216027C0E31C006640CF /* Module.hpp */,
 				76BA779027C6CA8F00AA896B /* TensorScalar.cpp */,
 				76BA779127C6CA8F00AA896B /* TensorScalar.hpp */,
-				76486AE827DBC8FF0078FF9B /* Vision.cpp */,
-				76486AE927DBC8FF0078FF9B /* Vision.hpp */,
+				76486AEB27DBCDF70078FF9B /* cv */,
 			);
 			path = Tensor;
 			sourceTree = "<group>";
@@ -978,7 +998,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -1036,7 +1056,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;

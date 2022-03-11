@@ -10,6 +10,7 @@
 
 #include <utility>
 #include <atomic>
+#include <cstddef>
 
 namespace otter {
 
