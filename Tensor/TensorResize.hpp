@@ -12,6 +12,7 @@
 #include "Tensor.hpp"
 
 namespace otter {
+namespace native {
 
 bool resize_output(const Tensor& output, IntArrayRef shape);
 bool resize_output_check(const Tensor& output, IntArrayRef shape);
@@ -67,8 +68,6 @@ inline TensorNucleus* resize_impl_cpu_(TensorNucleus* self, IntArrayRef size, In
     
     return self;
 }
-
-namespace native {
 
 const Tensor& resize_as_(const Tensor& self, const Tensor& the_template);
 const Tensor& resize_(const Tensor& self, IntArrayRef size);

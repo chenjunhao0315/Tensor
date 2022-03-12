@@ -66,15 +66,31 @@ void save_image_options(const Tensor& img_, const char *name, IMG_TYPE type, int
     unsigned char* data = img.data_ptr<unsigned char>();
     
     int success = 0;
-    if (type == IMG_TYPE::JPG)
+    if (type == IMG_TYPE::PNG)
+        success = stbi_write_png(buff, width, height, channel, data, width * channel);
+    else if (type == IMG_TYPE::BMP)
+        success = stbi_write_bmp(buff, width, height, channel, data);
+    else if (type == IMG_TYPE::JPG)
         success = stbi_write_jpg(buff, width, height, channel, data, quality);
     
     if (!success)
         fprintf(stderr, "Failed to write image %s\n", buff);
 }
 
+void save_image(const Tensor &img, const char *name) {
+    save_image_jpg(img, name);
+}
+
 void save_image_jpg(const Tensor& img, const char *name, int quality) {
     save_image_options(img, name, IMG_TYPE::JPG, quality);
+}
+
+void save_image_png(const Tensor& img, const char *name) {
+    save_image_options(img, name, IMG_TYPE::PNG, 100);
+}
+
+void save_image_bmp(const Tensor& img, const char *name) {
+    save_image_options(img, name, IMG_TYPE::BMP, 100);
 }
 
 

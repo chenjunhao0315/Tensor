@@ -470,7 +470,7 @@ void TensorIterator::set_output(int64_t output_idx, IntArrayRef sizes, IntArrayR
             assert(op.original_tensor_base().is_same(t));
             assert(!op.tensor_base().is_same(t));
             TensorRef tensor(op.tensor());
-            resize_output(*tensor, sizes);
+            otter::native::resize_output(*tensor, sizes);
             if (!strides.empty()) {
                 tensor->as_strided_(sizes, strides);
             }

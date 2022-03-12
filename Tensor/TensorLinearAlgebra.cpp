@@ -53,7 +53,7 @@ void addmm_impl_cpu_(Tensor &result, const Tensor &self, Tensor m1, Tensor m2, c
     // Ensure the matrix can do matrix multiplication
     assert(self_sizes[0] == m1_sizes[0] && self_sizes[1] == m2_sizes[1]);
     
-    otter::resize_output(result, self_sizes);
+    otter::native::resize_output(result, self_sizes);
     const auto result_strides = result.strides();
     const auto result_sizes = result.sizes();
 
@@ -135,5 +135,11 @@ void addmm_impl_cpu_(Tensor &result, const Tensor &self, Tensor m1, Tensor m2, c
     }
 }
 
-
+Tensor matmul(Tensor& output, const Tensor& tensor1, const Tensor& tensor2) {
+    auto dim_tensor1 = tensor1.dim();
+    auto dim_tensor2 = tensor2.dim();
+    
+    return output;
 }
+
+}   // end namespace otter
