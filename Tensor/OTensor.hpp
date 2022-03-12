@@ -18,6 +18,7 @@
 #include "TensorUtils.hpp"
 #include "Convolution.hpp"
 #include "TensorShape.hpp"
+#include "TensorFunction.hpp"
 
 
 #endif /* OTensor_h */
