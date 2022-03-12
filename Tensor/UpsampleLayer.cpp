@@ -81,7 +81,7 @@ int UpsampleLayer::compute_output_shape(ParamDict& pd) {
 
 int UpsampleLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const {
     if (mode == 0) {
-        top_blob = otter::cpu::upsample_nearest2d(bottom_blob, {output_height, output_width}, scale_height, scale_width);
+        top_blob = otter::native::upsample_nearest2d(bottom_blob, {output_height, output_width}, scale_height, scale_width);
     }
     
     return 0;

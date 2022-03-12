@@ -20,11 +20,22 @@ enum class IMG_TYPE {
     
 };
 
-Tensor load_image_pixel(const char* filename);
-
+// Translate HWC -> CHW
+// Recommended!
 Tensor load_image_rgb(const char* filename);
 
+// Raw data
+Tensor load_image_pixel(const char* filename);
+
+// Save image
+// Note that the input should be 3-dim and HWC
+void save_image(const Tensor &img, const char *name);
+
 void save_image_jpg(const Tensor& im, const char *name, int quality = 80);
+
+void save_image_png(const Tensor& img, const char *name);
+
+void save_image_bmp(const Tensor& img, const char *name);
 
 void cvtColor(Tensor& input, Tensor& output);
 

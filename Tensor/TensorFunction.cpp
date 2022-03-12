@@ -23,7 +23,7 @@ void resize_out(const Tensor &out, IntArrayRef sizes, IntArrayRef strides, const
     assert(out.dtype() == options.dtype());
     assert(out.device() == options.device());
     
-    const bool resized = resize_output(out, sizes);
+    const bool resized = otter::native::resize_output(out, sizes);
     if (resized) {
         if (!strides.empty()) {
             
@@ -658,7 +658,7 @@ Tensor & wrapper_upsample_nearest2d_out_out(const Tensor & self, IntArrayRef out
 
 // end upsample
 
-namespace cpu {
+namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha) {
     return wrapper_add_Tensor(self, other, alpha);
@@ -866,5 +866,5 @@ Tensor & upsample_nearest2d_out(Tensor & out, const Tensor & self, IntArrayRef o
     return wrapper_upsample_nearest2d_out_out(self, output_size, scales_h, scales_w, out);
 }
 
-}   // end namespace cpu
+}   // end namespace native
 }   // end namesapce otter

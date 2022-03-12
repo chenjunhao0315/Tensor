@@ -159,11 +159,11 @@ Tensor Tensor::to(ScalarType dtype, bool non_blocking, bool copy, MemoryFormat m
 }
 
 Tensor& Tensor::add_(const Tensor &other, const Scalar &alpha) const {
-    return otter::cpu::add_(const_cast<Tensor&>(*this), other, alpha);
+    return otter::native::add_(const_cast<Tensor&>(*this), other, alpha);
 }
 
 Tensor Tensor::add(const Tensor& other, const Scalar& alpha) const {
-    return otter::cpu::add(*this, other, alpha);
+    return otter::native::add(*this, other, alpha);
 }
 
 Tensor& Tensor::add_(const Scalar &other, const Scalar &alpha) const {
@@ -175,11 +175,11 @@ Tensor Tensor::add(const Scalar& other, const Scalar& alpha) const {
 }
 
 Tensor& Tensor::sub_(const Tensor &other, const Scalar &alpha) const {
-    return otter::cpu::sub_(const_cast<Tensor&>(*this), other, alpha);
+    return otter::native::sub_(const_cast<Tensor&>(*this), other, alpha);
 }
 
 Tensor Tensor::sub(const Tensor& other, const Scalar& alpha) const {
-    return otter::cpu::sub(*this, other, alpha);
+    return otter::native::sub(*this, other, alpha);
 }
 
 Tensor& Tensor::sub_(const Scalar &other, const Scalar &alpha) const {
@@ -191,11 +191,11 @@ Tensor Tensor::sub(const Scalar& other, const Scalar& alpha) const {
 }
 
 Tensor& Tensor::mul_(const Tensor &other) const {
-    return otter::cpu::mul_(const_cast<Tensor&>(*this), other);
+    return otter::native::mul_(const_cast<Tensor&>(*this), other);
 }
 
 Tensor Tensor::mul(const Tensor& other) const {
-    return otter::cpu::mul(*this, other);
+    return otter::native::mul(*this, other);
 }
 
 Tensor& Tensor::mul_(const Scalar &other) const {
@@ -207,11 +207,11 @@ Tensor Tensor::mul(const Scalar& other) const {
 }
 
 Tensor& Tensor::div_(const Tensor &other) const {
-    return otter::cpu::div_(const_cast<Tensor&>(*this), other);
+    return otter::native::div_(const_cast<Tensor&>(*this), other);
 }
 
 Tensor Tensor::div(const Tensor& other) const {
-    return otter::cpu::div(*this, other);
+    return otter::native::div(*this, other);
 }
 
 Tensor& Tensor::div_(const Scalar &other) const {
@@ -223,11 +223,11 @@ Tensor Tensor::div(const Scalar& other) const {
 }
 
 Tensor& Tensor::remainder_(const Tensor &other) const {
-    return otter::cpu::remainder_(const_cast<Tensor&>(*this), other);
+    return otter::native::remainder_(const_cast<Tensor&>(*this), other);
 }
 
 Tensor Tensor::remainder(const Tensor& other) const {
-    return otter::cpu::remainder(*this, other);
+    return otter::native::remainder(*this, other);
 }
 
 Tensor& Tensor::remainder_(const Scalar &other) const {
@@ -239,11 +239,11 @@ Tensor Tensor::remainder(const Scalar& other) const {
 }
 
 Tensor& Tensor::bitwise_and_(const Tensor &other) const {
-    return otter::cpu::bitwise_and_(const_cast<Tensor&>(*this), other);
+    return otter::native::bitwise_and_(const_cast<Tensor&>(*this), other);
 }
 
 Tensor Tensor::bitwise_and(const Tensor& other) const {
-    return otter::cpu::bitwise_and(*this, other);
+    return otter::native::bitwise_and(*this, other);
 }
 
 Tensor& Tensor::bitwise_and_(const Scalar &other) const {
@@ -255,11 +255,11 @@ Tensor Tensor::bitwise_and(const Scalar& other) const {
 }
 
 Tensor& Tensor::bitwise_or_(const Tensor &other) const {
-    return otter::cpu::bitwise_or_(const_cast<Tensor&>(*this), other);
+    return otter::native::bitwise_or_(const_cast<Tensor&>(*this), other);
 }
 
 Tensor Tensor::bitwise_or(const Tensor& other) const {
-    return otter::cpu::bitwise_or(*this, other);
+    return otter::native::bitwise_or(*this, other);
 }
 
 Tensor& Tensor::bitwise_or_(const Scalar &other) const {
@@ -271,11 +271,11 @@ Tensor Tensor::bitwise_or(const Scalar& other) const {
 }
 
 Tensor& Tensor::bitwise_xor_(const Tensor &other) const {
-    return otter::cpu::bitwise_xor_(const_cast<Tensor&>(*this), other);
+    return otter::native::bitwise_xor_(const_cast<Tensor&>(*this), other);
 }
 
 Tensor Tensor::bitwise_xor(const Tensor& other) const {
-    return otter::cpu::bitwise_xor(*this, other);
+    return otter::native::bitwise_xor(*this, other);
 }
 
 Tensor& Tensor::bitwise_xor_(const Scalar &other) const {
@@ -287,67 +287,67 @@ Tensor Tensor::bitwise_xor(const Scalar& other) const {
 }
 
 Tensor& Tensor::bitwise_not_() const {
-    return otter::cpu::bitwise_not_(const_cast<Tensor&>(*this));
+    return otter::native::bitwise_not_(const_cast<Tensor&>(*this));
 }
 
 Tensor Tensor::bitwise_not() const {
-    return otter::cpu::bitwise_not(*this);
+    return otter::native::bitwise_not(*this);
 }
 
 Tensor& Tensor::neg_() const {
-    return otter::cpu::neg_(const_cast<Tensor&>(*this));
+    return otter::native::neg_(const_cast<Tensor&>(*this));
 }
 
 Tensor Tensor::neg() const {
-    return otter::cpu::neg(*this);
+    return otter::native::neg(*this);
 }
 
 Tensor& Tensor::abs_() const {
-    return otter::cpu::abs_(const_cast<Tensor&>(*this));
+    return otter::native::abs_(const_cast<Tensor&>(*this));
 }
 
 Tensor Tensor::abs() const {
-    return otter::cpu::abs(*this);
+    return otter::native::abs(*this);
 }
 
 Tensor& Tensor::sin_() const {
-    return otter::cpu::sin_(const_cast<Tensor&>(*this));
+    return otter::native::sin_(const_cast<Tensor&>(*this));
 }
 
 Tensor Tensor::sin() const {
-    return otter::cpu::sin(*this);
+    return otter::native::sin(*this);
 }
 
 Tensor& Tensor::cos_() const {
-    return otter::cpu::cos_(const_cast<Tensor&>(*this));
+    return otter::native::cos_(const_cast<Tensor&>(*this));
 }
 
 Tensor Tensor::cos() const {
-    return otter::cpu::cos(*this);
+    return otter::native::cos(*this);
 }
 
 Tensor& Tensor::tan_() const {
-    return otter::cpu::tan_(const_cast<Tensor&>(*this));
+    return otter::native::tan_(const_cast<Tensor&>(*this));
 }
 
 Tensor Tensor::tan() const {
-    return otter::cpu::tan(*this);
+    return otter::native::tan(*this);
 }
 
 Tensor& Tensor::exp_() const {
-    return otter::cpu::exp_(const_cast<Tensor&>(*this));
+    return otter::native::exp_(const_cast<Tensor&>(*this));
 }
 
 Tensor Tensor::exp() const {
-    return otter::cpu::exp(*this);
+    return otter::native::exp(*this);
 }
 
 Tensor& Tensor::sqrt_() const {
-    return otter::cpu::sqrt_(const_cast<Tensor&>(*this));
+    return otter::native::sqrt_(const_cast<Tensor&>(*this));
 }
 
 Tensor Tensor::sqrt() const {
-    return otter::cpu::sqrt(*this);
+    return otter::native::sqrt(*this);
 }
 
 Tensor Tensor::dot(const Tensor& other) const {
@@ -355,15 +355,15 @@ Tensor Tensor::dot(const Tensor& other) const {
 }
 
 Tensor Tensor::addmm(const Tensor& mat1, const Tensor& mat2, const Scalar& beta, const Scalar& alpha) const {
-    return otter::cpu::addmm(*this, mat1, mat2, beta, alpha);
+    return otter::native::addmm(*this, mat1, mat2, beta, alpha);
 }
 
 Tensor& Tensor::addmm_(const Tensor &mat1, const Tensor &mat2, const Scalar& beta, const Scalar& alpha) const {
-    return otter::cpu::addmm_(const_cast<Tensor&>(*this), mat1, mat2, beta, alpha);
+    return otter::native::addmm_(const_cast<Tensor&>(*this), mat1, mat2, beta, alpha);
 }
 
 Tensor Tensor::mm(const Tensor &other) const {
-    return otter::cpu::mm(*this, other);
+    return otter::native::mm(*this, other);
 }
 
 #define DEFINE_ITEM(T, name)      \

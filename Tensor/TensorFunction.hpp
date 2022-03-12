@@ -207,7 +207,7 @@ struct structured_upsample_nearest2d_out_cpu : public structured_upsample_neares
     void impl(const Tensor & self, IntArrayRef output_size, double scales_h, double scales_w, const Tensor & out);
 };
 
-namespace cpu {
+namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha);
 Tensor & add_out(Tensor & out, const Tensor & self, const Tensor & other, const Scalar & alpha);
@@ -291,14 +291,8 @@ std::tuple<Tensor&, Tensor&> max_pool2d_with_indices_out(Tensor & out, Tensor & 
 Tensor upsample_nearest2d(const Tensor & self, IntArrayRef output_size, double scales_h, double scales_w);
 Tensor & upsample_nearest2d_out(Tensor & out, const Tensor & self, IntArrayRef output_size, double scales_h, double scales_w);
 
-}
+}   // end namespace native
 
-
-//Tensor& warpper_addmm_()
-
-
-
-
-}
+}   // end namespace otter
 
 #endif /* TensorFunction_hpp */
