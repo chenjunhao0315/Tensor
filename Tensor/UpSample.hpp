@@ -20,9 +20,12 @@ namespace otter {
 
 class Tensor;
 
+using scale_t = double;
 using upsampling_nearest2d_fn = void(*)(const Tensor& output, const Tensor& input, double scales_h, double scales_w);
+using upsampling_bilinear2d_fn = void(*)(const Tensor& output, const Tensor& input, bool align_corners, scale_t scales_h, scale_t scales_w);
 
 DECLARE_DISPATCH(upsampling_nearest2d_fn, upsampling_nearest2d_stub);
+DECLARE_DISPATCH(upsampling_bilinear2d_fn, upsampling_bilinear2d_stub);
 
 static inline int64_t nearest_neighbor_compute_source_index(
     const float scale,
@@ -124,6 +127,34 @@ static OTTER_UNUSED std::array<int64_t, 4> upsample_2d_common_check(IntArrayRef 
                 ")");
 
     return {nbatch, channels, output_height, output_width};
+}
+
+template<typename scalar_t>
+static inline void compute_source_index_and_lambda(
+    int64_t& input_index0,
+    int64_t& input_index1,
+    scalar_t& lambda0,
+    scalar_t& lambda1,
+    scalar_t ratio,
+    int64_t output_index,
+    int64_t input_size,
+    int64_t output_size,
+    bool align_corners) {
+    if (output_size == input_size) {
+        // scale_factor = 1, simply copy
+        input_index0 = output_index;
+        input_index1 = output_index;
+        lambda0 = static_cast<scalar_t>(1);
+        lambda1 = static_cast<scalar_t>(0);
+    } else {
+        const scalar_t real_input_index = area_pixel_compute_source_index<scalar_t>(
+            ratio, output_index, align_corners, /*cubic=*/false);
+        input_index0 = static_cast<int64_t>(real_input_index);
+        int64_t offset = (input_index0 < input_size - 1) ? 1 : 0;
+        input_index1 = input_index0 + offset;
+        lambda1 = real_input_index - input_index0;
+        lambda0 = static_cast<scalar_t>(1.) - lambda1;
+    }
 }
 
 }   // end namespace otter

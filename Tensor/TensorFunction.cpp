@@ -615,7 +615,7 @@ Tensor & wrapper_leaky_relu_(Tensor & self, const Scalar & negative_slope) {
 }
 // end leaky_relu cpu
 
-// upsample
+// upsample nearest
 struct structured_upsample_nearest2d_out_cpu_functional final : public structured_upsample_nearest2d_out_cpu {
 
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
@@ -656,7 +656,53 @@ Tensor & wrapper_upsample_nearest2d_out_out(const Tensor & self, IntArrayRef out
     return out;
 }
 
-// end upsample
+// end upsample nearest
+
+// upsample bilinear
+struct structured_upsample_bilinear2d_out_cpu_functional final : public structured_upsample_bilinear2d_out_cpu {
+
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+
+        outputs_[output_idx] = create_out(sizes, strides, options);
+    }
+
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+
+Tensor wrapper_upsample_bilinear2d(const Tensor & self, IntArrayRef output_size, bool align_corners, double scales_h, double scales_w) {
+    structured_upsample_bilinear2d_out_cpu_functional op;
+    op.meta(self, output_size, align_corners, scales_h, scales_w);
+    op.impl(self, output_size, align_corners, scales_h, scales_w, *op.outputs_[0]);
+    
+    return std::move(op.outputs_[0]).take();
+}
+
+struct structured_upsample_bilinear2d_out_cpu_out final : public structured_upsample_bilinear2d_out_cpu {
+    structured_upsample_bilinear2d_out_cpu_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+    }
+
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+
+Tensor & wrapper_upsample_bilinear2d_out_out(const Tensor & self, IntArrayRef output_size, bool align_corners, double scales_h, double scales_w, Tensor & out) {
+    structured_upsample_bilinear2d_out_cpu_out op(out);
+    op.meta(self, output_size, align_corners, scales_h, scales_w);
+    op.impl(self, output_size, align_corners, scales_h, scales_w, op.outputs_[0]);
+    
+    return out;
+}
+// end upsample bilinear
 
 namespace native {
 
@@ -864,6 +910,14 @@ Tensor upsample_nearest2d(const Tensor & self, IntArrayRef output_size, double s
 
 Tensor & upsample_nearest2d_out(Tensor & out, const Tensor & self, IntArrayRef output_size, double scales_h, double scales_w) {
     return wrapper_upsample_nearest2d_out_out(self, output_size, scales_h, scales_w, out);
+}
+
+Tensor upsample_bilinear2d(const Tensor & self, IntArrayRef output_size, bool align_corners, double scales_h, double scales_w) {
+    return wrapper_upsample_bilinear2d(self, output_size, align_corners, scales_h, scales_w);
+}
+
+Tensor & upsample_bilinear2d_out(Tensor & out, const Tensor & self, IntArrayRef output_size, bool align_corners, double scales_h, double scales_w) {
+    return wrapper_upsample_bilinear2d_out_out(self, output_size, align_corners, scales_h, scales_w, out);
 }
 
 }   // end namespace native
