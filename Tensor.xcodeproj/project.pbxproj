@@ -54,6 +54,7 @@
 		762E3B4B27BCFD750075F983 /* TensorIteratorDynamicCasting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B4927BCFD750075F983 /* TensorIteratorDynamicCasting.cpp */; };
 		762E3B5627BEA4A20075F983 /* MemoryOverlap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B5427BEA4A10075F983 /* MemoryOverlap.cpp */; };
 		76486AEA27DBC8FF0078FF9B /* Vision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AE827DBC8FF0078FF9B /* Vision.cpp */; };
+		76486AF127DCD0C10078FF9B /* TensorInterpolation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AEF27DCD0C00078FF9B /* TensorInterpolation.cpp */; };
 		7687216127C0E31C006640CF /* Module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687215F27C0E31C006640CF /* Module.cpp */; };
 		7687216427C0E379006640CF /* Layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216227C0E379006640CF /* Layer.cpp */; };
 		7687216827C12145006640CF /* NetOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216627C12145006640CF /* NetOption.cpp */; };
@@ -240,6 +241,8 @@
 		76486AE927DBC8FF0078FF9B /* Vision.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Vision.hpp; sourceTree = "<group>"; };
 		76486AED27DBD0F60078FF9B /* stb_image_write.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image_write.h; sourceTree = "<group>"; };
 		76486AEE27DBD0F60078FF9B /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
+		76486AEF27DCD0C00078FF9B /* TensorInterpolation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorInterpolation.cpp; sourceTree = "<group>"; };
+		76486AF027DCD0C00078FF9B /* TensorInterpolation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorInterpolation.hpp; sourceTree = "<group>"; };
 		7687215F27C0E31C006640CF /* Module.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Module.cpp; sourceTree = "<group>"; };
 		7687216027C0E31C006640CF /* Module.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Module.hpp; sourceTree = "<group>"; };
 		7687216227C0E379006640CF /* Layer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Layer.cpp; sourceTree = "<group>"; };
@@ -572,6 +575,8 @@
 				7628E2D327D10CDA00B136FA /* UpSample.hpp */,
 				7628E2D527D1168C00B136FA /* UpSampleKernel.cpp */,
 				7628E2D627D1168C00B136FA /* UpSampleKernel.hpp */,
+				76486AEF27DCD0C00078FF9B /* TensorInterpolation.cpp */,
+				76486AF027DCD0C00078FF9B /* TensorInterpolation.hpp */,
 			);
 			name = Ops;
 			sourceTree = "<group>";
@@ -934,6 +939,7 @@
 				76F336C427A5B9B800E3AEF1 /* Dispatch.cpp in Sources */,
 				76E6C53A27A510F30036A26F /* Parallel.cpp in Sources */,
 				76F336E327AD6DB000E3AEF1 /* RefPtr.cpp in Sources */,
+				76486AF127DCD0C10078FF9B /* TensorInterpolation.cpp in Sources */,
 				760382D327C00DD000CD599F /* TensorCat.cpp in Sources */,
 				76F3378227B3AA7B00E3AEF1 /* Math.cpp in Sources */,
 				76E6C51327A502A30036A26F /* Tensor.cpp in Sources */,
