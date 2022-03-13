@@ -16,8 +16,7 @@ namespace cv {
 enum class IMG_TYPE {
     JPG,
     BMP,
-    PNG,
-    
+    PNG
 };
 
 // Translate HWC -> CHW
@@ -31,7 +30,7 @@ Tensor load_image_pixel(const char* filename);
 // Note that the input should be 3-dim and HWC
 void save_image(const Tensor &img, const char *name);
 
-void save_image_jpg(const Tensor& im, const char *name, int quality = 80);
+void save_image_jpg(const Tensor& img, const char *name, int quality = 80);
 
 void save_image_png(const Tensor& img, const char *name);
 
