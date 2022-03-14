@@ -15,6 +15,9 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "3rdparty/stb_image_write.h"
 #endif
+#ifdef __ARM_NEON__
+#define STBI_NEON
+#endif
 
 #include "TensorMaker.hpp"
 #include "TensorPixel.hpp"
@@ -49,7 +52,7 @@ Tensor load_image_rgb(const char* filename) {
 }
 
 void save_image_options(const Tensor& img_, const char *name, IMG_TYPE type, int quality) {
-    OTTER_CHECK(img_.dim() <= 4, "Expect the dimension of image <= 4, but get ", img_.dim());
+    OTTER_CHECK(img_.dim() == 3, "Expect the dimension of image to be 3, but get ", img_.dim());
     
     char buff[256];
     
