@@ -58,6 +58,7 @@
 		76486AF427DDCE2C0078FF9B /* Drawing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AF227DDCE2C0078FF9B /* Drawing.cpp */; };
 		76486AF727DF7A510078FF9B /* GraphicAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AF527DF7A510078FF9B /* GraphicAPI.cpp */; };
 		76486AFA27DF7CD80078FF9B /* LineIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AF827DF7CD80078FF9B /* LineIterator.cpp */; };
+		76486AFD27E110160078FF9B /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AFB27E110160078FF9B /* Color.cpp */; };
 		7687216127C0E31C006640CF /* Module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687215F27C0E31C006640CF /* Module.cpp */; };
 		7687216427C0E379006640CF /* Layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216227C0E379006640CF /* Layer.cpp */; };
 		7687216827C12145006640CF /* NetOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216627C12145006640CF /* NetOption.cpp */; };
@@ -252,6 +253,8 @@
 		76486AF627DF7A510078FF9B /* GraphicAPI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GraphicAPI.hpp; sourceTree = "<group>"; };
 		76486AF827DF7CD80078FF9B /* LineIterator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LineIterator.cpp; sourceTree = "<group>"; };
 		76486AF927DF7CD80078FF9B /* LineIterator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LineIterator.hpp; sourceTree = "<group>"; };
+		76486AFB27E110160078FF9B /* Color.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Color.cpp; sourceTree = "<group>"; };
+		76486AFC27E110160078FF9B /* Color.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Color.hpp; sourceTree = "<group>"; };
 		7687215F27C0E31C006640CF /* Module.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Module.cpp; sourceTree = "<group>"; };
 		7687216027C0E31C006640CF /* Module.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Module.hpp; sourceTree = "<group>"; };
 		7687216227C0E379006640CF /* Layer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Layer.cpp; sourceTree = "<group>"; };
@@ -618,6 +621,8 @@
 				76486AF627DF7A510078FF9B /* GraphicAPI.hpp */,
 				76486AF827DF7CD80078FF9B /* LineIterator.cpp */,
 				76486AF927DF7CD80078FF9B /* LineIterator.hpp */,
+				76486AFB27E110160078FF9B /* Color.cpp */,
+				76486AFC27E110160078FF9B /* Color.hpp */,
 			);
 			name = cv;
 			sourceTree = "<group>";
@@ -971,6 +976,7 @@
 				76E6C52227A504FC0036A26F /* PerspectiveView.cpp in Sources */,
 				76E6C55427A578980036A26F /* Loop.cpp in Sources */,
 				76486AF427DDCE2C0078FF9B /* Drawing.cpp in Sources */,
+				76486AFD27E110160078FF9B /* Color.cpp in Sources */,
 				76F4A59D27C9872500DFFD9E /* ConvolutionMM2DNeon.cpp in Sources */,
 				76F0064327B67E4C009D67F5 /* TensorProperties.cpp in Sources */,
 				76F336D627A7AD1600E3AEF1 /* TensorFunction.cpp in Sources */,

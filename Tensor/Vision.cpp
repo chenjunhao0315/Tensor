@@ -51,8 +51,37 @@ Tensor load_image_rgb(const char* filename) {
     return img;
 }
 
+Tensor check_save_img_and_try_to_fix(const Tensor& img_) {
+    OTTER_CHECK(img_.dim() <= 4, "Expect the dimension of image <= 4, but get ", img_.dim());
+    
+    Tensor img;
+    
+    if (img_.dim() == 4) {
+        int batch_check = (int)img_.size(0);
+        OTTER_CHECK(batch_check == 1, "Expect there is only one image need to be stored but get ", batch_check);
+        
+        img = img_.squeeze(0);
+    } else {
+        img = img_;
+    }
+    
+    int channel_check_CHW = (int)img.size(0);
+    int channel_check_HWC = (int)img.size(2);
+    bool maybe_CHW = channel_check_CHW <= 4;
+    bool maybe_HWC = channel_check_HWC <= 4;
+    
+    if (maybe_HWC) {    // image size too small or it is HWC
+        return img.to(otter::ScalarType::Byte).contiguous();
+    } else if (maybe_CHW) {
+        return img.permute({1, 2, 0}).to(otter::ScalarType::Byte).contiguous();
+    }
+    
+    OTTER_CHECK(false, "To save image, the data should be HWC or CHW");
+    return Tensor();
+}
+
 void save_image_options(const Tensor& img_, const char *name, IMG_TYPE type, int quality) {
-    OTTER_CHECK(img_.dim() == 3, "Expect the dimension of image to be 3, but get ", img_.dim());
+    Tensor img = check_save_img_and_try_to_fix(img_);
     
     char buff[256];
     
@@ -61,7 +90,6 @@ void save_image_options(const Tensor& img_, const char *name, IMG_TYPE type, int
     else if (type == IMG_TYPE::JPG) sprintf(buff, "%s.jpg", name);
     else                            sprintf(buff, "%s.png", name);
     
-    Tensor img = img_.to(otter::ScalarType::Byte).contiguous();
     int height  = (int)img.size(0);
     int width   = (int)img.size(1);
     int channel = (int)img.size(2);
