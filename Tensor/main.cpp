@@ -129,7 +129,7 @@ int main(int argc, const char * argv[]) {
     net.compile();
     net.summary();
 
-    net.load_weight("yolo-fastest-1.1-xl.dam");
+    // net.load_weight("yolo-fastest-1.1-xl.dam");
 
     auto in = otter::full({1, 3, 320, 320}, 0.5, otter::ScalarType::Float);
     otter::Clock clock;
