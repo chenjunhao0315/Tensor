@@ -14,6 +14,8 @@
 
 #define OTTER_AVX 1
 
+#define OTTER_OPENCV_DRAW 1
+
 #if OTTER_MOBLE
 
 #else

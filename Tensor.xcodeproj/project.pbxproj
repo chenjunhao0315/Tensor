@@ -15,6 +15,7 @@
 		760382D327C00DD000CD599F /* TensorCat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760382D127C00DCF00CD599F /* TensorCat.cpp */; };
 		760382D627C019AE00CD599F /* DepthwiseConvKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760382D427C019AE00CD599F /* DepthwiseConvKernel.cpp */; };
 		760384B527C0492200CD599F /* TensorPixel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760384B327C0492200CD599F /* TensorPixel.cpp */; };
+		7603BA2527E1DB9C00EA42F1 /* hershey_fonts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7603BA2327E1DB9C00EA42F1 /* hershey_fonts.cpp */; };
 		7604745427D67ED100FCB785 /* DataReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7604745227D67ED100FCB785 /* DataReader.cpp */; };
 		7604745727D68F3F00FCB785 /* Initializer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7604745527D68F3F00FCB785 /* Initializer.cpp */; };
 		7620AF6E27B4060A0081C210 /* RangeFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF6C27B4060A0081C210 /* RangeFactory.cpp */; };
@@ -160,6 +161,8 @@
 		760384B327C0492200CD599F /* TensorPixel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorPixel.cpp; sourceTree = "<group>"; };
 		760384B427C0492200CD599F /* TensorPixel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorPixel.hpp; sourceTree = "<group>"; };
 		760384B627C0525C00CD599F /* Vec256_float_neon.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Vec256_float_neon.hpp; sourceTree = "<group>"; };
+		7603BA2327E1DB9C00EA42F1 /* hershey_fonts.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = hershey_fonts.cpp; sourceTree = "<group>"; };
+		7603BA2427E1DB9C00EA42F1 /* hershey_fonts.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = hershey_fonts.hpp; sourceTree = "<group>"; };
 		7604745227D67ED100FCB785 /* DataReader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DataReader.cpp; sourceTree = "<group>"; };
 		7604745327D67ED100FCB785 /* DataReader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DataReader.hpp; sourceTree = "<group>"; };
 		7604745527D68F3F00FCB785 /* Initializer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Initializer.cpp; sourceTree = "<group>"; };
@@ -618,6 +621,8 @@
 				76486AF627DF7A510078FF9B /* GraphicAPI.hpp */,
 				76486AF827DF7CD80078FF9B /* LineIterator.cpp */,
 				76486AF927DF7CD80078FF9B /* LineIterator.hpp */,
+				7603BA2327E1DB9C00EA42F1 /* hershey_fonts.cpp */,
+				7603BA2427E1DB9C00EA42F1 /* hershey_fonts.hpp */,
 			);
 			name = cv;
 			sourceTree = "<group>";
@@ -882,6 +887,7 @@
 				76F0063A27B64D63009D67F5 /* TensorBlas.cpp in Sources */,
 				76F0064C27B7FC09009D67F5 /* ExpandUtils.cpp in Sources */,
 				762E3B3327BB79950075F983 /* Unfold2D.cpp in Sources */,
+				7603BA2527E1DB9C00EA42F1 /* hershey_fonts.cpp in Sources */,
 				760382CA27BFFD7600CD599F /* Exception.cpp in Sources */,
 				7620AF7E27B550200081C210 /* TensorShape.cpp in Sources */,
 				76F0064027B66DEF009D67F5 /* MemoryFormat.cpp in Sources */,
