@@ -149,7 +149,7 @@ int main(int argc, const char * argv[]) {
     
     otter::cv::rectangle(img, otter::cv::Point(100, 100), otter::cv::Point(400, 400), otter::cv::Color(0, 0, 255), 10, 8, 0);
     
-    otter::cv::putText(img, "test", otter::cv::Point(100, 100), otter::cv::FONT_HERSHEY_SIMPLEX, 5, otter::cv::Color(255, 0, 0), 3, otter::cv::LINE_AA, false);
+    otter::cv::putText(img, "test", otter::cv::Point(100, 100), otter::cv::FONT_HERSHEY_SIMPLEX, 50, otter::cv::Color(255, 0, 0), 3, otter::cv::LINE_AA, false);
     
     otter::cv::save_image_jpg(img, "test", 100);
     

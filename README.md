@@ -9,6 +9,9 @@ It aims to enhance the performance on mobile phone platform.
 
 The main purpose of this project is used for NTHU電機系實作專題.
 
+Add some function for image loading and saving, which is powered by [stb_image][6].
+Add some drawing for image, which is powered by [OpenCV][5].
+
 ## Feature
 
 * C++17
@@ -589,6 +592,111 @@ Dot operation. **Note**: 1D tensor, same data type, same data size
 dot(Tensor) -> Tensor
 ```
 
+## Image I/O
+Use `stb_image` library
+
+### Load image
+Load image from `*.jpg`, `*.png`, ...
+
+* `load_image_pixel(filename);`    Load image from file and store the data in HWC format(**d = 3**)
+* `load_image_rgb(filename);` Load image from file and store the data in NCHW format(**d = 4**)
+
+```c++
+auto img_hwc = otter::cv::load_image_pixel("hello_world.jpg");    // Memory format: HWC -> for tranditional image processing
+
+auto img_nchw = otter::cv::load_image_rgb("hello_world.jpg");    // Memory format: NCHW -> for neural network input
+```
+
+### Save Image
+Save image into `*.jpg`, `*.png`, `*.bmp`
+
+* `save_image(img, filename);` Save image in `jpg` format for convience
+* `save_image_jpg(img, filename, quality);`    Save image in `jpg` format
+* `save_image_png(img, filename);`    Save image in `png` format
+* `save_image_bmp(img, filename);`    Save image in `bmp` format
+
+```c++
+auto img = otter::cv::load_image_pixel("hello_world.jpg");    // Load image
+
+otter::cv::save_image(img, "test");
+```
+
+## Drawing
+Now use the code from [OpenCV][5], all the function work the same as it
+#### Line
+Draw line on image
+* `line(img,  point1, point2, color, thickness = 1, line_type = LINE_8, shift = 0);`    Draw a straight line form point1 to point2 using `Bresenham algorithm`
+
+```c++
+auto img = otter::zeros({50, 50, 3}, otter::ScalarType::Byte);    // Create an empty 50*50 canvas with three channels
+
+otter::cv::line(img, otter::cv::Point(10, 10), otter::cv::Point(40, 40), otter::cv::Color(255, 0, 0), 3);    // Draw a line form (10, 10) to (40, 40) with rgb(255, 0, 0) and thickness is 3 using default line_type and default shift
+
+otter::cv::save_image(img, "test");
+```
+
+#### Circle
+Draw circle on image
+* `circle(img, center, radius, color, thickness = 1, line_type = LINE_8, shift = 0)`    Draw a circle with given center and radius
+
+```c++
+auto img = otter::zeros({50, 50, 3}, otter::ScalarType::Byte);    // Create an empty 50*50 canvas with three channels
+
+otter::cv::circle(img, otter::cv::Point(25, 25), 10, otter::cv::Color(255, 0, 0), 3);    // Draw a circle at (25, 25) radius(10) with rgb(255, 0, 0) and thickness is 3 using default line_type and default shift
+
+otter::cv::save_image(img, "test");
+```
+
+#### Rectangle
+Draw rectangle on image
+* `rectangle(img, point1, point2, color, thickness = 1, line_type = LINE_8, shift = 0);`    Draw a rectangle with left top point1 to bottom right point2
+* `rectangle(img, rect, color, thickness = 1, line_type = LINE_8, shift = 0);`    Draw a rectangle with given rectangle position
+
+```c++
+auto img = otter::zeros({50, 50, 3}, otter::ScalarType::Byte);    // Create an empty 50*50 canvas with three channels
+
+// Both two method create identical result
+
+// Method 1
+otter::cv::rectangle(img, otter::cv::Point(10, 10), otter::cv::Point(40, 40), otter::cv::Color(255, 0, 0), 3);    // Draw a rectangle form (10, 10) to (40, 40) with rgb(255, 0, 0) and thickness is 3 using default line_type and default shift
+
+// Method 2
+otter::cv::rectangle(img, otter::cv::Rect(10, 10, 30, 30), otter::cv::Color(255, 0, 0), 3);    // Draw a rectangle form (10, 10) with width (30, 30) with rgb(255, 0, 0) and thickness is 3 using default line_type and default shift
+
+otter::cv::save_image(img, "test");
+```
+
+#### Put Text
+Put text on image
+* `putText(img, string, point, font_face, font_scale, color, thickness = 1, line_type = LINE_8, shift = 0)`    Put text from left top point with given font_face and font_scale
+* `putText(img, string, point, font_face, pixelHeight, color, thickness = 1, line_type = LINE_8, shift = 0)`    Put text from left top point with given font_face and pixelHeight
+
+##### Font face
+
+* `FONT_HERSHEY_SIMPLEX`    normal size sans-serif font
+* `FONT_HERSHEY_PLAIN`        small size sans-serif font
+* `FONT_HERSHEY_DUPLEX`        normal size sans-serif font (more complex than FONT_HERSHEY_SIMPLEX)
+* `FONT_HERSHEY_COMPLEX`    normal size serif font
+* `FONT_HERSHEY_TRIPLEX`    normal size serif font (more complex than FONT_HERSHEY_COMPLEX)
+* `FONT_HERSHEY_COMPLEX_SMALL`  smaller version of FONT_HERSHEY_COMPLEX
+* `FONT_HERSHEY_SCRIPT_SIMPLEX` hand-writing style font
+* `FONT_HERSHEY_SCRIPT_COMPLEX` more complex variant of FONT_HERSHEY_SCRIPT_SIMPLEX
+* `FONT_ITALIC` flag for italic font
+
+
+```c++
+auto img = otter::zeros({500, 500, 3}, otter::ScalarType::Byte);    // Create an empty 500*500 canvas with three channels
+    
+otter::cv::line(img, otter::cv::Point(0, 0), otter::cv::Point(250, 250), otter::cv::Color(255, 0, 0), 20, 8, 0);    // Draw line from (0, 0) to (250, 250)
+    
+otter::cv::circle(img, otter::cv::Point(250, 250), 50, otter::cv::Color(0, 255, 0), 5, otter::cv::LINE_8, 0);    // Draw circle at (250, 250) with radius 50
+    
+otter::cv::rectangle(img, otter::cv::Point(100, 100), otter::cv::Point(400, 400), otter::cv::Color(0, 0, 255), 10, 8, 0);    // Draw rectangle from (100, 100) to (400, 400)
+    
+otter::cv::putText(img, "test", otter::cv::Point(100, 100), otter::cv::FONT_HERSHEY_SIMPLEX, 50, otter::cv::Color(255, 0, 0), 3, otter::cv::LINE_AA, false);    // Put text at (100, 100)
+    
+otter::cv::save_image_jpg(img, "test", 100);
+```
 
 ## Supported Layers
 
@@ -799,10 +907,15 @@ g++ -Os -fopenmp -mavx2 -o otter *.cpp
 - [PyTorch][9]
 - [ncnn][10]
 - [Neural Network][11]
+- [Opencv][5]
+- [stb_image][6]
 
 [1]: https://cs.stanford.edu/people/karpathy/convnetjs/
 [2]: https://github.com/pjreddie/darknet
 [4]: https://github.com/BVLC/caffe
+[5]: https://github.com/opencv/opencv
+[6]: https://github.com/nothings/stb
 [9]: https://github.com/pytorch/pytorch
 [10]: https://github.com/Tencent/ncnn
 [11]: https://github.com/chenjunhao0315/Neural_Network
+
