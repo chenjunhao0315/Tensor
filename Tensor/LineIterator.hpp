@@ -15,7 +15,9 @@ class Tensor;
 
 namespace cv {
 
+bool clipLine(Size2l img_size, Point2l& pt1, Point2l& pt2);
 bool clipLine(Size img_size, Point& pt1, Point& pt2);
+bool clipLine(Rect img_rect, Point& pt1, Point& pt2);
 
 class LineIterator {
 public:

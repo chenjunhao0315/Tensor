@@ -140,27 +140,16 @@ int main(int argc, const char * argv[]) {
 //    clock.stop_and_show();
 //    out.print();
 //    cout << out << endl;
+
+    auto img = otter::zeros({500, 500, 3}, otter::ScalarType::Byte);
     
-    otter::cv::Size img_size(500, 500);
+    otter::cv::line(img, otter::cv::Point(0, 0), otter::cv::Point(250, 250), otter::cv::Color(255, 0, 0), 20, 8, 0);
     
-    otter::cv::Point pt1(0, 0);
-    otter::cv::Point pt2(1000, 500);
+    otter::cv::circle(img, otter::cv::Point(250, 250), 50, otter::cv::Color(0, 255, 0), 5, otter::cv::LINE_8, 0);
     
-    otter::cv::clipLine(img_size, pt1, pt2);
+    otter::cv::rectangle(img, otter::cv::Point(100, 100), otter::cv::Point(400, 400), otter::cv::Color(0, 0, 255), 10, 8, 0);
     
-    cout << "from" << pt1 << " to " << pt2 << endl;
-    
-    auto img = otter::cv::load_image_pixel("5D4A0550cj.jpg");
-    
-    img = img.squeeze(0);
-    
-//    auto img = otter::zeros({50, 50, 3}, otter::ScalarType::Byte);
-    
-    unsigned char color[] = {255, 0, 0};
-    
-    otter::cv::line(img, otter::cv::Point(0, 0), otter::cv::Point(1000, 1000), 1.0, 1, 8, 0);
-    
-    otter::cv::save_image(img, "test");
+    otter::cv::save_image_jpg(img, "test", 100);
     
     return 0;
 }

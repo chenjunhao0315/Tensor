@@ -9,6 +9,9 @@
 #define GraphicAPI_hpp
 
 #include <iostream>
+#include <cmath>
+
+#include "Dispatch.hpp"
 
 namespace otter {
 namespace cv {
@@ -25,6 +28,11 @@ public:
     scalar_t x;
     scalar_t y;
 };
+
+template<typename scalar_t> template<typename scalar_t_2> inline
+Point_<scalar_t>::operator Point_<scalar_t_2>() const {
+    return Point_<scalar_t_2>(static_cast<scalar_t_2>(x), static_cast<scalar_t_2>(y));
+}
 
 template<typename scalar_t> static inline
 bool operator == (const Point_<scalar_t>& a, const Point_<scalar_t>& b) {
@@ -65,9 +73,9 @@ Point_<scalar_t> operator - (const Point_<scalar_t>& a) {
     return Point_<scalar_t>(static_cast<scalar_t>(-a.x), static_cast<scalar_t>(-a.y));
 }
 
-template<typename scalar_t> template<typename scalar_t_2> inline
-Point_<scalar_t>::operator Point_<scalar_t_2>() const {
-    return Point_<scalar_t_2>(static_cast<scalar_t_2>(x), static_cast<scalar_t_2>(y));
+template<typename scalar_t> static inline
+double norm(const Point_<scalar_t>& pt) {
+    return std::sqrt((double)pt.x * pt.x + (double)pt.y * pt.y);
 }
 
 template <typename scalar_t>
@@ -136,6 +144,10 @@ public:
     
     inline Point_<scalar_t> bottom_right() const {
         return Point_<scalar_t>(x + width, y + height);
+    }
+    
+    inline Size_<scalar_t> size() const {
+        return Size_<scalar_t>(width, height);
     }
     
     inline scalar_t area() const {
@@ -216,6 +228,51 @@ template <typename scalar_t>
 inline std::ostream& operator<<(std::ostream& o, const Rect_<scalar_t>& rect) {
     return o << "[" << rect.width << " x " << rect.height << " from (" << rect.x << ", " << rect.y << ")]";
 }
+
+class RotatedRect {
+public:
+    RotatedRect();
+
+    RotatedRect(const Point2f& center, const Size2f& size, float angle);
+
+    RotatedRect(const Point2f& point1, const Point2f& point2, const Point2f& point3);
+    
+    void points(Point2f pts[]) const;
+    
+    Rect boundingRect() const;
+    
+    Rect_<float> boundingRect2f() const;
+    
+    Point2f center;
+    
+    Size2f size;
+    
+    float angle;
+};
+
+inline RotatedRect::RotatedRect()
+    : center(), size(), angle(0) {}
+
+inline RotatedRect::RotatedRect(const Point2f& _center, const Size2f& _size, float _angle)
+    : center(_center), size(_size), angle(_angle) {}
+
+class Color {
+public:
+    Color(double v0, double v1 = 0, double v2 = 0, double v3 = 0);
+    
+    double val[4];
+};
+
+inline Color::Color(double v0, double v1, double v2, double v3) {
+    val[0] = v0;
+    val[1] = v1;
+    val[2] = v2;
+    val[3] = v3;
+}
+
+void colorToRawData(const Color& color, void *buf, otter::ScalarType dtype, int channels, int unroll_to);
+
+
 
 }   // end namespace cv
 }   // end namespace otter

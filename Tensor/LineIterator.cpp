@@ -70,6 +70,15 @@ bool clipLine(Size img_size, Point& pt1, Point& pt2) {
     return inside;
 }
 
+bool clipLine(Rect img_rect, Point& pt1, Point& pt2) {
+    Point tl = img_rect.top_left();
+    pt1 -= tl; pt2 -= tl;
+    bool inside = clipLine(img_rect.size(), pt1, pt2);
+    pt1 += tl; pt2 += tl;
+
+    return inside;
+}
+
 LineIterator::LineIterator(const Tensor& img, Point pt1, Point pt2, int connectivity, bool leftToRight) {
     // TODO: check if HWC
     
