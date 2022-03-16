@@ -1364,8 +1364,17 @@ PolyLine(Tensor& img, const Point2l* v, int count, bool is_closed,
     }
 }
 
+void checkImage(const Tensor& img) {
+    OTTER_CHECK(img.dim() == 3, "Drawing function expect 3 dims tensor but get ", img.dim());
+    OTTER_CHECK(img.size(2) <= 4, "Please check the memory format, we expect HWC here, but get ", img.size(2), " channels here.", "\nUse .permute() or ./transpose() to fix it");
+}
+
+// External Function
+
 void line(Tensor& img, Point pt1, Point pt2, const Color& color,
           int thickness, int line_type, int shift) {
+    checkImage(img);
+    
     if (line_type == CV_AA && img.scalar_type() != otter::ScalarType::Byte)
         line_type = 8;
     
@@ -1379,6 +1388,8 @@ void line(Tensor& img, Point pt1, Point pt2, const Color& color,
 
 void arrowedLine(Tensor& img, Point pt1, Point pt2, const Color& color,
                  int thickness, int line_type, int shift, double tipLength) {
+    checkImage(img);
+    
     const double tipSize = norm(pt1 - pt2) * tipLength; // Factor to normalize the size of the tip depending on the length of the arrow
     
     line(img, pt1, pt2, color, thickness, line_type, shift);
@@ -1397,6 +1408,8 @@ void arrowedLine(Tensor& img, Point pt1, Point pt2, const Color& color,
 void rectangle(Tensor& img, Point pt1, Point pt2,
                const Color& color, int thickness,
                int lineType, int shift) {
+    checkImage(img);
+    
     if (lineType == CV_AA && img.scalar_type() != otter::ScalarType::Byte)
         lineType = 8;
     
@@ -1422,17 +1435,18 @@ void rectangle(Tensor& img, Point pt1, Point pt2,
 }
 
 
-void rectangle(Tensor& img, Rect rec,
-               const Color& color, int thickness,
-               int lineType, int shift) {
+void rectangle(Tensor& img, Rect rec, const Color& color, int thickness, int lineType, int shift) {
+    checkImage(img);
+    
     if (!rec.empty())
         rectangle(img, rec.top_left(), rec.bottom_right() - Point(1 << shift, 1 << shift),
                   color, thickness, lineType, shift);
 }
 
 
-void circle(Tensor& img, Point center, int radius,
-            const Color& color, int thickness, int line_type, int shift) {
+void circle(Tensor& img, Point center, int radius, const Color& color, int thickness, int line_type, int shift) {
+    checkImage(img);
+    
     if (line_type == CV_AA && img.scalar_type() != otter::ScalarType::Byte)
         line_type = 8;
     
@@ -1442,8 +1456,7 @@ void circle(Tensor& img, Point center, int radius,
     double buf[4];
     colorToRawData(color, buf, img.scalar_type(), img.size(2), 0);
     
-    if (thickness > 1 || line_type != LINE_8 || shift > 0)
-    {
+    if (thickness > 1 || line_type != LINE_8 || shift > 0) {
         Point2l _center(center);
         int64_t _radius(radius);
         _center.x <<= XY_SHIFT - shift;
@@ -1451,8 +1464,7 @@ void circle(Tensor& img, Point center, int radius,
         _radius <<= XY_SHIFT - shift;
         EllipseEx(img, _center, Size2l(_radius, _radius),
                   0, 0, 360, buf, thickness, line_type);
-    }
-    else
+    } else
         Circle(img, center, radius, buf, thickness < 0);
 }
 
@@ -1460,6 +1472,8 @@ void circle(Tensor& img, Point center, int radius,
 void ellipse(Tensor& img, Point center, Size axes,
              double angle, double start_angle, double end_angle,
              const Color& color, int thickness, int line_type, int shift) {
+    
+    checkImage(img);
     
     if (line_type == CV_AA && img.scalar_type() != otter::ScalarType::Byte)
         line_type = 8;
@@ -1486,6 +1500,7 @@ void ellipse(Tensor& img, Point center, Size axes,
 
 void ellipse(Tensor& img, const RotatedRect& box, const Color& color,
              int thickness, int lineType) {
+    checkImage(img);
     
     if (lineType == CV_AA && img.scalar_type() != otter::ScalarType::Byte)
         lineType = 8;
@@ -1508,6 +1523,8 @@ void ellipse(Tensor& img, const RotatedRect& box, const Color& color,
 }
 
 void fillConvexPoly(Tensor& img, const Point* pts, int npts, const Color& color, int line_type, int shift) {
+    checkImage(img);
+    
     if (!pts || npts <= 0)
         return;
     
@@ -1524,6 +1541,7 @@ void fillConvexPoly(Tensor& img, const Point* pts, int npts, const Color& color,
 void fillPoly(Tensor& img, const Point** pts, const int* npts, int ncontours,
               const Color& color, int line_type,
               int shift, Point offset) {
+    checkImage(img);
     
     if (line_type == CV_AA && img.scalar_type() != otter::ScalarType::Byte)
         line_type = 8;
@@ -1550,6 +1568,8 @@ void fillPoly(Tensor& img, const Point** pts, const int* npts, int ncontours,
 
 void polylines(Tensor& img, const Point* const* pts, const int* npts, int ncontours, bool isClosed,
                const Color& color, int thickness, int line_type, int shift) {
+    checkImage(img);
+    
     if (line_type == CV_AA && img.scalar_type() != otter::ScalarType::Byte)
         line_type = 8;
     
@@ -1566,10 +1586,10 @@ void polylines(Tensor& img, const Point* const* pts, const int* npts, int nconto
     }
 }
 
-enum { FONT_SIZE_SHIFT=8, FONT_ITALIC_ALPHA=(1 << 8),
-    FONT_ITALIC_DIGIT=(2 << 8), FONT_ITALIC_PUNCT=(4 << 8),
-    FONT_ITALIC_BRACES=(8 << 8), FONT_HAVE_GREEK=(16 << 8),
-    FONT_HAVE_CYRILLIC=(32 << 8) };
+enum { FONT_SIZE_SHIFT = 8, FONT_ITALIC_ALPHA = (1 << 8),
+    FONT_ITALIC_DIGIT = (2 << 8), FONT_ITALIC_PUNCT = (4 << 8),
+    FONT_ITALIC_BRACES = (8 << 8), FONT_HAVE_GREEK = (16 << 8),
+    FONT_HAVE_CYRILLIC = (32 << 8) };
 
 static const int HersheyPlain[] = {
     (5 + 4*16) + FONT_HAVE_GREEK,
@@ -1698,13 +1718,11 @@ static const int HersheyScriptComplex[] = {
     2225, 2229, 2226, 2246 };
 
 
-static const int* getFontData(int fontFace)
-{
+static const int* getFontData(int fontFace) {
     bool isItalic = (fontFace & FONT_ITALIC) != 0;
     const int* ascii = 0;
     
-    switch( fontFace & 15 )
-    {
+    switch( fontFace & 15 ) {
         case FONT_HERSHEY_SIMPLEX:
             ascii = HersheySimplex;
             break;
@@ -1735,40 +1753,32 @@ static const int* getFontData(int fontFace)
     return ascii;
 }
 
-inline void readCheck(int &c, int &i, const std::string &text, int fontFace)
-{
-    
+inline void readCheck(int &c, int &i, const std::string &text, int fontFace) {
     int leftBoundary = ' ', rightBoundary = 127;
     
-    if(c >= 0x80 && fontFace == FONT_HERSHEY_COMPLEX)
-    {
-        if(c == 0xD0 && (unsigned char)text[i + 1] >= 0x90 && (unsigned char)text[i + 1] <= 0xBF)
-        {
+    if(c >= 0x80 && fontFace == FONT_HERSHEY_COMPLEX) {
+        if(c == 0xD0 && (unsigned char)text[i + 1] >= 0x90 && (unsigned char)text[i + 1] <= 0xBF) {
             c = (unsigned char)text[++i] - 17;
             leftBoundary = 127;
             rightBoundary = 175;
-        }
-        else if(c == 0xD1 && (unsigned char)text[i + 1] >= 0x80 && (unsigned char)text[i + 1] <= 0x8F)
-        {
+        } else if(c == 0xD1 && (unsigned char)text[i + 1] >= 0x80 && (unsigned char)text[i + 1] <= 0x8F) {
             c = (unsigned char)text[++i] + 47;
             leftBoundary = 175;
             rightBoundary = 191;
-        }
-        else
-        {
-            if(c >= 0xC0 && text[i+1] != 0) //2 bytes utf
+        } else {
+            if(c >= 0xC0 && text[i + 1] != 0) //2 bytes utf
                 i++;
             
-            if(c >= 0xE0 && text[i+1] != 0) //3 bytes utf
+            if(c >= 0xE0 && text[i + 1] != 0) //3 bytes utf
                 i++;
             
-            if(c >= 0xF0 && text[i+1] != 0) //4 bytes utf
+            if(c >= 0xF0 && text[i + 1] != 0) //4 bytes utf
                 i++;
             
-            if(c >= 0xF8 && text[i+1] != 0) //5 bytes utf
+            if(c >= 0xF8 && text[i + 1] != 0) //5 bytes utf
                 i++;
             
-            if(c >= 0xFC && text[i+1] != 0) //6 bytes utf
+            if(c >= 0xFC && text[i + 1] != 0) //6 bytes utf
                 i++;
             
             c = '?';
@@ -1784,7 +1794,6 @@ extern const char* g_HersheyGlyphs[];
 void putText(Tensor& img, const std::string& text, Point org,
              int fontFace, double fontScale, Color color,
              int thickness, int line_type, bool bottomLeftOrigin) {
-    
     
     if (text.empty()) {
         return;
@@ -1820,8 +1829,8 @@ void putText(Tensor& img, const std::string& text, Point org,
         const char* ptr = faces[ascii[(c - ' ') + 1]];
         p.x = (unsigned char)ptr[0] - 'R';
         p.y = (unsigned char)ptr[1] - 'R';
-        int64_t dx = p.y*hscale;
-        view_x -= p.x*hscale;
+        int64_t dx = p.y * hscale;
+        view_x -= p.x * hscale;
         pts.resize(0);
         
         for( ptr += 2;; )
@@ -1846,8 +1855,7 @@ void putText(Tensor& img, const std::string& text, Point org,
     }
 }
 
-Size getTextSize( const std::string& text, int fontFace, double fontScale, int thickness, int* _base_line)
-{
+Size getTextSize(const std::string& text, int fontFace, double fontScale, int thickness, int* _base_line) {
     Size size;
     double view_x = 0;
     const char **faces = cv::g_HersheyGlyphs;
@@ -1855,7 +1863,7 @@ Size getTextSize( const std::string& text, int fontFace, double fontScale, int t
     
     int base_line = (ascii[0] & 15);
     int cap_line = (ascii[0] >> 4) & 15;
-    size.height = std::round((cap_line + base_line)*fontScale + (thickness+1)/2);
+    size.height = std::round((cap_line + base_line) * fontScale + (thickness+1)/2);
     
     for( int i = 0; i < (int)text.size(); i++ )
     {
@@ -1864,7 +1872,7 @@ Size getTextSize( const std::string& text, int fontFace, double fontScale, int t
         
         readCheck(c, i, text, fontFace);
         
-        const char* ptr = faces[ascii[(c-' ')+1]];
+        const char* ptr = faces[ascii[(c - ' ') + 1]];
         p.x = (unsigned char)ptr[0] - 'R';
         p.y = (unsigned char)ptr[1] - 'R';
         view_x += (p.y - p.x)*fontScale;
@@ -1872,12 +1880,11 @@ Size getTextSize( const std::string& text, int fontFace, double fontScale, int t
     
     size.width = std::round(view_x + thickness);
     if( _base_line )
-        *_base_line = std::round(base_line*fontScale + thickness*0.5);
+        *_base_line = std::round(base_line * fontScale + thickness * 0.5);
     return size;
 }
 
-double getFontScaleFromHeight(const int fontFace, const int pixelHeight, const int thickness)
-{
+double getFontScaleFromHeight(const int fontFace, const int pixelHeight, const int thickness) {
     // By https://stackoverflow.com/a/27898487/1531708
     const int* ascii = getFontData(fontFace);
     
@@ -1885,6 +1892,12 @@ double getFontScaleFromHeight(const int fontFace, const int pixelHeight, const i
     int cap_line = (ascii[0] >> 4) & 15;
     
     return static_cast<double>(pixelHeight - static_cast<double>((thickness + 1)) / 2.0) / static_cast<double>(cap_line + base_line);
+}
+
+void putText(Tensor& img, const std::string& text, Point org, int FontFace, int pixelHeight, Color color, int thickness, int line_type, bool bottomLeftOrigin) {
+    double scale = getFontScaleFromHeight(FontFace, pixelHeight, thickness);
+    
+    putText(img, text, org, FontFace, scale, color, thickness, line_type, bottomLeftOrigin);
 }
 
 }   // end namespace cv
