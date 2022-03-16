@@ -92,7 +92,8 @@
 #define THISTLE                 { 216, 191, 216}
 #define PLUM                    { 221, 160, 221}
 #define VIOLET                  { 238, 130, 238}
-#define MAGENTA/FUCHSIA         { 255,   0, 255}
+#define MAGENTA                 { 255,   0, 255}
+#define FUCHSIA                 { 255,   0, 255}
 #define ORCHID                  { 218, 112, 214}
 #define MEDIUM_VIOLET_RED       { 199,  21, 133}
 #define PALE_VIOLET_RED         { 219, 112, 147}
