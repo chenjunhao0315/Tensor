@@ -8,6 +8,7 @@
 #include "TensorResize.hpp"
 
 namespace otter {
+namespace native {
 
 bool resize_output_check(const Tensor& output, IntArrayRef shape) {
     // Tests for resizing of tensors with one or more elements
@@ -44,8 +45,6 @@ void resize_bytes_cpu(MemoryNucleus* memory, size_t size_bytes) {
         memcpy(memory->data(), old_data.get(), copy_capacity);
     }
 }
-
-namespace native {
 
 const Tensor& resize_as_(const Tensor& self, const Tensor& the_template) {
     const Tensor& result = self.resize_(the_template.sizes());

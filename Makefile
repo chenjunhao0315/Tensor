@@ -1,5 +1,5 @@
 OPENMP = 1
-LIBSO = 1
+LIBSO = 0
 AVX = 1
 
 OS := $(shell uname)
@@ -45,7 +45,7 @@ endif
 
 SOURCES = $(wildcard $(SRCDIR)*.cpp)
 OBJS = $(patsubst $(SRCDIR)%.cpp, $(OBJDIR)%.o, $(SOURCES))
-DEPS = $(wildcard $(SRCDIR)*.hpp)
+DEPS = $(wildcard $(SRCDIR)*.hpp) $(SRCDIR)3rdparty/*.h
 
 $(EXEC): $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)

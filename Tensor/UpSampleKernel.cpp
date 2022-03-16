@@ -16,6 +16,8 @@
 
 namespace otter {
 
+namespace {
+
 using scale_t = std::vector<double>;
 
 template<int m>
@@ -305,6 +307,170 @@ void cpu_upsample_nearest_channels_last(
     }
 }
 
+template <typename scalar_t, typename scale_type>
+void cpu_upsample_linear_channels_last(
+    const Tensor& output_,
+    const Tensor& input_,
+    bool align_corners,
+    const scale_type& scales) {
+    
+    OTTER_CHECK(input_.dtype() == output_.dtype(), "expected input and output has same dtype");
+
+    auto input_sizes = input_.sizes().vec();
+    auto output_sizes = output_.sizes().vec();
+    auto ndim = input_sizes.size();
+    OTTER_CHECK(ndim >=4 && ndim <= 5, "Upsample with NHWC format supports tensors with 4 or 5 dims.")
+
+    auto channels_last_memory_format = ndim == 4 ? MemoryFormat::ChannelsLast : MemoryFormat::ChannelsLast3d;
+    auto input = input_.contiguous(channels_last_memory_format);
+    auto output = output_.contiguous(channels_last_memory_format);
+
+    auto input_data = input.data_ptr<scalar_t>();
+    auto output_data = output.data_ptr<scalar_t>();
+
+    int64_t num_batches =  input_sizes[0];
+    int64_t channels =  input_sizes[1];
+    int64_t input_depth = (ndim == 5) ? input_sizes[2] : 1;
+    int64_t output_depth = (ndim == 5) ? output_sizes[2] : 1;
+    int64_t input_height = (ndim >= 4) ? input_sizes[ndim - 2] : 1;
+    int64_t output_height = (ndim >= 4) ? output_sizes[ndim - 2] : 1;
+    int64_t input_width = input_sizes[ndim - 1];
+    int64_t output_width = output_sizes[ndim - 1];
+
+    OTTER_CHECK(channels > 0, "expected input and output channels greater than 0 but got ", channels);
+    int64_t output_slice_size = output_depth * output_height * output_width * channels;
+
+    using Vec = vec::Vectorized<scalar_t>;
+    auto loop2d = [&](int64_t begin, int64_t end) {
+        const scalar_t height_scale = area_pixel_compute_scale<scalar_t>(
+            input_height, output_height, align_corners, scales[0]);
+        const scalar_t width_scale = area_pixel_compute_scale<scalar_t>(
+            input_width, output_width, align_corners, scales[1]);
+
+        auto input_indexr = [=](int64_t n, int64_t h, int64_t w) {
+            return input_data + n * input_height * input_width * channels + h * input_width * channels + w * channels;
+        };
+
+        int64_t ih0, ih1, iw0, iw1;
+        scalar_t h0lambda, h1lambda, w0lambda, w1lambda;
+        for (const auto n : otter::irange(begin, end)) {
+            for (const auto oh : otter::irange(output_height)) {
+                compute_source_index_and_lambda(ih0, ih1, h0lambda, h1lambda, height_scale, oh, input_height, output_height, align_corners);
+                for (const auto ow : otter::irange(output_width)) {
+                    compute_source_index_and_lambda(iw0, iw1, w0lambda, w1lambda, width_scale, ow, input_width, output_width, align_corners);
+
+                    scalar_t* out = output_data + n * output_slice_size + oh * output_width * channels + ow * channels;
+                    scalar_t* i00 = input_indexr(n, ih0, iw0);
+                    scalar_t* i01 = input_indexr(n, ih0, iw1);
+                    scalar_t* i10 = input_indexr(n, ih1, iw0);
+                    scalar_t* i11 = input_indexr(n, ih1, iw1);
+
+                    int64_t size = channels;
+                    int64_t d = 0;
+                    for (; d < size - (size % Vec::size()); d += Vec::size()) {
+                        Vec out_vec =
+                            Vec(h0lambda * w0lambda) * Vec::loadu(i00 + d) + /* h0 * w0 * i00 */
+                            Vec(h0lambda * w1lambda) * Vec::loadu(i01 + d) + /* h0 * w1 * i01 */
+                            Vec(h1lambda * w0lambda) * Vec::loadu(i10 + d) + /* h1 * w0 * i10 */
+                            Vec(h1lambda * w1lambda) * Vec::loadu(i11 + d);  /* h1 * w1 * i11 */
+                        out_vec.store(out + d);
+                    }
+                    for (; d < size; d++) {
+                        out[d] =
+                        h0lambda * w0lambda * i00[d] + /* h0 * w0 * i00 */
+                        h0lambda * w1lambda * i01[d] + /* h0 * w1 * i01 */
+                        h1lambda * w0lambda * i10[d] + /* h1 * w0 * i10 */
+                        h1lambda * w1lambda * i11[d];  /* h1 * w1 * i11 */
+                    }
+                }
+            }
+        }
+    };
+
+    auto loop3d = [&](int64_t begin, int64_t end) {
+        const scalar_t depth_scale = area_pixel_compute_scale<scalar_t>(
+            input_depth, output_depth, align_corners, scales[0]);
+        const scalar_t height_scale = area_pixel_compute_scale<scalar_t>(
+            input_height, output_height, align_corners, scales[1]);
+        const scalar_t width_scale = area_pixel_compute_scale<scalar_t>(
+            input_width, output_width, align_corners, scales[2]);
+
+        auto input_indexr = [=](int64_t n, int64_t d, int64_t h, int64_t w) {
+            return input_data + n * input_depth * input_height * input_width * channels +
+                d * input_height * input_width * channels +
+                h * input_width * channels + w * channels;
+        };
+
+        int64_t id0, id1, ih0, ih1, iw0, iw1;
+        scalar_t d0lambda, d1lambda, h0lambda, h1lambda, w0lambda, w1lambda;
+        for (const auto n : otter::irange(begin, end)) {
+            for (const auto od : otter::irange(output_depth)) {
+                compute_source_index_and_lambda(
+                    id0, id1, d0lambda, d1lambda, depth_scale, od, input_depth, output_depth, align_corners);
+                for (const auto oh : otter::irange(output_height)) {
+                    compute_source_index_and_lambda(
+                        ih0, ih1, h0lambda, h1lambda, height_scale, oh, input_height, output_height, align_corners);
+                    for (const auto ow : otter::irange(output_width)) {
+                        compute_source_index_and_lambda(
+                            iw0, iw1, w0lambda, w1lambda, width_scale, ow, input_width, output_width, align_corners);
+
+                        scalar_t* out = output_data + n * output_slice_size +
+                            od * output_height * output_width * channels +
+                            oh * output_width * channels + ow * channels;
+                        scalar_t* i000 = input_indexr(n, id0, ih0, iw0);
+                        scalar_t* i001 = input_indexr(n, id0, ih0, iw1);
+                        scalar_t* i010 = input_indexr(n, id0, ih1, iw0);
+                        scalar_t* i011 = input_indexr(n, id0, ih1, iw1);
+                        scalar_t* i100 = input_indexr(n, id1, ih0, iw0);
+                        scalar_t* i101 = input_indexr(n, id1, ih0, iw1);
+                        scalar_t* i110 = input_indexr(n, id1, ih1, iw0);
+                        scalar_t* i111 = input_indexr(n, id1, ih1, iw1);
+
+                        int64_t size = channels;
+                        int64_t d = 0;
+                        for (; d < size - (size % Vec::size()); d += Vec::size()) {
+                            Vec out_vec =
+                                Vec(d0lambda * h0lambda * w0lambda) * Vec::loadu(i000 + d) + /* d0 * h0 * w0 * i000 */
+                                Vec(d0lambda * h0lambda * w1lambda) * Vec::loadu(i001 + d) + /* d0 * h0 * w1 * i001 */
+                                Vec(d0lambda * h1lambda * w0lambda) * Vec::loadu(i010 + d) + /* d0 * h1 * w0 * i010 */
+                                Vec(d0lambda * h1lambda * w1lambda) * Vec::loadu(i011 + d) + /* d0 * h1 * w1 * i011 */
+                                Vec(d1lambda * h0lambda * w0lambda) * Vec::loadu(i100 + d) + /* d1 * h0 * w0 * i100 */
+                                Vec(d1lambda * h0lambda * w1lambda) * Vec::loadu(i101 + d) + /* d1 * h0 * w1 * i101 */
+                                Vec(d1lambda * h1lambda * w0lambda) * Vec::loadu(i110 + d) + /* d1 * h1 * w0 * i110 */
+                                Vec(d1lambda * h1lambda * w1lambda) * Vec::loadu(i111 + d);  /* d1 * h1 * w1 * i111 */
+                            out_vec.store(out + d);
+                        }
+                        for (; d < size; d++) {
+                            out[d] =
+                                d0lambda * h0lambda * w0lambda * i000[d] + /* d0 * h0 * w0 * i000 */
+                                d0lambda * h0lambda * w1lambda * i001[d] + /* d0 * h0 * w1 * i001 */
+                                d0lambda * h1lambda * w0lambda * i010[d] + /* d0 * h1 * w0 * i010 */
+                                d0lambda * h1lambda * w1lambda * i011[d] + /* d0 * h1 * w1 * i011 */
+                                d1lambda * h0lambda * w0lambda * i100[d] + /* d1 * h0 * w0 * i100 */
+                                d1lambda * h0lambda * w1lambda * i101[d] + /* d1 * h0 * w1 * i101 */
+                                d1lambda * h1lambda * w0lambda * i110[d] + /* d1 * h1 * w0 * i110 */
+                                d1lambda * h1lambda * w1lambda * i111[d];  /* d1 * h1 * w1 * i111 */
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    if (ndim == 4) {
+        // upsample nearest 2d
+        otter::parallel_for(0, num_batches, otter::GRAIN_SIZE / output_slice_size / 4, loop2d);
+    } else {
+        // upsample nearest 3d
+        OTTER_INTERNAL_ASSERT(ndim == 5);
+        otter::parallel_for(0, num_batches, otter::GRAIN_SIZE / output_slice_size / 8, loop3d);
+    }
+
+    if (!output_.is_contiguous(channels_last_memory_format)) {
+        output_.copy_(output);
+    }
+}
+
 template <int out_ndims, typename scale_type, class F>
 void upsample_generic_Nd_kernel_impl(
     const Tensor& output,
@@ -547,6 +713,103 @@ struct HelperInterpNearest : public HelperInterpBase {
 
 };
 
+struct HelperInterpLinear : public HelperInterpBase {
+
+    static const int interp_size = 2;
+
+    // Compute indices and weights for each interpolated dimension
+    // indices_weights = {
+    //      {indices_0, weights_0, indices_1, weights_1},  // dim -n
+    //      {indices_0, weights_0, indices_1, weights_1},  // dim -(n-1)
+    //      ...
+    //      {indices_0, weights_0, indices_1, weights_1},  // dim -1
+    // }
+    // Indices and weights are reshaped as (1, 1, ..., N, ..., 1, 1) to
+    // fit input/output tensors.
+    // Indices are already containing the strides to optimize the computations
+    static inline std::vector<Tensor> compute_indices_weights(
+        ScalarType scalar_type,
+        int64_t input_size, int64_t output_size, int64_t stride, int64_t ndims, int64_t reshape_dim,
+        bool align_corners, const double opt_scale
+    ) {
+        std::vector<Tensor> output;
+        HelperInterpLinear::init_indices_weights(
+            scalar_type, output, output_size, ndims, reshape_dim, HelperInterpLinear::interp_size);
+
+        OTTER_DISPATCH_FLOATING_TYPES(scalar_type, "compute_indices_weights_linear", [&] {
+
+            scalar_t scale = area_pixel_compute_scale<scalar_t>(input_size, output_size, align_corners, opt_scale);
+
+            auto input_index0_ptr = output[0].data_ptr<int64_t>();
+            auto lambda0_ptr = output[1].data_ptr<scalar_t>();
+            auto input_index1_ptr = output[2].data_ptr<int64_t>();
+            auto lambda1_ptr = output[3].data_ptr<scalar_t>();
+
+            for (const auto i : otter::irange(output_size)) {
+
+                compute_source_index_and_lambda<scalar_t>(
+                    input_index0_ptr[i], input_index1_ptr[i],
+                    lambda0_ptr[i], lambda1_ptr[i],
+                    scale, i, input_size, output_size, align_corners
+                );
+                // put stride into indices
+                // index values correspond to input indices (0, 1, 2, 3, ...)
+                // when multiplied by input stride, maximum possible value
+                // input_size[dim-1] * input_size[dim-2] * ... for the given dimension.
+                input_index0_ptr[i] *= stride;
+                input_index1_ptr[i] *= stride;
+            }
+        });
+        return output;
+    }
+
+    // taken from
+    // https://github.com/python-pillow/Pillow/blob/6812205f18ca4ef54372e87e1a13ce4a859434df/
+    // src/libImaging/Resample.c#L20-L29
+    template<typename scalar_t>
+    static inline scalar_t aa_filter(scalar_t x) {
+        if (x < 0.0) {
+            x = -x;
+        }
+        if (x < 1.0) {
+            return 1.0 - x;
+        }
+        return 0.0;
+    }
+
+    static inline std::vector<Tensor> compute_indices_weights_aa(
+        ScalarType scalar_type,
+        int64_t input_size,
+        int64_t output_size,
+        int64_t stride,
+        int64_t ndims,
+        int64_t reshape_dim,
+        bool align_corners,
+        const double opt_scale
+    ) {
+
+        std::vector<Tensor> indices_weights;
+        OTTER_DISPATCH_FLOATING_TYPES(scalar_type, "compute_indices_weights_aa", [&] {
+
+            scalar_t scale = area_pixel_compute_scale<scalar_t>(input_size, output_size, align_corners, opt_scale);
+
+            auto interp_size = HelperInterpLinear::interp_size;
+
+            indices_weights = HelperInterpLinear::_compute_indices_weights_aa<scalar_t>(
+                input_size,
+                output_size,
+                stride,
+                ndims,
+                reshape_dim,
+                align_corners,
+                scale,
+                interp_size,
+                &HelperInterpLinear::aa_filter<scalar_t>);
+        });
+        return indices_weights;
+    }
+};
+
 void upsample_nearest2d_kernel_impl(
     const Tensor& output,
     const Tensor& input,
@@ -564,6 +827,26 @@ void upsample_nearest2d_kernel_impl(
     }
 }
 
+void upsample_bilinear2d_kernel_impl(
+    const Tensor& output,
+    const Tensor& input,
+    bool align_corners,
+    double scales_h,
+    double scales_w) {
+
+    // Temporarily dispatch to original channels last implementation
+    if (input.is_contiguous(MemoryFormat::ChannelsLast)) {
+        OTTER_DISPATCH_FLOATING_TYPES(input.scalar_type(), "upsample_bilinear2d_channels_last", [&] {
+            cpu_upsample_linear_channels_last<scalar_t, scale_t>(output, input, align_corners, {scales_h, scales_w});
+        });
+    } else {
+        upsample_generic_Nd_kernel_impl<2, scale_t, HelperInterpLinear>(output, input, align_corners, {scales_h, scales_w});
+    }
+}
+
+}   // end namespace
+
 REGISTER_DISPATCH(upsampling_nearest2d_stub, &upsample_nearest2d_kernel_impl);
+REGISTER_DISPATCH(upsampling_bilinear2d_stub, &upsample_bilinear2d_kernel_impl);
 
 }   // end namespace otter

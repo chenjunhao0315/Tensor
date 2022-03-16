@@ -9,6 +9,7 @@
 #include "Dispatch.hpp"
 #include "EmptyTensor.hpp"
 #include "TensorBlasKernel.hpp"
+#include "TensorResize.hpp"
 
 namespace otter {
 
@@ -74,6 +75,20 @@ Tensor dot(const Tensor& self, const Tensor& other) {
         result.fill_(otter::dot_impl(self.numel(), self.data_ptr<scalar_t>(), self.stride(0), other.data_ptr<scalar_t>(), other.stride(0)));
         return result;
     });
+}
+
+Tensor& dot_out(const Tensor& self, const Tensor& other, Tensor& result) {
+    auto output_device = result.device();
+    auto input1_device = self.device();
+    auto input2_device = other.device();
+    // check if the input & output tensors are on the same device.
+    OTTER_CHECK((output_device == input1_device) && (input1_device == input2_device),
+                "dot: Expected the output and input tensors to be on the "
+                "same device");
+    otter::native::resize_output(result, {});
+    OTTER_CHECK(result.scalar_type() == self.scalar_type(),
+                "result dtype does not match input dtype ");
+    return result.fill_(self.dot(other));
 }
 
 

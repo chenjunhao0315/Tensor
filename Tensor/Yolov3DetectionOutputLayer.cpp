@@ -216,9 +216,8 @@ int Yolov3DetectionOutputLayer::forward(const std::vector<Tensor>& bottom_blobs,
         int net_h = (int)(anchors_scale_a[i] * width);
         int net_w = (int)(anchors_scale_a[i] * height);
         
-//        otter::parallel_for(0, num_box, 0, [&](int64_t start, int64_t end) {
-//            for (const auto pp : otter::irange(start, end)) {
-            for (const auto pp : otter::irange(0, num_box)) {
+        otter::parallel_for(0, num_box, 0, [&](int64_t start, int64_t end) {
+            for (const auto pp : otter::irange(start, end)) {
                 int p = (int)pp * channels_per_box;
                 int biases_index = static_cast<int>(mask_a[pp + mask_offset]);
                 
@@ -277,7 +276,7 @@ int Yolov3DetectionOutputLayer::forward(const std::vector<Tensor>& bottom_blobs,
                     }
                 }
             }
-//        });
+        });
         
         for (int i = 0; i < num_box; i++) {
             const std::vector<BBox>& bbox_list = bbox_map[i];

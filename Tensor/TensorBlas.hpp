@@ -18,6 +18,8 @@ class Tensor;
 
 Tensor dot(const Tensor& self, const Tensor& other);
 
+Tensor& dot_out(const Tensor& self, const Tensor& other, Tensor& result);
+
 enum class TransposeType {
     NoTranspose,
     Transpose,

@@ -34,8 +34,7 @@ public:
     template<typename T, size_t N>
     TensorAccessor<T,N> accessor() const& {
         static_assert(N > 0, "accessor is used for indexing tensor, for scalars use *data_ptr<T>()");
-        // "TensorAccessor expected ", N, " dims but tensor has ", dim()"
-        assert(dim() == N);
+        OTTER_CHECK(dim() == N, "TensorAccessor expected ", N, " dims but tensor has ", dim());
         return TensorAccessor<T,N>(data_ptr<T>(), sizes().data(), strides().data());
     }
     template<typename T, size_t N>

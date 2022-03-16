@@ -25,9 +25,9 @@ class TensorMaker {
 public:
     using ContextDeleter = DeleterFnPtr;
     
-    TensorMaker& dtype(ScalarType dtype) noexcept {
-        dtype_ = dtype;
-        
+    TensorMaker& options(TensorOptions value) noexcept {
+        opts_ = value;
+
         return *this;
     }
     
@@ -56,7 +56,6 @@ private:
     std::unique_ptr<void, ContextDeleter> ctx_{nullptr, detail::noopDelete};
     
     TensorOptions opts_{};
-    ScalarType dtype_ = ScalarType::Undefined;
     Device device_ = Device::CPU;
 };
 
@@ -64,8 +63,8 @@ inline TensorMaker for_blob(void* data, IntArrayRef sizes) noexcept {
     return TensorMaker{data, sizes};
 }
 
-inline Tensor from_blob(void* data, IntArrayRef sizes, ScalarType dtype) {
-    return for_blob(data, sizes).dtype(dtype).make_tensor();
+inline Tensor from_blob(void* data, IntArrayRef sizes, TensorOptions options) {
+    return for_blob(data, sizes).options(options).make_tensor();
 }
 
 template <typename T>

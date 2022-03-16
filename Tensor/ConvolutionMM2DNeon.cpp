@@ -156,8 +156,9 @@ void im2col_sgemm_conv2d_impl(
                 float32x4_t _sum5 = vdupq_n_f32(_b0[2]);
                 float32x4_t _sum6 = vdupq_n_f32(_b0[3]);
                 float32x4_t _sum7 = vdupq_n_f32(_b0[3]);
-                float32x4_t _sum8  = vdupq_n_f32(_b1[0]);
-                float32x4_t _sum9  = vdupq_n_f32(_b1[0]);
+                
+                float32x4_t _sum8 = vdupq_n_f32(_b1[0]);
+                float32x4_t _sum9 = vdupq_n_f32(_b1[0]);
                 float32x4_t _sum10 = vdupq_n_f32(_b1[1]);
                 float32x4_t _sum11 = vdupq_n_f32(_b1[1]);
                 float32x4_t _sum12 = vdupq_n_f32(_b1[2]);
@@ -166,13 +167,13 @@ void im2col_sgemm_conv2d_impl(
                 float32x4_t _sum15 = vdupq_n_f32(_b1[3]);
                 
                 for (int64_t w = nn >> 2; w != 0; --w) {
-                    float32x4_t _val0 = vld1q_f32(tmpptr + 0);
+                    float32x4_t _val0 = vld1q_f32(tmpptr);
                     float32x4_t _val1 = vld1q_f32(tmpptr + 4);
                     float32x4_t _val2 = vld1q_f32(tmpptr + 8);
                     float32x4_t _val3 = vld1q_f32(tmpptr + 12);
                     tmpptr += 16;
-
-                    float32x4_t _w0 = vld1q_f32(kptr + 0);
+                    
+                    float32x4_t _w0 = vld1q_f32(kptr);
                     float32x4_t _w1 = vld1q_f32(kptr + 4);
                     float32x4_t _w2 = vld1q_f32(kptr + 8);
                     float32x4_t _w3 = vld1q_f32(kptr + 12);
@@ -182,23 +183,21 @@ void im2col_sgemm_conv2d_impl(
                     _sum2 = vfmaq_f32(_sum2, _val0, vdupq_n_f32(_w0[1]));
                     _sum4 = vfmaq_f32(_sum4, _val0, vdupq_n_f32(_w0[2]));
                     _sum6 = vfmaq_f32(_sum6, _val0, vdupq_n_f32(_w0[3]));
-
                     _sum1 = vfmaq_f32(_sum1, _val1, vdupq_n_f32(_w0[0]));
                     _sum3 = vfmaq_f32(_sum3, _val1, vdupq_n_f32(_w0[1]));
                     _sum5 = vfmaq_f32(_sum5, _val1, vdupq_n_f32(_w0[2]));
                     _sum7 = vfmaq_f32(_sum7, _val1, vdupq_n_f32(_w0[3]));
                     
-                    _sum8 = vfmaq_f32(_sum8, _val0, vdupq_n_f32(_w1[0]));
+                    _sum8  = vfmaq_f32(_sum8,  _val0, vdupq_n_f32(_w1[0]));
                     _sum10 = vfmaq_f32(_sum10, _val0, vdupq_n_f32(_w1[1]));
                     _sum12 = vfmaq_f32(_sum12, _val0, vdupq_n_f32(_w1[2]));
                     _sum14 = vfmaq_f32(_sum14, _val0, vdupq_n_f32(_w1[3]));
-
-                    _sum9 = vfmaq_f32(_sum9, _val1, vdupq_n_f32(_w1[0]));
+                    _sum9  = vfmaq_f32(_sum9,  _val1, vdupq_n_f32(_w1[0]));
                     _sum11 = vfmaq_f32(_sum11, _val1, vdupq_n_f32(_w1[1]));
                     _sum13 = vfmaq_f32(_sum13, _val1, vdupq_n_f32(_w1[2]));
                     _sum15 = vfmaq_f32(_sum15, _val1, vdupq_n_f32(_w1[3]));
                     
-                    float32x4_t _val4 = vld1q_f32(tmpptr + 0);
+                    float32x4_t _val4 = vld1q_f32(tmpptr);
                     float32x4_t _val5 = vld1q_f32(tmpptr + 4);
                     float32x4_t _val6 = vld1q_f32(tmpptr + 8);
                     float32x4_t _val7 = vld1q_f32(tmpptr + 12);
@@ -208,23 +207,21 @@ void im2col_sgemm_conv2d_impl(
                     _sum2 = vfmaq_f32(_sum2, _val2, vdupq_n_f32(_w2[1]));
                     _sum4 = vfmaq_f32(_sum4, _val2, vdupq_n_f32(_w2[2]));
                     _sum6 = vfmaq_f32(_sum6, _val2, vdupq_n_f32(_w2[3]));
-
                     _sum1 = vfmaq_f32(_sum1, _val3, vdupq_n_f32(_w2[0]));
                     _sum3 = vfmaq_f32(_sum3, _val3, vdupq_n_f32(_w2[1]));
                     _sum5 = vfmaq_f32(_sum5, _val3, vdupq_n_f32(_w2[2]));
                     _sum7 = vfmaq_f32(_sum7, _val3, vdupq_n_f32(_w2[3]));
                     
-                    _sum8 = vfmaq_f32(_sum8, _val2, vdupq_n_f32(_w3[0]));
+                    _sum8  = vfmaq_f32(_sum8,  _val2, vdupq_n_f32(_w3[0]));
                     _sum10 = vfmaq_f32(_sum10, _val2, vdupq_n_f32(_w3[1]));
                     _sum12 = vfmaq_f32(_sum12, _val2, vdupq_n_f32(_w3[2]));
                     _sum14 = vfmaq_f32(_sum14, _val2, vdupq_n_f32(_w3[3]));
-
-                    _sum9 = vfmaq_f32(_sum9, _val3, vdupq_n_f32(_w3[0]));
+                    _sum9  = vfmaq_f32(_sum9,  _val3, vdupq_n_f32(_w3[0]));
                     _sum11 = vfmaq_f32(_sum11, _val3, vdupq_n_f32(_w3[1]));
                     _sum13 = vfmaq_f32(_sum13, _val3, vdupq_n_f32(_w3[2]));
                     _sum15 = vfmaq_f32(_sum15, _val3, vdupq_n_f32(_w3[3]));
                     
-                    float32x4_t _w4 = vld1q_f32(kptr + 0);
+                    float32x4_t _w4 = vld1q_f32(kptr);
                     float32x4_t _w5 = vld1q_f32(kptr + 4);
                     float32x4_t _w6 = vld1q_f32(kptr + 8);
                     float32x4_t _w7 = vld1q_f32(kptr + 12);
@@ -234,18 +231,16 @@ void im2col_sgemm_conv2d_impl(
                     _sum2 = vfmaq_f32(_sum2, _val4, vdupq_n_f32(_w4[1]));
                     _sum4 = vfmaq_f32(_sum4, _val4, vdupq_n_f32(_w4[2]));
                     _sum6 = vfmaq_f32(_sum6, _val4, vdupq_n_f32(_w4[3]));
-
                     _sum1 = vfmaq_f32(_sum1, _val5, vdupq_n_f32(_w4[0]));
                     _sum3 = vfmaq_f32(_sum3, _val5, vdupq_n_f32(_w4[1]));
                     _sum5 = vfmaq_f32(_sum5, _val5, vdupq_n_f32(_w4[2]));
                     _sum7 = vfmaq_f32(_sum7, _val5, vdupq_n_f32(_w4[3]));
                     
-                    _sum8 = vfmaq_f32(_sum8, _val4, vdupq_n_f32(_w5[0]));
+                    _sum8  = vfmaq_f32(_sum8,  _val4, vdupq_n_f32(_w5[0]));
                     _sum10 = vfmaq_f32(_sum10, _val4, vdupq_n_f32(_w5[1]));
                     _sum12 = vfmaq_f32(_sum12, _val4, vdupq_n_f32(_w5[2]));
                     _sum14 = vfmaq_f32(_sum14, _val4, vdupq_n_f32(_w5[3]));
-
-                    _sum9 = vfmaq_f32(_sum9, _val5, vdupq_n_f32(_w5[0]));
+                    _sum9  = vfmaq_f32(_sum9,  _val5, vdupq_n_f32(_w5[0]));
                     _sum11 = vfmaq_f32(_sum11, _val5, vdupq_n_f32(_w5[1]));
                     _sum13 = vfmaq_f32(_sum13, _val5, vdupq_n_f32(_w5[2]));
                     _sum15 = vfmaq_f32(_sum15, _val5, vdupq_n_f32(_w5[3]));
@@ -254,18 +249,16 @@ void im2col_sgemm_conv2d_impl(
                     _sum2 = vfmaq_f32(_sum2, _val6, vdupq_n_f32(_w6[1]));
                     _sum4 = vfmaq_f32(_sum4, _val6, vdupq_n_f32(_w6[2]));
                     _sum6 = vfmaq_f32(_sum6, _val6, vdupq_n_f32(_w6[3]));
-
                     _sum1 = vfmaq_f32(_sum1, _val7, vdupq_n_f32(_w6[0]));
                     _sum3 = vfmaq_f32(_sum3, _val7, vdupq_n_f32(_w6[1]));
                     _sum5 = vfmaq_f32(_sum5, _val7, vdupq_n_f32(_w6[2]));
                     _sum7 = vfmaq_f32(_sum7, _val7, vdupq_n_f32(_w6[3]));
                     
-                    _sum8 = vfmaq_f32(_sum8, _val6, vdupq_n_f32(_w7[0]));
+                    _sum8  = vfmaq_f32(_sum8,  _val6, vdupq_n_f32(_w7[0]));
                     _sum10 = vfmaq_f32(_sum10, _val6, vdupq_n_f32(_w7[1]));
                     _sum12 = vfmaq_f32(_sum12, _val6, vdupq_n_f32(_w7[2]));
                     _sum14 = vfmaq_f32(_sum14, _val6, vdupq_n_f32(_w7[3]));
-
-                    _sum9 = vfmaq_f32(_sum9, _val7, vdupq_n_f32(_w7[0]));
+                    _sum9  = vfmaq_f32(_sum9,  _val7, vdupq_n_f32(_w7[0]));
                     _sum11 = vfmaq_f32(_sum11, _val7, vdupq_n_f32(_w7[1]));
                     _sum13 = vfmaq_f32(_sum13, _val7, vdupq_n_f32(_w7[2]));
                     _sum15 = vfmaq_f32(_sum15, _val7, vdupq_n_f32(_w7[3]));
@@ -278,24 +271,22 @@ void im2col_sgemm_conv2d_impl(
                     
                     float32x4_t _w0 = vld1q_f32(kptr);
                     float32x4_t _w1 = vld1q_f32(kptr + 4);
-                    kptr += 4;
+                    kptr += 8;
                     
                     _sum0 = vfmaq_f32(_sum0, _val0, vdupq_n_f32(_w0[0]));
                     _sum2 = vfmaq_f32(_sum2, _val0, vdupq_n_f32(_w0[1]));
                     _sum4 = vfmaq_f32(_sum4, _val0, vdupq_n_f32(_w0[2]));
                     _sum6 = vfmaq_f32(_sum6, _val0, vdupq_n_f32(_w0[3]));
-
                     _sum1 = vfmaq_f32(_sum1, _val1, vdupq_n_f32(_w0[0]));
                     _sum3 = vfmaq_f32(_sum3, _val1, vdupq_n_f32(_w0[1]));
                     _sum5 = vfmaq_f32(_sum5, _val1, vdupq_n_f32(_w0[2]));
                     _sum7 = vfmaq_f32(_sum7, _val1, vdupq_n_f32(_w0[3]));
                     
-                    _sum8 = vfmaq_f32(_sum8, _val0, vdupq_n_f32(_w1[0]));
+                    _sum8  = vfmaq_f32(_sum8,  _val0, vdupq_n_f32(_w1[0]));
                     _sum10 = vfmaq_f32(_sum10, _val0, vdupq_n_f32(_w1[1]));
                     _sum12 = vfmaq_f32(_sum12, _val0, vdupq_n_f32(_w1[2]));
                     _sum14 = vfmaq_f32(_sum14, _val0, vdupq_n_f32(_w1[3]));
-
-                    _sum9 = vfmaq_f32(_sum9, _val1, vdupq_n_f32(_w1[0]));
+                    _sum9  = vfmaq_f32(_sum9,  _val1, vdupq_n_f32(_w1[0]));
                     _sum11 = vfmaq_f32(_sum11, _val1, vdupq_n_f32(_w1[1]));
                     _sum13 = vfmaq_f32(_sum13, _val1, vdupq_n_f32(_w1[2]));
                     _sum15 = vfmaq_f32(_sum15, _val1, vdupq_n_f32(_w1[3]));

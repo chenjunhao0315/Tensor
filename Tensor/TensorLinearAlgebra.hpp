@@ -12,6 +12,8 @@ namespace otter {
 
 void addmm_impl_cpu_(Tensor &result, const Tensor &self, Tensor m1, Tensor m2, const Scalar& beta, const Scalar& alpha);
 
+Tensor matmul(Tensor& output, const Tensor& tensor1, const Tensor& tensor2);
+
 }
 
 #endif /* TensorLinearAlgebra_hpp */

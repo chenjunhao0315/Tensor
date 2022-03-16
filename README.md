@@ -372,7 +372,7 @@ cout << t3 << endl;
 ```
 ##### binaray operation
 ```
-TensorC = TesorA + TensorB
+TensorC = TensorA + TensorB
 ```
 ```c++
 auto t1 = otter::range(1, 10, 2, otter::ScalarType::Float);
@@ -398,7 +398,7 @@ sub_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
-TensorC = TesorA - TensorB
+TensorC = TensorA - TensorB
 ```
 
 #### mul
@@ -412,7 +412,7 @@ mul_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
-TensorC = TesorA * TensorB
+TensorC = TensorA * TensorB
 ```
 
 #### div
@@ -426,7 +426,7 @@ div_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
-TensorC = TesorA / TensorB
+TensorC = TensorA / TensorB
 ```
 
 #### remainder
@@ -440,7 +440,7 @@ remainder_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
-TensorC = TesorA % TensorB
+TensorC = TensorA % TensorB
 ```
 
 #### bitwise and
@@ -454,7 +454,7 @@ bitwise_and_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
-TensorC = TesorA & TensorB
+TensorC = TensorA & TensorB
 ```
 
 #### bitwise or
@@ -468,7 +468,7 @@ bitwise_or_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
-TensorC = TesorA & TensorB
+TensorC = TensorA & TensorB
 ```
 
 #### bitwise xor
@@ -482,7 +482,7 @@ bitwise_xor_(Scalar) -> Tensor&    // inplace
 ```
 ##### binaray operation
 ```c++
-TensorC = TesorA ^ TensorB
+TensorC = TensorA ^ TensorB
 ```
 
 #### bitwise not

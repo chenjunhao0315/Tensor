@@ -9,11 +9,13 @@
 #define TensorPixel_hpp
 
 namespace otter {
-
 class Tensor;
+
+namespace cv {
 
 Tensor from_rgb(const unsigned char* rgb, int h, int w, int stride);
 
-}
+}   // end namesapce cv
+}   // end namespace otter
 
 #endif /* TensorPixel_hpp */

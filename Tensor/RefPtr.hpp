@@ -9,6 +9,8 @@
 #define RefPtr_hpp
 
 #include <utility>
+#include <atomic>
+#include <cstddef>
 
 namespace otter {
 
@@ -30,7 +32,11 @@ TTarget* assign_ptr_(TTarget* rhs) {
     }
 }
 
+inline size_t atomic_refcount_decrement(std::atomic<size_t>& refcount) {
+    return refcount.fetch_sub(1, std::memory_order_acq_rel) - 1;
 }
+
+}   // end namespace detail
 
 class Ptr_quantum {
     template <typename T, typename NullType>
@@ -50,7 +56,7 @@ protected:
 private:
     virtual void release_resources() {}
 
-    mutable int refCount_;
+    mutable std::atomic<size_t> refCount_;
 };
 
 struct DontIncreaseRefcount {};
@@ -116,8 +122,11 @@ public:
         reset_();
     }
     
-    int use_count() const noexcept {
-        return (target_) ? target_->refCount_ : 0;
+    size_t use_count() const noexcept {
+        if (target_ == NullType::singleton()) {
+            return 0;
+        }
+        return target_->refCount_.load(std::memory_order_acquire);
     }
     
     bool unique() {
@@ -156,9 +165,9 @@ private:
         if (target_ != NullType::singleton())
             ++target_->refCount_;
     }
-    void reset_() {
-        if (target_ != NullType::singleton() && --target_->refCount_ == 0) {
-            target_->release_resources();
+    void reset_() noexcept {
+        if (target_ != NullType::singleton() && detail::atomic_refcount_decrement(target_->refCount_) == 0) {
+            const_cast<std::remove_const_t<Target>*>(target_)->release_resources();
             delete target_;
         }
         target_ = NullType::singleton();
