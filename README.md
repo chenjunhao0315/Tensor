@@ -10,6 +10,7 @@ It aims to enhance the performance on mobile phone platform.
 The main purpose of this project is used for NTHU電機系實作專題.
 
 Add some function for image loading and saving, which is powered by [stb_image][6].
+
 Add some drawing for image, which is powered by [OpenCV][5].
 
 ## Feature
