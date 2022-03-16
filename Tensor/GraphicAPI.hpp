@@ -270,9 +270,7 @@ inline Color::Color(double v0, double v1, double v2, double v3) {
     val[3] = v3;
 }
 
-void colorToRawData(const Color& color, void *buf, otter::ScalarType dtype, int channels, int unroll_to);
-
-
+void colorToRawData(const Color& color, void *buf, otter::ScalarType dtype, int64_t channels, int64_t unroll_to);
 
 }   // end namespace cv
 }   // end namespace otter
