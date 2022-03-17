@@ -1819,8 +1819,7 @@ void putText(Tensor& img, const std::string& text, Point org,
     pts.reserve(1 << 10);
     const char **faces = cv::g_HersheyGlyphs;
     
-    for( int i = 0; i < (int)text.size(); i++ )
-    {
+    for( int i = 0; i < (int)text.size(); i++ ) {
         int c = (unsigned char)text[i];
         Point2l p;
         
@@ -1833,18 +1832,14 @@ void putText(Tensor& img, const std::string& text, Point org,
         view_x -= p.x * hscale;
         pts.resize(0);
         
-        for( ptr += 2;; )
-        {
-            if( *ptr == ' ' || !*ptr )
-            {
+        for( ptr += 2;; ) {
+            if( *ptr == ' ' || !*ptr ) {
                 if( pts.size() > 1 )
                     PolyLine( img, &pts[0], (int)pts.size(), false, buf, thickness, line_type, XY_SHIFT );
                 if( !*ptr++ )
                     break;
                 pts.resize(0);
-            }
-            else
-            {
+            } else {
                 p.x = (unsigned char)ptr[0] - 'R';
                 p.y = (unsigned char)ptr[1] - 'R';
                 ptr += 2;
@@ -1865,8 +1860,7 @@ Size getTextSize(const std::string& text, int fontFace, double fontScale, int th
     int cap_line = (ascii[0] >> 4) & 15;
     size.height = std::round((cap_line + base_line) * fontScale + (thickness+1)/2);
     
-    for( int i = 0; i < (int)text.size(); i++ )
-    {
+    for( int i = 0; i < (int)text.size(); i++ ) {
         int c = (unsigned char)text[i];
         Point p;
         
