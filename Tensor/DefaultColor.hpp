@@ -8,145 +8,160 @@
 #ifndef DefaultColor_h
 #define DefaultColor_h
 
-#define MAROON                  { 128,   0,   0}
-#define DARK_RED                { 139,   0,   0}
-#define BROWN                   { 165,  42,  42}
-#define FIREBRICK               { 178,  34,  34}
-#define CRIMSON                 { 220,  20,  60}
-#define RED                     { 255,   0,   0}
-#define TOMATO                  { 255,  99,  71}
-#define CORAL                   { 255, 127,  80}
-#define INDIAN_RED              { 205,  92,  92}
-#define LIGHT_CORAL             { 240, 128, 128}
-#define DARK_SALMON             { 233, 150, 122}
-#define SALMON                  { 250, 128, 114}
-#define LIGHT_SALMON            { 255, 160, 122}
-#define ORANGE_RED              { 255,  69,   0}
-#define DARK_ORANGE             { 255, 140,   0}
-#define ORANGE                  { 255, 165,   0}
-#define GOLD                    { 255, 215,   0}
-#define DARK_GOLDEN_ROD         { 184, 134,  11}
-#define GOLDEN_ROD              { 218, 165,  32}
-#define PALE_GOLDEN_ROD         { 238, 232, 170}
-#define DARK_KHAKI              { 189, 183, 107}
-#define KHAKI                   { 240, 230, 140}
-#define OLIVE                   { 128, 128,   0}
-#define YELLOW                  { 255, 255,   0}
-#define YELLOW_GREEN            { 154, 205,  50}
-#define DARK_OLIVE_GREEN        {  85, 107,  47}
-#define OLIVE_DRAB              { 107, 142,  35}
-#define LAWN_GREEN              { 124, 252,   0}
-#define CHARTREUSE              { 127, 255,   0}
-#define GREEN_YELLOW            { 173, 255,  47}
-#define DARK_GREEN              {   0, 100,   0}
-#define GREEN                   {   0, 128,   0}
-#define FOREST_GREEN            {  34, 139,  34}
-#define LIME                    {   0, 255,   0}
-#define LIME_GREEN              {  50, 205,  50}
-#define LIGHT_GREEN             { 144, 238, 144}
-#define PALE_GREEN              { 152, 251, 152}
-#define DARK_SEA_GREEN          { 143, 188, 143}
-#define MEDIUM_SPRING_GREEN     {   0, 250, 154}
-#define SPRING_GREEN            {   0, 255, 127}
-#define SEA_GREEN               {  46, 139,  87}
-#define MEDIUM_AQUA_MARINE      { 102, 205, 170}
-#define MEDIUM_SEA_GREEN        {  60, 179, 113}
-#define LIGHT_SEA_GREEN         {  32, 178, 170}
-#define DARK_SLATE_GRAY         {  47,  79,  79}
-#define TEAL                    {   0, 128, 128}
-#define DARK_CYAN               {   0, 139, 139}
-#define AQUA                    {   0, 255, 255}
-#define CYAN                    {   0, 255, 255}
-#define LIGHT_CYAN              { 224, 255, 255}
-#define DARK_TURQUOISE          {   0, 206, 209}
-#define TURQUOISE               {  64, 224, 208}
-#define MEDIUM_TURQUOISE        {  72, 209, 204}
-#define PALE_TURQUOISE          { 175, 238, 238}
-#define AQUA_MARINE             { 127, 255, 212}
-#define POWDER_BLUE             { 176, 224, 230}
-#define CADET_BLUE              {  95, 158, 160}
-#define STEEL_BLUE              {  70, 130, 180}
-#define CORN_FLOWER_BLUE        { 100, 149, 237}
-#define DEEP_SKY_BLUE           {   0, 191, 255}
-#define DODGER_BLUE             {  30, 144, 255}
-#define LIGHT_BLUE              { 173, 216, 230}
-#define SKY_BLUE                { 135, 206, 235}
-#define LIGHT_SKY_BLUE          { 135, 206, 250}
-#define MIDNIGHT_BLUE           {  25,  25, 112}
-#define NAVY                    {   0,   0, 128}
-#define DARK_BLUE               {   0,   0, 139}
-#define MEDIUM_BLUE             {   0,   0, 205}
-#define BLUE                    {   0,   0, 255}
-#define ROYAL_BLUE              {  65, 105, 225}
-#define BLUE_VIOLET             { 138,  43, 226}
-#define INDIGO                  {  75,   0, 130}
-#define DARK_SLATE_BLUE         {  72,  61, 139}
-#define SLATE_BLUE              { 106,  90, 205}
-#define MEDIUM_SLATE_BLUE       { 123, 104, 238}
-#define MEDIUM_PURPLE           { 147, 112, 219}
-#define DARK_MAGENTA            { 139,   0, 139}
-#define DARK_VIOLET             { 148,   0, 211}
-#define DARK_ORCHID             { 153,  50, 204}
-#define MEDIUM_ORCHID           { 186,  85, 211}
-#define PURPLE                  { 128,   0, 128}
-#define THISTLE                 { 216, 191, 216}
-#define PLUM                    { 221, 160, 221}
-#define VIOLET                  { 238, 130, 238}
-#define MAGENTA                 { 255,   0, 255}
-#define FUCHSIA                 { 255,   0, 255}
-#define ORCHID                  { 218, 112, 214}
-#define MEDIUM_VIOLET_RED       { 199,  21, 133}
-#define PALE_VIOLET_RED         { 219, 112, 147}
-#define DEEP_PINK               { 255,  20, 147}
-#define HOT_PINK                { 255, 105, 180}
-#define LIGHT_PINK              { 255, 182, 193}
-#define PINK                    { 255, 192, 203}
-#define ANTIQUE_WHITE           { 250, 235, 215}
-#define BEIGE                   { 245, 245, 220}
-#define BISQUE                  { 255, 228, 196}
-#define BLANCHED_ALMOND         { 255, 235, 205}
-#define WHEAT                   { 245, 222, 179}
-#define CORN_SILK               { 255, 248, 220}
-#define LEMON_CHIFFON           { 255, 250, 205}
-#define LIGHT_GOLDEN_ROD_YELLOW { 250, 250, 210}
-#define LIGHT_YELLOW            { 255, 255, 224}
-#define SADDLE_BROWN            { 139,  69,  19}
-#define SIENNA                  { 160,  82,  45}
-#define CHOCOLATE               { 210, 105,  30}
-#define PERU                    { 205, 133,  63}
-#define SANDY_BROWN             { 244, 164,  96}
-#define BURLY_WOOD              { 222, 184, 135}
-#define TAN                     { 210, 180, 140}
-#define ROSY_BROWN              { 188, 143, 143}
-#define MOCCASIN                { 255, 228, 181}
-#define NAVAJO_WHITE            { 255, 222, 173}
-#define PEACH_PUFF              { 255, 218, 185}
-#define MISTY_ROSE              { 255, 228, 225}
-#define LAVENDER_BLUSH          { 255, 240, 245}
-#define LINEN                   { 250, 240, 230}
-#define OLD_LACE                { 253, 245, 230}
-#define PAPAYA_WHIP             { 255, 239, 213}
-#define SEA_SHELL               { 255, 245, 238}
-#define MINT_CREAM              { 245, 255, 250}
-#define SLATE_GRAY              { 112, 128, 144}
-#define LIGHT_SLATE_GRAY        { 119, 136, 153}
-#define LIGHT_STEEL_BLUE        { 176, 196, 222}
-#define LAVENDER                { 230, 230, 250}
-#define FLORAL_WHITE            { 255, 250, 240}
-#define ALICE_BLUE              { 240, 248, 255}
-#define GHOST_WHITE             { 248, 248, 255}
-#define HONEYDEW                { 240, 255, 240}
-#define IVORY                   { 255, 255, 240}
-#define AZURE                   { 240, 255, 255}
-#define SNOW                    { 255, 250, 250}
-#define BLACK                   {   0,   0,   0}
-#define DIM_GRAY                { 105, 105, 105}
-#define GRAY                    { 128, 128, 128}
-#define DARK_GRAY               { 169, 169, 169}
-#define SILVER                  { 192, 192, 192}
-#define LIGHT_GRAY              { 211, 211, 211}
-#define GAINSBORO               { 220, 220, 220}
-#define WHITE_SMOKE             { 245, 245, 245}
-#define WHITE                   { 255, 255, 255}
+#include "GraphicAPI.hpp"
+
+namespace otter {
+namespace cv {
+
+#define DefaultColor(c) \
+    otter::cv::getDefaultColor(c)
+
+enum DefaultColor {
+    MAROON                  = 0,
+    DARK_RED                = 1,
+    BROWN                   = 2,
+    FIREBRICK               = 3,
+    CRIMSON                 = 4,
+    RED                     = 5,
+    TOMATO                  = 6,
+    CORAL                   = 7,
+    INDIAN_RED              = 8,
+    LIGHT_CORAL             = 9,
+    DARK_SALMON             = 10,
+    SALMON                  = 11,
+    LIGHT_SALMON            = 12,
+    ORANGE_RED              = 13,
+    DARK_ORANGE             = 14,
+    ORANGE                  = 15,
+    GOLD                    = 16,
+    DARK_GOLDEN_ROD         = 17,
+    GOLDEN_ROD              = 18,
+    PALE_GOLDEN_ROD         = 19,
+    DARK_KHAKI              = 20,
+    KHAKI                   = 21,
+    OLIVE                   = 22,
+    YELLOW                  = 23,
+    YELLOW_GREEN            = 24,
+    DARK_OLIVE_GREEN        = 25,
+    OLIVE_DRAB              = 26,
+    LAWN_GREEN              = 27,
+    CHARTREUSE              = 28,
+    GREEN_YELLOW            = 29,
+    DARK_GREEN              = 30,
+    GREEN                   = 31,
+    FOREST_GREEN            = 32,
+    LIME                    = 33,
+    LIME_GREEN              = 34,
+    LIGHT_GREEN             = 35,
+    PALE_GREEN              = 36,
+    DARK_SEA_GREEN          = 37,
+    MEDIUM_SPRING_GREEN     = 38,
+    SPRING_GREEN            = 39,
+    SEA_GREEN               = 40,
+    MEDIUM_AQUA_MARINE      = 41,
+    MEDIUM_SEA_GREEN        = 42,
+    LIGHT_SEA_GREEN         = 43,
+    DARK_SLATE_GRAY         = 44,
+    TEAL                    = 45,
+    DARK_CYAN               = 46,
+    AQUA                    = 47,
+    CYAN                    = 48,
+    LIGHT_CYAN              = 49,
+    DARK_TURQUOISE          = 50,
+    TURQUOISE               = 51,
+    MEDIUM_TURQUOISE        = 52,
+    PALE_TURQUOISE          = 53,
+    AQUA_MARINE             = 54,
+    POWDER_BLUE             = 55,
+    CADET_BLUE              = 56,
+    STEEL_BLUE              = 57,
+    CORN_FLOWER_BLUE        = 58,
+    DEEP_SKY_BLUE           = 59,
+    DODGER_BLUE             = 60,
+    LIGHT_BLUE              = 61,
+    SKY_BLUE                = 62,
+    LIGHT_SKY_BLUE          = 63,
+    MIDNIGHT_BLUE           = 64,
+    NAVY                    = 65,
+    DARK_BLUE               = 66,
+    MEDIUM_BLUE             = 67,
+    BLUE                    = 68,
+    ROYAL_BLUE              = 69,
+    BLUE_VIOLET             = 70,
+    INDIGO                  = 71,
+    DARK_SLATE_BLUE         = 72,
+    SLATE_BLUE              = 73,
+    MEDIUM_SLATE_BLUE       = 74,
+    MEDIUM_PURPLE           = 75,
+    DARK_MAGENTA            = 76,
+    DARK_VIOLET             = 77,
+    DARK_ORCHID             = 78,
+    MEDIUM_ORCHID           = 79,
+    PURPLE                  = 80,
+    THISTLE                 = 81,
+    PLUM                    = 82,
+    VIOLET                  = 83,
+    MAGENTA                 = 84,
+    FUCHSIA                 = 85,
+    ORCHID                  = 86,
+    MEDIUM_VIOLET_RED       = 87,
+    PALE_VIOLET_RED         = 88,
+    DEEP_PINK               = 89,
+    HOT_PINK                = 90,
+    LIGHT_PINK              = 91,
+    PINK                    = 92,
+    ANTIQUE_WHITE           = 93,
+    BEIGE                   = 94,
+    BISQUE                  = 95,
+    BLANCHED_ALMOND         = 96,
+    WHEAT                   = 97,
+    CORN_SILK               = 98,
+    LEMON_CHIFFON           = 99,
+    LIGHT_GOLDEN_ROD_YELLOW = 100,
+    LIGHT_YELLOW            = 101,
+    SADDLE_BROWN            = 102,
+    SIENNA                  = 103,
+    CHOCOLATE               = 104,
+    PERU                    = 105,
+    SANDY_BROWN             = 106,
+    BURLY_WOOD              = 107,
+    TAN                     = 108,
+    ROSY_BROWN              = 109,
+    MOCCASIN                = 110,
+    NAVAJO_WHITE            = 111,
+    PEACH_PUFF              = 112,
+    MISTY_ROSE              = 113,
+    LAVENDER_BLUSH          = 114,
+    LINEN                   = 115,
+    OLD_LACE                = 116,
+    PAPAYA_WHIP             = 117,
+    SEA_SHELL               = 118,
+    MINT_CREAM              = 119,
+    SLATE_GRAY              = 120,
+    LIGHT_SLATE_GRAY        = 121,
+    LIGHT_STEEL_BLUE        = 122,
+    LAVENDER                = 123,
+    FLORAL_WHITE            = 124,
+    ALICE_BLUE              = 125,
+    GHOST_WHITE             = 126,
+    HONEYDEW                = 127,
+    IVORY                   = 128,
+    AZURE                   = 129,
+    SNOW                    = 130,
+    BLACK                   = 131,
+    DIM_GRAY                = 132,
+    GRAY                    = 133,
+    DARK_GRAY               = 134,
+    SILVER                  = 135,
+    LIGHT_GRAY              = 136,
+    GAINSBORO               = 137,
+    WHITE_SMOKE             = 138,
+    WHITE                   = 139
+};
+
+Color getDefaultColor(int color);
+
+}   // end namespace cv
+}   // end namespace otter
 
 #endif /* DefaultColor_h */
