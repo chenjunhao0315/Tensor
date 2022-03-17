@@ -10,6 +10,7 @@
 
 #include "Config.hpp"
 #include "GraphicAPI.hpp"
+#include "DefaultColor.hpp"
 
 namespace otter {
 class Tensor;
