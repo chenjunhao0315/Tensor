@@ -19,6 +19,7 @@
 #include "TensorBlas.hpp"
 #include "TensorProperties.hpp"
 #include "TensorScalar.hpp"
+#include "TensorDistribution.hpp"
 
 namespace otter {
 
@@ -140,6 +141,46 @@ Tensor Tensor::unfold(int64_t dim, int64_t size, int64_t step) const {
 
 Tensor Tensor::detach() const {
     return otter::native::detach(*this);
+}
+
+Tensor& Tensor::uniform_(double from, double to) const {
+    return otter::native::uniform_(const_cast<Tensor&>(*this), from, to);
+}
+
+Tensor& Tensor::uniform_(double from, double to, Generator generator) const {
+    return otter::native::uniform_(const_cast<Tensor&>(*this), from, to, generator);
+}
+
+Tensor& Tensor::normal_(double mean, double std) const {
+    return otter::native::normal_(const_cast<Tensor&>(*this), mean, std);
+}
+
+Tensor& Tensor::normal_(double mean, double std, Generator generator) const {
+    return otter::native::normal_(const_cast<Tensor&>(*this), mean, std, generator);
+}
+
+Tensor& Tensor::random_(int64_t from, int64_t to) const {
+    return otter::native::random_(const_cast<Tensor&>(*this), from, to);
+}
+
+Tensor& Tensor::random_(int64_t from, int64_t to, Generator generator) const {
+    return otter::native::random_(const_cast<Tensor&>(*this), from, to, generator);
+}
+
+Tensor& Tensor::random_(int64_t to) const {
+    return otter::native::random_(const_cast<Tensor&>(*this), to);
+}
+
+Tensor& Tensor::random_(int64_t to, Generator generator) const {
+    return otter::native::random_(const_cast<Tensor&>(*this), to, generator);
+}
+
+Tensor& Tensor::random_() const {
+    return otter::native::random_(const_cast<Tensor&>(*this));
+}
+
+Tensor& Tensor::random_(Generator generator) const {
+    return otter::native::random_(const_cast<Tensor&>(*this), generator);
 }
 
 Tensor& Tensor::zero_() {
