@@ -13,6 +13,8 @@
 
 namespace otter {
 
+struct Generator;
+
 class TensorRef;
 
 class Tensor : public TensorBase {
@@ -175,6 +177,19 @@ public:
     Tensor& fill_(const Tensor& value);
     
     Tensor to(ScalarType dtype, bool non_blocking = false, bool copy = false, MemoryFormat memory_format = MemoryFormat::Preserve) const;
+    
+    Tensor& uniform_(double from, double to) const;
+    Tensor& uniform_(double from, double to, Generator generator) const;
+    
+    Tensor& normal_(double mean = 0, double std = 1) const;
+    Tensor& normal_(double mean, double std, Generator generator) const;
+    
+    Tensor& random_(int64_t from, int64_t to = INT_MAX) const;
+    Tensor& random_(int64_t from, int64_t to, Generator generator) const;
+    Tensor& random_(int64_t to) const;
+    Tensor& random_(int64_t to, Generator generator) const;
+    Tensor& random_() const;
+    Tensor& random_(Generator generator) const;
     
     Tensor& add_(const Tensor& other, const Scalar& alpha = 1) const;
     Tensor add(const Tensor& other, const Scalar& alpha = 1) const;

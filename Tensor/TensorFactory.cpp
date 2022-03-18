@@ -19,6 +19,10 @@ Tensor empty(IntArrayRef size, TensorOptions options) {
     return otter::empty_cpu(size, options);
 }
 
+Tensor empty(IntArrayRef size, TensorOptions options, MemoryFormat memory_format) {
+    return otter::empty_cpu(size, options, memory_format);
+}
+
 Tensor empty_strided(IntArrayRef size, IntArrayRef stride, ScalarType dtype) {
     return otter::empty_strided_cpu(size, stride, dtype);
 }
@@ -36,7 +40,11 @@ Tensor empty_like(const Tensor& self, const TensorOptions& options) {
 }
 
 Tensor empty_like(const Tensor& self, const TensorOptions& options, MemoryFormat memory_format) {
-    return otter::empty_cpu(self.sizes(), options, memory_format);
+    return otter::empty(self.sizes(), options, memory_format);
+}
+
+Tensor empty_like(const Tensor& self, MemoryFormat memory_format) {
+    return otter::empty(self.sizes(), self.options(), memory_format);
 }
 
 Tensor empty_like(const Tensor& self, ScalarType dtype) {
@@ -68,6 +76,12 @@ Tensor full(IntArrayRef size, const Scalar& fill_value, ScalarType dtype) {
     return result.fill_(fill_value);
 }
 
+Tensor full(IntArrayRef size, const Scalar& fill_value, TensorOptions options) {
+    auto result = empty(size, options);
+    
+    return result.fill_(fill_value);
+}
+
 Tensor ones(IntArrayRef size, ScalarType dtype) {
     auto result = empty(size, dtype);
     
@@ -80,6 +94,12 @@ Tensor ones(IntArrayRef size, TensorOptions options) {
     return result.fill_(1);
 }
 
+Tensor ones_like(const Tensor& self, ScalarType dtype) {
+    auto result = empty_like(self, dtype);
+    
+    return result.fill_(1);
+}
+
 Tensor ones_like(const Tensor& self, TensorOptions options) {
     auto result = empty_like(self, options);
     
@@ -88,11 +108,25 @@ Tensor ones_like(const Tensor& self, TensorOptions options) {
 
 Tensor zeros(IntArrayRef size, ScalarType dtype) {
     auto result = empty_cpu(size, dtype);
+    
     return result.zero_();
 }
 
 Tensor zeros(IntArrayRef size, TensorOptions options) {
     auto result = empty_cpu(size, options);
+    
+    return result.zero_();
+}
+
+Tensor zeros_like(const Tensor& self, ScalarType dtype) {
+    auto result = empty_like(self, dtype);
+    
+    return result.zero_();
+}
+
+Tensor zeros_like(const Tensor& self, TensorOptions options) {
+    auto result = empty_like(self, options);
+    
     return result.zero_();
 }
 
@@ -110,11 +144,59 @@ Tensor range(const Scalar& start, const Scalar& end, const Scalar& step, ScalarT
 }
 
 Tensor rand(IntArrayRef size, ScalarType dtype) {
-    return ones(size, dtype);
+    auto result = empty(size, dtype);
+    result.uniform_(0, 1);
+    
+    return result;
 }
 
 Tensor rand(IntArrayRef size, TensorOptions options) {
-    return ones(size, options);
+    auto result = empty(size, options);
+    result.uniform_(0, 1);
+    
+    return result;
+}
+
+Tensor rand_like(const Tensor& self, ScalarType dtype) {
+    auto result = empty_like(self, dtype);
+    result.uniform_(0, 1);
+    
+    return result;
+}
+
+Tensor rand_like(const Tensor& self, TensorOptions options) {
+    auto result = empty_like(self, options);
+    result.uniform_(0, 1);
+    
+    return result;
+}
+
+Tensor randn(IntArrayRef size, ScalarType dtype) {
+    auto result = empty(size, dtype);
+    result.normal_(0, 1);
+    
+    return result;
+}
+
+Tensor randn(IntArrayRef size, TensorOptions options) {
+    auto result = empty(size, options);
+    result.normal_(0, 1);
+    
+    return result;
+}
+
+Tensor randn_like(const Tensor& self, ScalarType dtype) {
+    auto result = empty_like(self, dtype);
+    result.normal_(0, 1);
+    
+    return result;
+}
+
+Tensor randn_like(const Tensor& self, TensorOptions options) {
+    auto result = empty_like(self, options);
+    result.normal_(0, 1);
+    
+    return result;
 }
 
 

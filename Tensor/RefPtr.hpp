@@ -14,6 +14,15 @@
 
 namespace otter {
 
+class Ptr_quantum;
+namespace raw {
+namespace ptr {
+
+inline void incref(Ptr_quantum* self);
+
+}   // end namespace raw
+}   // end namespace ptr
+
 namespace detail {
 
 template <class TTarget>
@@ -32,6 +41,10 @@ TTarget* assign_ptr_(TTarget* rhs) {
     }
 }
 
+inline size_t atomic_refcount_increment(std::atomic<size_t>& refcount) {
+    return refcount.fetch_add(1, std::memory_order_acq_rel) + 1;
+}
+
 inline size_t atomic_refcount_decrement(std::atomic<size_t>& refcount) {
     return refcount.fetch_sub(1, std::memory_order_acq_rel) - 1;
 }
@@ -41,6 +54,7 @@ inline size_t atomic_refcount_decrement(std::atomic<size_t>& refcount) {
 class Ptr_quantum {
     template <typename T, typename NullType>
     friend class Ptr;
+    friend inline void raw::ptr::incref(Ptr_quantum* self);
     
     template <typename T>
     friend struct ExclusivelyOwnedTraits;
@@ -55,7 +69,7 @@ protected:
     
 private:
     virtual void release_resources() {}
-
+    
     mutable std::atomic<size_t> refCount_;
 };
 
@@ -83,18 +97,18 @@ public:
     Ptr& operator=(Ptr&& rhs) & noexcept {
         return operator=<Target, NullType>(std::move(rhs));
     }
-
+    
     template <class From, class FromNullType>
     Ptr& operator=(Ptr<From, FromNullType>&& rhs) & noexcept {
         Ptr tmp = std::move(rhs);
         this->swap(tmp);
         return *this;
     }
-
+    
     Ptr& operator=(const Ptr& rhs) & noexcept {
         return operator=<Target, NullType>(rhs);
     }
-
+    
     template <class From, class FromNullType>
     Ptr& operator=(const Ptr<From, FromNullType>& rhs) & {
         Ptr tmp = rhs;
@@ -183,34 +197,50 @@ private:
 };
 
 template <
-    class Target,
-    class NullType = detail::ptr_quantum_default_null_type<Target>,
-    class... Args>
+class Target,
+class NullType = detail::ptr_quantum_default_null_type<Target>,
+class... Args>
 inline Ptr<Target, NullType> make_otterptr(Args&&... args) {
     return Ptr<Target, NullType>::make(std::forward<Args>(args)...);
 }
 
 template <class TTarget1, class NullType1, class TTarget2, class NullType2>
 inline bool operator<(
-    const Ptr<TTarget1, NullType1>& lhs,
-    const Ptr<TTarget2, NullType2>& rhs) noexcept {
-  return lhs.get() < rhs.get();
-}
+                      const Ptr<TTarget1, NullType1>& lhs,
+                      const Ptr<TTarget2, NullType2>& rhs) noexcept {
+                          return lhs.get() < rhs.get();
+                      }
 
 template <class TTarget1, class NullType1, class TTarget2, class NullType2>
 inline bool operator==(
-    const Ptr<TTarget1, NullType1>& lhs,
-    const Ptr<TTarget2, NullType2>& rhs) noexcept {
-  return lhs.get() == rhs.get();
-}
+                       const Ptr<TTarget1, NullType1>& lhs,
+                       const Ptr<TTarget2, NullType2>& rhs) noexcept {
+                           return lhs.get() == rhs.get();
+                       }
 
 template <class TTarget1, class NullType1, class TTarget2, class NullType2>
 inline bool operator!=(
-    const Ptr<TTarget1, NullType1>& lhs,
-    const Ptr<TTarget2, NullType2>& rhs) noexcept {
-  return !operator==(lhs, rhs);
+                       const Ptr<TTarget1, NullType1>& lhs,
+                       const Ptr<TTarget2, NullType2>& rhs) noexcept {
+                           return !operator==(lhs, rhs);
+                       }
+
+namespace raw {
+namespace ptr {
+
+inline void incref(Ptr_quantum* self) {
+    if (self) {
+        detail::atomic_refcount_increment(self->refCount_);
+    }
 }
 
+inline void decref(Ptr_quantum* self) {
+    Ptr<Ptr_quantum>::reclaim(self);
 }
+
+}   // end namespace Ptr
+}   // end namespace raw
+
+}   // end namespace otter
 
 #endif /* RefPtr_hpp */

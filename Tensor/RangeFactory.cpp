@@ -14,7 +14,7 @@
 namespace otter {
 
 Tensor& linspace_out(const Scalar& start, const Scalar& end, int64_t steps, Tensor& result) {
-    assert(steps > 0);
+    OTTER_CHECK(steps > 0, "Steps must > 0 but get ", steps);
     
     if (result.numel() != steps) {
         result.resize_({steps});

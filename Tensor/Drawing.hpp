@@ -53,6 +53,10 @@ void ellipse(Tensor& img, Point center, Size axes, double angle, double start_an
 
 void ellipse(Tensor& img, const RotatedRect& box, const Color& color, int thickness = 1, int lineType = LINE_8);
 
+void ellipse2Poly(Point2d center, Size2d axes, int angle, int arc_start, int arc_end, int delta, std::vector<Point2d>& pts);
+
+void ellipse2Poly(Point center, Size axes, int angle, int arcStart, int arcEnd, int delta, std::vector<Point>& pts);
+
 void fillConvexPoly(Tensor& img, const Point* pts, int npts, const Color& color, int line_type = LINE_8, int shift = 0);
 
 void fillPoly(Tensor& img, const Point** pts, const int* npts, int ncontours, const Color& color, int line_type = LINE_8, int shift = 0, Point offset = Point());
