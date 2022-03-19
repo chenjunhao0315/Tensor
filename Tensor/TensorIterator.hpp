@@ -304,6 +304,11 @@ public:
         return *this;
     }
     
+    TensorIteratorConfig& allow_cpu_scalars(const bool _allow_cpu_scalars) {
+        allow_cpu_scalars_ = _allow_cpu_scalars;
+        return *this;
+    }
+    
     TensorIteratorConfig& check_all_same_dtype(const bool _check_all_same_dtype) {
         check_all_same_dtype_ = _check_all_same_dtype;
         return *this;
@@ -357,6 +362,7 @@ private:
     
     bool resize_outputs_ = true;
     bool check_mem_overlap_ = true;
+    bool allow_cpu_scalars_ = false;
     bool check_all_same_dtype_ = false;
     bool check_all_same_device_ = false;
     bool enforce_safe_casting_to_output_ = false;

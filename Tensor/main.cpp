@@ -10,6 +10,7 @@
 #include "Net.hpp"
 #include "Vision.hpp"
 #include "Drawing.hpp"
+#include "ColorConvert.hpp"
 
 using namespace std;
 

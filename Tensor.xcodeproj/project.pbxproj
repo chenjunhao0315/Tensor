@@ -30,6 +30,8 @@
 		760704D127E4AA2100D5E00D /* TensorDistributionTemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760704CF27E4AA2100D5E00D /* TensorDistributionTemplate.cpp */; };
 		760704D427E4FE6A00D5E00D /* TensorDistributionKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760704D227E4FE6A00D5E00D /* TensorDistributionKernel.cpp */; };
 		760704D727E5021200D5E00D /* Avx_Math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760704D527E5021200D5E00D /* Avx_Math.cpp */; };
+		760704DB27E6189600D5E00D /* ColorConvert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760704D927E6189600D5E00D /* ColorConvert.cpp */; };
+		760704DE27E6425300D5E00D /* ImageThreshold.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760704DC27E6425300D5E00D /* ImageThreshold.cpp */; };
 		7620AF6E27B4060A0081C210 /* RangeFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF6C27B4060A0081C210 /* RangeFactory.cpp */; };
 		7620AF7127B406F70081C210 /* RangeFactoryKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF6F27B406F70081C210 /* RangeFactoryKernel.cpp */; };
 		7620AF7427B4F3F50081C210 /* TensorMaker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF7227B4F3F50081C210 /* TensorMaker.cpp */; };
@@ -203,6 +205,10 @@
 		760704D327E4FE6A00D5E00D /* TensorDistributionKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorDistributionKernel.hpp; sourceTree = "<group>"; };
 		760704D527E5021200D5E00D /* Avx_Math.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Avx_Math.cpp; sourceTree = "<group>"; };
 		760704D627E5021200D5E00D /* Avx_Math.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Avx_Math.hpp; sourceTree = "<group>"; };
+		760704D927E6189600D5E00D /* ColorConvert.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ColorConvert.cpp; sourceTree = "<group>"; };
+		760704DA27E6189600D5E00D /* ColorConvert.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ColorConvert.hpp; sourceTree = "<group>"; };
+		760704DC27E6425300D5E00D /* ImageThreshold.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImageThreshold.cpp; sourceTree = "<group>"; };
+		760704DD27E6425300D5E00D /* ImageThreshold.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ImageThreshold.hpp; sourceTree = "<group>"; };
 		7620AF6C27B4060A0081C210 /* RangeFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RangeFactory.cpp; sourceTree = "<group>"; };
 		7620AF6D27B4060A0081C210 /* RangeFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RangeFactory.hpp; sourceTree = "<group>"; };
 		7620AF6F27B406F70081C210 /* RangeFactoryKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RangeFactoryKernel.cpp; sourceTree = "<group>"; };
@@ -696,6 +702,10 @@
 				760704B427E2934200D5E00D /* ColorMap.hpp */,
 				760704B627E29D4E00D5E00D /* DefaultColor.hpp */,
 				760704B727E32E7200D5E00D /* DefaultColor.cpp */,
+				760704D927E6189600D5E00D /* ColorConvert.cpp */,
+				760704DA27E6189600D5E00D /* ColorConvert.hpp */,
+				760704DC27E6425300D5E00D /* ImageThreshold.cpp */,
+				760704DD27E6425300D5E00D /* ImageThreshold.hpp */,
 			);
 			name = cv;
 			sourceTree = "<group>";
@@ -846,6 +856,7 @@
 				76E6C51227A502A30036A26F /* Tensor.hpp */,
 				76F336BF27A5B61E00E3AEF1 /* Scalar.cpp */,
 				76F336C027A5B61E00E3AEF1 /* Scalar.hpp */,
+				769279D527D4C7480088BD9F /* core */,
 				760382C127BF4C3600CD599F /* Memory */,
 				760382C227BF4C8600CD599F /* Dtype */,
 				760382C427BF4D0800CD599F /* Utils */,
@@ -853,12 +864,11 @@
 				762E3B5127BD629F0075F983 /* vec */,
 				760384B127C0455100CD599F /* Convolution */,
 				7687218227C2DDCD006640CF /* Normalization */,
+				760704BC27E3A32100D5E00D /* Distribution */,
 				760384B227C045BA00CD599F /* Ops */,
 				7687216C27C1233A006640CF /* Net */,
 				7687216527C0E569006640CF /* Layer */,
-				769279D527D4C7480088BD9F /* core */,
 				76486AEB27DBCDF70078FF9B /* cv */,
-				760704BC27E3A32100D5E00D /* Distribution */,
 			);
 			path = Tensor;
 			sourceTree = "<group>";
@@ -980,6 +990,7 @@
 				7628E18027CFDB5900B136FA /* ConcatLayer.cpp in Sources */,
 				760382D627C019AE00CD599F /* DepthwiseConvKernel.cpp in Sources */,
 				76E6C54527A5132B0036A26F /* Utils.cpp in Sources */,
+				760704DB27E6189600D5E00D /* ColorConvert.cpp in Sources */,
 				762E3B2D27BACA050075F983 /* TensorAccessor.cpp in Sources */,
 				76E6C52527A505250036A26F /* ArrayRef.cpp in Sources */,
 				7687218127C2DDC7006640CF /* Normalization.cpp in Sources */,
@@ -998,6 +1009,7 @@
 				76E6C55727A57AAD0036A26F /* Function_Trait.cpp in Sources */,
 				762E3B3927BBBA8C0075F983 /* Convolution.cpp in Sources */,
 				76F336D027A660D800E3AEF1 /* Fill.cpp in Sources */,
+				760704DE27E6425300D5E00D /* ImageThreshold.cpp in Sources */,
 				7628E02F27CF543800B136FA /* Padding.cpp in Sources */,
 				76F336E027A90E8E00E3AEF1 /* TensorBase.cpp in Sources */,
 				760704CE27E3E87500D5E00D /* TensorDistribution.cpp in Sources */,

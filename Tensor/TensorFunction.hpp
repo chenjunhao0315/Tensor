@@ -32,6 +32,11 @@ struct structured_##name : public TensorIterator { \
     void meta(const Tensor& self, const Scalar& alpha); \
 }
 
+#define DECLARE_META_STRUCTURE_SIN_DUAL(name) \
+struct structured_##name : public TensorIterator { \
+    void meta(const Tensor& self, const Scalar& alpha, const Scalar& beta); \
+}
+
 #define DECLARE_META_STRUCTURE_SELF_OVERLOAD(name, overload)    \
 struct structured_##name##_##overload : public TensorIterator {   \
     void meta(const Tensor& self);   \
@@ -78,6 +83,7 @@ DECLARE_META_STRUCTURE_TRI_DUAL(addmm);
 DECLARE_META_STRUCTURE_DUAL_NONE(mm);
 
 DECLARE_META_STRUCTURE_SIN_SIN(leaky_relu);
+DECLARE_META_STRUCTURE_SIN_DUAL(threshold);
 
 struct structured_max_pool2d_with_indices : public TensorIterator {
     void meta(const Tensor & self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode);
@@ -215,6 +221,10 @@ struct structured_upsample_bilinear2d_out_cpu : public structured_upsample_bilin
     void impl(const Tensor & self, IntArrayRef output_size, bool align_corners, double scales_h, double scales_w, const Tensor & out);
 };
 
+struct structured_threshold_out : public structured_threshold {
+    void impl(const Tensor & self, const Scalar & threshold, const Scalar & value, const Tensor & out);
+};
+
 namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha);
@@ -301,6 +311,10 @@ Tensor & upsample_nearest2d_out(Tensor & out, const Tensor & self, IntArrayRef o
 
 Tensor upsample_bilinear2d(const Tensor & self, IntArrayRef output_size, bool align_corners, double scales_h, double scales_w);
 Tensor & upsample_bilinear2d_out(Tensor & out, const Tensor & self, IntArrayRef output_size, bool align_corners, double scales_h, double scales_w);
+
+Tensor threshold(const Tensor & self, const Scalar & threshold, const Scalar & value);
+Tensor & threshold_out(Tensor & out, const Tensor & self, const Scalar & threshold, const Scalar & value);
+Tensor & threshold_(Tensor & self, const Scalar & threshold, const Scalar & value);
 
 }   // end namespace native
 
