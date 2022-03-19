@@ -551,7 +551,7 @@ Tensor & wrapper_mm_(Tensor & self, const Tensor & other) {
 
 // max_pool2d
 struct structured_max_pool2d_with_indices_out_cpu_functional final : public structured_max_pool2d_with_indices_out_cpu {
-
+    
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
         outputs_[output_idx] = create_out(sizes, strides, options);
     }
@@ -567,15 +567,15 @@ std::tuple<Tensor, Tensor> wrapper_max_pool2d_with_indices(const Tensor & self, 
     op.impl(self, kernel_size, stride, padding, dilation, ceil_mode, *op.outputs_[0], *op.outputs_[1]);
     return std::make_tuple(std::move(op.outputs_[0]).take(), std::move(op.outputs_[1]).take());
 }
-    
+
 struct structured_max_pool2d_with_indices_out_cpu_out final : public structured_max_pool2d_with_indices_out_cpu {
     structured_max_pool2d_with_indices_out_cpu_out(Tensor& out0, Tensor& out1) : outputs_{ std::ref(out0), std::ref(out1) } {}
-
+    
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
         const auto& out = outputs_[output_idx].get();
         resize_out(out, sizes, strides, options);
     }
-
+    
     const Tensor& maybe_get_output(int64_t output_idx) override {
         return outputs_[output_idx];
     }
@@ -617,11 +617,11 @@ Tensor & wrapper_leaky_relu_(Tensor & self, const Scalar & negative_slope) {
 
 // upsample nearest
 struct structured_upsample_nearest2d_out_cpu_functional final : public structured_upsample_nearest2d_out_cpu {
-
+    
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
         outputs_[output_idx] = create_out(sizes, strides, options);
     }
-
+    
     const Tensor& maybe_get_output(int64_t output_idx) override {
         return *outputs_[output_idx];
     }
@@ -637,12 +637,12 @@ Tensor wrapper_upsample_nearest2d(const Tensor & self, IntArrayRef output_size, 
 
 struct structured_upsample_nearest2d_out_cpu_out final : public structured_upsample_nearest2d_out_cpu {
     structured_upsample_nearest2d_out_cpu_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
-
+    
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
         const auto& out = outputs_[output_idx].get();
         resize_out(out, sizes, strides, options);
     }
-
+    
     const Tensor& maybe_get_output(int64_t output_idx) override {
         return outputs_[output_idx];
     }
@@ -660,12 +660,12 @@ Tensor & wrapper_upsample_nearest2d_out_out(const Tensor & self, IntArrayRef out
 
 // upsample bilinear
 struct structured_upsample_bilinear2d_out_cpu_functional final : public structured_upsample_bilinear2d_out_cpu {
-
+    
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
-
+        
         outputs_[output_idx] = create_out(sizes, strides, options);
     }
-
+    
     const Tensor& maybe_get_output(int64_t output_idx) override {
         return *outputs_[output_idx];
     }
@@ -682,13 +682,13 @@ Tensor wrapper_upsample_bilinear2d(const Tensor & self, IntArrayRef output_size,
 
 struct structured_upsample_bilinear2d_out_cpu_out final : public structured_upsample_bilinear2d_out_cpu {
     structured_upsample_bilinear2d_out_cpu_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
-
+    
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
-
+        
         const auto& out = outputs_[output_idx].get();
         resize_out(out, sizes, strides, options);
     }
-
+    
     const Tensor& maybe_get_output(int64_t output_idx) override {
         return outputs_[output_idx];
     }
@@ -703,6 +703,76 @@ Tensor & wrapper_upsample_bilinear2d_out_out(const Tensor & self, IntArrayRef ou
     return out;
 }
 // end upsample bilinear
+
+// threshold
+struct structured_threshold_out_functional final : public structured_threshold_out {
+    
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        
+        outputs_[output_idx] = create_out(sizes, strides, options);
+
+        structured_threshold_out::set_output(output_idx, sizes, strides, options);
+    }
+    
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+
+otter::Tensor wrapper_threshold(const otter::Tensor & self, const otter::Scalar & threshold, const otter::Scalar & value) {
+    structured_threshold_out_functional op;
+    op.meta(self, threshold, value);
+    op.impl(self, threshold, value, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_threshold_out_out final : public structured_threshold_out {
+    structured_threshold_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+
+        structured_threshold_out::set_output(output_idx, sizes, strides, options);
+    }
+    
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+
+otter::Tensor & wrapper_threshold_out_out(const otter::Tensor & self, const otter::Scalar & threshold, const otter::Scalar & value, otter::Tensor & out) {
+    structured_threshold_out_out op(out);
+    op.meta(self, threshold, value);
+    op.impl(self, threshold, value, op.outputs_[0]);
+    return out;
+}
+struct structured_threshold_out_inplace final : public structured_threshold_out {
+    structured_threshold_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+
+        structured_threshold_out::set_output(output_idx, sizes, strides, options);
+    }
+    
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+
+otter::Tensor & wrapper_threshold_(otter::Tensor & self, const otter::Scalar & threshold, const otter::Scalar & value) {
+    structured_threshold_out_inplace op(self);
+    op.meta(self, threshold, value);
+    op.impl(self, threshold, value, op.outputs_[0]);
+    return self;
+}
+// end threshold
 
 namespace native {
 
@@ -918,6 +988,18 @@ Tensor upsample_bilinear2d(const Tensor & self, IntArrayRef output_size, bool al
 
 Tensor & upsample_bilinear2d_out(Tensor & out, const Tensor & self, IntArrayRef output_size, bool align_corners, double scales_h, double scales_w) {
     return wrapper_upsample_bilinear2d_out_out(self, output_size, align_corners, scales_h, scales_w, out);
+}
+
+Tensor threshold(const Tensor & self, const Scalar & threshold, const Scalar & value) {
+    return wrapper_threshold(self, threshold, value);
+}
+
+Tensor & threshold_out(Tensor & out, const Tensor & self, const Scalar & threshold, const Scalar & value) {
+    return wrapper_threshold_out_out(self, threshold, value, out);
+}
+
+Tensor & threshold_(Tensor & self, const Scalar & threshold, const Scalar & value) {
+    return wrapper_threshold_(self, threshold, value);
 }
 
 }   // end namespace native

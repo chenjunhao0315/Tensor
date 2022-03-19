@@ -276,6 +276,10 @@ To checked_convert(From f, const char* name) {
     return convert<To, From>(f);
 }
 
+inline std::ostream& operator<<(std::ostream& stream, ScalarType scalar_type) {
+    return stream << toString(scalar_type);
+}
+
 }   // end namespace otter
 
 #endif /* ScalarType_hpp */
