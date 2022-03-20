@@ -11,6 +11,7 @@
 #include "Vision.hpp"
 #include "Drawing.hpp"
 #include "ColorConvert.hpp"
+#include "ImageThreshold.hpp"
 
 using namespace std;
 
