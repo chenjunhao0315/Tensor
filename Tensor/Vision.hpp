@@ -19,11 +19,12 @@ enum class IMG_TYPE {
     PNG
 };
 
-// Translate HWC -> CHW
-// Recommended!
+// Translate HWC -> NCHW
+// Recommended for neural network input!
 Tensor load_image_rgb(const char* filename);
 
-// Raw data
+// Raw data HWC
+// For tranditional image process
 Tensor load_image_pixel(const char* filename);
 
 // Save image

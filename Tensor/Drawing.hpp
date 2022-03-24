@@ -10,6 +10,7 @@
 
 #include "Config.hpp"
 #include "GraphicAPI.hpp"
+#include "DefaultColor.hpp"
 
 namespace otter {
 class Tensor;
@@ -38,27 +39,33 @@ enum HersheyFonts {
     FONT_ITALIC                 = 16 //!< flag for italic font
 };
 
-void line(Tensor& img, Point pt1, Point pt2, const Color& color, int thickness, int line_type, int shift);
+void line(Tensor& img, Point pt1, Point pt2, const Color& color, int thickness = 1, int line_type = LINE_8, int shift = 0);
 
-void arrowedLine(Tensor& img, Point pt1, Point pt2, const Color& color, int thickness, int line_type, int shift, double tipLength);
+void arrowedLine(Tensor& img, Point pt1, Point pt2, const Color& color, int thickness = 1, int line_type = LINE_8, int shift = 0, double tipLength = 0.1);
 
-void rectangle(Tensor& img, Point pt1, Point pt2, const Color& color, int thickness, int lineType, int shift);
+void rectangle(Tensor& img, Point pt1, Point pt2, const Color& color, int thickness = 1, int lineType = LINE_8, int shift = 0);
 
-void rectangle(Tensor& img, Rect rec, const Color& color, int thickness, int lineType, int shif);
+void rectangle(Tensor& img, Rect rec, const Color& color, int thickness = 1, int lineType = LINE_8, int shif = 0);
 
-void circle(Tensor& img, Point center, int radius, const Color& color, int thickness, int line_type, int shift);
+void circle(Tensor& img, Point center, int radius, const Color& color, int thickness = 1, int line_type = LINE_8, int shift = 0);
 
-void ellipse(Tensor& img, Point center, Size axes, double angle, double start_angle, double end_angle, const Color& color, int thickness, int line_type, int shift);
+void ellipse(Tensor& img, Point center, Size axes, double angle, double start_angle, double end_angle, const Color& color, int thickness = 1, int line_type = LINE_8, int shift = 0);
 
-void ellipse(Tensor& img, const RotatedRect& box, const Color& color, int thickness, int lineType);
+void ellipse(Tensor& img, const RotatedRect& box, const Color& color, int thickness = 1, int lineType = LINE_8);
 
-void fillConvexPoly(Tensor& img, const Point* pts, int npts, const Color& color, int line_type, int shift);
+void fillConvexPoly(Tensor& img, const Point* pts, int npts, const Color& color, int line_type = LINE_8, int shift = 0);
 
-void fillPoly(Tensor& img, const Point** pts, const int* npts, int ncontours, const Color& color, int line_type, int shift, Point offset);
+void fillPoly(Tensor& img, const Point** pts, const int* npts, int ncontours, const Color& color, int line_type = LINE_8, int shift = 0, Point offset = Point());
 
-void polylines(Tensor& img, const Point* const* pts, const int* npts, int ncontours, bool isClosed, const Color& color, int thickness, int line_type, int shift);
+void polylines(Tensor& img, const Point* const* pts, const int* npts, int ncontours, bool isClosed, const Color& color, int thickness = 1, int line_type = LINE_8, int shift = 0);
 
-void putText(Tensor& img, const std::string& text, Point org, int fontFace, double fontScale, Color color, int thickness, int line_type, bool bottomLeftOrigin);
+void putText(Tensor& img, const std::string& text, Point org, int fontFace, double fontScale, Color color, int thickness = 1, int line_type = LINE_8, bool bottomLeftOrigin = false);
+
+void putText(Tensor& img, const std::string& text, Point org, int FontFace, int pixelHeight, Color color, int thickness = 1, int line_type = LINE_8, bool bottomLeftOrigin = false);
+
+Size getTextSize(const std::string& text, int fontFace, double fontScale, int thickness, int* _base_line);
+
+double getFontScaleFromHeight(const int fontFace, const int pixelHeight, const int thickness);
 
 #endif // OTTER_OPENCV_DRAW
 
