@@ -32,9 +32,9 @@ void copy_kernel(TensorIterator& iter, bool non_blocking) {
     if (dtype == iter.dtype(1)) {
         copy_same_dtype(iter);
     } else {
-        OTTER_DISPATCH_ALL_TYPES(dtype, "copy_", [&]() {
+        OTTER_DISPATCH_ALL_TYPES_AND(otter::ScalarType::Bool, dtype, "copy_", [&]() {
             using dest_t = scalar_t;
-            OTTER_DISPATCH_ALL_TYPES(iter.dtype(1), "copy_", [&]() {
+            OTTER_DISPATCH_ALL_TYPES_AND(otter::ScalarType::Bool, iter.dtype(1), "copy_", [&]() {
                 cpu_kernel(iter, [=](scalar_t src) -> dest_t {
                     return otter::static_cast_with_inter_type<dest_t, scalar_t>::apply(src);;
                 });

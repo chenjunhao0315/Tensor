@@ -119,6 +119,13 @@ public:
     Vectorized<float> operator>=(const Vectorized<float>& other) const {
         return _mm256_cmp_ps(values, other.values, _CMP_GE_OQ);
     }
+    
+    Vectorized<float> eq(const Vectorized<float>& other) const;
+    Vectorized<float> ne(const Vectorized<float>& other) const;
+    Vectorized<float> gt(const Vectorized<float>& other) const;
+    Vectorized<float> ge(const Vectorized<float>& other) const;
+    Vectorized<float> lt(const Vectorized<float>& other) const;
+    Vectorized<float> le(const Vectorized<float>& other) const;
 };
 
 template <>
@@ -143,18 +150,38 @@ Vectorized<float> inline operator/(const Vectorized<float>& a, const Vectorized<
 
 template <>
 Vectorized<float> inline operator&(const Vectorized<float>& a, const Vectorized<float>& b) {
-  return _mm256_and_ps(a, b);
+    return _mm256_and_ps(a, b);
 }
 
 template <>
 Vectorized<float> inline operator|(const Vectorized<float>& a, const Vectorized<float>& b) {
-  return _mm256_or_ps(a, b);
+    return _mm256_or_ps(a, b);
 }
 
 template <>
 Vectorized<float> inline operator^(const Vectorized<float>& a, const Vectorized<float>& b) {
-  return _mm256_xor_ps(a, b);
+    return _mm256_xor_ps(a, b);
 }
+
+inline Vectorized<float> Vectorized<float>::eq(const Vectorized<float>& other) const {
+    return (*this == other) & Vectorized<float>(1.0f);
+}
+inline Vectorized<float> Vectorized<float>::ne(const Vectorized<float>& other) const {
+    return (*this != other) & Vectorized<float>(1.0f);
+}
+inline Vectorized<float> Vectorized<float>::gt(const Vectorized<float>& other) const {
+    return (*this > other) & Vectorized<float>(1.0f);
+}
+inline Vectorized<float> Vectorized<float>::ge(const Vectorized<float>& other) const {
+    return (*this >= other) & Vectorized<float>(1.0f);
+}
+inline Vectorized<float> Vectorized<float>::lt(const Vectorized<float>& other) const {
+    return (*this < other) & Vectorized<float>(1.0f);
+}
+inline Vectorized<float> Vectorized<float>::le(const Vectorized<float>& other) const {
+    return (*this <= other) & Vectorized<float>(1.0f);
+}
+
 
 
 #endif

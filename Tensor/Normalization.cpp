@@ -56,8 +56,8 @@ std::tuple<Tensor, Tensor, Tensor> batchnorm_cpu_transform_input_template(const 
         }
     }());
     
-    auto w = (weight.defined()) ? as_nd(weight) : scalar_to_tensor(1, Device::CPU);
-    auto b = (bias.defined()) ? as_nd(bias) : scalar_to_tensor(0, Device::CPU);
+    auto w = (weight.defined()) ? as_nd(weight) : native::wrapped_scalar_tensor(1, Device::CPU);
+    auto b = (bias.defined()) ? as_nd(bias) : native::wrapped_scalar_tensor(0, Device::CPU);
     
     Tensor output = otter::empty_like(input);
     auto iter = TensorIteratorConfig()

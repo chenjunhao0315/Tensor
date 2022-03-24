@@ -97,6 +97,54 @@ struct structured_upsample_bilinear2d : public TensorIterator {
     void meta(const Tensor & self, IntArrayRef output_size, bool align_corners, double scales_h, double scales_w);
 };
 
+struct structured_eq_Scalar : public TensorIterator {
+    void meta(const Tensor & self, const Scalar & other);
+};
+
+struct structured_eq_Tensor : public TensorIterator {
+    void meta(const Tensor & self, const Tensor & other);
+};
+
+struct structured_ne_Scalar : public TensorIterator {
+    void meta(const Tensor & self, const Scalar & other);
+};
+
+struct structured_ne_Tensor : public TensorIterator {
+    void meta(const Tensor & self, const Tensor & other);
+};
+
+struct structured_ge_Scalar : public TensorIterator {
+    void meta(const Tensor & self, const Scalar & other);
+};
+
+struct structured_ge_Tensor : public TensorIterator {
+    void meta(const Tensor & self, const Tensor & other);
+};
+
+struct structured_gt_Scalar : public TensorIterator {
+    void meta(const Tensor & self, const Scalar & other);
+};
+
+struct structured_gt_Tensor : public TensorIterator {
+    void meta(const Tensor & self, const Tensor & other);
+};
+
+struct structured_le_Scalar : public TensorIterator {
+    void meta(const Tensor & self, const Scalar & other);
+};
+
+struct structured_le_Tensor : public TensorIterator {
+    void meta(const Tensor & self, const Tensor & other);
+};
+
+struct structured_lt_Scalar : public TensorIterator {
+    void meta(const Tensor & self, const Scalar & other);
+};
+
+struct structured_lt_Tensor : public TensorIterator {
+    void meta(const Tensor & self, const Tensor & other);
+};
+
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override { \
@@ -225,6 +273,54 @@ struct structured_threshold_out : public structured_threshold {
     void impl(const Tensor & self, const Scalar & threshold, const Scalar & value, const Tensor & out);
 };
 
+struct structured_eq_Scalar_out : public structured_eq_Scalar {
+    void impl(const Tensor & self, const Scalar & other, const Tensor & out);
+};
+
+struct structured_eq_Tensor_out : public structured_eq_Tensor {
+    void impl(const Tensor & self, const Tensor & other, const Tensor & out);
+};
+
+struct structured_ne_Scalar_out : public structured_ne_Scalar {
+    void impl(const Tensor & self, const Scalar & other, const Tensor & out);
+};
+
+struct structured_ne_Tensor_out : public structured_ne_Tensor {
+    void impl(const Tensor & self, const Tensor & other, const Tensor & out);
+};
+
+struct structured_ge_Scalar_out : public structured_ge_Scalar {
+    void impl(const Tensor & self, const Scalar & other, const Tensor & out);
+};
+
+struct structured_ge_Tensor_out : public structured_ge_Tensor {
+    void impl(const Tensor & self, const Tensor & other, const Tensor & out);
+};
+
+struct structured_gt_Scalar_out : public structured_gt_Scalar {
+    void impl(const Tensor & self, const Scalar & other, const Tensor & out);
+};
+
+struct structured_gt_Tensor_out : public structured_gt_Tensor {
+    void impl(const Tensor & self, const Tensor & other, const Tensor & out);
+};
+
+struct structured_le_Scalar_out : public structured_le_Scalar {
+    void impl(const Tensor & self, const Scalar & other, const Tensor & out);
+};
+
+struct structured_le_Tensor_out : public structured_le_Tensor {
+    void impl(const Tensor & self, const Tensor & other, const Tensor & out);
+};
+
+struct structured_lt_Scalar_out : public structured_lt_Scalar {
+    void impl(const Tensor & self, const Scalar & other, const Tensor & out);
+};
+
+struct structured_lt_Tensor_out : public structured_lt_Tensor {
+    void impl(const Tensor & self, const Tensor & other, const Tensor & out);
+};
+
 namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha);
@@ -315,6 +411,60 @@ Tensor & upsample_bilinear2d_out(Tensor & out, const Tensor & self, IntArrayRef 
 Tensor threshold(const Tensor & self, const Scalar & threshold, const Scalar & value);
 Tensor & threshold_out(Tensor & out, const Tensor & self, const Scalar & threshold, const Scalar & value);
 Tensor & threshold_(Tensor & self, const Scalar & threshold, const Scalar & value);
+
+Tensor eq(const Tensor & self, const Scalar & other);
+Tensor & eq_out(Tensor & out, const Tensor & self, const Scalar & other);
+Tensor & eq_outf(const Tensor & self, const Scalar & other, Tensor & out);
+Tensor & eq_(Tensor & self, const Scalar & other);
+Tensor eq(const Tensor & self, const Tensor & other);
+Tensor & eq_out(Tensor & out, const Tensor & self, const Tensor & other);
+Tensor & eq_outf(const Tensor & self, const Tensor & other, Tensor & out);
+Tensor & eq_(Tensor & self, const Tensor & other);
+
+Tensor ne(const Tensor & self, const Scalar & other);
+Tensor & ne_out(Tensor & out, const Tensor & self, const Scalar & other);
+Tensor & ne_outf(const Tensor & self, const Scalar & other, Tensor & out);
+Tensor & ne_(Tensor & self, const Scalar & other);
+Tensor ne(const Tensor & self, const Tensor & other);
+Tensor & ne_out(Tensor & out, const Tensor & self, const Tensor & other);
+Tensor & ne_outf(const Tensor & self, const Tensor & other, Tensor & out);
+Tensor & ne_(Tensor & self, const Tensor & other);
+
+Tensor ge(const Tensor & self, const Scalar & other);
+Tensor & ge_out(Tensor & out, const Tensor & self, const Scalar & other);
+Tensor & ge_outf(const Tensor & self, const Scalar & other, Tensor & out);
+Tensor & ge_(Tensor & self, const Scalar & other);
+Tensor ge(const Tensor & self, const Tensor & other);
+Tensor & ge_out(Tensor & out, const Tensor & self, const Tensor & other);
+Tensor & ge_outf(const Tensor & self, const Tensor & other, Tensor & out);
+Tensor & ge_(Tensor & self, const Tensor & other);
+
+Tensor le(const Tensor & self, const Scalar & other);
+Tensor & le_out(Tensor & out, const Tensor & self, const Scalar & other);
+Tensor & le_outf(const Tensor & self, const Scalar & other, Tensor & out);
+Tensor & le_(Tensor & self, const Scalar & other);
+Tensor le(const Tensor & self, const Tensor & other);
+Tensor & le_out(Tensor & out, const Tensor & self, const Tensor & other);
+Tensor & le_outf(const Tensor & self, const Tensor & other, Tensor & out);
+Tensor & le_(Tensor & self, const Tensor & other);
+
+Tensor gt(const Tensor & self, const Scalar & other);
+Tensor & gt_out(Tensor & out, const Tensor & self, const Scalar & other);
+Tensor & gt_outf(const Tensor & self, const Scalar & other, Tensor & out);
+Tensor & gt_(Tensor & self, const Scalar & other);
+Tensor gt(const Tensor & self, const Tensor & other);
+Tensor & gt_out(Tensor & out, const Tensor & self, const Tensor & other);
+Tensor & gt_outf(const Tensor & self, const Tensor & other, Tensor & out);
+Tensor & gt_(Tensor & self, const Tensor & other);
+
+Tensor lt(const Tensor & self, const Scalar & other);
+Tensor & lt_out(Tensor & out, const Tensor & self, const Scalar & other);
+Tensor & lt_outf(const Tensor & self, const Scalar & other, Tensor & out);
+Tensor & lt_(Tensor & self, const Scalar & other);
+Tensor lt(const Tensor & self, const Tensor & other);
+Tensor & lt_out(Tensor & out, const Tensor & self, const Tensor & other);
+Tensor & lt_outf(const Tensor & self, const Tensor & other, Tensor & out);
+Tensor & lt_(Tensor & self, const Tensor & other);
 
 }   // end namespace native
 

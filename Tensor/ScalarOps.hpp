@@ -30,6 +30,15 @@ inline Tensor scalar_to_tensor(const Scalar& scalar, Device device = Device::CPU
     return scalar_tensor(scalar, ScalarType::Float);
 }
 
+namespace native {
+inline Tensor wrapped_scalar_tensor(const Scalar& scalar, const Device device = Device::CPU) {
+  auto tensor = scalar_to_tensor(scalar, device);
+  tensor.unsafeGetTensorNucleus()->set_wrapped_number(true);
+  return tensor;
 }
+
+}
+
+}   // end namespace otter
 
 #endif /* ScalarOps_hpp */

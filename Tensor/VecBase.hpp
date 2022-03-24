@@ -291,6 +291,24 @@ public:
     Vectorized<T> operator<=(const Vectorized<T>& other) const { return binary_pred(other, std::less_equal<T>()); }
     Vectorized<T> operator>(const Vectorized<T>& other) const { return binary_pred(other, std::greater<T>()); }
     Vectorized<T> operator<(const Vectorized<T>& other) const { return binary_pred(other, std::less<T>()); }
+    
+private:
+    template <typename Op>
+    inline Vectorized<T> binary_pred_bool(const Vectorized<T>& other, Op op) const {
+        // 1 if the pred is true, otherwise 0.
+        Vectorized<T> vector;
+        for (int i = 0; i != size(); ++ i) {
+            vector[i] = bool(op(values[i], other.values[i]));
+        }
+        return vector;
+    }
+public:
+    Vectorized<T> eq(const Vectorized<T>& other) const { return binary_pred_bool(other, std::equal_to<T>()); }
+    Vectorized<T> ne(const Vectorized<T>& other) const { return binary_pred_bool(other, std::not_equal_to<T>()); }
+    Vectorized<T> gt(const Vectorized<T>& other) const { return binary_pred_bool(other, std::greater<T>()); }
+    Vectorized<T> ge(const Vectorized<T>& other) const { return binary_pred_bool(other, std::greater_equal<T>()); }
+    Vectorized<T> lt(const Vectorized<T>& other) const { return binary_pred_bool(other, std::less<T>()); }
+    Vectorized<T> le(const Vectorized<T>& other) const { return binary_pred_bool(other, std::less_equal<T>()); }
 };
 
 struct Vectorizedi;

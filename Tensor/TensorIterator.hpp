@@ -162,6 +162,7 @@ public:
     ScalarType dtype(int arg = 0) const { return operands_[arg].current_dtype; }
     ScalarType input_dtype(int arg=0) const { return operands_[num_outputs_ + arg].current_dtype; }
     ScalarType common_dtype() const { return common_dtype_; }
+    ScalarType compute_common_dtype();
     
     void initialize_operands(TensorIteratorConfig& config);
     void compute_mem_overlaps(const TensorIteratorConfig& config);
@@ -242,6 +243,10 @@ public:
     
     void build_unary_op(const TensorBase& out, const TensorBase& a);
     void build_borrowing_unary_op(const TensorBase& out, const TensorBase& a);
+    
+    void build_comparison_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
+    void build_borrowing_comparison_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
+    void build_borrowing_except_last_argument_comparison_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
     
     static TensorIterator nullary_op(TensorBase& out);
     static TensorIterator borrowing_nullary_op(const TensorBase& out);

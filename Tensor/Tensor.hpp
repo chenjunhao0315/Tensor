@@ -24,7 +24,7 @@ protected:
     friend TensorRef;
 public:
     Tensor() = default;
-
+    
     explicit Tensor(Ptr<TensorNucleus> tensor_nucleus) : TensorBase(std::move(tensor_nucleus)) {}
     
     Tensor(const Tensor &tensor) = default;
@@ -50,7 +50,7 @@ public:
         tensor_nucleus_ = x.unsafeReleasePtr();
         return *this;
     }
-
+    
     Tensor& operator=(const Tensor &x) & {
         return operator=(static_cast<const TensorBase&>(x));
     }
@@ -68,6 +68,22 @@ public:
     
     Tensor& operator=(Tensor&& rhs) && {
         return copy_(rhs);
+    }
+    
+    bool is_floating_point() const {
+        return otter::isFloatingType(this->scalar_type());
+    }
+    bool is_signed() const {
+        return otter::isSignedType(this->scalar_type());
+    }
+    bool is_inference() const {
+        return true;
+    }
+    bool _is_zerotensor() const {
+        return false;
+    }
+    bool is_neg() const {
+        return false;
     }
     
     template <typename T>
@@ -177,6 +193,7 @@ public:
     Tensor& fill_(const Tensor& value);
     
     Tensor to(ScalarType dtype, bool non_blocking = false, bool copy = false, MemoryFormat memory_format = MemoryFormat::Preserve) const;
+    Tensor to(TensorOptions options, bool non_blocking = false, bool copy = false, MemoryFormat memory_format = MemoryFormat::Preserve) const;
     
     Tensor& uniform_(double from, double to) const;
     Tensor& uniform_(double from, double to, Generator generator) const;
@@ -234,6 +251,36 @@ public:
     Tensor& bitwise_not_() const;
     Tensor bitwise_not() const;
     
+    Tensor eq(const Scalar & other) const;
+    Tensor eq(const Tensor & other) const;
+    Tensor & eq_(const Scalar & other) const;
+    Tensor & eq_(const Tensor & other) const;
+    
+    Tensor ne(const Scalar & other) const;
+    Tensor ne(const Tensor & other) const;
+    Tensor & ne_(const Scalar & other) const;
+    Tensor & ne_(const Tensor & other) const;
+    
+    Tensor ge(const Scalar & other) const;
+    Tensor ge(const Tensor & other) const;
+    Tensor & ge_(const Scalar & other) const;
+    Tensor & ge_(const Tensor & other) const;
+    
+    Tensor le(const Scalar & other) const;
+    Tensor le(const Tensor & other) const;
+    Tensor & le_(const Scalar & other) const;
+    Tensor & le_(const Tensor & other) const;
+    
+    Tensor gt(const Scalar & other) const;
+    Tensor gt(const Tensor & other) const;
+    Tensor & gt_(const Scalar & other) const;
+    Tensor & gt_(const Tensor & other) const;
+    
+    Tensor lt(const Scalar & other) const;
+    Tensor lt(const Tensor & other) const;
+    Tensor & lt_(const Scalar & other) const;
+    Tensor & lt_(const Tensor & other) const;
+    
     Tensor& neg_() const;
     Tensor neg() const;
     
@@ -273,24 +320,24 @@ template <>
 struct MaybeOwnedTraits<Tensor> {
     using owned_type = Tensor;
     using borrow_type = Tensor;
-
+    
     static borrow_type create_borrow(const owned_type& from) {
         return borrow_type(borrow_type::unsafe_borrow_t{}, from);
     }
-
+    
     static void assign_borrow(borrow_type& lhs, const borrow_type& rhs) {
         lhs.unsafeReleaseTensorNucleus();
         lhs = borrow_type(borrow_type::unsafe_borrow_t{}, rhs);
     }
-
+    
     static void destroy_borrow(borrow_type& toDestroy) {
         toDestroy.unsafeReleaseTensorNucleus();
     }
-
+    
     static const owned_type& referenceFromBorrow(const borrow_type& borrow) {
         return borrow;
     }
-
+    
     static const owned_type* pointerFromBorrow(const borrow_type& borrow) {
         return &borrow;
     }
@@ -298,38 +345,38 @@ struct MaybeOwnedTraits<Tensor> {
 
 template <>
 struct ExclusivelyOwnedTraits<Tensor> {
-  using repr_type = Tensor;
-  using pointer_type = Tensor*;
-  using const_pointer_type = const Tensor*;
-
-  static repr_type nullRepr() {
-    return Tensor();
-  }
-
-  template <class... Args>
-  static repr_type createInPlace(Args&&... args) {
-    return Tensor(std::forward<Args>(args)...);
-  }
-
-  static repr_type moveToRepr(Tensor&& x) {
-    return std::move(x);
-  }
-
-  static void destroyOwned(Tensor& x) {
-    return ExclusivelyOwnedTraits<TensorBase>::destroyOwned(x);
-  }
-
-  static Tensor take(Tensor& x) {
-    return std::move(x);
-  }
-
-  static pointer_type getImpl(repr_type& x) {
-    return &x;
-  }
-
-  static const_pointer_type getImpl(const repr_type& x) {
-    return &x;
-  }
+    using repr_type = Tensor;
+    using pointer_type = Tensor*;
+    using const_pointer_type = const Tensor*;
+    
+    static repr_type nullRepr() {
+        return Tensor();
+    }
+    
+    template <class... Args>
+    static repr_type createInPlace(Args&&... args) {
+        return Tensor(std::forward<Args>(args)...);
+    }
+    
+    static repr_type moveToRepr(Tensor&& x) {
+        return std::move(x);
+    }
+    
+    static void destroyOwned(Tensor& x) {
+        return ExclusivelyOwnedTraits<TensorBase>::destroyOwned(x);
+    }
+    
+    static Tensor take(Tensor& x) {
+        return std::move(x);
+    }
+    
+    static pointer_type getImpl(repr_type& x) {
+        return &x;
+    }
+    
+    static const_pointer_type getImpl(const repr_type& x) {
+        return &x;
+    }
 };
 
 class TensorPrinter {
