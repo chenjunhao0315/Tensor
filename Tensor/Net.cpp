@@ -44,8 +44,6 @@ void Net::addLayer(LayerOption option) {
         option["input_id"] = "0";
     }
     
-    blob_count_ += (int)std::count(option["output"].begin(), option["output"].end(), ',') + 1;
-//    blob_count_++;   // TODO: Check Split layer or etc. which will produce multi blobs
     layer_options.push_back(option);
     
     if (opt_check_string(option, "batchnorm")) {
@@ -54,7 +52,6 @@ void Net::addLayer(LayerOption option) {
         auto_option["name"] = "bn_" + option["name"];
         auto_option["input"] = option["output"];
         auto_option["output"] = auto_option["name"];
-        blob_count_++;
         layer_options.push_back(auto_option);
     }
     
@@ -68,7 +65,6 @@ void Net::addLayer(LayerOption option) {
         auto_option["name"] = abbreviate + "_" + option["name"];
         auto_option["input"] = layer_options[layer_options.size() - 1]["output"];
         auto_option["output"] = auto_option["name"];
-        blob_count_++;
         layer_options.push_back(auto_option);
     }
 }
@@ -158,9 +154,7 @@ void Net::graph_construct() {
 
 void Net::compile(CompileMode comopile_mode) {
     
-    if (option.lightmode) {
-        graph_construct();
-    }
+    graph_construct();
     
     size_t layer_count = layer_options.size();
     size_t blob_count  = blob_count_;
@@ -174,19 +168,7 @@ void Net::compile(CompileMode comopile_mode) {
     int blob_index = 0;
     for (const auto i : otter::irange(layer_count)) {
         LayerOption& option = layer_options[i];
-        
-        // auto graph connection
-        if (i > 0) {
-            if (!opt_check_string(option, "input")) {
-                std::stringstream bottom_list(layer_options[i - 1]["output"]);
-                std::string bottom_name;
-                std::getline(bottom_list, bottom_name, ',');
-                EARSE_SPACE(bottom_name);
-                option["input"] = bottom_name;
-            }
-        }
-        //
-        
+
         std::string type = option["type"];
         std::string name = option["name"];
         int bottom_count = (type == "Input") ? 0 : (int)std::count(option["input"].begin(), option["input"].end(), ',') + 1;

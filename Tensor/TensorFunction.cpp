@@ -710,7 +710,7 @@ struct structured_threshold_out_functional final : public structured_threshold_o
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
         
         outputs_[output_idx] = create_out(sizes, strides, options);
-
+        
         structured_threshold_out::set_output(output_idx, sizes, strides, options);
     }
     
@@ -733,7 +733,7 @@ struct structured_threshold_out_out final : public structured_threshold_out {
         
         const auto& out = outputs_[output_idx].get();
         resize_out(out, sizes, strides, options);
-
+        
         structured_threshold_out::set_output(output_idx, sizes, strides, options);
     }
     
@@ -756,7 +756,7 @@ struct structured_threshold_out_inplace final : public structured_threshold_out 
         
         const auto& out = outputs_[output_idx].get();
         check_inplace(out, sizes, options);
-
+        
         structured_threshold_out::set_output(output_idx, sizes, strides, options);
     }
     
@@ -773,6 +773,704 @@ otter::Tensor & wrapper_threshold_(otter::Tensor & self, const otter::Scalar & t
     return self;
 }
 // end threshold
+
+struct structured_eq_Scalar_out_functional final : public structured_eq_Scalar_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+        structured_eq_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_eq_Scalar(const Tensor & self, const Scalar & other) {
+    structured_eq_Scalar_out_functional op;
+    op.meta(self, other);
+    op.impl(self, other, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_eq_Scalar_out_out final : public structured_eq_Scalar_out {
+    structured_eq_Scalar_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+        structured_eq_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_eq_out_Scalar_out(const Tensor & self, const Scalar & other, Tensor & out) {
+    structured_eq_Scalar_out_out op(out);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return out;
+}
+struct structured_eq_Scalar_out_inplace final : public structured_eq_Scalar_out {
+    structured_eq_Scalar_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+        structured_eq_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_eq__Scalar(Tensor & self, const Scalar & other) {
+    structured_eq_Scalar_out_inplace op(self);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return self;
+}
+struct structured_eq_Tensor_out_functional final : public structured_eq_Tensor_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+        structured_eq_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_eq_Tensor(const Tensor & self, const Tensor & other) {
+    structured_eq_Tensor_out_functional op;
+    op.meta(self, other);
+    op.impl(self, other, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_eq_Tensor_out_out final : public structured_eq_Tensor_out {
+    structured_eq_Tensor_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+        structured_eq_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_eq_out_Tensor_out(const Tensor & self, const Tensor & other, Tensor & out) {
+    structured_eq_Tensor_out_out op(out);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return out;
+}
+struct structured_eq_Tensor_out_inplace final : public structured_eq_Tensor_out {
+    structured_eq_Tensor_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+        structured_eq_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_eq__Tensor(Tensor & self, const Tensor & other) {
+    structured_eq_Tensor_out_inplace op(self);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return self;
+}
+
+struct structured_ne_Scalar_out_functional final : public structured_ne_Scalar_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+        structured_ne_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_ne_Scalar(const Tensor & self, const Scalar & other) {
+    structured_ne_Scalar_out_functional op;
+    op.meta(self, other);
+    op.impl(self, other, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_ne_Scalar_out_out final : public structured_ne_Scalar_out {
+    structured_ne_Scalar_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+        structured_ne_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_ne_out_Scalar_out(const Tensor & self, const Scalar & other, Tensor & out) {
+    structured_ne_Scalar_out_out op(out);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return out;
+}
+struct structured_ne_Scalar_out_inplace final : public structured_ne_Scalar_out {
+    structured_ne_Scalar_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+        structured_ne_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_ne__Scalar(Tensor & self, const Scalar & other) {
+    structured_ne_Scalar_out_inplace op(self);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return self;
+}
+struct structured_ne_Tensor_out_functional final : public structured_ne_Tensor_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+        structured_ne_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_ne_Tensor(const Tensor & self, const Tensor & other) {
+    structured_ne_Tensor_out_functional op;
+    op.meta(self, other);
+    op.impl(self, other, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_ne_Tensor_out_out final : public structured_ne_Tensor_out {
+    structured_ne_Tensor_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+        structured_ne_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_ne_out_Tensor_out(const Tensor & self, const Tensor & other, Tensor & out) {
+    structured_ne_Tensor_out_out op(out);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return out;
+}
+struct structured_ne_Tensor_out_inplace final : public structured_ne_Tensor_out {
+    structured_ne_Tensor_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+        structured_ne_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_ne__Tensor(Tensor & self, const Tensor & other) {
+    structured_ne_Tensor_out_inplace op(self);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return self;
+}
+struct structured_ge_Scalar_out_functional final : public structured_ge_Scalar_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+        structured_ge_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_ge_Scalar(const Tensor & self, const Scalar & other) {
+    structured_ge_Scalar_out_functional op;
+    op.meta(self, other);
+    op.impl(self, other, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_ge_Scalar_out_out final : public structured_ge_Scalar_out {
+    structured_ge_Scalar_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+        structured_ge_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_ge_out_Scalar_out(const Tensor & self, const Scalar & other, Tensor & out) {
+    structured_ge_Scalar_out_out op(out);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return out;
+}
+struct structured_ge_Scalar_out_inplace final : public structured_ge_Scalar_out {
+    structured_ge_Scalar_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+        structured_ge_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_ge__Scalar(Tensor & self, const Scalar & other) {
+    structured_ge_Scalar_out_inplace op(self);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return self;
+}
+struct structured_ge_Tensor_out_functional final : public structured_ge_Tensor_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+        structured_ge_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_ge_Tensor(const Tensor & self, const Tensor & other) {
+    structured_ge_Tensor_out_functional op;
+    op.meta(self, other);
+    op.impl(self, other, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_ge_Tensor_out_out final : public structured_ge_Tensor_out {
+    structured_ge_Tensor_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+        structured_ge_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_ge_out_Tensor_out(const Tensor & self, const Tensor & other, Tensor & out) {
+    structured_ge_Tensor_out_out op(out);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return out;
+}
+struct structured_ge_Tensor_out_inplace final : public structured_ge_Tensor_out {
+    structured_ge_Tensor_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+        structured_ge_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_ge__Tensor(Tensor & self, const Tensor & other) {
+    structured_ge_Tensor_out_inplace op(self);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return self;
+}
+struct structured_le_Scalar_out_functional final : public structured_le_Scalar_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+        structured_le_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_le_Scalar(const Tensor & self, const Scalar & other) {
+    structured_le_Scalar_out_functional op;
+    op.meta(self, other);
+    op.impl(self, other, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_le_Scalar_out_out final : public structured_le_Scalar_out {
+    structured_le_Scalar_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+        structured_le_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_le_out_Scalar_out(const Tensor & self, const Scalar & other, Tensor & out) {
+    structured_le_Scalar_out_out op(out);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return out;
+}
+struct structured_le_Scalar_out_inplace final : public structured_le_Scalar_out {
+    structured_le_Scalar_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+        structured_le_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_le__Scalar(Tensor & self, const Scalar & other) {
+    structured_le_Scalar_out_inplace op(self);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return self;
+}
+struct structured_le_Tensor_out_functional final : public structured_le_Tensor_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+        structured_le_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_le_Tensor(const Tensor & self, const Tensor & other) {
+    structured_le_Tensor_out_functional op;
+    op.meta(self, other);
+    op.impl(self, other, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_le_Tensor_out_out final : public structured_le_Tensor_out {
+    structured_le_Tensor_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+        structured_le_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_le_out_Tensor_out(const Tensor & self, const Tensor & other, Tensor & out) {
+    structured_le_Tensor_out_out op(out);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return out;
+}
+struct structured_le_Tensor_out_inplace final : public structured_le_Tensor_out {
+    structured_le_Tensor_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+        structured_le_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_le__Tensor(Tensor & self, const Tensor & other) {
+    structured_le_Tensor_out_inplace op(self);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return self;
+}
+struct structured_gt_Scalar_out_functional final : public structured_gt_Scalar_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+        structured_gt_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_gt_Scalar(const Tensor & self, const Scalar & other) {
+    structured_gt_Scalar_out_functional op;
+    op.meta(self, other);
+    op.impl(self, other, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_gt_Scalar_out_out final : public structured_gt_Scalar_out {
+    structured_gt_Scalar_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+        structured_gt_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_gt_out_Scalar_out(const Tensor & self, const Scalar & other, Tensor & out) {
+    structured_gt_Scalar_out_out op(out);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return out;
+}
+struct structured_gt_Scalar_out_inplace final : public structured_gt_Scalar_out {
+    structured_gt_Scalar_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+        structured_gt_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_gt__Scalar(Tensor & self, const Scalar & other) {
+    structured_gt_Scalar_out_inplace op(self);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return self;
+}
+struct structured_gt_Tensor_out_functional final : public structured_gt_Tensor_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+        structured_gt_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_gt_Tensor(const Tensor & self, const Tensor & other) {
+    structured_gt_Tensor_out_functional op;
+    op.meta(self, other);
+    op.impl(self, other, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_gt_Tensor_out_out final : public structured_gt_Tensor_out {
+    structured_gt_Tensor_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+        structured_gt_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_gt_out_Tensor_out(const Tensor & self, const Tensor & other, Tensor & out) {
+    structured_gt_Tensor_out_out op(out);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return out;
+}
+struct structured_gt_Tensor_out_inplace final : public structured_gt_Tensor_out {
+    structured_gt_Tensor_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+        structured_gt_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_gt__Tensor(Tensor & self, const Tensor & other) {
+    structured_gt_Tensor_out_inplace op(self);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return self;
+}
+struct structured_lt_Scalar_out_functional final : public structured_lt_Scalar_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+        structured_lt_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_lt_Scalar(const Tensor & self, const Scalar & other) {
+    structured_lt_Scalar_out_functional op;
+    op.meta(self, other);
+    op.impl(self, other, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_lt_Scalar_out_out final : public structured_lt_Scalar_out {
+    structured_lt_Scalar_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+        structured_lt_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_lt_out_Scalar_out(const Tensor & self, const Scalar & other, Tensor & out) {
+    structured_lt_Scalar_out_out op(out);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return out;
+}
+struct structured_lt_Scalar_out_inplace final : public structured_lt_Scalar_out {
+    structured_lt_Scalar_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+        structured_lt_Scalar_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_lt__Scalar(Tensor & self, const Scalar & other) {
+    structured_lt_Scalar_out_inplace op(self);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return self;
+}
+struct structured_lt_Tensor_out_functional final : public structured_lt_Tensor_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+        structured_lt_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_lt_Tensor(const Tensor & self, const Tensor & other) {
+    structured_lt_Tensor_out_functional op;
+    op.meta(self, other);
+    op.impl(self, other, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_lt_Tensor_out_out final : public structured_lt_Tensor_out {
+    structured_lt_Tensor_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+        structured_lt_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_lt_out_Tensor_out(const Tensor & self, const Tensor & other, Tensor & out) {
+    structured_lt_Tensor_out_out op(out);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return out;
+}
+struct structured_lt_Tensor_out_inplace final : public structured_lt_Tensor_out {
+    structured_lt_Tensor_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,
+                    TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+        structured_lt_Tensor_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_lt__Tensor(Tensor & self, const Tensor & other) {
+    structured_lt_Tensor_out_inplace op(self);
+    op.meta(self, other);
+    op.impl(self, other, op.outputs_[0]);
+    return self;
+}
 
 namespace native {
 
@@ -1000,6 +1698,152 @@ Tensor & threshold_out(Tensor & out, const Tensor & self, const Scalar & thresho
 
 Tensor & threshold_(Tensor & self, const Scalar & threshold, const Scalar & value) {
     return wrapper_threshold_(self, threshold, value);
+}
+
+Tensor eq(const Tensor & self, const Scalar & other) {
+    return wrapper_eq_Scalar(self, other);
+}
+Tensor & eq_out(Tensor & out, const Tensor & self, const Scalar & other) {
+    return wrapper_eq_out_Scalar_out(self, other, out);
+}
+Tensor & eq_outf(const Tensor & self, const Scalar & other, Tensor & out) {
+    return wrapper_eq_out_Scalar_out(self, other, out);
+}
+Tensor & eq_(Tensor & self, const Scalar & other) {
+    return wrapper_eq__Scalar(self, other);
+}
+Tensor eq(const Tensor & self, const Tensor & other) {
+    return wrapper_eq_Tensor(self, other);
+}
+Tensor & eq_out(Tensor & out, const Tensor & self, const Tensor & other) {
+    return wrapper_eq_out_Tensor_out(self, other, out);
+}
+Tensor & eq_outf(const Tensor & self, const Tensor & other, Tensor & out) {
+    return wrapper_eq_out_Tensor_out(self, other, out);
+}
+Tensor & eq_(Tensor & self, const Tensor & other) {
+    return wrapper_eq__Tensor(self, other);
+}
+
+Tensor ne(const Tensor & self, const Scalar & other) {
+    return wrapper_ne_Scalar(self, other);
+}
+Tensor & ne_out(Tensor & out, const Tensor & self, const Scalar & other) {
+    return wrapper_ne_out_Scalar_out(self, other, out);
+}
+Tensor & ne_outf(const Tensor & self, const Scalar & other, Tensor & out) {
+    return wrapper_ne_out_Scalar_out(self, other, out);
+}
+Tensor & ne_(Tensor & self, const Scalar & other) {
+    return wrapper_ne__Scalar(self, other);
+}
+Tensor ne(const Tensor & self, const Tensor & other) {
+    return wrapper_ne_Tensor(self, other);
+}
+Tensor & ne_out(Tensor & out, const Tensor & self, const Tensor & other) {
+    return wrapper_ne_out_Tensor_out(self, other, out);
+}
+Tensor & ne_outf(const Tensor & self, const Tensor & other, Tensor & out) {
+    return wrapper_ne_out_Tensor_out(self, other, out);
+}
+Tensor & ne_(Tensor & self, const Tensor & other) {
+    return wrapper_ne__Tensor(self, other);
+}
+Tensor ge(const Tensor & self, const Scalar & other) {
+    return wrapper_ge_Scalar(self, other);
+}
+Tensor & ge_out(Tensor & out, const Tensor & self, const Scalar & other) {
+    return wrapper_ge_out_Scalar_out(self, other, out);
+}
+Tensor & ge_outf(const Tensor & self, const Scalar & other, Tensor & out) {
+    return wrapper_ge_out_Scalar_out(self, other, out);
+}
+Tensor & ge_(Tensor & self, const Scalar & other) {
+    return wrapper_ge__Scalar(self, other);
+}
+Tensor ge(const Tensor & self, const Tensor & other) {
+    return wrapper_ge_Tensor(self, other);
+}
+Tensor & ge_out(Tensor & out, const Tensor & self, const Tensor & other) {
+    return wrapper_ge_out_Tensor_out(self, other, out);
+}
+Tensor & ge_outf(const Tensor & self, const Tensor & other, Tensor & out) {
+    return wrapper_ge_out_Tensor_out(self, other, out);
+}
+Tensor & ge_(Tensor & self, const Tensor & other) {
+    return wrapper_ge__Tensor(self, other);
+}
+Tensor le(const Tensor & self, const Scalar & other) {
+    return wrapper_le_Scalar(self, other);
+}
+Tensor & le_out(Tensor & out, const Tensor & self, const Scalar & other) {
+    return wrapper_le_out_Scalar_out(self, other, out);
+}
+Tensor & le_outf(const Tensor & self, const Scalar & other, Tensor & out) {
+    return wrapper_le_out_Scalar_out(self, other, out);
+}
+Tensor & le_(Tensor & self, const Scalar & other) {
+    return wrapper_le__Scalar(self, other);
+}
+Tensor le(const Tensor & self, const Tensor & other) {
+    return wrapper_le_Tensor(self, other);
+}
+Tensor & le_out(Tensor & out, const Tensor & self, const Tensor & other) {
+    return wrapper_le_out_Tensor_out(self, other, out);
+}
+Tensor & le_outf(const Tensor & self, const Tensor & other, Tensor & out) {
+    return wrapper_le_out_Tensor_out(self, other, out);
+}
+Tensor & le_(Tensor & self, const Tensor & other) {
+    return wrapper_le__Tensor(self, other);
+}
+Tensor gt(const Tensor & self, const Scalar & other) {
+    return wrapper_gt_Scalar(self, other);
+}
+Tensor & gt_out(Tensor & out, const Tensor & self, const Scalar & other) {
+    return wrapper_gt_out_Scalar_out(self, other, out);
+}
+Tensor & gt_outf(const Tensor & self, const Scalar & other, Tensor & out) {
+    return wrapper_gt_out_Scalar_out(self, other, out);
+}
+Tensor & gt_(Tensor & self, const Scalar & other) {
+    return wrapper_gt__Scalar(self, other);
+}
+Tensor gt(const Tensor & self, const Tensor & other) {
+    return wrapper_gt_Tensor(self, other);
+}
+Tensor & gt_out(Tensor & out, const Tensor & self, const Tensor & other) {
+    return wrapper_gt_out_Tensor_out(self, other, out);
+}
+Tensor & gt_outf(const Tensor & self, const Tensor & other, Tensor & out) {
+    return wrapper_gt_out_Tensor_out(self, other, out);
+}
+Tensor & gt_(Tensor & self, const Tensor & other) {
+    return wrapper_gt__Tensor(self, other);
+}
+Tensor lt(const Tensor & self, const Scalar & other) {
+    return wrapper_lt_Scalar(self, other);
+}
+Tensor & lt_out(Tensor & out, const Tensor & self, const Scalar & other) {
+    return wrapper_lt_out_Scalar_out(self, other, out);
+}
+Tensor & lt_outf(const Tensor & self, const Scalar & other, Tensor & out) {
+    return wrapper_lt_out_Scalar_out(self, other, out);
+}
+Tensor & lt_(Tensor & self, const Scalar & other) {
+    return wrapper_lt__Scalar(self, other);
+}
+Tensor lt(const Tensor & self, const Tensor & other) {
+    return wrapper_lt_Tensor(self, other);
+}
+Tensor & lt_out(Tensor & out, const Tensor & self, const Tensor & other) {
+    return wrapper_lt_out_Tensor_out(self, other, out);
+}
+Tensor & lt_outf(const Tensor & self, const Tensor & other, Tensor & out) {
+    return wrapper_lt_out_Tensor_out(self, other, out);
+}
+Tensor & lt_(Tensor & self, const Tensor & other) {
+    return wrapper_lt__Tensor(self, other);
 }
 
 }   // end namespace native

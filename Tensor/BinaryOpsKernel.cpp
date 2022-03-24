@@ -24,10 +24,10 @@ void add_kernel(TensorIterator& iter, const Scalar& alpha_scalar) {
             auto alpha = alpha_scalar.to<scalar_t>();
             auto alpha_vec = Vectorized<scalar_t>(alpha);
             cpu_kernel_vec(
-                iter,
-                [=](scalar_t a, scalar_t b) __ubsan_ignore_undefined__ -> scalar_t { return a + alpha * b; },
-                [=](Vectorized<scalar_t> a, Vectorized<scalar_t> b) __ubsan_ignore_undefined__ { return vec::fmadd(b, alpha_vec, a);
-            });
+                           iter,
+                           [=](scalar_t a, scalar_t b) __ubsan_ignore_undefined__ -> scalar_t { return a + alpha * b; },
+                           [=](Vectorized<scalar_t> a, Vectorized<scalar_t> b) __ubsan_ignore_undefined__ { return vec::fmadd(b, alpha_vec, a);
+                           });
         });
     }
 }
@@ -44,9 +44,9 @@ void mul_kernel(TensorIterator& iter) {
     } else {
         OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "mul_cpu", [&]() {
             cpu_kernel_vec(iter,
-                [=](scalar_t a, scalar_t b) -> scalar_t { return a * b; },
-                [=](Vectorized<scalar_t> a, Vectorized<scalar_t> b) { return a * b; }
-            );
+                           [=](scalar_t a, scalar_t b) -> scalar_t { return a * b; },
+                           [=](Vectorized<scalar_t> a, Vectorized<scalar_t> b) { return a * b; }
+                           );
         });
     }
 }
@@ -123,6 +123,129 @@ void bitwise_xor_kernel(TensorIterator& iter) {
     }
 }
 
+void lt_kernel(TensorIterator& iter) {
+    // See Note [special-case bool outputs]
+    if (iter.dtype() == ScalarType::Bool) {
+        OTTER_DISPATCH_ALL_TYPES_AND(otter::ScalarType::Bool, iter.common_dtype(), "lt_cpu", [&]() {
+            cpu_kernel(iter, [](scalar_t a, scalar_t b) -> bool {
+                return a < b;
+            });
+        });
+    } else {
+        OTTER_DISPATCH_ALL_TYPES(iter.common_dtype(), "lt_cpu", [&]() {
+            cpu_kernel_vec(iter,
+                [](scalar_t a, scalar_t b) -> scalar_t {
+                    return a < b;
+                },
+                [](Vectorized<scalar_t> a, Vectorized<scalar_t> b) -> Vectorized<scalar_t> {
+                    return a.lt(b);
+                });
+        });
+    }
+}
+void le_kernel(TensorIterator& iter) {
+    // See Note [special-case bool outputs]
+    if (iter.dtype() == ScalarType::Bool) {
+        OTTER_DISPATCH_ALL_TYPES_AND(otter::ScalarType::Bool, iter.common_dtype(), "le_cpu", [&]() {
+            cpu_kernel(iter, [](scalar_t a, scalar_t b) -> bool {
+                return a <= b;
+            });
+        });
+    } else {
+        OTTER_DISPATCH_ALL_TYPES(iter.common_dtype(), "le_cpu", [&]() {
+            cpu_kernel_vec(iter,
+                [](scalar_t a, scalar_t b) -> scalar_t {
+                    return a <= b;
+                },
+                [](Vectorized<scalar_t> a, Vectorized<scalar_t> b) -> Vectorized<scalar_t> {
+                    return a.le(b);
+                });
+        });
+    }
+}
+void gt_kernel(TensorIterator& iter) {
+    // See Note [special-case bool outputs]
+    if (iter.dtype() == ScalarType::Bool) {
+        OTTER_DISPATCH_ALL_TYPES_AND(otter::ScalarType::Bool, iter.common_dtype(), "gt_cpu", [&]() {
+            cpu_kernel(iter,
+                       [](scalar_t a, scalar_t b) -> bool {
+                return a > b;
+            });
+        });
+    } else {
+        OTTER_DISPATCH_ALL_TYPES(iter.common_dtype(), "gt_cpu", [&]() {
+            cpu_kernel_vec(
+                           iter,
+                           [](scalar_t a, scalar_t b) -> scalar_t {
+                               return a > b;
+                           },
+                           [](Vectorized<scalar_t> a, Vectorized<scalar_t> b) -> Vectorized<scalar_t> {
+                               return a.gt(b);
+                           });
+        });
+    }
+}
+void ge_kernel(TensorIterator& iter) {
+    // See Note [special-case bool outputs]
+    if (iter.dtype() == ScalarType::Bool) {
+        OTTER_DISPATCH_ALL_TYPES_AND(otter::ScalarType::Bool, iter.common_dtype(), "ge_cpu", [&]() {
+            cpu_kernel(iter, [](scalar_t a, scalar_t b) -> bool {
+                return a >= b;
+            });
+        });
+    } else {
+        OTTER_DISPATCH_ALL_TYPES(iter.common_dtype(), "ge_cpu", [&]() {
+            cpu_kernel_vec(iter,
+                [](scalar_t a, scalar_t b) -> scalar_t {
+                    return a >= b;
+                },
+                [](Vectorized<scalar_t> a, Vectorized<scalar_t> b) -> Vectorized<scalar_t> {
+                    return a.ge(b);
+                });
+        });
+    }
+}
+void eq_kernel(TensorIterator& iter) {
+    // See Note [special-case bool outputs]
+    if (iter.dtype() == ScalarType::Bool) {
+        OTTER_DISPATCH_ALL_TYPES_AND(otter::ScalarType::Bool, iter.common_dtype(), "eq_cpu", [&]() {
+            cpu_kernel(iter, [](scalar_t a, scalar_t b) -> bool {
+                return a == b;
+            });
+        });
+    } else {
+        OTTER_DISPATCH_ALL_TYPES(iter.common_dtype(), "eq_cpu", [&]() {
+            cpu_kernel_vec(iter,
+                [](scalar_t a, scalar_t b) -> scalar_t {
+                    return a == b;
+                },
+                [](Vectorized<scalar_t> a, Vectorized<scalar_t> b) -> Vectorized<scalar_t> {
+                    return a.eq(b);
+                });
+        });
+    }
+}
+void ne_kernel(TensorIterator& iter) {
+    // See Note [special-case bool outputs]
+    if (iter.dtype() == ScalarType::Bool) {
+        OTTER_DISPATCH_ALL_TYPES_AND(otter::ScalarType::Bool, iter.common_dtype(), "ne_cpu", [&]() {
+            cpu_kernel(iter, [](scalar_t a, scalar_t b) -> bool {
+                return a != b;
+            });
+        });
+    } else {
+        OTTER_DISPATCH_ALL_TYPES(iter.common_dtype(), "ne_cpu", [&]() {
+            cpu_kernel_vec(iter,
+                [](scalar_t a, scalar_t b) -> scalar_t {
+                    return a != b;
+                },
+                [](Vectorized<scalar_t> a, Vectorized<scalar_t> b) -> Vectorized<scalar_t> {
+                    return a.ne(b);
+                });
+        });
+    }
+}
+
 REGISTER_DISPATCH(add_stub, &add_kernel);
 REGISTER_DISPATCH(sub_stub, &sub_kernel);
 REGISTER_DISPATCH(mul_stub, &mul_kernel);
@@ -131,5 +254,11 @@ REGISTER_DISPATCH(remainder_stub, &remainder_kernel);
 REGISTER_DISPATCH(bitwise_and_stub, &bitwise_and_kernel);
 REGISTER_DISPATCH(bitwise_or_stub, &bitwise_or_kernel);
 REGISTER_DISPATCH(bitwise_xor_stub, &bitwise_xor_kernel);
+REGISTER_DISPATCH(lt_stub, &lt_kernel);
+REGISTER_DISPATCH(le_stub, &le_kernel);
+REGISTER_DISPATCH(gt_stub, &gt_kernel);
+REGISTER_DISPATCH(ge_stub, &ge_kernel);
+REGISTER_DISPATCH(eq_stub, &eq_kernel);
+REGISTER_DISPATCH(ne_stub, &ne_kernel);
 
 }

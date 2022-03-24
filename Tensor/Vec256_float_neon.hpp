@@ -324,6 +324,12 @@ public:
         return Vectorized<float>(r0, r1);
     }
     
+    Vectorized<float> eq(const Vectorized<float>& other) const;
+    Vectorized<float> ne(const Vectorized<float>& other) const;
+    Vectorized<float> gt(const Vectorized<float>& other) const;
+    Vectorized<float> ge(const Vectorized<float>& other) const;
+    Vectorized<float> lt(const Vectorized<float>& other) const;
+    Vectorized<float> le(const Vectorized<float>& other) const;
 };
 
 template <>
@@ -385,6 +391,25 @@ Vectorized<float> inline operator^(const Vectorized<float>& a, const Vectorized<
                                                      vreinterpretq_u32_f32(a.get_high()),
                                                      vreinterpretq_u32_f32(b.get_high())));
     return Vectorized<float>(r0, r1);
+}
+
+inline Vectorized<float> Vectorized<float>::eq(const Vectorized<float>& other) const {
+    return (*this == other) & Vectorized<float>(1.0f);
+}
+inline Vectorized<float> Vectorized<float>::ne(const Vectorized<float>& other) const {
+    return (*this != other) & Vectorized<float>(1.0f);
+}
+inline Vectorized<float> Vectorized<float>::gt(const Vectorized<float>& other) const {
+    return (*this > other) & Vectorized<float>(1.0f);
+}
+inline Vectorized<float> Vectorized<float>::ge(const Vectorized<float>& other) const {
+    return (*this >= other) & Vectorized<float>(1.0f);
+}
+inline Vectorized<float> Vectorized<float>::lt(const Vectorized<float>& other) const {
+    return (*this < other) & Vectorized<float>(1.0f);
+}
+inline Vectorized<float> Vectorized<float>::le(const Vectorized<float>& other) const {
+    return (*this <= other) & Vectorized<float>(1.0f);
 }
 
 #endif

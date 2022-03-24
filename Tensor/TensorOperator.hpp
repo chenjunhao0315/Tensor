@@ -22,13 +22,13 @@ _(/,x.div(y), otter::empty_like(y).fill_(x).div_(y)) \
 _(%,x.remainder(y), otter::empty_like(y).fill_(x).remainder_(y)) \
 _(&,x.bitwise_and(y), y.bitwise_and(x)) \
 _(|,x.bitwise_or(y), y.bitwise_or(x)) \
-_(^,x.bitwise_xor(y), y.bitwise_xor(x))
-//_(<,x.lt(y), y.gt(x)) \
-//_(<=,x.le(y), y.ge(x)) \
-//_(>,x.gt(y),y.lt(x)) \
-//_(>=,x.ge(y), y.le(x)) \
-//_(==,x.eq(y), y.eq(x)) \
-//_(!=,x.ne(y), y.ne(x))
+_(^,x.bitwise_xor(y), y.bitwise_xor(x)) \
+_(<,x.lt(y), y.gt(x)) \
+_(<=,x.le(y), y.ge(x)) \
+_(>,x.gt(y),y.lt(x)) \
+_(>=,x.ge(y), y.le(x)) \
+_(==,x.eq(y), y.eq(x)) \
+_(!=,x.ne(y), y.ne(x))
 
 #define DEFINE_OPERATOR(op, body, reverse_scalar_body) \
 static inline Tensor operator op(const Tensor& x, const Tensor& y) { \
