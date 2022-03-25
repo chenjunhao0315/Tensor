@@ -44,7 +44,7 @@ Tensor threshold_binary(const Tensor& self, double threshold, double true_value,
         unsigned char *ptr = out.data_ptr<unsigned char>();
         
 #if __ARM_NEON
-        
+        int remain = num_pixels;
 #else
         int remain = num_pixels;
 #endif  // __ARM_NEON

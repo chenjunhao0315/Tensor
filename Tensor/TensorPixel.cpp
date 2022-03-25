@@ -17,7 +17,7 @@ namespace otter {
 namespace cv {
 
 Tensor from_rgb(const unsigned char* rgb, int h, int w, int stride) {
-    auto result = empty({1, 3, h, w}, otter::ScalarType::Byte);
+    auto result = empty({1, 3, h, w}, otter::ScalarType::Float);
     OTTER_CHECK(result.defined(), "Tensor create failed!");
     
     const int wgap = stride - w * 3;
@@ -26,10 +26,10 @@ Tensor from_rgb(const unsigned char* rgb, int h, int w, int stride) {
         h = 1;
     }
     
-    auto accessor = result.accessor<uint8_t, 4>()[0];
-    uint8_t* ptr0 = accessor[0].data();
-    uint8_t* ptr1 = accessor[1].data();
-    uint8_t* ptr2 = accessor[2].data();
+    auto accessor = result.accessor<float, 4>()[0];
+    float* ptr0 = accessor[0].data();
+    float* ptr1 = accessor[1].data();
+    float* ptr2 = accessor[2].data();
     
     for (int y = 0; y < h; ++y) {
 #if __ARM_NEON__
@@ -47,13 +47,253 @@ Tensor from_rgb(const unsigned char* rgb, int h, int w, int stride) {
             uint16x8_t _r16 = vmovl_u8(_rgb.val[0]);
             uint16x8_t _g16 = vmovl_u8(_rgb.val[1]);
             uint16x8_t _b16 = vmovl_u8(_rgb.val[2]);
-
+            
             float32x4_t _rlow = vcvtq_f32_u32(vmovl_u16(vget_low_u16(_r16)));
             float32x4_t _rhigh = vcvtq_f32_u32(vmovl_u16(vget_high_u16(_r16)));
             float32x4_t _glow = vcvtq_f32_u32(vmovl_u16(vget_low_u16(_g16)));
             float32x4_t _ghigh = vcvtq_f32_u32(vmovl_u16(vget_high_u16(_g16)));
             float32x4_t _blow = vcvtq_f32_u32(vmovl_u16(vget_low_u16(_b16)));
             float32x4_t _bhigh = vcvtq_f32_u32(vmovl_u16(vget_high_u16(_b16)));
+            
+            vst1q_f32(ptr0, _rlow);
+            vst1q_f32(ptr0 + 4, _rhigh);
+            vst1q_f32(ptr1, _glow);
+            vst1q_f32(ptr1 + 4, _ghigh);
+            vst1q_f32(ptr2, _blow);
+            vst1q_f32(ptr2 + 4, _bhigh);
+            
+            rgb += 3 * 8;
+            ptr0 += 8;
+            ptr1 += 8;
+            ptr2 += 8;
+        }
+#else
+        if (nn > 0)
+        {
+            asm volatile(
+                         "0:                             \n"
+                         "pld        [%1, #256]          \n"
+                         "vld3.u8    {d0-d2}, [%1]!      \n"
+                         "vmovl.u8   q8, d0              \n"
+                         "vmovl.u8   q9, d1              \n"
+                         "vmovl.u8   q10, d2             \n"
+                         "vmovl.u16  q0, d16             \n"
+                         "vmovl.u16  q1, d17             \n"
+                         "vmovl.u16  q2, d18             \n"
+                         "vmovl.u16  q3, d19             \n"
+                         "vmovl.u16  q8, d20             \n"
+                         "vmovl.u16  q9, d21             \n"
+                         "vcvt.f32.u32   q0, q0          \n"
+                         "vcvt.f32.u32   q1, q1          \n"
+                         "vcvt.f32.u32   q2, q2          \n"
+                         "vcvt.f32.u32   q3, q3          \n"
+                         "vcvt.f32.u32   q8, q8          \n"
+                         "subs       %0, #1              \n"
+                         "vst1.f32   {d0-d3}, [%2]!      \n"
+                         "vcvt.f32.u32   q9, q9          \n"
+                         "vst1.f32   {d4-d7}, [%3]!      \n"
+                         "vst1.f32   {d16-d19}, [%4]!    \n"
+                         "bne        0b                  \n"
+                         : "=r"(nn),   // %0
+                         "=r"(rgb),  // %1
+                         "=r"(ptr0), // %2
+                         "=r"(ptr1), // %3
+                         "=r"(ptr2)  // %4
+                         : "0"(nn),
+                         "1"(rgb),
+                         "2"(ptr0),
+                         "3"(ptr1),
+                         "4"(ptr2)
+                         : "cc", "memory", "q0", "q1", "q2", "q3", "q8", "q9", "q10");
+        }
+#endif // __aarch64__
+#endif // __ARM_NEON__
+        for (; remain > 0; remain--)
+        {
+            *ptr0 = rgb[0];
+            *ptr1 = rgb[1];
+            *ptr2 = rgb[2];
+            
+            rgb += 3;
+            ptr0++;
+            ptr1++;
+            ptr2++;
+        }
+        
+        rgb += wgap;
+        
+    }
+    
+    return result;
+}
+
+Tensor from_rgba(const unsigned char* rgba, int h, int w, int stride) {
+    auto result = empty({1, 4, h, w}, otter::ScalarType::Float);
+    OTTER_CHECK(result.defined(), "Tensor create failed!");
+    
+    const int wgap = stride - w * 4;
+    if (wgap == 0) {
+        w = w * h;
+        h = 1;
+    }
+    
+    auto result_a = result.accessor<float, 4>()[0];
+    float* ptr0 = result_a[0].data();
+    float* ptr1 = result_a[1].data();
+    float* ptr2 = result_a[2].data();
+    float* ptr3 = result_a[3].data();
+    
+    for (int y = 0; y < h; y++)
+    {
+#if __ARM_NEON
+        int nn = w >> 3;
+        int remain = w - (nn << 3);
+#else
+        int remain = w;
+#endif // __ARM_NEON
+        
+#if __ARM_NEON
+#if __aarch64__
+        for (; nn > 0; nn--)
+        {
+            uint8x8x4_t _rgba = vld4_u8(rgba);
+            int16x8_t _r16 = vreinterpretq_s16_u16(vmovl_u8(_rgba.val[0]));
+            int16x8_t _g16 = vreinterpretq_s16_u16(vmovl_u8(_rgba.val[1]));
+            int16x8_t _b16 = vreinterpretq_s16_u16(vmovl_u8(_rgba.val[2]));
+            int16x8_t _a16 = vreinterpretq_s16_u16(vmovl_u8(_rgba.val[3]));
+            
+            float32x4_t _rlow = vcvtq_f32_s32(vmovl_s16(vget_low_s16(_r16)));
+            float32x4_t _rhigh = vcvtq_f32_s32(vmovl_s16(vget_high_s16(_r16)));
+            float32x4_t _glow = vcvtq_f32_s32(vmovl_s16(vget_low_s16(_g16)));
+            float32x4_t _ghigh = vcvtq_f32_s32(vmovl_s16(vget_high_s16(_g16)));
+            float32x4_t _blow = vcvtq_f32_s32(vmovl_s16(vget_low_s16(_b16)));
+            float32x4_t _bhigh = vcvtq_f32_s32(vmovl_s16(vget_high_s16(_b16)));
+            float32x4_t _alow = vcvtq_f32_s32(vmovl_s16(vget_low_s16(_a16)));
+            float32x4_t _ahigh = vcvtq_f32_s32(vmovl_s16(vget_high_s16(_a16)));
+            
+            vst1q_f32(ptr0, _rlow);
+            vst1q_f32(ptr0 + 4, _rhigh);
+            vst1q_f32(ptr1, _glow);
+            vst1q_f32(ptr1 + 4, _ghigh);
+            vst1q_f32(ptr2, _blow);
+            vst1q_f32(ptr2 + 4, _bhigh);
+            vst1q_f32(ptr3, _alow);
+            vst1q_f32(ptr3 + 4, _ahigh);
+            
+            rgba += 4 * 8;
+            ptr0 += 8;
+            ptr1 += 8;
+            ptr2 += 8;
+            ptr3 += 8;
+        }
+#else
+        if (nn > 0)
+        {
+            asm volatile(
+                         "0:                             \n"
+                         "pld        [%1, #256]          \n"
+                         "vld4.u8    {d0-d3}, [%1]!      \n"
+                         "vmovl.u8   q8, d0              \n"
+                         "vmovl.u8   q9, d1              \n"
+                         "vmovl.u8   q10, d2             \n"
+                         "vmovl.u8   q11, d3             \n"
+                         "vmovl.u16  q0, d16             \n"
+                         "vmovl.u16  q1, d17             \n"
+                         "vmovl.u16  q2, d18             \n"
+                         "vmovl.u16  q3, d19             \n"
+                         "vmovl.u16  q8, d20             \n"
+                         "vmovl.u16  q9, d21             \n"
+                         "vmovl.u16  q10, d22            \n"
+                         "vmovl.u16  q11, d23            \n"
+                         "vcvt.f32.u32   q0, q0          \n"
+                         "vcvt.f32.u32   q1, q1          \n"
+                         "vcvt.f32.u32   q2, q2          \n"
+                         "vcvt.f32.u32   q3, q3          \n"
+                         "vcvt.f32.u32   q8, q8          \n"
+                         "vcvt.f32.u32   q9, q9          \n"
+                         "subs       %0, #1              \n"
+                         "vst1.f32   {d0-d3}, [%2]!      \n"
+                         "vcvt.f32.u32   q10, q10        \n"
+                         "vcvt.f32.u32   q11, q11        \n"
+                         "vst1.f32   {d4-d7}, [%3]!      \n"
+                         "vst1.f32   {d16-d19}, [%4]!    \n"
+                         "vst1.f32   {d20-d23}, [%5]!    \n"
+                         "bne        0b                  \n"
+                         : "=r"(nn),   // %0
+                         "=r"(rgba), // %1
+                         "=r"(ptr0), // %2
+                         "=r"(ptr1), // %3
+                         "=r"(ptr2), // %4
+                         "=r"(ptr3)  // %5
+                         : "0"(nn),
+                         "1"(rgba),
+                         "2"(ptr0),
+                         "3"(ptr1),
+                         "4"(ptr2),
+                         "5"(ptr3)
+                         : "cc", "memory", "q0", "q1", "q2", "q3", "q8", "q9", "q10", "q11");
+        }
+#endif // __aarch64__
+#endif // __ARM_NEON
+        for (; remain > 0; remain--)
+        {
+            *ptr0 = rgba[0];
+            *ptr1 = rgba[1];
+            *ptr2 = rgba[2];
+            *ptr3 = rgba[3];
+            
+            rgba += 4;
+            ptr0++;
+            ptr1++;
+            ptr2++;
+            ptr3++;
+        }
+        
+        rgba += wgap;
+    }
+    
+    return result;
+}
+
+Tensor from_rgba2rgb(const unsigned char* rgba, int h, int w, int stride) {
+    auto result = empty({1, 3, h, w}, otter::ScalarType::Float);
+    OTTER_CHECK(result.defined(), "Tensor create failed!");
+
+    const int wgap = stride - w * 4;
+    if (wgap == 0) {
+        w = w * h;
+        h = 1;
+    }
+
+    auto result_a = result.accessor<float, 4>()[0];
+    float* ptr0 = result_a[0].data();
+    float* ptr1 = result_a[1].data();
+    float* ptr2 = result_a[2].data();
+
+    for (int y = 0; y < h; y++)
+    {
+#if __ARM_NEON
+        int nn = w >> 3;
+        int remain = w - (nn << 3);
+#else
+        int remain = w;
+#endif // __ARM_NEON
+
+#if __ARM_NEON
+#if __aarch64__
+        for (; nn > 0; nn--)
+        {
+            uint8x8x4_t _rgba = vld4_u8(rgba);
+            int16x8_t _r16 = vreinterpretq_s16_u16(vmovl_u8(_rgba.val[0]));
+            int16x8_t _g16 = vreinterpretq_s16_u16(vmovl_u8(_rgba.val[1]));
+            int16x8_t _b16 = vreinterpretq_s16_u16(vmovl_u8(_rgba.val[2]));
+
+            float32x4_t _rlow = vcvtq_f32_s32(vmovl_s16(vget_low_s16(_r16)));
+            float32x4_t _rhigh = vcvtq_f32_s32(vmovl_s16(vget_high_s16(_r16)));
+            float32x4_t _glow = vcvtq_f32_s32(vmovl_s16(vget_low_s16(_g16)));
+            float32x4_t _ghigh = vcvtq_f32_s32(vmovl_s16(vget_high_s16(_g16)));
+            float32x4_t _blow = vcvtq_f32_s32(vmovl_s16(vget_low_s16(_b16)));
+            float32x4_t _bhigh = vcvtq_f32_s32(vmovl_s16(vget_high_s16(_b16)));
 
             vst1q_f32(ptr0, _rlow);
             vst1q_f32(ptr0 + 4, _rhigh);
@@ -62,7 +302,7 @@ Tensor from_rgb(const unsigned char* rgb, int h, int w, int stride) {
             vst1q_f32(ptr2, _blow);
             vst1q_f32(ptr2 + 4, _bhigh);
 
-            rgb += 3 * 8;
+            rgba += 4 * 8;
             ptr0 += 8;
             ptr1 += 8;
             ptr2 += 8;
@@ -73,7 +313,7 @@ Tensor from_rgb(const unsigned char* rgb, int h, int w, int stride) {
             asm volatile(
                 "0:                             \n"
                 "pld        [%1, #256]          \n"
-                "vld3.u8    {d0-d2}, [%1]!      \n"
+                "vld4.u8    {d0-d3}, [%1]!      \n"
                 "vmovl.u8   q8, d0              \n"
                 "vmovl.u8   q9, d1              \n"
                 "vmovl.u8   q10, d2             \n"
@@ -95,35 +335,34 @@ Tensor from_rgb(const unsigned char* rgb, int h, int w, int stride) {
                 "vst1.f32   {d16-d19}, [%4]!    \n"
                 "bne        0b                  \n"
                 : "=r"(nn),   // %0
-                "=r"(rgb),  // %1
+                "=r"(rgba), // %1
                 "=r"(ptr0), // %2
                 "=r"(ptr1), // %3
                 "=r"(ptr2)  // %4
                 : "0"(nn),
-                "1"(rgb),
+                "1"(rgba),
                 "2"(ptr0),
                 "3"(ptr1),
                 "4"(ptr2)
-                : "cc", "memory", "q0", "q1", "q2", "q3", "q8", "q9", "q10");
+                : "cc", "memory", "q0", "q1", "q2", "q3", "q8", "q9");
         }
 #endif // __aarch64__
-#endif // __ARM_NEON__
+#endif // __ARM_NEON
         for (; remain > 0; remain--)
         {
-            *ptr0 = rgb[0];
-            *ptr1 = rgb[1];
-            *ptr2 = rgb[2];
+            *ptr0 = rgba[0];
+            *ptr1 = rgba[1];
+            *ptr2 = rgba[2];
 
-            rgb += 3;
+            rgba += 4;
             ptr0++;
             ptr1++;
             ptr2++;
         }
 
-        rgb += wgap;
-        
+        rgba += wgap;
     }
-    
+
     return result;
 }
 
