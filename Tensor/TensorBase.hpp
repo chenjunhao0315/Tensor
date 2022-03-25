@@ -91,6 +91,15 @@ public:
         return is_channels_last_;
     }
     
+    bool is_wrapped_number() const {
+        return is_wrapped_number_;
+    }
+    
+    void set_wrapped_number(bool value) {
+        OTTER_INTERNAL_ASSERT(dim() == 0);
+        is_wrapped_number_ = value;
+    }
+    
     bool compute_contiguous() const;
     bool compute_non_overlapping_and_dense() const;
     bool compute_channels_last_contiguous_2d() const;
@@ -348,12 +357,14 @@ private:
         is_channels_last_ = false;
         is_channels_last_contiguous_ = false;
         is_non_overlapping_and_dense_ = true;
+        is_wrapped_number_ = false;
     }
     
     bool is_contiguous_ : 1;
     bool is_channels_last_ : 1;
     bool is_channels_last_contiguous_ : 1;
     bool is_non_overlapping_and_dense_ : 1;
+    bool is_wrapped_number_ : 1;
 };
 
 struct UndefinedTensorNucleus : public TensorNucleus {

@@ -37,8 +37,6 @@ void save_image_png(const Tensor& img, const char *name);
 
 void save_image_bmp(const Tensor& img, const char *name);
 
-void cvtColor(Tensor& input, Tensor& output);
-
 }   // end namespace cv
 }   // end namespace otter
 

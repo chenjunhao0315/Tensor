@@ -162,6 +162,7 @@ public:
     ScalarType dtype(int arg = 0) const { return operands_[arg].current_dtype; }
     ScalarType input_dtype(int arg=0) const { return operands_[num_outputs_ + arg].current_dtype; }
     ScalarType common_dtype() const { return common_dtype_; }
+    ScalarType compute_common_dtype();
     
     void initialize_operands(TensorIteratorConfig& config);
     void compute_mem_overlaps(const TensorIteratorConfig& config);
@@ -243,6 +244,10 @@ public:
     void build_unary_op(const TensorBase& out, const TensorBase& a);
     void build_borrowing_unary_op(const TensorBase& out, const TensorBase& a);
     
+    void build_comparison_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
+    void build_borrowing_comparison_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
+    void build_borrowing_except_last_argument_comparison_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
+    
     static TensorIterator nullary_op(TensorBase& out);
     static TensorIterator borrowing_nullary_op(const TensorBase& out);
     static TensorIterator borrowing_nullary_op(TensorBase&& out) = delete;
@@ -304,6 +309,11 @@ public:
         return *this;
     }
     
+    TensorIteratorConfig& allow_cpu_scalars(const bool _allow_cpu_scalars) {
+        allow_cpu_scalars_ = _allow_cpu_scalars;
+        return *this;
+    }
+    
     TensorIteratorConfig& check_all_same_dtype(const bool _check_all_same_dtype) {
         check_all_same_dtype_ = _check_all_same_dtype;
         return *this;
@@ -357,6 +367,7 @@ private:
     
     bool resize_outputs_ = true;
     bool check_mem_overlap_ = true;
+    bool allow_cpu_scalars_ = false;
     bool check_all_same_dtype_ = false;
     bool check_all_same_device_ = false;
     bool enforce_safe_casting_to_output_ = false;

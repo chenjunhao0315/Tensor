@@ -31,7 +31,7 @@ Tensor load_image_stb(const char* filename) {
     OTTER_CHECK(data, "Cannot load image ", filename, " STB Reason: ", stbi_failure_reason());
     
     auto img = otter::from_blob(data, {h, w, c}, otter::ScalarType::Byte).clone();
-    free(data);
+    stbi_image_free(data);
     
     return img;
 }
@@ -46,7 +46,7 @@ Tensor load_image_rgb(const char* filename) {
     OTTER_CHECK(data, "Cannot load image ", filename, " STB Reason: ", stbi_failure_reason());
     
     auto img = otter::cv::from_rgb(data, h, w, w * 3);
-    free(data);
+    stbi_image_free(data);
     
     return img;
 }

@@ -12,6 +12,7 @@
 #include <limits>
 #include <cmath>
 
+#include "Exception.hpp"
 #include "TypeCast.hpp"
 
 namespace otter {
@@ -76,6 +77,19 @@ static inline bool isIntegralType(ScalarType t, bool includeBool) {
 static inline bool isFloatingType(ScalarType t) {
   return (
       t == ScalarType::Double || t == ScalarType::Float);
+}
+
+static inline bool isSignedType(ScalarType t) {
+#define CASE_SIGNED(ctype, name) \
+  case ScalarType::name:         \
+    return std::numeric_limits<ctype>::is_signed;
+    switch (t) {
+        OTTER_ALL_SCALAR_TYPES(CASE_SIGNED)
+        default:
+            OTTER_CHECK(false, "Unknown ScalarType");
+    }
+#undef CASE_SIGNED
+    return false;
 }
 
 template <ScalarType N>
@@ -274,6 +288,66 @@ To checked_convert(From f, const char* name) {
         report_overflow(name);
     }
     return convert<To, From>(f);
+}
+
+// see tensor_attributes.rst for detailed explanation and examples
+// of casting rules.
+static inline bool canCast(const ScalarType from, const ScalarType to) {
+  // We disallow float -> integral, e.g., int_tensor *= float is disallowed.
+  if (isFloatingType(from) && isIntegralType(to, false)) {
+    return false;
+  }
+  // Treat bool as a distinct "category," to be consistent with type promotion
+  // rules (e.g. `bool_tensor + 5 -> int64_tensor`). If `5` was in the same
+  // category as `bool_tensor`, we would not promote. Differing categories
+  // implies `bool_tensor += 5` is disallowed.
+  //
+  // NB: numpy distinguishes "unsigned" as a category to get the desired
+  // `bool_tensor + 5 -> int64_tensor` behavior. We don't, because:
+  // * We don't want the performance hit of checking the runtime sign of
+  // Scalars.
+  // * `uint8_tensor + 5 -> int64_tensor` would be undesirable.
+  if (from != ScalarType::Bool && to == ScalarType::Bool) {
+    return false;
+  }
+  return true;
+}
+
+static inline ScalarType promoteTypes(ScalarType a, ScalarType b) {
+  // This is generated according to NumPy's promote_types
+  constexpr auto u1 = ScalarType::Byte;
+  constexpr auto i1 = ScalarType::Char;
+  constexpr auto i2 = ScalarType::Short;
+  constexpr auto i4 = ScalarType::Int;
+  constexpr auto i8 = ScalarType::Long;
+  constexpr auto f4 = ScalarType::Float;
+  constexpr auto f8 = ScalarType::Double;
+  constexpr auto b1 = ScalarType::Bool;
+  constexpr auto ud = ScalarType::Undefined;
+  if (a == ud || b == ud) {
+    return ScalarType::Undefined;
+  }
+
+  // this matrix has to be consistent with AT_FORALL_SCALAR_TYPES_WITH_COMPLEX
+  // so that's why we have to add undefined as we are not sure what is the
+  // corrent values for the type promotions in complex type cases.
+  static constexpr ScalarType _promoteTypesLookup[static_cast<int>(
+      ScalarType::NumOptions)][static_cast<int>(ScalarType::NumOptions)] = {
+      /*        u1  i1  i2  i4  i8  f4  f8  b1*/
+      /* u1 */ {u1, i2, i2, i4, i8, f4, f8, u1},
+      /* i1 */ {i2, i1, i2, i4, i8, f4, f8, i1},
+      /* i2 */ {i2, i2, i2, i4, i8, f4, f8, i2},
+      /* i4 */ {i4, i4, i4, i4, i8, f4, f8, i4},
+      /* i8 */ {i8, i8, i8, i8, i8, f4, f8, i8},
+      /* f4 */ {f4, f4, f4, f4, f4, f4, f8, f4},
+      /* f8 */ {f8, f8, f8, f8, f8, f8, f8, f8},
+      /* b1 */ {u1, i1, i2, i4, i8, f4, f8, b1}
+  };
+  return _promoteTypesLookup[static_cast<int>(a)][static_cast<int>(b)];
+}
+
+inline std::ostream& operator<<(std::ostream& stream, ScalarType scalar_type) {
+    return stream << toString(scalar_type);
 }
 
 }   // end namespace otter

@@ -27,11 +27,28 @@ void leaky_relu_kernel(TensorIterator& iter, const Scalar& negval_) {
             [&](Vec a) -> Vec {
                 auto r = Vec::blendv(negval_v, one_vec, a > zero_vec);
                 return a * r;
-            }
-        );
+            });
+    });
+}
+
+void threshold_kernel(TensorIterator& iter, const Scalar& threshold_scalar, const Scalar& value_scalar) {
+    OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "threshold_cpu", [&] {
+        using Vec = Vectorized<scalar_t>;
+        scalar_t threshold = threshold_scalar.to<scalar_t>();
+        Vec threshold_v = Vec(threshold);
+        scalar_t value = value_scalar.to<scalar_t>();
+        Vec value_v = Vec(value);
+        cpu_kernel_vec(iter,
+            [&](scalar_t x, scalar_t other) -> scalar_t {
+                return x <= threshold ? value : other;
+            },
+            [&](Vec x, Vec other) -> Vec {
+                return Vec::blendv(other, value_v, x <= threshold_v);
+        });
     });
 }
 
 REGISTER_DISPATCH(leaky_relu_stub, &leaky_relu_kernel);
+REGISTER_DISPATCH(threshold_stub, &threshold_kernel);
 
 }   // end namesapce otter

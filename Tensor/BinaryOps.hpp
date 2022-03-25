@@ -27,6 +27,13 @@ DECLARE_DISPATCH(structured_binary_fn, bitwise_and_stub);
 DECLARE_DISPATCH(structured_binary_fn, bitwise_or_stub);
 DECLARE_DISPATCH(structured_binary_fn, bitwise_xor_stub);
 
+DECLARE_DISPATCH(structured_binary_fn, lt_stub);
+DECLARE_DISPATCH(structured_binary_fn, le_stub);
+DECLARE_DISPATCH(structured_binary_fn, gt_stub);
+DECLARE_DISPATCH(structured_binary_fn, ge_stub);
+DECLARE_DISPATCH(structured_binary_fn, eq_stub);
+DECLARE_DISPATCH(structured_binary_fn, ne_stub);
+
  
 }
 

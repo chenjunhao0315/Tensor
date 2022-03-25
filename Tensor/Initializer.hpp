@@ -32,6 +32,26 @@ private:
     const DataReader& dr_;
 };
 
+class InitializerXavierNormal : public Initializer {
+public:
+    InitializerXavierNormal(double gain_);
+    virtual ~InitializerXavierNormal();
+    
+    virtual Tensor load(IntArrayRef shape) const;
+private:
+    double gain;
+};
+
+class InitializerXavierUniform : public Initializer {
+public:
+    InitializerXavierUniform(double gain_);
+    virtual ~InitializerXavierUniform();
+    
+    virtual Tensor load(IntArrayRef shape) const;
+private:
+    double gain;
+};
+
 }
 
 #endif /* Initializer_hpp */

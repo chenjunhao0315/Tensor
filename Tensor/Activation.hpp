@@ -16,8 +16,10 @@ class TensorIterator;
 class Scalar;
 
 using leaky_relu_fn = void(*)(TensorIterator&, const Scalar& a);
+using threshold_fn = void (*)(TensorIterator&, const Scalar&, const Scalar&);
 
 DECLARE_DISPATCH(leaky_relu_fn, leaky_relu_stub);
+DECLARE_DISPATCH(threshold_fn, threshold_stub);
 
 }
 

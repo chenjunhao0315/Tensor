@@ -8,10 +8,12 @@
 #ifndef UnaryOps_hpp
 #define UnaryOps_hpp
 
+#include "Generator.hpp"
 #include "DispatchStub.hpp"
 
 namespace otter {
 
+class TensorBase;
 class TensorIterator;
 class Scalar;
 
@@ -26,6 +28,12 @@ DECLARE_DISPATCH(unary_fn, cos_stub);
 DECLARE_DISPATCH(unary_fn, tan_stub);
 DECLARE_DISPATCH(unary_fn, exp_stub);
 DECLARE_DISPATCH(unary_fn, sqrt_stub);
+
+DECLARE_DISPATCH(void(*)(TensorIterator&, const double, const double, Generator), uniform_stub);
+DECLARE_DISPATCH(void(*)(const TensorBase&, const double, const double, Generator), normal_stub);
+DECLARE_DISPATCH(void(*)(TensorIterator&, const uint64_t, const int64_t, Generator), random_from_to_stub);
+DECLARE_DISPATCH(void(*)(TensorIterator&, Generator), random_full_64_bits_range_stub);
+DECLARE_DISPATCH(void(*)(TensorIterator&, Generator), random_stub);
 
 }
 
