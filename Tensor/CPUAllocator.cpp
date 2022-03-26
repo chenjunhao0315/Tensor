@@ -41,7 +41,7 @@ public:
     ~DefaultMobileCPUAllocator() override = default;
     
     static void deleter(void* const pointer) {
-        if (OTTER_UNLIKELY(pointer)) {
+        if (OTTER_UNLIKELY(!pointer)) {
             return;
         }
         
@@ -99,6 +99,9 @@ public:
         };
     }
     
+    DeleterFnPtr raw_deleter() const override {
+        return deleter;
+    }
 };
 
 static DefaultMobileCPUAllocator<gAlignment, 16u> g_mobile_cpu_allocator;
