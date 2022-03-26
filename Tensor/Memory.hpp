@@ -16,7 +16,7 @@
 
 #include "RefPtr.hpp"
 #include "ExclusivelyOwned.hpp"
-#include "Allocator.hpp"
+#include "CPUAllocator.hpp"
 
 namespace otter {
 

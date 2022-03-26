@@ -56,6 +56,10 @@
 		7628E18027CFDB5900B136FA /* ConcatLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E17E27CFDB5900B136FA /* ConcatLayer.cpp */; };
 		7628E2D427D10CDA00B136FA /* UpSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E2D227D10CDA00B136FA /* UpSample.cpp */; };
 		7628E2D727D1168C00B136FA /* UpSampleKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7628E2D527D1168C00B136FA /* UpSampleKernel.cpp */; };
+		762B4D6327EF775100A98E34 /* CPUAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762B4D6127EF775100A98E34 /* CPUAllocator.cpp */; };
+		762B4D6627EF7D0500A98E34 /* CPUCachingAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762B4D6427EF7D0500A98E34 /* CPUCachingAllocator.cpp */; };
+		762B4D6927EF7E3D00A98E34 /* flat_hash_map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762B4D6727EF7E3D00A98E34 /* flat_hash_map.cpp */; };
+		762B4D6C27EF80AB00A98E34 /* CPUProfilingAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762B4D6A27EF80AB00A98E34 /* CPUProfilingAllocator.cpp */; };
 		762E3B2D27BACA050075F983 /* TensorAccessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B2B27BACA050075F983 /* TensorAccessor.cpp */; };
 		762E3B3027BB5D260075F983 /* ConvolutionMM2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B2E27BB5D260075F983 /* ConvolutionMM2D.cpp */; };
 		762E3B3327BB79950075F983 /* Unfold2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762E3B3127BB79950075F983 /* Unfold2D.cpp */; };
@@ -258,6 +262,14 @@
 		7628E2D327D10CDA00B136FA /* UpSample.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UpSample.hpp; sourceTree = "<group>"; };
 		7628E2D527D1168C00B136FA /* UpSampleKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UpSampleKernel.cpp; sourceTree = "<group>"; };
 		7628E2D627D1168C00B136FA /* UpSampleKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UpSampleKernel.hpp; sourceTree = "<group>"; };
+		762B4D6127EF775100A98E34 /* CPUAllocator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CPUAllocator.cpp; sourceTree = "<group>"; };
+		762B4D6227EF775100A98E34 /* CPUAllocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CPUAllocator.hpp; sourceTree = "<group>"; };
+		762B4D6427EF7D0500A98E34 /* CPUCachingAllocator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CPUCachingAllocator.cpp; sourceTree = "<group>"; };
+		762B4D6527EF7D0500A98E34 /* CPUCachingAllocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CPUCachingAllocator.hpp; sourceTree = "<group>"; };
+		762B4D6727EF7E3D00A98E34 /* flat_hash_map.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = flat_hash_map.cpp; sourceTree = "<group>"; };
+		762B4D6827EF7E3D00A98E34 /* flat_hash_map.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = flat_hash_map.hpp; sourceTree = "<group>"; };
+		762B4D6A27EF80AB00A98E34 /* CPUProfilingAllocator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CPUProfilingAllocator.cpp; sourceTree = "<group>"; };
+		762B4D6B27EF80AB00A98E34 /* CPUProfilingAllocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CPUProfilingAllocator.hpp; sourceTree = "<group>"; };
 		762E3B2B27BACA050075F983 /* TensorAccessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorAccessor.cpp; sourceTree = "<group>"; };
 		762E3B2C27BACA050075F983 /* TensorAccessor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorAccessor.hpp; sourceTree = "<group>"; };
 		762E3B2E27BB5D260075F983 /* ConvolutionMM2D.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionMM2D.cpp; sourceTree = "<group>"; };
@@ -474,6 +486,12 @@
 				76E6C51527A502F60036A26F /* Memory.hpp */,
 				762E3B5427BEA4A10075F983 /* MemoryOverlap.cpp */,
 				762E3B5527BEA4A20075F983 /* MemoryOverlap.hpp */,
+				762B4D6127EF775100A98E34 /* CPUAllocator.cpp */,
+				762B4D6227EF775100A98E34 /* CPUAllocator.hpp */,
+				762B4D6427EF7D0500A98E34 /* CPUCachingAllocator.cpp */,
+				762B4D6527EF7D0500A98E34 /* CPUCachingAllocator.hpp */,
+				762B4D6A27EF80AB00A98E34 /* CPUProfilingAllocator.cpp */,
+				762B4D6B27EF80AB00A98E34 /* CPUProfilingAllocator.hpp */,
 			);
 			name = Memory;
 			sourceTree = "<group>";
@@ -542,6 +560,8 @@
 				7604745327D67ED100FCB785 /* DataReader.hpp */,
 				760704D527E5021200D5E00D /* Avx_Math.cpp */,
 				760704D627E5021200D5E00D /* Avx_Math.hpp */,
+				762B4D6727EF7E3D00A98E34 /* flat_hash_map.cpp */,
+				762B4D6827EF7E3D00A98E34 /* flat_hash_map.hpp */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -990,6 +1010,7 @@
 				7628E02327CE7A6200B136FA /* Pool.cpp in Sources */,
 				760704C827E3BC1300D5E00D /* MT19937.cpp in Sources */,
 				7620AF7127B406F70081C210 /* RangeFactoryKernel.cpp in Sources */,
+				762B4D6627EF7D0500A98E34 /* CPUCachingAllocator.cpp in Sources */,
 				7620AF7A27B53BAE0081C210 /* TensorCopyKernel.cpp in Sources */,
 				762E3B3F27BC9F400075F983 /* Clock.cpp in Sources */,
 				76E6C51627A502F60036A26F /* Memory.cpp in Sources */,
@@ -1009,6 +1030,7 @@
 				7687216427C0E379006640CF /* Layer.cpp in Sources */,
 				7628DEE127CDF85100B136FA /* ActivationKernel.cpp in Sources */,
 				76BA778C27C66DC000AA896B /* DilatedConvolution.cpp in Sources */,
+				762B4D6327EF775100A98E34 /* CPUAllocator.cpp in Sources */,
 				76E6C54827A513A10036A26F /* TensorIterator.cpp in Sources */,
 				7628DEE427CE096600B136FA /* LReluLayer.cpp in Sources */,
 				7628E2D727D1168C00B136FA /* UpSampleKernel.cpp in Sources */,
@@ -1044,6 +1066,7 @@
 				7687218827C35B9F006640CF /* BatchNormalization.cpp in Sources */,
 				7628E17D27CFCFCB00B136FA /* Dropout.cpp in Sources */,
 				76E6C52E27A505FE0036A26F /* TensorOptions.cpp in Sources */,
+				762B4D6927EF7E3D00A98E34 /* flat_hash_map.cpp in Sources */,
 				7620AF7427B4F3F50081C210 /* TensorMaker.cpp in Sources */,
 				76E6C51C27A504000036A26F /* DType.cpp in Sources */,
 				76F336E627AEA7E400E3AEF1 /* TensorOperator.cpp in Sources */,
@@ -1078,6 +1101,7 @@
 				76F0064327B67E4C009D67F5 /* TensorProperties.cpp in Sources */,
 				76F336D627A7AD1600E3AEF1 /* TensorFunction.cpp in Sources */,
 				760704C227E3B2B800D5E00D /* Generator.cpp in Sources */,
+				762B4D6C27EF80AB00A98E34 /* CPUProfilingAllocator.cpp in Sources */,
 				76F336DD27A8FCE600E3AEF1 /* EmptyTensor.cpp in Sources */,
 				76486AEA27DBC8FF0078FF9B /* Vision.cpp in Sources */,
 			);

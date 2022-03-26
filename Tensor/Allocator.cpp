@@ -8,57 +8,9 @@
 #include "Allocator.hpp"
 #include "Macro.hpp"
 
+namespace otter {
+
 void deleteNothing(void*) {}
-
-struct DefaultCPUAllocator : public Allocator {
-    DefaultCPUAllocator() = default;
-    DataPtr allocate(size_t nbytes) const override {
-        void* data = alloc_cpu(nbytes);
-        return {data, data, &ReportAndDelete, Device::CPU};
-    }
-
-    static void ReportAndDelete(void* ptr) {
-        if (!ptr) {
-            return;
-        }
-        free_cpu(ptr);
-    }
-
-    DeleterFnPtr raw_deleter() const override {
-        return &ReportAndDelete;
-    }
-};
-
-static DefaultCPUAllocator default_allocator;
-
-// TODO: Mobile allocator
-template <uint32_t PreGuardBytes, uint32_t PostGuardBytes>
-class DefaultMobileCPUAllocator final : public Allocator {
-public:
-    DefaultMobileCPUAllocator() = default;
-    
-    ~DefaultMobileCPUAllocator() override = default;
-    
-    static void deleter(void* const pointer) {
-        if (OTTER_UNLIKELY(pointer)) {
-            return;
-        }
-        
-        
-    }
-};
-
-Allocator* get_default_allocator() {
-    return &default_allocator;
-}
-
-Allocator* GetAllocator(Device device) {
-    switch (device) {
-        case Device::CPU: return get_default_allocator(); break;
-        default: return get_default_allocator();
-    }
-    return get_default_allocator();
-}
 
 static void deleteInefficientStdFunctionContext(void* ptr) {
     delete static_cast<InefficientStdFunctionContext*>(ptr);
@@ -92,6 +44,8 @@ void free_cpu(void* data) {
     free(data);
 #endif
 }
+
+}   // end namespace otter
 
 void *otter_malloc_log(const size_t size, const char * const filename, const char * const funcname, const int line) {
     if (size == 0) return nullptr;
