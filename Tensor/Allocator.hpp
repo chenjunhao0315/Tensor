@@ -39,6 +39,8 @@ constexpr size_t gAlignment = 16;
 constexpr size_t gAlignment = 64;
 #endif
 
+namespace otter {
+
 using DeleterFnPtr = void (*)(void*);
 void deleteNothing(void*);
 
@@ -140,9 +142,6 @@ struct Allocator {
 void* alloc_cpu(size_t nbytes);
 void free_cpu(void* data);
 
-Allocator* get_default_allocator();
-Allocator* GetAllocator(Device device);
-
 struct InefficientStdFunctionContext {
   std::unique_ptr<void, std::function<void(void*)>> ptr_;
   InefficientStdFunctionContext(
@@ -153,5 +152,7 @@ struct InefficientStdFunctionContext {
       const std::function<void(void*)>& deleter,
       Device device);
 };
+
+}   // end namespace otter
 
 #endif /* Allocator_hpp */

@@ -47,5 +47,20 @@ __attribute__((no_sanitize("signed-integer-overflow")))
 #define OTTER_STRINGIZE_IMPL(x) #x
 #define OTTER_STRINGIZE(x) OTTER_STRINGIZE_IMPL(x)
 
+#ifdef __clang__
+#define _OTTER_PRAGMA__(string) _Pragma(#string)
+#define _OTTER_PRAGMA_(string) _OTTER_PRAGMA__(string)
+#define OTTER_CLANG_DIAGNOSTIC_PUSH() _Pragma("clang diagnostic push")
+#define OTTER_CLANG_DIAGNOSTIC_POP() _Pragma("clang diagnostic pop")
+#define OTTER_CLANG_DIAGNOSTIC_IGNORE(flag) \
+  _OTTER_PRAGMA_(clang diagnostic ignored flag)
+#define OTTER_CLANG_HAS_WARNING(flag) __has_warning(flag)
+#else
+#define OTTER_CLANG_DIAGNOSTIC_PUSH()
+#define OTTER_CLANG_DIAGNOSTIC_POP()
+#define OTTER_CLANG_DIAGNOSTIC_IGNORE(flag)
+#define OTTER_CLANG_HAS_WARNING(flag) 0
+#endif
+
 
 #endif /* Macro_h */

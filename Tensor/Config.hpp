@@ -8,7 +8,7 @@
 #ifndef Config_h
 #define Config_h
 
-#define OTTER_MOBLE 0
+#define OTTER_MOBILE 0
 
 #define OTTER_OPENMP 1
 
@@ -16,7 +16,7 @@
 
 #define OTTER_OPENCV_DRAW 1
 
-#if OTTER_MOBLE
+#if OTTER_MOBILE
 
 #else
 #if OTTER_AVX
