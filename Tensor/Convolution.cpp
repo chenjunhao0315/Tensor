@@ -110,10 +110,27 @@ ConvBackend select_proper_conv_backend(
                     return ConvBackend::SlowDilated2d;
                 } else {
                     if (params.use_cpu_neon(input, weight)) {
-                        if (input.size(1) >= 64 && weight.size(0) >= 64 && params.stride[0] == 1 && params.stride[1] == 1 && weight.size(2) == 1 && weight.size(3) == 1) {
-                            return ConvBackend::Slow2dNeon_1x1s1;
+                        // Depthwise
+                        if (params.use_cpu_depthwise_neon(input, weight)) {
+                            if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
+                                return ConvBackend::DepthwiseNeon_3x3s2;
+                            } else if (weight.size(2) == 5 && weight.size(3) == 5 && params.stride[0] == 1 && params.stride[1] == 1) {
+                                return ConvBackend::DepthwiseNeon_5x5s1;
+                            }
+                        }
+                        // General
+                        if (weight.size(2) == 1 && weight.size(3) == 1 && params.stride[0] == 1 && params.stride[1] == 1 && input.size(1) >= 64 && weight.size(0) >= 64) {
+                            return ConvBackend::Sgemm2dNeon_1x1s1;
+                        } else if (weight.size(2) == 1 && weight.size(3) == 1 && params.stride[0] == 2 && params.stride[1] == 2) {
+                            return ConvBackend::Sgemm2dNeon_1x1s2;
                         } else {
-                            return ConvBackend::Slow2dNeon;
+                            bool prefer_sgemm = (params.stride[0] == 1 && params.stride[1] == 1 && (input.size(1) >= 12 || weight.size(0) >= 12)) || ((params.stride[0] >= 2 || params.stride[1] >= 2) && (input.size(1) >= 16 || weight.size(0) >= 16));
+                            
+                            if (prefer_sgemm) {
+                                return ConvBackend::Sgemm2dNeon;
+                            } else {
+                                return ConvBackend::SlideWin2dNeon;
+                            }
                         }
                     } else {
                         return ConvBackend::Slow2d;
@@ -204,9 +221,17 @@ Tensor convolution(
         case ConvBackend::Winograd3x3Depthwise:
             output = convolution_depthwise3x3_winograd_stub(Device::CPU, input, weight, bias, params.stride, params.padding, params.groups);
             break;
+        case ConvBackend::DepthwiseNeon_3x3s2:
+            output = depthwise_conv2d_3x3s2_neon(input, weight, bias, params.stride, params.padding);
+            break;
+        case ConvBackend::DepthwiseNeon_5x5s1:
+            output = depthwise_conv2d_5x5s1_neon(input, weight, bias, params.stride, params.padding);
+            break;
         case ConvBackend::Slow2d:
-        case ConvBackend::Slow2dNeon:
-        case ConvBackend::Slow2dNeon_1x1s1:
+        case ConvBackend::Sgemm2dNeon:
+        case ConvBackend::Sgemm2dNeon_1x1s1:
+        case ConvBackend::Sgemm2dNeon_1x1s2:
+        case ConvBackend::SlideWin2dNeon:
         case ConvBackend::SlowDilated2d:
             if (params.groups == 1) {
                 output = otter::convolution_nogroup_backend(input.contiguous(), weight, bias, backend, params);
@@ -240,10 +265,14 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
             return otter::slow_conv2d(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::SlowDilated2d:
             return otter::slow_conv_dilated2d(self, weight, bias, kernel_size, params.stride, params.padding, params.dilation);
-        case ConvBackend::Slow2dNeon:
-            return otter::slow_conv2d_neon(self, weight, bias, kernel_size, params.stride, params.padding);
-        case ConvBackend::Slow2dNeon_1x1s1:
-            return otter::slow_conv2d_1x1s1_neon(self, weight, bias, kernel_size, params.stride, params.padding);
+        case ConvBackend::Sgemm2dNeon:
+            return otter::sgemm_conv2d_neon(self, weight, bias, kernel_size, params.stride, params.padding);
+        case ConvBackend::Sgemm2dNeon_1x1s1:
+            return otter::sgemm_conv2d_1x1s1_neon(self, weight, bias, kernel_size, params.stride, params.padding);
+        case ConvBackend::Sgemm2dNeon_1x1s2:
+            return otter::sgemm_conv2d_1x1s2_neon(self, weight, bias, kernel_size, params.stride, params.padding);
+        case ConvBackend::SlideWin2dNeon:
+            return otter::slide_win_conv2d(self, weight, bias, kernel_size, params.stride, params.padding);
         default:
             OTTER_CHECK(false, "Unsupported nogroup conv backend");
     }

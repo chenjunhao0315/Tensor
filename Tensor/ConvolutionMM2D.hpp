@@ -8,7 +8,7 @@
 #ifndef ConvolutionMM2D_hpp
 #define ConvolutionMM2D_hpp
 
-#include "ArrayRef.hpp"
+#include "ConvolutionUtils.hpp"
 
 namespace otter {
 
@@ -33,6 +33,23 @@ Tensor& slow_conv2d_out(
     Tensor& output);
 
 Tensor slow_conv2d(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding);
+
+Tensor& slide_win_conv2d_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    Tensor& output);
+    
+Tensor slide_win_conv2d(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,

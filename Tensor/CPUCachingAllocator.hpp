@@ -9,6 +9,8 @@
 #define CPUCachingAllocator_hpp
 
 #include <cstdint>
+#include <mutex>
+
 #include "flat_hash_map.hpp"
 #include "SmallVector.hpp"
 

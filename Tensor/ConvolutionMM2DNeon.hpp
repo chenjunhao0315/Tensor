@@ -8,13 +8,13 @@
 #ifndef ConvolutionMM2DNeon_hpp
 #define ConvolutionMM2DNeon_hpp
 
-#include "ArrayRef.hpp"
+#include "ConvolutionUtils.hpp"
 
 namespace otter {
 
 class Tensor;
 
-Tensor& slow_conv2d_neon_out(
+Tensor& sgemm_conv2d_neon_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
@@ -23,7 +23,7 @@ Tensor& slow_conv2d_neon_out(
     IntArrayRef padding,
     Tensor& output);
     
-Tensor slow_conv2d_neon(
+Tensor sgemm_conv2d_neon(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
@@ -31,7 +31,7 @@ Tensor slow_conv2d_neon(
     IntArrayRef stride,
     IntArrayRef padding);
 
-Tensor& slow_conv2d_1x1s1_neon_out(
+Tensor& sgemm_conv2d_1x1s1_neon_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
@@ -40,7 +40,41 @@ Tensor& slow_conv2d_1x1s1_neon_out(
     IntArrayRef padding,
     Tensor& output);
 
-Tensor slow_conv2d_1x1s1_neon(
+Tensor sgemm_conv2d_1x1s1_neon(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding);
+
+Tensor& sgemm_conv2d_1x1s2_neon_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor sgemm_conv2d_1x1s2_neon(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding);
+
+Tensor& sgemm_conv2d_3x3s2_neon_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    Tensor& output);
+    
+Tensor sgemm_conv2d_neon(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,

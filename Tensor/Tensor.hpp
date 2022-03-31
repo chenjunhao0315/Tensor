@@ -8,6 +8,8 @@
 #ifndef Tensor_hpp
 #define Tensor_hpp
 
+#include <climits>
+
 #include "TensorBase.hpp"
 #include "TensorAccessor.hpp"
 
