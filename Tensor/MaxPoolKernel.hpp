@@ -8,10 +8,4 @@
 #ifndef MaxPoolKernel_hpp
 #define MaxPoolKernel_hpp
 
-namespace otter {
-
-
-
-}
-
 #endif /* MaxPoolKernel_hpp */

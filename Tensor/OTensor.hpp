@@ -8,17 +8,20 @@
 #ifndef OTensor_h
 #define OTensor_h
 
-#include "TensorMaker.hpp"
-#include "TensorFactory.hpp"
-#include "TensorOperator.hpp"
+#include "Formatting.hpp"
 #include "TensorOptions.hpp"
+#include "TensorFactory.hpp"
+#include "TensorMaker.hpp"
+#include "TensorOperator.hpp"
+#include "TensorShape.hpp"
 #include "UnaryOps.hpp"
 #include "BinaryOps.hpp"
-#include "Formatting.hpp"
-#include "TensorUtils.hpp"
-#include "Convolution.hpp"
-#include "TensorShape.hpp"
 #include "TensorFunction.hpp"
+#include "Convolution.hpp"
+#include "Padding.hpp"
+#include "TensorInterpolation.hpp"
+#include "ChannelShuffle.hpp"
+#include "Net.hpp"
 
 
 #endif /* OTensor_h */
