@@ -67,6 +67,20 @@ bool ConvParams::is_stride_nonpos() const {
     return is_nonpos;
 }
 
+bool ConvParams::is_depthwise(const Tensor& input, const Tensor& weight) const {
+    return (input.dim() == 4) &&
+    (input.size(1) == groups) &&
+    (weight.dim() == 4) &&
+    (weight.size(0) % input.size(1) == 0) &&
+    (weight.size(1) == 1) &&
+    (input.scalar_type() == ScalarType::Float) &&
+    (weight.scalar_type() == ScalarType::Float) &&
+    (input.device() == Device::CPU) &&
+    (weight.device() == Device::CPU) &&
+    !is_dilated() &&
+    !transposed;
+}
+
 bool ConvParams::use_cpu_depthwise3x3_winograd(const Tensor& input, const Tensor& weight) const {
 #if defined(__ARM_NEON__)
     // Currently only 3x3 depthwise convolutions on tensors of float are supported.
@@ -97,24 +111,6 @@ bool ConvParams::use_cpu_neon(const Tensor& input, const Tensor& weight) const {
     (input.scalar_type() == ScalarType::Float) &&
     (input.device() == Device::CPU) &&
     (weight.device() == Device::CPU);
-#else
-    return false;
-#endif
-}
-
-bool ConvParams::use_cpu_depthwise_neon(const Tensor& input, const Tensor& weight) const {
-#if defined(__ARM_NEON__)
-    return (input.dim() == 4) &&
-    (input.size(1) == groups) &&
-    (weight.dim() == 4) &&
-    (weight.size(0) % input.size(1) == 0) &&
-    (weight.size(1) == 1) &&
-    (input.scalar_type() == ScalarType::Float) &&
-    (weight.scalar_type() == ScalarType::Float) &&
-    (input.device() == Device::CPU) &&
-    (weight.device() == Device::CPU) &&
-    !is_dilated() &&
-    !transposed;
 #else
     return false;
 #endif

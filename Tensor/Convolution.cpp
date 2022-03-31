@@ -111,7 +111,7 @@ ConvBackend select_proper_conv_backend(
                 } else {
                     if (params.use_cpu_neon(input, weight)) {
                         // Depthwise
-                        if (params.use_cpu_depthwise_neon(input, weight)) {
+                        if (params.is_depthwise(input, weight)) {
                             if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
                                 return ConvBackend::DepthwiseNeon_3x3s2;
                             } else if (weight.size(2) == 5 && weight.size(3) == 5 && params.stride[0] == 1 && params.stride[1] == 1) {
@@ -119,8 +119,12 @@ ConvBackend select_proper_conv_backend(
                             }
                         }
                         // General
-                        if (weight.size(2) == 1 && weight.size(3) == 1 && params.stride[0] == 1 && params.stride[1] == 1 && input.size(1) >= 64 && weight.size(0) >= 64) {
-                            return ConvBackend::Sgemm2dNeon_1x1s1;
+                        if (weight.size(2) == 1 && weight.size(3) == 1 && params.stride[0] == 1 && params.stride[1] == 1) {
+                            if (input.size(1) >= 64 && weight.size(0) >= 64) {
+                                return ConvBackend::Sgemm2dNeon_1x1s1;
+                            }
+                            
+                            return ConvBackend::Sw2dNeon_1x1s1;
                         } else if (weight.size(2) == 1 && weight.size(3) == 1 && params.stride[0] == 2 && params.stride[1] == 2) {
                             return ConvBackend::Sgemm2dNeon_1x1s2;
                         } else {
@@ -231,6 +235,7 @@ Tensor convolution(
         case ConvBackend::Sgemm2dNeon:
         case ConvBackend::Sgemm2dNeon_1x1s1:
         case ConvBackend::Sgemm2dNeon_1x1s2:
+        case ConvBackend::Sw2dNeon_1x1s1:
         case ConvBackend::SlideWin2dNeon:
         case ConvBackend::SlowDilated2d:
             if (params.groups == 1) {
@@ -269,6 +274,8 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
             return otter::sgemm_conv2d_neon(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::Sgemm2dNeon_1x1s1:
             return otter::sgemm_conv2d_1x1s1_neon(self, weight, bias, kernel_size, params.stride, params.padding);
+        case ConvBackend::Sw2dNeon_1x1s1:
+            return otter::conv2d_1x1s1_neon(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::Sgemm2dNeon_1x1s2:
             return otter::sgemm_conv2d_1x1s2_neon(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::SlideWin2dNeon:
