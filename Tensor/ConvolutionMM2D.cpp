@@ -309,4 +309,110 @@ Tensor& slow_conv2d_out(
     return otter::slow_conv2d_forward_out_cpu(self, weight, bias, kernel_size, stride, padding, output);
 }
 
+Tensor& slide_win_conv2d_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    Tensor& output) {
+    
+    const int64_t kernel_height = kernel_size[0];
+    const int64_t kernel_width  = kernel_size[1];
+    const int64_t pad_height    = padding[0];
+    const int64_t pad_width     = padding[1];
+    const int64_t stride_height = stride[0];
+    const int64_t stride_width  = stride[1];
+    
+    const int64_t dim_planes = 1;
+    const int64_t dim_height = 2;
+    const int64_t dim_width  = 3;
+    
+    const Tensor input = self.contiguous();
+    const int64_t input_channels  = input.size(dim_planes);
+    const int64_t input_height    = input.size(dim_height);
+    const int64_t input_width     = input.size(dim_width);
+    const int64_t output_channels = weight.size(0);
+    const int64_t output_height   = (input_height + 2 * pad_height - kernel_height) / stride_height + 1;
+    const int64_t output_width    = (input_width  + 2 * pad_width  - kernel_width ) / stride_width  + 1;
+    
+    auto output_size = otter::calculate_conv_output_size(input.sizes(), weight.sizes(), stride, padding);
+    
+    output.resize_(output_size);
+    
+    const int64_t max_kernel = kernel_height * kernel_width;
+    std::vector<int> space_offset_(max_kernel);
+    int *space_offset = &space_offset_[0];
+    
+    int p1 = 0;
+    int p2 = 0;
+    int gap = int(input_width - kernel_width);
+    for (int64_t i = 0; i < kernel_height; ++i) {
+        for (int64_t j = 0; j < kernel_width; ++j) {
+            space_offset[p1] = p2;
+            p1++;
+            p2++;
+        }
+        p2 += gap;
+    }
+    
+    bool bias_term = bias.defined();
+    
+    otter::parallel_for(0, output_channels, 0, [&](int64_t start, int64_t end) {
+        for (const auto p : otter::irange(start, end)) {
+            OTTER_DISPATCH_ALL_TYPES(self.scalar_type(), "slide_win_conv2d", [&]{
+                using scalar_t = float;
+                auto output_a = output.accessor<scalar_t, 4>()[0];
+                auto input_a = self.accessor<scalar_t, 4>()[0];
+                scalar_t *outptr = output_a[p].data();
+                const scalar_t *weight_data = weight.data_ptr<scalar_t>();
+                const scalar_t *bias_data = (bias_term) ? bias.data_ptr<scalar_t>() : nullptr;
+                
+                for (int i = 0; i < output_height; ++i) {
+                    for (int j = 0; j < output_width; ++j) {
+                        scalar_t sum = 0;
+                        
+                        if (bias_term) {
+                            sum = bias_data[p];
+                        }
+
+                        const scalar_t* kptr = weight_data + max_kernel * input_channels * p;
+                        
+                        for (int q = 0; q < input_channels; ++q) {
+                            const auto input_a_c = input_a[q];
+                            const scalar_t *sptr = input_a_c[i * stride_height].data() + j * stride_width;
+                            
+                            for (int k = 0; k < max_kernel; ++k) {
+                                scalar_t val = sptr[space_offset[k]];
+                                scalar_t wt = kptr[k];
+                                sum += val * wt;
+                            }
+                            kptr += max_kernel;
+                        }
+                        outptr[j] = sum;
+                    }
+                    outptr += output_width;
+                }
+            });
+        }
+    });
+    
+    return output;
+}
+    
+Tensor slide_win_conv2d(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding) {
+    
+    auto out = otter::empty({}, self.options());
+    slide_win_conv2d_out(self, weight, bias, kernel_size, stride, padding, out);
+    
+    return out;
+}
+
 }   // end namespace otter

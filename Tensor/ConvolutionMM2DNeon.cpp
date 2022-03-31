@@ -1065,10 +1065,11 @@ static void convolution_im2col_sgemm_transform_kernel_neon(const Tensor& kernel_
     }
 }
 #else
-static void convolution_im2col_sgemm_transform_kernel_neon(const Tensor& _kernel, Tensor& kernel_tf, int64_t input_channels, int64_t out_chnnels, int64_t kernel_width, int64_t kernel_height) {}
+static void convolution_im2col_sgemm_transform_kernel_neon(const Tensor& _kernel, Tensor& kernel_tf, int64_t input_channels, int64_t out_chnnels, int64_t kernel_width, int64_t kernel_height) {
+}
 #endif
 
-Tensor& slow_conv2d_1x1s1_neon_out(
+Tensor& sgemm_conv2d_1x1s1_neon_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
@@ -1077,38 +1078,24 @@ Tensor& slow_conv2d_1x1s1_neon_out(
     IntArrayRef padding,
     Tensor& output) {
     
-    const int64_t kernel_height = kernel_size[0];
-    const int64_t kernel_width  = kernel_size[1];
-    const int64_t pad_height    = padding[0];
-    const int64_t pad_width     = padding[1];
-    const int64_t stride_height = stride[0];
-    const int64_t stride_width  = stride[1];
-    
-    const int64_t dim_batch = 0;
-    const int64_t dim_planes = 1;
-    const int64_t dim_height = 2;
-    const int64_t dim_width  = 3;
+    if (!output.defined()) {
+        auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+        output = otter::empty(output_size, self.options());
+    }
     
     const Tensor input = self.contiguous();
-    const int64_t input_channels  = input.size(dim_planes);
-    const int64_t input_height    = input.size(dim_height);
-    const int64_t input_width     = input.size(dim_width);
+    const int64_t input_channels  = input.size(1);
     const int64_t output_channels = weight.size(0);
-    const int64_t output_height   = (input_height + 2 * pad_height - kernel_height) / stride_height + 1;
-    const int64_t output_width    = (input_width  + 2 * pad_width  - kernel_width ) / stride_width  + 1;
-    
-    const int64_t batch_size      = input.size(dim_batch);
     
     Tensor im2col = self.view({self.size(0), self.size(1), -1});
     Tensor kernel_pack4x4;
     otter::convolution_im2col_sgemm_transform_kernel_neon(weight, kernel_pack4x4, input_channels, output_channels, 1, 1);
-    output.resize_({batch_size, output_channels, output_height, output_width});
     otter::im2col_sgemm_conv2d_impl(im2col, kernel_pack4x4, bias, input_channels, output_channels, output);
     
     return output;
 }
 
-Tensor slow_conv2d_1x1s1_neon(
+Tensor sgemm_conv2d_1x1s1_neon(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
@@ -1116,13 +1103,15 @@ Tensor slow_conv2d_1x1s1_neon(
     IntArrayRef stride,
     IntArrayRef padding) {
     
-    auto out = otter::empty({}, self.options());
-    slow_conv2d_1x1s1_neon_out(self, weight, bias, kernel_size, stride, padding, out);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto out = otter::empty(output_size, self.options());
+    
+    sgemm_conv2d_1x1s1_neon_out(self, weight, bias, kernel_size, stride, padding, out);
     
     return out;
 }
 
-Tensor& slow_conv2d_neon_out(
+Tensor& sgemm_conv2d_1x1s2_neon_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
@@ -1131,32 +1120,86 @@ Tensor& slow_conv2d_neon_out(
     IntArrayRef padding,
     Tensor& output) {
     
+    if (!output.defined()) {
+        auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+        output = otter::empty(output_size, self.options());
+    }
+    
+    int64_t batch_size = self.size(0);
+    int64_t input_channels = self.size(1);
+    int64_t input_width = self.size(3);
+    
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    int64_t output_height = output_size[2];
+    int64_t output_width = output_size[3];
+    
+    const int64_t tailstep = input_width - 2 * output_width + input_width;
+    
+    auto self_shrink = otter::empty({batch_size, input_channels, output_height, output_width}, self.options());
+    
+    auto input_a = self.accessor<float, 4>()[0];
+    auto input_shrink_a = self_shrink.accessor<float, 4>()[0];
+    
+    otter::parallel_for(0, input_channels, 0, [&](int64_t start, int64_t end) {
+        for (const auto p : otter::irange(start, end)) {
+            const float *input_ptr = input_a[p].data();
+            float *output_ptr = input_shrink_a[p].data();
+            
+            for (const auto i : otter::irange(0, output_height)) {
+                for (const auto j : otter::irange(0, output_width)) {
+                    (void)i;
+                    (void)j;
+                    output_ptr[0] = input_ptr[0];
+                    
+                    input_ptr += 2;
+                    output_ptr += 1;
+                }
+                input_ptr += tailstep;
+            }
+        }
+    });
+    
+    return otter::sgemm_conv2d_1x1s1_neon_out(self_shrink, weight, bias, kernel_size, stride, padding, output);
+}
+
+Tensor sgemm_conv2d_1x1s2_neon(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding) {
+    
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto out = otter::empty(output_size, self.options());
+    
+    return sgemm_conv2d_1x1s2_neon_out(self, weight, bias, kernel_size, stride, padding, out);
+}
+
+Tensor& sgemm_conv2d_neon_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    Tensor& output) {
+    
+    if (!output.defined()) {
+        auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+        output = otter::empty(output_size, self.options());
+    }
+    
     const int64_t kernel_height = kernel_size[0];
     const int64_t kernel_width  = kernel_size[1];
-    const int64_t pad_height    = padding[0];
-    const int64_t pad_width     = padding[1];
-    const int64_t stride_height = stride[0];
-    const int64_t stride_width  = stride[1];
-    
-    const int64_t dim_batch = 0;
-    const int64_t dim_planes = 1;
-    const int64_t dim_height = 2;
-    const int64_t dim_width  = 3;
     
     const Tensor input = self.contiguous();
-    const int64_t input_channels  = input.size(dim_planes);
-    const int64_t input_height    = input.size(dim_height);
-    const int64_t input_width     = input.size(dim_width);
+    const int64_t input_channels  = input.size(1);
     const int64_t output_channels = weight.size(0);
-    const int64_t output_height   = (input_height + 2 * pad_height - kernel_height) / stride_height + 1;
-    const int64_t output_width    = (input_width  + 2 * pad_width  - kernel_width ) / stride_width  + 1;
-    
-    const int64_t batch_size      = input.size(dim_batch);
     
     Tensor im2col = otter::im2col_cpu(input, kernel_size, stride, padding, {1, 1});
     Tensor kernel_pack4x4;
     otter::convolution_im2col_sgemm_transform_kernel_neon(weight, kernel_pack4x4, input_channels, output_channels, kernel_width, kernel_height);
-    output.resize_({batch_size, output_channels, output_height, output_width});
     
     im2col_sgemm_conv2d_impl(
         im2col,
@@ -1169,7 +1212,7 @@ Tensor& slow_conv2d_neon_out(
     return output;
 }
 
-Tensor slow_conv2d_neon(
+Tensor sgemm_conv2d_neon(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
@@ -1177,8 +1220,10 @@ Tensor slow_conv2d_neon(
     IntArrayRef stride,
     IntArrayRef padding) {
     
-    auto out = otter::empty({}, self.options());
-    slow_conv2d_neon_out(self, weight, bias, kernel_size, stride, padding, out);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto out = otter::empty(output_size, self.options());
+    
+    sgemm_conv2d_neon_out(self, weight, bias, kernel_size, stride, padding, out);
     
     return out;
 }

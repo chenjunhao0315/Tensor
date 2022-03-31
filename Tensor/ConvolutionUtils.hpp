@@ -33,6 +33,7 @@ struct ConvParams {
     bool is_stride_nonpos() const;
     bool use_cpu_depthwise3x3_winograd(const Tensor& input, const Tensor& weight) const;
     bool use_cpu_neon(const Tensor& input, const Tensor& weight) const;
+    bool use_cpu_depthwise_neon(const Tensor& input, const Tensor& weight) const;
 };
 
 enum class ConvBackend {
@@ -40,8 +41,12 @@ enum class ConvBackend {
     SlowDilated2d,
     SlowDilated3d,
     Slow2d,
-    Slow2dNeon,
-    Slow2dNeon_1x1s1,
+    Sgemm2dNeon,
+    Sgemm2dNeon_1x1s1,
+    Sgemm2dNeon_1x1s2,
+    SlideWin2dNeon,
+    DepthwiseNeon_3x3s2,
+    DepthwiseNeon_5x5s1,
     Slow3d,
     Overrideable
 };
