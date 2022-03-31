@@ -7,11 +7,8 @@
 
 #include "OTensor.hpp"
 #include "Clock.hpp"
-#include "Net.hpp"
 #include "Vision.hpp"
 #include "Drawing.hpp"
-#include "ColorConvert.hpp"
-#include "ImageThreshold.hpp"
 
 using namespace std;
 

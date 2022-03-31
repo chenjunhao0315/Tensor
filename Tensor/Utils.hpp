@@ -100,12 +100,12 @@ private:
 
 template <typename Integer1, typename Integer2, typename std::enable_if<std::is_integral<Integer1>::value, bool>::type = true, typename std::enable_if<std::is_integral<Integer2>::value, bool>::type = true>
 integer_range<Integer2> irange(Integer1 begin, Integer2 end) {
-  return { static_cast<Integer2>(begin), std::max(static_cast<Integer2>(begin), end) };
+    return { static_cast<Integer2>(begin), std::max(static_cast<Integer2>(begin), end) };
 }
 
 template <typename Integer, typename std::enable_if<std::is_integral<Integer>::value, bool>::type = true>
 integer_range<Integer> irange(Integer end) {
-  return { Integer(), std::max(Integer(), end) };
+    return { Integer(), std::max(Integer(), end) };
 }
 // End Iterger Iterator
 
@@ -133,6 +133,19 @@ inline bool data_index_step(T& x, const T& X, Args&&... args) {
     }
     return false;
 }
+
+namespace utils {
+
+template <typename T>
+inline void transpose(int64_t M, int64_t N, const T* src, int64_t ld_src, T* dst, int64_t ld_dst) {
+    for (int64_t j = 0; j < N; j++) {
+        for (int64_t i = 0; i < M; i++) {
+            dst[j * ld_dst + i] = src[i * ld_src + j];
+        }
+    }
+}
+
+}   // end namespace utils
 
 }   // end namespace otter
 
