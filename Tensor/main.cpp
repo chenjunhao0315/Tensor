@@ -218,7 +218,7 @@ int main(int argc, const char * argv[]) {
     net.load_otter("nanodet-plus.otter", otter::CompileMode::Inference);
     net.summary();
 
-    net.load_weight("nanodet-plus-m-1.5x_416-opt.bin");
+    net.load_weight("nanodet-plus-m-1.5x_416-opt.bin", otter::Net::WeightType::Ncnn);
 
     std::vector<Object> objects;
 
@@ -367,29 +367,36 @@ int main(int argc, const char * argv[]) {
     for (size_t i = 0; i < objects.size(); i++) {
         const Object& obj = objects[i];
 
-        fprintf(stderr, "%d = %.5f at %.2f %.2f %.2f x %.2f\n", obj.label, obj.prob,
+        fprintf(stderr, "Label: %s (%.5f) x: %.2f y: %.2f width: %.2f height: %.2f\n", class_names[obj.label], obj.prob,
                 obj.rect.x, obj.rect.y, obj.rect.width, obj.rect.height);
+        
+        int x1 = obj.rect.x;
+        int y1 = obj.rect.y;
+        int x2 = obj.rect.x + obj.rect.width;
+        int y2 = obj.rect.y + obj.rect.height;
 
-        otter::cv::rectangle(image, obj.rect, otter::cv::Color(255, 0, 0));
+        int h = height * 0.02;
+        if (h < 22)
+            h = 22;
+        
+        const int classes = 80;
+        int offset = obj.label * 123457 % classes;
+        float red = 1;
+        float green = 0;
+        float blue = 0;
+        
+        int text_size = max(height / 500, 1);
+        int line_width = floor(min(width, height) / 1000.0) + 1;
+        
+        otter::cv::Color color(red * 255, green * 255, blue * 255);
 
-        char text[256];
-        sprintf(text, "%s %.1f%%", class_names[obj.label], obj.prob * 100);
+        auto rect_size = getTextSize(class_names[obj.label], otter::cv::FONT_HERSHEY_SIMPLEX, getFontScaleFromHeight(otter::cv::FONT_HERSHEY_SIMPLEX, h, text_size), text_size, nullptr);
+        
+        otter::cv::Rect rect((x1 - line_width / 2 < 0) ? 0 : x1 - line_width / 2, ((y1 - h * 1.8 + line_width / 2) < 0) ? 0 : y1 - h * 1.8 + line_width / 2, rect_size.width * 1.2, rect_size.height * 1.8);
+        otter::cv::rectangle(image, rect, color, -1);
+        otter::cv::rectangle(image, otter::cv::Point(x1, y1), otter::cv::Point(x2, y2), color, line_width);
 
-        int baseLine = 0;
-        otter::cv::Size label_size = otter::cv::getTextSize(text, otter::cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
-
-        int x = obj.rect.x;
-        int y = obj.rect.y - label_size.height - baseLine;
-        if (y < 0)
-            y = 0;
-        if (x + label_size.width > image.size(1))
-            x = image.size(1) - label_size.width;
-
-        otter::cv::rectangle(image, otter::cv::Rect(otter::cv::Point(x, y), otter::cv::Size(label_size.width, label_size.height + baseLine)),
-                      otter::cv::Color(255, 255, 255), -1);
-
-        otter::cv::putText(image, text, otter::cv::Point(x, y + label_size.height),
-                    otter::cv::FONT_HERSHEY_SIMPLEX, 0.5, otter::cv::Color(0, 0, 0));
+        otter::cv::putText(image, class_names[obj.label], otter::cv::Point((x1 - line_width / 2 < 0) ? 0 : x1 + rect_size.width * 0.1 - line_width / 2, ((y1 - h * 0.4) < 0) ? 0 : y1 - h * 0.4), otter::cv::FONT_HERSHEY_SIMPLEX, h, otter::cv::Color(0, 0, 0), text_size, otter::cv::LINE_AA, false);
     }
 
     otter::cv::save_image(image, "test");
