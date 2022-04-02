@@ -55,7 +55,7 @@ Param parse_param(std::fstream &f) {
             EARSE_SPACE(type);
             return Param("Partner", type);
         } else if ((mark = find_colon.find(':')) == std::string::npos) {
-            fprintf(stderr, "[Param] Syntax error!\n");
+            fprintf(stderr, "[Param] Syntax error didn't find ':' but get %s\n", find_colon.c_str());
         } else {
             if (mark == find_colon.size() - 1) {
                 arg = parse_arg(f);

@@ -36,15 +36,21 @@ public:
     
     int checkVerison(const DataReader& dr);
     int load_otter(const char *model_structure, CompileMode comopile_mode);
-    int load_weight(const DataReader& dr);
-    int load_weight(const char *weight_path);
-    int load_weight(FILE *f);
+    
+    enum class WeightType {
+        Otter,
+        Ncnn
+    };
+    
+    int load_weight(const char *weight_path, WeightType type = WeightType::Otter);
+    int load_weight(FILE *f, WeightType type = WeightType::Otter);
+    int load_weight(const DataReader& dr, WeightType type = WeightType::Otter);
+    int load_weight(const Initializer& initializer);
     
     int find_blob_index_by_name(std::string name) const;
     void update_input_output_indexes();
     void update_input_output_names();
 
-    
 public:
     NetOption option;
     
