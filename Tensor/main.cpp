@@ -222,8 +222,10 @@ int main(int argc, const char * argv[]) {
 
     std::vector<Object> objects;
 
+    otter::Clock l;
     auto img = otter::cv::load_image_rgb("5D4A0550cj.jpg");
-
+    l.stop_and_show();
+    
     int width = img.size(3);
     int height = img.size(2);
 

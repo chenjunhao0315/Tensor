@@ -187,7 +187,7 @@ void Net::compile(CompileMode comopile_mode) {
         Layer* layer = LayerRegistry::CreateLayer(type);
         layer->name = name;
         
-        printf("Create layer %d Type: %s Name: %s\n", (int)i, layer->type().c_str(), name.c_str());
+//        printf("Create layer %d Type: %s Name: %s\n", (int)i, layer->type().c_str(), name.c_str());
         
         layer->bottoms.resize(bottom_count);
         std::stringstream bottom_list(option["input"]);
