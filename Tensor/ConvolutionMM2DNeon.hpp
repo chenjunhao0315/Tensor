@@ -12,8 +12,6 @@
 
 namespace otter {
 
-class Tensor;
-
 Tensor& sgemm_conv2d_neon_out(
     const Tensor& self,
     const Tensor& weight,

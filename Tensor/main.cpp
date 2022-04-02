@@ -358,8 +358,10 @@ int main(int argc, const char * argv[]) {
         "hair drier", "toothbrush"
     };
 
-    auto image = img.to(otter::ScalarType::Byte).permute({0, 2, 3, 1}).squeeze(0).clone().contiguous();
-
+    otter::Clock i;
+    auto image = img.to(otter::ScalarType::Byte).permute({0, 2, 3, 1}).squeeze(0).contiguous();
+    i.stop_and_show();
+    
     for (size_t i = 0; i < objects.size(); i++) {
         const Object& obj = objects[i];
 

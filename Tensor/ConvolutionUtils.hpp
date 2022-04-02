@@ -34,6 +34,7 @@ struct ConvParams {
     bool is_depthwise(const Tensor& input, const Tensor& weight) const;
     bool use_cpu_depthwise3x3_winograd(const Tensor& input, const Tensor& weight) const;
     bool use_cpu_neon(const Tensor& input, const Tensor& weight) const;
+    bool use_cpu_x86(const Tensor& input, const Tensor& weight) const;
 };
 
 enum class ConvBackend {
@@ -44,10 +45,13 @@ enum class ConvBackend {
     Sgemm2dNeon,
     Sgemm2dNeon_1x1s1,
     Sgemm2dNeon_1x1s2,
+    Sgemm2dX86,
     Sw2dNeon_1x1s1,
-    SlideWin2dNeon,
+    SlideWin2d,
     DepthwiseNeon_3x3s2,
     DepthwiseNeon_5x5s1,
+    DepthwiseX86_3x3s1,
+    DepthwiseX86_3x3s2,
     Slow3d,
     Overrideable
 };

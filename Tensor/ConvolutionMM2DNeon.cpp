@@ -19,7 +19,7 @@
 namespace otter {
 
 #ifdef __ARM_NEON__
-void im2col_sgemm_conv2d_impl(
+void im2col_sgemm_conv2d_impl_neon(
     const Tensor& im2col_,
     const Tensor& kernel_pack4x4_,
     const Tensor& bias_,
@@ -46,7 +46,7 @@ void im2col_sgemm_conv2d_impl(
         packHeight  = input_channels;
         packWidth   = 4 * kernelSize;
     }
-    tmp = otter::full({packChannel, packHeight, packWidth}, -1, ScalarType::Float);
+    tmp = otter::empty({packChannel, packHeight, packWidth}, ScalarType::Float);
     
     auto tmp_a    = tmp.accessor<float, 3>();
     auto im2col_a = im2col.accessor<float, 3>();
@@ -959,7 +959,7 @@ void im2col_sgemm_conv2d_impl(
 }
 
 #else
-void im2col_sgemm_conv2d_impl(const Tensor& im2col_, const Tensor& kernel_pack4x4_, const Tensor& bias_, int64_t input_channels, int64_t output_channels, Tensor& output) {}
+void im2col_sgemm_conv2d_impl_neon(const Tensor& im2col_, const Tensor& kernel_pack4x4_, const Tensor& bias_, int64_t input_channels, int64_t output_channels, Tensor& output) {}
 #endif
 
 #ifdef __ARM_NEON__
@@ -1091,7 +1091,7 @@ Tensor& sgemm_conv2d_1x1s1_neon_out(
     Tensor im2col = self.view({self.size(0), self.size(1), -1});
     Tensor kernel_pack4x4;
     otter::convolution_im2col_sgemm_transform_kernel_neon(weight, kernel_pack4x4, input_channels, output_channels, 1, 1);
-    otter::im2col_sgemm_conv2d_impl(im2col, kernel_pack4x4, bias, input_channels, output_channels, output);
+    otter::im2col_sgemm_conv2d_impl_neon(im2col, kernel_pack4x4, bias, input_channels, output_channels, output);
     
     return output;
 }
@@ -1105,11 +1105,9 @@ Tensor sgemm_conv2d_1x1s1_neon(
     IntArrayRef padding) {
     
     auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
-    auto out = otter::empty(output_size, self.options());
+    auto output = otter::empty(output_size, self.options());
     
-    sgemm_conv2d_1x1s1_neon_out(self, weight, bias, kernel_size, stride, padding, out);
-    
-    return out;
+    return sgemm_conv2d_1x1s1_neon_out(self, weight, bias, kernel_size, stride, padding, output);
 }
 
 Tensor& sgemm_conv2d_1x1s2_neon_out(
@@ -1202,7 +1200,7 @@ Tensor& sgemm_conv2d_neon_out(
     Tensor kernel_pack4x4;
     otter::convolution_im2col_sgemm_transform_kernel_neon(weight, kernel_pack4x4, input_channels, output_channels, kernel_width, kernel_height);
     
-    im2col_sgemm_conv2d_impl(
+    im2col_sgemm_conv2d_impl_neon(
         im2col,
         kernel_pack4x4,
         bias,
@@ -1224,9 +1222,7 @@ Tensor sgemm_conv2d_neon(
     auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
     auto out = otter::empty(output_size, self.options());
     
-    sgemm_conv2d_neon_out(self, weight, bias, kernel_size, stride, padding, out);
-    
-    return out;
+    return sgemm_conv2d_neon_out(self, weight, bias, kernel_size, stride, padding, out);
 }
 
 void conv2d_1x1s1_neon_impl(
