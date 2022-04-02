@@ -229,8 +229,8 @@ int main(int argc, const char * argv[]) {
     int width = img.size(3);
     int height = img.size(2);
 
-    //     const int target_size = 320;
-    const int target_size = 416;
+    const int target_size = 320;
+//    const int target_size = 416;
     const float prob_threshold = 0.4f;
     const float nms_threshold = 0.5f;
 
