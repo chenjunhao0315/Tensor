@@ -6,10 +6,19 @@
 //
 
 #include "TensorInterpolation.hpp"
+#include "Tensor.hpp"
 
 namespace otter {
 
 Tensor Interpolate(const Tensor& input, IntArrayRef size, IntArrayRef scale_factor, InterpolateMode mode, bool align_corners) {
+    
+    if (scale_factor.empty()) {
+        scale_factor = {0, 0};
+    } else if (size.empty()) {
+        size = {input.size(2) * scale_factor[0], input.size(3) * scale_factor[1]};
+    } else if (scale_factor.empty() && size.empty()) {
+        OTTER_CHECK(false, "Invalid interpolation");
+    }
     
     switch (mode) {
         case InterpolateMode::NEAREST:
