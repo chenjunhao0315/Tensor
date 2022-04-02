@@ -141,10 +141,19 @@ int ConvolutionLayer::init_model() {
 }
 
 int ConvolutionLayer::load_model(const Initializer& initializer) {
-    if (bias_term) {
-        bias_data = initializer.load({out_channels});
+    if (initializer.type != InitializerType::Ncnn) {
+        if (bias_term) {
+            bias_data = initializer.load({out_channels}, 1);
+        }
     }
-    weight_data = initializer.load({out_channels, in_channels / groups, kernel_height, kernel_width});
+    
+    weight_data = initializer.load({out_channels, in_channels / groups, kernel_height, kernel_width}, 0);
+    
+    if (initializer.type == InitializerType::Ncnn) {
+        if (bias_term) {
+            bias_data = initializer.load({out_channels}, 1);
+        }
+    }
     
     return 0;
 }

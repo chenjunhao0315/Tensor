@@ -13,23 +13,43 @@
 
 namespace otter {
 
+enum class InitializerType {
+    Otter,
+    Ncnn,
+    XavierNormal,
+    XavierUniform
+};
+
 class Initializer {
 public:
     Initializer();
     
     virtual ~Initializer();
     
-    virtual Tensor load(IntArrayRef shape) const = 0;
+    virtual Tensor load(IntArrayRef shape, int type) const = 0;
+    
+public:
+    InitializerType type;
 };
 
 class InitializerFromDataReader : public Initializer {
 public:
-    InitializerFromDataReader(const DataReader& dr);
+    InitializerFromDataReader(const DataReader& dr_);
     virtual ~InitializerFromDataReader();
     
-    virtual Tensor load(IntArrayRef shape) const;
+    virtual Tensor load(IntArrayRef shape, int type) const;
 private:
-    const DataReader& dr_;
+    const DataReader& dr;
+};
+
+class InitializerNcnnFromDataReader : public Initializer {
+public:
+    InitializerNcnnFromDataReader(const DataReader& dr_);
+    virtual ~InitializerNcnnFromDataReader();
+    
+    virtual Tensor load(IntArrayRef shape, int type) const;
+private:
+    const DataReader& dr;
 };
 
 class InitializerXavierNormal : public Initializer {

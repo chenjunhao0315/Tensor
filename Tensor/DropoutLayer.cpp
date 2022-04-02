@@ -18,6 +18,7 @@ DropoutLayer::DropoutLayer() {
 }
 
 int DropoutLayer::parse_param(LayerOption& option, ParamDict &pd) {
+    pd.clear();
     float prob = opt_find_float(option, "probability", 1.f);
     
     pd.set((int)DropoutParam::Probability, prob);

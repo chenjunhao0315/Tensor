@@ -3057,7 +3057,7 @@ Tensor conv2d_1x1s1_neon(
     
     auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
     auto output = otter::empty(output_size, self.options());
-    auto input = otter::constant_pad(self, {padding[0], padding[1], padding[0], padding[1]}, 0);
+    auto input = otter::constant_pad(self, {padding[0], padding[0], padding[1], padding[1]}, 0);
     
     return conv2d_1x1s1_neon_out(input, weight, bias, kernel_size, stride, padding, output);
 }

@@ -10,6 +10,9 @@
 #include "Net.hpp"
 #include "LayerRegistry.hpp"
 #include "Initializer.hpp"
+#include "Otter.hpp"
+
+#include <regex>
 
 namespace otter {
 
@@ -76,14 +79,18 @@ void Net::graph_construct() {
     
     // construct layer_map
 #define MAP_UPDATE  \
-    for (const auto i : otter::irange(layer_options.size())) {   \
-        std::stringstream top_list(layer_options[i]["output"]); \
-        std::string top_name;   \
-        std::getline(top_list, top_name, ',');  \
-        layer_map[top_name] = (int)i;    \
+    for (const auto i : otter::irange(layer_options.size())) {      \
+        std::stringstream top_list(layer_options[i]["output"]);     \
+        int top_count = (int)std::count(layer_options[i]["output"].begin(), layer_options[i]["output"].end(), ',') + 1; \
+        std::string top_name;                           \
+        for (int j = 0; j < top_count; ++j) {           \
+            std::getline(top_list, top_name, ',');      \
+            EARSE_SPACE(top_name);                      \
+            layer_map[top_name] = (int)i;               \
+        }                                               \
     }
     
-    MAP_UPDATE
+    MAP_UPDATE;
     
     for (const auto i : otter::irange(layer_count)) {
         LayerOption& layer = layer_options[i];
@@ -105,6 +112,7 @@ void Net::graph_construct() {
             std::string input_name;
             std::getline(input_list, input_name, ',');
             EARSE_SPACE(input_name);
+//            printf("layer name: %s consume: %s\n", layer["name"].c_str(), input_name.c_str());
             layer_options[layer_map[input_name]]["consume_name"] += (layer["name"] + ",");
         }
     }
@@ -139,10 +147,12 @@ void Net::graph_construct() {
                 size_t target_index = target_change_layer["input"].find(target_name);
                 if (target_index == std::string::npos)
                     target_index = 0;
-                target_change_layer["input"].replace(target_index, std::max(split_name.length(), target_name.length()), split_name);
+//                printf("before replace %s index: %d length: %d\n", target_change_layer["input"].c_str(), target_index, std::max(split_name.length(), target_name.length()));
+                target_change_layer["input"] = std::regex_replace(target_change_layer["input"], std::regex(target_name), split_name);
+//                printf("after replace %s\n", target_change_layer["input"].c_str());
             }
             layer_options.insert(layer_options.begin() + i + 1, auto_opt);
-            MAP_UPDATE
+            MAP_UPDATE;
         }
     }
     blob_count_ = 0;
@@ -177,7 +187,7 @@ void Net::compile(CompileMode comopile_mode) {
         Layer* layer = LayerRegistry::CreateLayer(type);
         layer->name = name;
         
-//        printf("Create layer %d Type: %s Name: %s\n", (int)i, layer->type().c_str(), name.c_str());
+        printf("Create layer %d Type: %s Name: %s\n", (int)i, layer->type().c_str(), name.c_str());
         
         layer->bottoms.resize(bottom_count);
         std::stringstream bottom_list(option["input"]);
@@ -462,17 +472,37 @@ int Net::checkVerison(const DataReader &dr) {
     return 0;
 }
 
+int Net::load_otter(const char *model_structure, CompileMode comopile_mode) {
+    core::OtterLeader leader;
+    leader.readProject(model_structure);
+    
+    for (int i = 0; i < leader.teams_size(); ++i) {
+        std::vector<core::Param> params = leader.getTeamParams(i);
+        std::string type = leader.getTeamName(i);
+        LayerOption opt;
+        opt["type"] = type;
+        for (int j = 0; j < params.size(); ++j) {
+            core::Param param = params[j];
+            opt[param.type] = param.info;
+        }
+        this->addLayer(opt);
+    }
+    this->compile(comopile_mode);
+    
+    return 0;
+}
+
 int Net::load_weight(const DataReader& dr) {
     if (layers.size() == 0) {
         fprintf(stderr, "[Net] Empty graph!\n");
         return -1;
     }
     
-    checkVerison(dr);
+//    checkVerison(dr);
     
     int layer_count = (int)layers.size();
     
-    InitializerFromDataReader initializer(dr);
+    InitializerNcnnFromDataReader initializer(dr);
     
     for (const auto i : otter::irange(layer_count)) {
         Layer* layer = layers[i];
