@@ -29,8 +29,8 @@ int UpsampleLayer::parse_param(LayerOption& option, ParamDict& pd) {
     }
     int output_height = opt_find_int(option, "output_height", 0);
     int output_width = opt_find_int(option, "output_width", 0);
-    float scale_height = opt_find_float(option, "scale_height", 0.f);
-    float scale_width = opt_find_float(option, "scale_width", 0.f);
+    float scale_height = opt_find_float(option, "scale_height", 1.f);
+    float scale_width = opt_find_float(option, "scale_width", 1.f);
     int align_corner = 0;
     if (opt_find(option, "align_corner")) {
         if (option["align_corner"] == "false")
@@ -39,8 +39,7 @@ int UpsampleLayer::parse_param(LayerOption& option, ParamDict& pd) {
             align_corner = 1;
     }
     
-    int stride = -1;
-    stride = opt_find_int(option, "stride", 1);
+    int stride = opt_find_int(option, "stride", 1);
     
     OTTER_CHECK(mode <= 2, "Unsupport upsample type");
     
@@ -51,6 +50,43 @@ int UpsampleLayer::parse_param(LayerOption& option, ParamDict& pd) {
     pd.set((int)UpsampleParam::Width_scale, scale_width);
     pd.set((int)UpsampleParam::Stride, stride);
     pd.set((int)UpsampleParam::Align_corner, align_corner);
+    
+    return 0;
+}
+
+int UpsampleLayer::compute_output_shape(ParamDict& pd) {
+    auto shape = bottom_shapes[0].clone();
+    auto shape_a = shape.accessor<int, 1>();
+    auto bottom_shape_a = bottom_shapes[0].accessor<int, 1>();
+    int output_height = pd.get((int)UpsampleParam::Output_height, 0);
+    int output_width = pd.get((int)UpsampleParam::Output_width, 0);
+    float scale_height = pd.get((int)UpsampleParam::Height_scale, 0.f);
+    float scale_width = pd.get((int)UpsampleParam::Width_scale, 0.f);
+    int stride = pd.get((int)UpsampleParam::Stride, 1);
+    
+    if (output_height && output_width) {
+        scale_height = output_height / bottom_shape_a[2];
+        scale_width  = output_width  / bottom_shape_a[3];
+    }
+    
+    if (stride) {
+        scale_height = stride;
+        scale_width  = stride;
+    }
+    
+    if (scale_height && scale_width) {
+        output_height = bottom_shape_a[2] * scale_height;
+        output_width = bottom_shape_a[3] * scale_width;
+    }
+    pd.set((int)UpsampleParam::Height_scale, scale_height);
+    pd.set((int)UpsampleParam::Width_scale, scale_width);
+    pd.set((int)UpsampleParam::Output_height, output_height);
+    pd.set((int)UpsampleParam::Output_width, output_width);
+    
+    shape_a[2] = output_height;
+    shape_a[3] = output_width;
+    
+    pd.set(OUTPUT_SHAPE_HINT, shape);
     
     return 0;
 }
@@ -67,34 +103,12 @@ int UpsampleLayer::load_param(const ParamDict &pd) {
     return 0;
 }
 
-int UpsampleLayer::compute_output_shape(ParamDict& pd) {
-    auto shape = bottom_shapes[0].clone();
-    auto shape_a = shape.accessor<int, 1>();
-    auto bottom_shape_a = bottom_shapes[0].accessor<int, 1>();
-    int output_height = pd.get((int)UpsampleParam::Output_height, 0);
-    int output_width = pd.get((int)UpsampleParam::Output_width, 0);
-    int stride = pd.get((int)UpsampleParam::Stride, -1);
-    if (stride > 0) {
-        output_height = bottom_shape_a[2] * stride;
-        output_width = bottom_shape_a[3] * stride;
-    }
-    pd.set((int)UpsampleParam::Output_height, output_height);
-    pd.set((int)UpsampleParam::Output_width, output_width);
-    
-    shape_a[2] = output_height;
-    shape_a[3] = output_width;
-    
-    pd.set(OUTPUT_SHAPE_HINT, shape);
-    
-    return 0;
-}
-
 int UpsampleLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const {
-    int input_height = bottom_blob.size(2);
-    int input_width = bottom_blob.size(3);
+    int input_height = (int)bottom_blob.size(2);
+    int input_width = (int)bottom_blob.size(3);
     
-    int output_height = input_height * stride;
-    int output_width = input_width * stride;
+    int output_height = input_height * scale_height;
+    int output_width = input_width * scale_width;
     
     if (mode == 1) {
         top_blob = otter::native::upsample_nearest2d(bottom_blob, {output_height, output_width}, scale_height, scale_width);

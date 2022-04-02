@@ -816,9 +816,7 @@ void upsample_nearest2d_kernel_impl(
     double scales_h,
     double scales_w) {
     
-    bool check;
-    
-    if ((check = input.is_contiguous(MemoryFormat::ChannelsLast))) {
+    if ((input.is_contiguous(MemoryFormat::ChannelsLast))) {
         OTTER_DISPATCH_FLOATING_TYPES(input.scalar_type(), "upsample_nearest2d_channels_last", [&] {
             cpu_upsample_nearest_channels_last<scalar_t, scale_t, nearest_idx>(output, input, {scales_h, scales_w});
         });
