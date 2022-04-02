@@ -34,6 +34,10 @@
 		760704DE27E6425300D5E00D /* ImageThreshold.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760704DC27E6425300D5E00D /* ImageThreshold.cpp */; };
 		760A333227F5F733003F0542 /* ChannelShuffle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333027F5F733003F0542 /* ChannelShuffle.cpp */; };
 		760A333527F5F84F003F0542 /* ChannelShuffleKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333327F5F84F003F0542 /* ChannelShuffleKernel.cpp */; };
+		760A333827F62553003F0542 /* ChannelShuffleLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333627F62553003F0542 /* ChannelShuffleLayer.cpp */; };
+		760A333B27F62800003F0542 /* SliceLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333927F62800003F0542 /* SliceLayer.cpp */; };
+		760A333E27F6585E003F0542 /* Otter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333C27F6585E003F0542 /* Otter.cpp */; };
+		760A334127F7949F003F0542 /* SigmoidLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333F27F7949F003F0542 /* SigmoidLayer.cpp */; };
 		7620AF6E27B4060A0081C210 /* RangeFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF6C27B4060A0081C210 /* RangeFactory.cpp */; };
 		7620AF7127B406F70081C210 /* RangeFactoryKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF6F27B406F70081C210 /* RangeFactoryKernel.cpp */; };
 		7620AF7427B4F3F50081C210 /* TensorMaker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF7227B4F3F50081C210 /* TensorMaker.cpp */; };
@@ -220,6 +224,14 @@
 		760A333127F5F733003F0542 /* ChannelShuffle.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ChannelShuffle.hpp; sourceTree = "<group>"; };
 		760A333327F5F84F003F0542 /* ChannelShuffleKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChannelShuffleKernel.cpp; sourceTree = "<group>"; };
 		760A333427F5F84F003F0542 /* ChannelShuffleKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ChannelShuffleKernel.hpp; sourceTree = "<group>"; };
+		760A333627F62553003F0542 /* ChannelShuffleLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChannelShuffleLayer.cpp; sourceTree = "<group>"; };
+		760A333727F62553003F0542 /* ChannelShuffleLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ChannelShuffleLayer.hpp; sourceTree = "<group>"; };
+		760A333927F62800003F0542 /* SliceLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SliceLayer.cpp; sourceTree = "<group>"; };
+		760A333A27F62800003F0542 /* SliceLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SliceLayer.hpp; sourceTree = "<group>"; };
+		760A333C27F6585E003F0542 /* Otter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Otter.cpp; sourceTree = "<group>"; };
+		760A333D27F6585E003F0542 /* Otter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Otter.hpp; sourceTree = "<group>"; };
+		760A333F27F7949F003F0542 /* SigmoidLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SigmoidLayer.cpp; sourceTree = "<group>"; };
+		760A334027F7949F003F0542 /* SigmoidLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SigmoidLayer.hpp; sourceTree = "<group>"; };
 		7620AF6C27B4060A0081C210 /* RangeFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RangeFactory.cpp; sourceTree = "<group>"; };
 		7620AF6D27B4060A0081C210 /* RangeFactory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RangeFactory.hpp; sourceTree = "<group>"; };
 		7620AF6F27B406F70081C210 /* RangeFactoryKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RangeFactoryKernel.cpp; sourceTree = "<group>"; };
@@ -785,6 +797,12 @@
 				769279D327D49BC90088BD9F /* UpsampleLayer.hpp */,
 				76927B3327D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp */,
 				76927B3427D4E2780088BD9F /* Yolov3DetectionOutputLayer.hpp */,
+				760A333627F62553003F0542 /* ChannelShuffleLayer.cpp */,
+				760A333727F62553003F0542 /* ChannelShuffleLayer.hpp */,
+				760A333927F62800003F0542 /* SliceLayer.cpp */,
+				760A333A27F62800003F0542 /* SliceLayer.hpp */,
+				760A333F27F7949F003F0542 /* SigmoidLayer.cpp */,
+				760A334027F7949F003F0542 /* SigmoidLayer.hpp */,
 			);
 			name = Layer;
 			sourceTree = "<group>";
@@ -882,6 +900,8 @@
 			children = (
 				76486AEC27DBD02B0078FF9B /* 3rdparty */,
 				7637DDB027ED524D000A5B08 /* main.cpp */,
+				760A333C27F6585E003F0542 /* Otter.cpp */,
+				760A333D27F6585E003F0542 /* Otter.hpp */,
 				76E6C53B27A511570036A26F /* Config.hpp */,
 				762E3B4C27BD499D0075F983 /* Macro.hpp */,
 				76F3377F27B3068E00E3AEF1 /* OTensor.hpp */,
@@ -1058,6 +1078,7 @@
 				760704BB27E3A31700D5E00D /* Transformation.cpp in Sources */,
 				76F336C127A5B61E00E3AEF1 /* Scalar.cpp in Sources */,
 				7687217527C14890006640CF /* InputLayer.cpp in Sources */,
+				760A333827F62553003F0542 /* ChannelShuffleLayer.cpp in Sources */,
 				76F336CD27A5D17E00E3AEF1 /* BinaryOps.cpp in Sources */,
 				760382CD27BFFE2F00CD599F /* StringUtils.cpp in Sources */,
 				76F0064927B6CCA9009D67F5 /* TensorBlasKernel.cpp in Sources */,
@@ -1077,6 +1098,7 @@
 				7620AF6E27B4060A0081C210 /* RangeFactory.cpp in Sources */,
 				7687218827C35B9F006640CF /* BatchNormalization.cpp in Sources */,
 				7628E17D27CFCFCB00B136FA /* Dropout.cpp in Sources */,
+				760A333E27F6585E003F0542 /* Otter.cpp in Sources */,
 				76E6C52E27A505FE0036A26F /* TensorOptions.cpp in Sources */,
 				762B4D6927EF7E3D00A98E34 /* flat_hash_map.cpp in Sources */,
 				7620AF7427B4F3F50081C210 /* TensorMaker.cpp in Sources */,
@@ -1113,6 +1135,8 @@
 				76F0064327B67E4C009D67F5 /* TensorProperties.cpp in Sources */,
 				76F336D627A7AD1600E3AEF1 /* TensorFunction.cpp in Sources */,
 				760704C227E3B2B800D5E00D /* Generator.cpp in Sources */,
+				760A333B27F62800003F0542 /* SliceLayer.cpp in Sources */,
+				760A334127F7949F003F0542 /* SigmoidLayer.cpp in Sources */,
 				762B4D6C27EF80AB00A98E34 /* CPUProfilingAllocator.cpp in Sources */,
 				76F336DD27A8FCE600E3AEF1 /* EmptyTensor.cpp in Sources */,
 				76486AEA27DBC8FF0078FF9B /* Vision.cpp in Sources */,

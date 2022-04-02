@@ -17,6 +17,7 @@ ConcatLayer::ConcatLayer() {
 }
 
 int ConcatLayer::parse_param(LayerOption& option, ParamDict& pd) {
+    pd.clear();
     int axis = opt_find_int(option, "axis", 1);
     
     pd.set((int)ConcatParam::Axis, axis);

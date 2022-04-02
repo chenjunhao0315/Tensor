@@ -45,10 +45,18 @@ int BatchNormalizationLayer::init_model() {
 
 int BatchNormalizationLayer::load_model(const Initializer& initializer) {
     auto shape_a = bottom_shapes[0].accessor<int, 1>();
-    bias_data = initializer.load({shape_a[1]});
-    scale_data = initializer.load({shape_a[1]});
-    mean_data = initializer.load({shape_a[1]});
-    var_data = initializer.load({shape_a[1]});
+    
+    if (initializer.type != InitializerType::Ncnn) {
+        bias_data = initializer.load({shape_a[1]}, 1);
+        scale_data = initializer.load({shape_a[1]}, 1);
+        mean_data = initializer.load({shape_a[1]}, 1);
+        var_data = initializer.load({shape_a[1]}, 1);
+    } else {
+        scale_data = initializer.load({shape_a[1]}, 1);
+        mean_data = initializer.load({shape_a[1]}, 1);
+        var_data = initializer.load({shape_a[1]}, 1);
+        bias_data = initializer.load({shape_a[1]}, 1);
+    }
     
     return 0;
 }

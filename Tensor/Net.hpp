@@ -35,6 +35,7 @@ public:
     void summary();
     
     int checkVerison(const DataReader& dr);
+    int load_otter(const char *model_structure, CompileMode comopile_mode);
     int load_weight(const DataReader& dr);
     int load_weight(const char *weight_path);
     int load_weight(FILE *f);

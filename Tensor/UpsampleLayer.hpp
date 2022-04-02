@@ -32,6 +32,7 @@ private:
     float scale_height;
     float scale_width;
     int stride;
+    int align_corner;
 };
 
 enum class UpsampleParam {
@@ -40,7 +41,8 @@ enum class UpsampleParam {
     Output_width,
     Height_scale,
     Width_scale,
-    Stride
+    Stride,
+    Align_corner
 };
 
 }   // end namespace otter

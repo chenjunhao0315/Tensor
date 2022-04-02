@@ -115,9 +115,9 @@ public:
     scalar_t height;
 };
 
-template<typename scalar_t> template<typename scalar_t2> inline
-Size_<scalar_t>::operator Size_<scalar_t2>() const {
-    return Size_<scalar_t2>(static_cast<scalar_t2>(width), static_cast<scalar_t2>(height));
+template<typename scalar_t> template<typename scalar_t_2> inline
+Size_<scalar_t>::operator Size_<scalar_t_2>() const {
+    return Size_<scalar_t_2>(static_cast<scalar_t_2>(width), static_cast<scalar_t_2>(height));
 }
 
 template <typename scalar_t>
@@ -137,6 +137,15 @@ class Rect_ {
 public:
     Rect_() : x(0), y(0), width(0), height(0) {}
     Rect_(scalar_t x_, scalar_t y_, scalar_t width_, scalar_t height_) : x(x_), y(y_), width(width_), height(height_) {}
+    
+    Rect_(const Rect_& r) = default;
+    Rect_(Rect_&& r) noexcept = default;
+    
+    Rect_& operator = (const Rect_& r) = default;
+    Rect_& operator = (Rect_&& r) noexcept = default;
+    
+    Rect_(const Point_<scalar_t>& org, const Size_<scalar_t>& sz);
+    Rect_(const Point_<scalar_t>& pt1, const Point_<scalar_t>& pt2);
     
     inline Point_<scalar_t> top_left() const {
         return Point_<scalar_t>(x, y);
@@ -158,6 +167,8 @@ public:
         return x <= 0 || y <= 0 || width <= 0 || height <= 0;
     }
     
+    template<typename scalar_t_2> operator Rect_<scalar_t_2>() const;
+    
     inline bool contains(const Point_<scalar_t>& pt) const {
         return x <= pt.x && pt.x < x + width && y <= pt.y && pt.y < y + height;
     }
@@ -173,15 +184,46 @@ typedef Rect_<float> Rect2f;
 typedef Rect_<double> Rect2d;
 typedef Rect2i Rect;
 
+template<typename scalar_t>
+inline Rect_<scalar_t>::Rect_(const Point_<scalar_t>& org, const Size_<scalar_t>& sz)
+    : x(org.x), y(org.y), width(sz.width), height(sz.height) {}
+
+template<typename scalar_t>
+inline Rect_<scalar_t>::Rect_(const Point_<scalar_t>& pt1, const Point_<scalar_t>& pt2) {
+    x = std::min(pt1.x, pt2.x);
+    y = std::min(pt1.y, pt2.y);
+    width = std::max(pt1.x, pt2.x) - x;
+    height = std::max(pt1.y, pt2.y) - y;
+}
+
+template<typename scalar_t> template<typename scalar_t_2>
+inline Rect_<scalar_t>::operator Rect_<scalar_t_2>() const
+{
+    return Rect_<scalar_t_2>(static_cast<scalar_t_2>(x), static_cast<scalar_t_2>(y), static_cast<scalar_t_2>(width), static_cast<scalar_t_2>(height));
+}
+
 template<typename scalar_t> static inline
 Rect_<scalar_t>& operator &= (Rect_<scalar_t>& a, const Rect_<scalar_t>& b) {
-    scalar_t x1 = std::max(a.x, b.x);
-    scalar_t y1 = std::max(a.y, b.y);
-    a.width = std::min(a.x + a.width, b.x + b.width) - x1;
-    a.height = std::min(a.y + a.height, b.y + b.height) - y1;
-    a.x = x1;
-    a.y = y1;
-    if( a.width <= 0 || a.height <= 0 )
+    if (a.empty() || b.empty()) {
+        a = Rect();
+        return a;
+    }
+    const Rect_<scalar_t>& Rx_min = (a.x < b.x) ? a : b;
+    const Rect_<scalar_t>& Rx_max = (a.x < b.x) ? b : a;
+    const Rect_<scalar_t>& Ry_min = (a.y < b.y) ? a : b;
+    const Rect_<scalar_t>& Ry_max = (a.y < b.y) ? b : a;
+    
+    if ((Rx_min.x < 0 && Rx_min.x + Rx_min.width < Rx_max.x) ||
+        (Ry_min.y < 0 && Ry_min.y + Ry_min.height < Ry_max.y)) {
+        a = Rect();
+        return a;
+    }
+    
+    a.width = std::min(Rx_min.width - (Rx_max.x - Rx_min.x), Rx_max.width);
+    a.height = std::min(Ry_min.height - (Ry_max.y - Ry_min.y), Ry_max.height);
+    a.x = Rx_max.x;
+    a.y = Ry_max.y;
+    if (a.empty())
         a = Rect();
     return a;
 }
@@ -232,9 +274,9 @@ inline std::ostream& operator<<(std::ostream& o, const Rect_<scalar_t>& rect) {
 class RotatedRect {
 public:
     RotatedRect();
-
+    
     RotatedRect(const Point2f& center, const Size2f& size, float angle);
-
+    
     RotatedRect(const Point2f& point1, const Point2f& point2, const Point2f& point3);
     
     void points(Point2f pts[]) const;
@@ -251,10 +293,10 @@ public:
 };
 
 inline RotatedRect::RotatedRect()
-    : center(), size(), angle(0) {}
+: center(), size(), angle(0) {}
 
 inline RotatedRect::RotatedRect(const Point2f& _center, const Size2f& _size, float _angle)
-    : center(_center), size(_size), angle(_angle) {}
+: center(_center), size(_size), angle(_angle) {}
 
 class Color {
 public:

@@ -16,6 +16,7 @@ SplitLayer::SplitLayer() {
 }
 
 int SplitLayer::compute_output_shape(ParamDict &pd) {
+    pd.clear();
     pd.set(OUTPUT_SHAPE_HINT, bottom_shapes[0]);
     
     return 0;

@@ -20,6 +20,7 @@ Yolov3DetectionOutputLayer::Yolov3DetectionOutputLayer() {
 }
 
 int Yolov3DetectionOutputLayer::parse_param(LayerOption& option, ParamDict& pd) {
+    pd.clear();
     int num_class = opt_find_int(option, "num_class", 80);
     int num_box = opt_find_int(option, "num_box", 3);
     float confidence_threshold = opt_find_float(option, "confidence_threshold", 0.25f);
@@ -77,7 +78,6 @@ int Yolov3DetectionOutputLayer::parse_param(LayerOption& option, ParamDict& pd) 
             anchors_scale_a[i] = scale;
         }
     }
-    
     
     pd.set((int)Yolov3DetectionParam::Num_class, num_class);
     pd.set((int)Yolov3DetectionParam::Num_box, num_box);

@@ -18,6 +18,7 @@ ShortCutLayer::ShortCutLayer() {
 }
 
 int ShortCutLayer::parse_param(LayerOption& option, ParamDict &pd) {
+    pd.clear();
     // alpha beta
     
     return 0;
