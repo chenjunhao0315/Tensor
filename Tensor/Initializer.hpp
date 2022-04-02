@@ -57,7 +57,7 @@ public:
     InitializerXavierNormal(double gain_);
     virtual ~InitializerXavierNormal();
     
-    virtual Tensor load(IntArrayRef shape) const;
+    virtual Tensor load(IntArrayRef shape, int type) const;
 private:
     double gain;
 };
@@ -67,7 +67,7 @@ public:
     InitializerXavierUniform(double gain_);
     virtual ~InitializerXavierUniform();
     
-    virtual Tensor load(IntArrayRef shape) const;
+    virtual Tensor load(IntArrayRef shape, int type) const;
 private:
     double gain;
 };

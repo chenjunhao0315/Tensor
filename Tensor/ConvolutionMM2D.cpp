@@ -362,7 +362,6 @@ Tensor& slide_win_conv2d_out(
     otter::parallel_for(0, output_channels, 0, [&](int64_t start, int64_t end) {
         for (const auto p : otter::irange(start, end)) {
             OTTER_DISPATCH_ALL_TYPES(self.scalar_type(), "slide_win_conv2d", [&]{
-                using scalar_t = float;
                 auto output_a = output.accessor<scalar_t, 4>()[0];
                 auto input_a = self.accessor<scalar_t, 4>()[0];
                 scalar_t *outptr = output_a[p].data();

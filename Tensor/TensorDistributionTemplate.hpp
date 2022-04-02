@@ -125,7 +125,7 @@ OTTER_CHECK(var >= min && var <= max, name , " is out of bounds"); \
 template<template<typename> class uniform_kernel, typename RNG>
 Tensor& uniform_impl_(Tensor& self, double from, double to, Generator generator) {
     OTTER_DISPATCH_FLOATING_TYPES(self.scalar_type(), "check_uniform_bounds", [&] {
-        const auto dtype = self.dtype();
+//        const auto dtype = self.dtype();
         const auto min = static_cast<double>(std::numeric_limits<scalar_t>::lowest());
         const auto max = static_cast<double>(std::numeric_limits<scalar_t>::max());
         CHECK_OUT_OF_BOUNDS(from, "from", min, max);
@@ -187,7 +187,7 @@ if (var < -(1LL << digits) || var > (1LL << digits)) { \
 OTTER_CHECK(false, "Out out bound!") \
 }
 
-static void check_from_to_in_range(int64_t from, int64_t to_inc, otter::TypeMeta dtype) {
+static inline void check_from_to_in_range(int64_t from, int64_t to_inc, otter::TypeMeta dtype) {
     const auto scalar_type = typeMetaToScalarType(dtype);
     if (isFloatingType(scalar_type)) {
         OTTER_DISPATCH_FLOATING_TYPES(scalar_type, "check_random_fp_bounds", [&] {
@@ -290,7 +290,7 @@ struct RandomKernel {
 
 
 #ifdef CPU_CAPABILITY_AVX2
-static void normal_fill_16_AVX2(float *data,
+static inline void normal_fill_16_AVX2(float *data,
                                 const __m256* two_pi,
                                 const __m256* one,
                                 const __m256* minus_two,
