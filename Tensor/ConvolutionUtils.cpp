@@ -116,4 +116,15 @@ bool ConvParams::use_cpu_neon(const Tensor& input, const Tensor& weight) const {
 #endif
 }
 
+bool ConvParams::use_cpu_x86(const Tensor& input, const Tensor& weight) const {
+#if __SSE2__
+    return (input.scalar_type() == ScalarType::Float) &&
+    (input.scalar_type() == ScalarType::Float) &&
+    (input.device() == Device::CPU) &&
+    (weight.device() == Device::CPU);
+#else
+    return false;
+#endif
+}
+
 }   // end namespace otter

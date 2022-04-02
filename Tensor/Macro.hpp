@@ -62,5 +62,13 @@ __attribute__((no_sanitize("signed-integer-overflow")))
 #define OTTER_CLANG_HAS_WARNING(flag) 0
 #endif
 
+#if defined(_MSC_VER)
+#define OTTER_ALWAYS_INLINE __forceinline
+#elif __has_attribute(always_inline) || defined(__GNUC__)
+#define OTTER_ALWAYS_INLINE __attribute__((__always_inline__)) inline
+#else
+#define OTTER_ALWAYS_INLINE inline
+#endif
+
 
 #endif /* Macro_h */
