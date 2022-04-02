@@ -1032,7 +1032,7 @@ static void im2col_sgemm_conv2d_impl_x86(
     const Tensor& bias_,
     int64_t input_channels,
     int64_t output_channels,
-    ensor& output) {
+    Tensor& output) {
 }
 #endif
 
