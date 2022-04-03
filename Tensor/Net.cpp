@@ -492,52 +492,67 @@ int Net::load_otter(const char *model_structure, CompileMode comopile_mode) {
     return 0;
 }
 
-int Net::load_weight(const DataReader& dr) {
-    if (layers.size() == 0) {
-        fprintf(stderr, "[Net] Empty graph!\n");
-        return -1;
-    }
-    
-//    checkVerison(dr);
-    
-    int layer_count = (int)layers.size();
-    
-    InitializerNcnnFromDataReader initializer(dr);
-    
-    for (const auto i : otter::irange(layer_count)) {
-        Layer* layer = layers[i];
-        
-        if (!layer) {
-            fprintf(stderr, "[Net] Load weight error at layer %d, please check the network topology.\n", i);
-            return -1;
-        }
-        
-        int layer_status = layer->load_model(initializer);
-        if (layer_status != 0) {
-            fprintf(stderr, "[Net] layer %d %s load weight fail!\n", i, layer->name.c_str());
-            return -1;
-        }
-    }
-    
-    
-    return 0;
-}
-
-int Net::load_weight(FILE *f) {
-    DataReaderFromStdio dr(f);
-    return load_weight(dr);
-}
-
-int Net::load_weight(const char *weight_path) {
+int Net::load_weight(const char *weight_path, WeightType type) {
     FILE* fp = fopen(weight_path, "rb");
     if (!fp) {
         fprintf(stderr, "Open weight file fail!\n");
         return -1;
     }
     
-    int status = load_weight(fp);
+    int status = load_weight(fp, type);
     fclose(fp);
     return status;
+}
+
+int Net::load_weight(FILE *f, WeightType type) {
+    DataReaderFromStdio dr(f);
+    return load_weight(dr, type);
+}
+
+int Net::load_weight(const DataReader& dr, WeightType type) {
+    if (layers.size() == 0) {
+        fprintf(stderr, "[Net] Empty graph!\n");
+        return -1;
+    }
+    
+    switch (type) {
+        case WeightType::Otter: {
+            checkVerison(dr);
+            InitializerFromDataReader initializer(dr);
+            
+            return load_weight(initializer);
+        }
+        case WeightType::Ncnn: {
+            InitializerNcnnFromDataReader initializer(dr);
+            
+            return load_weight(initializer);
+        }
+        default:
+            InitializerFromDataReader initializer(dr);
+            
+            return load_weight(initializer);
+    }
+    
+    return -1;
+}
+
+int Net::load_weight(const Initializer& initializer) {
+    for (const auto i : otter::irange(layers.size())) {
+        Layer* layer = layers[i];
+        
+        if (!layer) {
+            fprintf(stderr, "[Net] Load weight error at layer %lu, please check the network topology.\n", i);
+            return -1;
+        }
+        
+        int layer_status = layer->load_model(initializer);
+        if (layer_status != 0) {
+            fprintf(stderr, "[Net] layer %lu %s load weight fail!\n", i, layer->name.c_str());
+            return -1;
+        }
+    }
+    
+    return 0;
 }
 
 Extractor Net::create_extractor() const {
