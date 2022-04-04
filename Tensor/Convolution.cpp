@@ -13,6 +13,7 @@
 #include "ConvolutionMM2DNeon.hpp"
 #include "ConvolutionMM2DX86.hpp"
 #include "DepthwiseConvKernelX86.hpp"
+#include "ConvolutionMM2DTranspose.hpp"
 
 namespace otter {
 
@@ -87,8 +88,14 @@ static void check_shape_forward(const Tensor& input, const IntArrayRef& weight_s
         }
         
     } else {
-        assert(input.size(1) == weight_sizes[0]);
-        assert(!bias.defined() || (bias.dim() == 1 && bias.size(0) == weight_sizes[1] * groups));
+        OTTER_CHECK(input.size(1) == weight_sizes[0],
+            "Given transposed=", transposed, ", weight of size ", weight_sizes,
+            ", expected input", input.sizes(), " to have ", weight_sizes[0],
+            " channels, but got ", input.size(1), " channels instead");
+        OTTER_CHECK(!bias.defined() || (bias.dim() == 1 && bias.size(0) == weight_sizes[1] * groups),
+            "Given transposed=", transposed, ", weight of size ", weight_sizes,
+            ", expected bias to be 1-dimensional with ", weight_sizes[1] * groups, " elements",
+            ", but got bias of size ", bias.sizes(), " instead");
     }
 }
 
@@ -103,7 +110,10 @@ ConvBackend select_proper_conv_backend(
         return ConvBackend::Winograd3x3Depthwise;
     } else if (input.device() == Device::CPU) { // or input.is_cuda()
         if (params.transposed) {
-            // unsupported
+            if (input.dim() == 4) {
+                return ConvBackend::SlowTranspose2d;
+            }
+            // unsupport
         } else {
             if (input.dim() == 4) {
                 if (params.is_dilated()) {
@@ -116,6 +126,8 @@ ConvBackend select_proper_conv_backend(
                                 return ConvBackend::DepthwiseNeon_3x3s2;
                             } else if (weight.size(2) == 5 && weight.size(3) == 5 && params.stride[0] == 1 && params.stride[1] == 1) {
                                 return ConvBackend::DepthwiseNeon_5x5s1;
+                            } else if (weight.size(2) == 5 && weight.size(3) == 5 && params.stride[0] == 2 && params.stride[1] == 2) {
+                                return ConvBackend::DepthwiseNeon_5x5s2;
                             }
                         }
                         // General
@@ -233,18 +245,22 @@ Tensor convolution(
             output = convolution_depthwise3x3_winograd_stub(Device::CPU, input, weight, bias, params.stride, params.padding, params.groups);
             break;
         case ConvBackend::DepthwiseNeon_3x3s2:
-            output = depthwise_conv2d_3x3s2_neon(input, weight, bias, params.stride, params.padding);
+            output = depthwise_conv2d_3x3s2_neon(input.contiguous(), weight, bias, params.stride, params.padding);
             break;
         case ConvBackend::DepthwiseNeon_5x5s1:
-            output = depthwise_conv2d_5x5s1_neon(input, weight, bias, params.stride, params.padding);
+            output = depthwise_conv2d_5x5s1_neon(input.contiguous(), weight, bias, params.stride, params.padding);
+            break;
+        case ConvBackend::DepthwiseNeon_5x5s2:
+            output = depthwise_conv2d_5x5s2_neon(input.contiguous(), weight, bias, params.stride, params.padding);
             break;
         case ConvBackend::DepthwiseX86_3x3s2:
-            output = depthwise_conv2d_3x3s2_x86_sse(input, weight, bias, params.stride, params.padding);
+            output = depthwise_conv2d_3x3s2_x86_sse(input.contiguous(), weight, bias, params.stride, params.padding);
             break;
         case ConvBackend::DepthwiseX86_3x3s1:
-            output = depthwise_conv2d_3x3s1_x86_sse(input, weight, bias, params.stride, params.padding);
+            output = depthwise_conv2d_3x3s1_x86_sse(input.contiguous(), weight, bias, params.stride, params.padding);
             break;
         case ConvBackend::Slow2d:
+        case ConvBackend::SlowTranspose2d:
         case ConvBackend::Sgemm2dNeon:
         case ConvBackend::Sgemm2dNeon_1x1s1:
         case ConvBackend::Sgemm2dNeon_1x1s2:
@@ -282,9 +298,12 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
     switch (backend) {
         case ConvBackend::Slow2d:
             return otter::slow_conv2d(self, weight, bias, kernel_size, params.stride, params.padding);
+        case ConvBackend::SlowTranspose2d:
+            return otter::slow_conv_transpose2d(self, weight, kernel_size, bias, params.stride, params.padding, params.output_padding, params.dilation);
         case ConvBackend::SlowDilated2d:
             return otter::slow_conv_dilated2d(self, weight, bias, kernel_size, params.stride, params.padding, params.dilation);
         case ConvBackend::Sgemm2dNeon:
+            printf("sgemm 2d neon kernel(%d, %d) stride(%d, %d) groups: %d\n", kernel_size[0], kernel_size[1], params.stride[0], params.stride[1], params.groups);
             return otter::sgemm_conv2d_neon(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::Sgemm2dNeon_1x1s1:
             return otter::sgemm_conv2d_1x1s1_neon(self, weight, bias, kernel_size, params.stride, params.padding);
