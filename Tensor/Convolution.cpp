@@ -8,11 +8,11 @@
 #include "Tensor.hpp"
 #include "TensorShape.hpp"
 #include "Convolution.hpp"
-#include "DepthwiseConvKernel.hpp"
-#include "DilatedConvolution.hpp"
 #include "ConvolutionMM2DNeon.hpp"
 #include "ConvolutionMM2DX86.hpp"
+#include "DepthwiseConvKernelNeon.hpp"
 #include "DepthwiseConvKernelX86.hpp"
+#include "DilatedConvolution.hpp"
 #include "ConvolutionMM2DTranspose.hpp"
 
 namespace otter {
@@ -136,7 +136,7 @@ ConvBackend select_proper_conv_backend(
                                 return ConvBackend::Sgemm2dNeon_1x1s1;
                             }
                             
-                            return ConvBackend::Sw2dNeon_1x1s1;
+                            return ConvBackend::SlideWin2dNeon_1x1s1;
                         } else if (weight.size(2) == 1 && weight.size(3) == 1 && params.stride[0] == 2 && params.stride[1] == 2) {
                             return ConvBackend::Sgemm2dNeon_1x1s2;
                         } else {
@@ -173,7 +173,7 @@ ConvBackend select_proper_conv_backend(
         return ConvBackend::Overrideable;
     }
     throw "unsupported ConvNd parameters";
-    return ConvBackend::Slow2d;
+    return ConvBackend::Overrideable;
 }
 
 static auto view3d(const Tensor& tensor) -> Tensor {
@@ -253,19 +253,20 @@ Tensor convolution(
         case ConvBackend::DepthwiseNeon_5x5s2:
             output = depthwise_conv2d_5x5s2_neon(input.contiguous(), weight, bias, params.stride, params.padding);
             break;
-        case ConvBackend::DepthwiseX86_3x3s2:
-            output = depthwise_conv2d_3x3s2_x86_sse(input.contiguous(), weight, bias, params.stride, params.padding);
-            break;
         case ConvBackend::DepthwiseX86_3x3s1:
             output = depthwise_conv2d_3x3s1_x86_sse(input.contiguous(), weight, bias, params.stride, params.padding);
             break;
+        case ConvBackend::DepthwiseX86_3x3s2:
+            output = depthwise_conv2d_3x3s2_x86_sse(input.contiguous(), weight, bias, params.stride, params.padding);
+            break;
         case ConvBackend::Slow2d:
         case ConvBackend::SlowTranspose2d:
+        case ConvBackend::SlideWinTranspose2d:
         case ConvBackend::Sgemm2dNeon:
         case ConvBackend::Sgemm2dNeon_1x1s1:
         case ConvBackend::Sgemm2dNeon_1x1s2:
         case ConvBackend::Sgemm2dX86:
-        case ConvBackend::Sw2dNeon_1x1s1:
+        case ConvBackend::SlideWin2dNeon_1x1s1:
         case ConvBackend::SlideWin2d:
         case ConvBackend::SlowDilated2d:
             if (params.groups == 1) {
@@ -300,16 +301,17 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
             return otter::slow_conv2d(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::SlowTranspose2d:
             return otter::slow_conv_transpose2d(self, weight, kernel_size, bias, params.stride, params.padding, params.output_padding, params.dilation);
+        case ConvBackend::SlideWinTranspose2d:
+            return otter::slide_win_conv_transpose2d(self, weight, kernel_size, bias, params.stride, params.padding, params.output_padding, params.dilation);
         case ConvBackend::SlowDilated2d:
             return otter::slow_conv_dilated2d(self, weight, bias, kernel_size, params.stride, params.padding, params.dilation);
         case ConvBackend::Sgemm2dNeon:
-            printf("sgemm 2d neon kernel(%d, %d) stride(%d, %d) groups: %d\n", kernel_size[0], kernel_size[1], params.stride[0], params.stride[1], params.groups);
             return otter::sgemm_conv2d_neon(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::Sgemm2dNeon_1x1s1:
             return otter::sgemm_conv2d_1x1s1_neon(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::Sgemm2dX86:
             return otter::sgemm_conv2d_x86(self, weight, bias, kernel_size, params.stride, params.padding);
-        case ConvBackend::Sw2dNeon_1x1s1:
+        case ConvBackend::SlideWin2dNeon_1x1s1:
             return otter::conv2d_1x1s1_neon(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::Sgemm2dNeon_1x1s2:
             return otter::sgemm_conv2d_1x1s2_neon(self, weight, bias, kernel_size, params.stride, params.padding);
