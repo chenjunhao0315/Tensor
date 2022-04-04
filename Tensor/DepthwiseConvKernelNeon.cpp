@@ -7,7 +7,7 @@
 
 #include "Tensor.hpp"
 #include "Macro.hpp"
-#include "DepthwiseConvKernel.hpp"
+#include "DepthwiseConvKernelNeon.hpp"
 #include "TensorFactory.hpp"
 #include "Parallel.hpp"
 #include "ConvolutionUtils.hpp"

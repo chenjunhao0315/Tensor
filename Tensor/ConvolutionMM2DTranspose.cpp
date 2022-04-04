@@ -11,6 +11,9 @@
 #include "Dispatch.hpp"
 #include "TensorBlas.hpp"
 #include "im2col.hpp"
+#include "Parallel.hpp"
+#include "Dispatch.hpp"
+#include "TensorTransform.hpp"
 
 namespace otter {
 
@@ -409,7 +412,7 @@ Tensor slide_win_conv_transpose2d(
 }
 
 Tensor& slide_win_conv_transpose2d_out(
-    const Tensor& input,
+    const Tensor& self,
     const Tensor& weight,
     IntArrayRef kernel_size,
     const Tensor& bias,
@@ -419,7 +422,102 @@ Tensor& slide_win_conv_transpose2d_out(
     IntArrayRef dilation,
     Tensor& output) {
     
+    const int64_t kernel_height   = kernel_size[0];
+    const int64_t kernel_width    = kernel_size[1];
+    const int64_t pad_height      = padding[0];
+    const int64_t pad_width       = padding[1];
+    const int64_t stride_height   = stride[0];
+    const int64_t stride_width    = stride[1];
+    const int64_t dilation_height = dilation[0];
+    const int64_t dilation_width  = dilation[1];
+    const int64_t output_padding_height = output_padding[0];
+    const int64_t output_padding_width  = output_padding[1];
     
+    const int64_t dim_planes = 1;
+    const int64_t dim_height = 2;
+    const int64_t dim_width  = 3;
+    
+    const int64_t input_channels  = self.size(dim_planes);
+    const int64_t input_height    = self.size(dim_height);
+    const int64_t input_width     = self.size(dim_width);
+    const int64_t output_channels = weight.size(1);
+    
+    const int64_t batch_size      = self.size(0);
+    
+    int64_t output_height = (input_height - 1) * stride_height +
+        (dilation_height * (kernel_height - 1) + 1) + output_padding_height;
+    int64_t output_width = (input_width - 1) * stride_width +
+        (dilation_width * (kernel_width - 1) + 1) + output_padding_width;
+    
+    auto output_pad = otter::empty({batch_size, output_channels, output_height, output_width}, self.options());
+    
+    const int bias_term = (bias.defined()) ? 1 : 0;
+    
+    const int64_t kernelSize = kernel_height * kernel_width;
+    
+    // kernel offsets
+    std::vector<int> _space_ofs(kernelSize);
+    int* space_ofs = &_space_ofs[0];
+    {
+        int p1 = 0;
+        int p2 = 0;
+        int gap = int(output_width * dilation_height - kernel_width * dilation_width);
+        for (int i = 0; i < kernel_height; i++) {
+            for (int j = 0; j < kernel_width; j++) {
+                space_ofs[p1] = p2;
+                p1++;
+                p2 += dilation_width;
+            }
+            p2 += gap;
+        }
+    }
+    
+    OTTER_DISPATCH_FLOATING_TYPES_AND(ScalarType::Long, self.scalar_type(), "slide_win_deconv", [&] {
+        auto input_a = self.accessor<scalar_t, 4>()[0];
+        auto weight_a = weight.accessor<scalar_t, 4>()[0];
+        auto bias_data = (bias_term) ? bias.data_ptr<scalar_t>() : nullptr;
+        
+        otter::parallel_for(0, output_channels, 0, [&](int64_t begin, int64_t end) {
+            for (const auto p : otter::irange(begin, end)) {
+                auto out = output_pad[0][p];
+
+                const scalar_t bias = bias_term ? bias_data[p] : static_cast<scalar_t>(0);
+
+                out.fill_(bias);
+                
+                auto out_a = out.accessor<scalar_t, 2>();
+
+                // shadowed variable for less openmp task args
+                const int w = (int)self.size(3);
+                const int h = (int)self.size(2);
+
+                for (int i = 0; i < h; i++) {
+                    for (int j = 0; j < w; j++) {
+                        scalar_t* outptr = out_a[i * stride_height].data() + j * stride_width;
+
+                        const scalar_t* kptr = (const scalar_t*)weight_a.data() + kernelSize * input_channels * p;
+
+                        for (int q = 0; q < input_channels; q++) {
+                            const scalar_t val = input_a[q][i][j];
+
+                            for (int k = 0; k < kernelSize; k++) {
+                                float w = kptr[k];
+                                outptr[space_ofs[k]] += val * w;
+                            }
+
+                            kptr += kernelSize;
+                        }
+                    }
+                }
+            }
+        });
+    });
+    
+    if (padding[0] > 0 || padding[1] > 0) {
+        output = otter::crop(output_pad, {padding[1], padding[1], padding[0], padding[0]});
+    } else {
+        output = output_pad;
+    }
     
     return output;
 }
