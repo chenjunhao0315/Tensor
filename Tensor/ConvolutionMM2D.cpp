@@ -14,6 +14,7 @@
 #include "Parallel.hpp"
 #include "Unfold2D.hpp"
 #include "TensorBlas.hpp"
+#include "Padding.hpp"
 
 namespace otter {
 
@@ -329,15 +330,15 @@ Tensor& slide_win_conv2d_out(
     const int64_t dim_height = 2;
     const int64_t dim_width  = 3;
     
-    const Tensor input = self.contiguous();
-    const int64_t input_channels  = input.size(dim_planes);
-    const int64_t input_height    = input.size(dim_height);
-    const int64_t input_width     = input.size(dim_width);
+    const Tensor input_pad = otter::constant_pad(self.contiguous(), padding, 0);
+    const int64_t input_channels  = self.size(dim_planes);
+    const int64_t input_height    = self.size(dim_height);
+    const int64_t input_width     = self.size(dim_width);
     const int64_t output_channels = weight.size(0);
     const int64_t output_height   = (input_height + 2 * pad_height - kernel_height) / stride_height + 1;
     const int64_t output_width    = (input_width  + 2 * pad_width  - kernel_width ) / stride_width  + 1;
     
-    auto output_size = otter::calculate_conv_output_size(input.sizes(), weight.sizes(), stride, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
     
     output.resize_(output_size);
     
@@ -363,7 +364,7 @@ Tensor& slide_win_conv2d_out(
         for (const auto p : otter::irange(start, end)) {
             OTTER_DISPATCH_ALL_TYPES(self.scalar_type(), "slide_win_conv2d", [&]{
                 auto output_a = output.accessor<scalar_t, 4>()[0];
-                auto input_a = self.accessor<scalar_t, 4>()[0];
+                auto input_a = input_pad.accessor<scalar_t, 4>()[0];
                 scalar_t *outptr = output_a[p].data();
                 const scalar_t *weight_data = weight.data_ptr<scalar_t>();
                 const scalar_t *bias_data = (bias_term) ? bias.data_ptr<scalar_t>() : nullptr;

@@ -203,7 +203,7 @@ size_t OtterLeader::params_size() const {
 
 bool OtterLeader::readProject(const char *project_path) {
     std::fstream project;
-    project.open(project_path);
+    project.open(project_path, std::ios_base::in);
     if (!project.is_open()) {
         fprintf(stderr, "[OtterLeader] Open file fail!\n");
         return false;

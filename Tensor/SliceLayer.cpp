@@ -68,7 +68,7 @@ int SliceLayer::load_param(const ParamDict &pd) {
 
 int SliceLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const {
     
-    int ends = (end == -1) ? bottom_blob.size(1) : end;
+    int ends = (end == -1) ? (int)bottom_blob.size(1) : end;
     
     top_blob = otter::native::slice(bottom_blob, axis, start, ends);
     

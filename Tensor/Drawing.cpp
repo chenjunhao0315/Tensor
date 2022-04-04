@@ -114,7 +114,7 @@ LineAA(Tensor& img, Point2l pt1, Point2l pt2, const void* color) {
     int ep_table[9];
     int cb = ((unsigned char*)color)[0], cg = ((unsigned char*)color)[1], cr = ((unsigned char*)color)[2], ca = ((unsigned char*)color)[3];
     int _cb, _cg, _cr, _ca;
-    int nch = img.size(2);
+    int nch = (int)img.size(2);
     unsigned char* ptr = img.data_ptr<unsigned char>();
     size_t step = (int)(img.size(1) * img.size(2) * img.itemsize());
     Size2l size0(Size((int)img.size(1), (int)img.size(0))), size = size0;

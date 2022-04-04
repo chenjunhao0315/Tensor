@@ -48,6 +48,21 @@ Tensor depthwise_conv2d_5x5s1_neon(
     IntArrayRef stride,
     IntArrayRef padding);
 
+Tensor& depthwise_conv2d_5x5s2_neon_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor depthwise_conv2d_5x5s2_neon(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef stride,
+    IntArrayRef padding);
+
 }
 
 #endif /* DepthwiseConvKernel_hpp */
