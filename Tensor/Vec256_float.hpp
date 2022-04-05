@@ -182,6 +182,29 @@ inline Vectorized<float> Vectorized<float>::le(const Vectorized<float>& other) c
     return (*this <= other) & Vectorized<float>(1.0f);
 }
 
+template <>
+Vectorized<float> inline minimum(const Vectorized<float>& a, const Vectorized<float>& b) {
+    Vectorized<float> min = _mm256_min_ps(a, b);
+    Vectorized<float> isnan = _mm256_cmp_ps(a, b, _CMP_UNORD_Q);
+    // Exploit the fact that all-ones is a NaN.
+    return _mm256_or_ps(min, isnan);
+}
+
+template <>
+Vectorized<float> inline clamp(const Vectorized<float>& a, const Vectorized<float>& min, const Vectorized<float>& max) {
+    return _mm256_min_ps(max, _mm256_max_ps(min, a));
+}
+
+template <>
+Vectorized<float> inline clamp_max(const Vectorized<float>& a, const Vectorized<float>& max) {
+    return _mm256_min_ps(max, a);
+}
+
+template <>
+Vectorized<float> inline clamp_min(const Vectorized<float>& a, const Vectorized<float>& min) {
+    return _mm256_max_ps(min, a);
+}
+
 
 
 #endif

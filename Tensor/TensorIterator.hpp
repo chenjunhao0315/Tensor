@@ -249,8 +249,11 @@ public:
     void build_borrowing_except_last_argument_comparison_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
     
     static TensorIterator nullary_op(TensorBase& out);
+    static TensorIterator unary_op(TensorBase& out, const TensorBase& a);
+    static TensorIterator binary_op(TensorBase& out, const TensorBase& a, const TensorBase& b);
     static TensorIterator borrowing_nullary_op(const TensorBase& out);
     static TensorIterator borrowing_nullary_op(TensorBase&& out) = delete;
+    static TensorIterator borrowing_binary_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
     
 private:
     DimVector shape_;

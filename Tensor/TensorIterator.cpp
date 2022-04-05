@@ -698,6 +698,24 @@ void TensorIterator::build_borrowing_except_last_argument_comparison_op(const Te
     build(config);
 }
 
+TensorIterator TensorIterator::binary_op(TensorBase& out, const TensorBase& a, const TensorBase& b) {
+    TensorIterator iter;
+    iter.build_binary_op(out, a, b);
+    return iter;
+}
+
+TensorIterator TensorIterator::borrowing_binary_op(const TensorBase& out, const TensorBase& a, const TensorBase& b) {
+    TensorIterator iter;
+    iter.build_borrowing_binary_op(out, a, b);
+    return iter;
+}
+
+TensorIterator TensorIterator::unary_op(TensorBase& out, const TensorBase& a) {
+    TensorIterator iter;
+    iter.build_unary_op(out, a);
+    return iter;
+}
+
 TensorIteratorConfig& TensorIteratorConfig::add_owned_output(const TensorBase& output) {
     assert(num_inputs_ == 0);
     tensors_.push_back(otter::MaybeOwned<TensorBase>::owned(otter::in_place, output));

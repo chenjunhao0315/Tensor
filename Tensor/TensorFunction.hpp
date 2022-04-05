@@ -145,6 +145,10 @@ struct structured_lt_Tensor : public TensorIterator {
     void meta(const Tensor & self, const Tensor & other);
 };
 
+struct structured_clamp : public TensorIterator {
+    void meta(const Tensor & self, Scalar min, Scalar max);
+};
+
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override { \
@@ -319,6 +323,10 @@ struct structured_lt_Scalar_out : public structured_lt_Scalar {
 
 struct structured_lt_Tensor_out : public structured_lt_Tensor {
     void impl(const Tensor & self, const Tensor & other, const Tensor & out);
+};
+
+struct structured_clamp_out : public structured_clamp {
+    void impl(const Tensor & self, Scalar min, Scalar max, const Tensor & out);
 };
 
 namespace native {
