@@ -97,6 +97,7 @@ CREATE_COMPARISON_SCALAR_TENSOR_META_FUNC(ge);
 
 DEFINE_DISPATCH(add_stub);
 DEFINE_DISPATCH(sub_stub);
+DEFINE_DISPATCH(add_clamp_stub);
 DEFINE_DISPATCH(mul_stub);
 DEFINE_DISPATCH(div_true_stub);
 DEFINE_DISPATCH(remainder_stub);

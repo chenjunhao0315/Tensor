@@ -25,6 +25,12 @@ public:
     virtual int forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const;
     
     virtual std::string type() const { return "Eltwise"; }
+public:
+    int operation_type;
+};
+
+enum class EltwiseParam {
+    Type
 };
 
 }

@@ -412,6 +412,28 @@ inline Vectorized<float> Vectorized<float>::le(const Vectorized<float>& other) c
     return (*this <= other) & Vectorized<float>(1.0f);
 }
 
+template <>
+Vectorized<float> inline minimum(const Vectorized<float>& a, const Vectorized<float>& b) {
+    float32x4_t r0 = vminq_f32(a.get_low(), b.get_low());
+    float32x4_t r1 = vminq_f32(a.get_high(), b.get_high());
+    return Vectorized<float>(r0, r1);
+}
+
+template <>
+Vectorized<float> inline clamp(const Vectorized<float>& a, const Vectorized<float>& min, const Vectorized<float>& max) {
+    return minimum(max, maximum(min, a));
+}
+
+template <>
+Vectorized<float> inline clamp_max(const Vectorized<float>& a, const Vectorized<float>& max) {
+    return minimum(max, a);
+}
+
+template <>
+Vectorized<float> inline clamp_min(const Vectorized<float>& a, const Vectorized<float>& min) {
+    return maximum(min, a);
+}
+
 #endif
 
 

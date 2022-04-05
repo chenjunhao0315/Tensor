@@ -16,6 +16,7 @@
 #include "TensorShape.hpp"
 #include "UnaryOps.hpp"
 #include "BinaryOps.hpp"
+#include "TensorCompare.hpp"
 #include "TensorFunction.hpp"
 #include "Convolution.hpp"
 #include "Padding.hpp"
