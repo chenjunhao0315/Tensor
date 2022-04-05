@@ -85,7 +85,7 @@ static void im2col_sgemm_conv2d_impl_x86(
         int remain_size_start = nn_size * 8;
         nn_size = (outSize - remain_size_start) / 4;
 #else
-        int nn_size = size / 4;
+        int nn_size = outSize / 4;
         int remain_size_start = 0;
 #endif
 

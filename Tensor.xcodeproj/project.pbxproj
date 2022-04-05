@@ -109,6 +109,8 @@
 		76BA779227C6CA8F00AA896B /* TensorScalar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA779027C6CA8F00AA896B /* TensorScalar.cpp */; };
 		76BA779527C6CCB700AA896B /* im2col.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA779327C6CCB700AA896B /* im2col.cpp */; };
 		76BA779827C6CD2300AA896B /* vol2col.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA779627C6CD2300AA896B /* vol2col.cpp */; };
+		76CF3F3727FC6E4B009BF242 /* DeconvolutionLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CF3F3527FC6E4B009BF242 /* DeconvolutionLayer.cpp */; };
+		76CF3F3F27FC92A8009BF242 /* EltwiseLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CF3F3D27FC92A8009BF242 /* EltwiseLayer.cpp */; };
 		76D1285127EC2C3C00A54E6F /* TypeProperties.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76D1284F27EC2C3C00A54E6F /* TypeProperties.cpp */; };
 		76E5EC7B27C4A6D800A2B38A /* BatchNormalizationLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E5EC7927C4A6D800A2B38A /* BatchNormalizationLayer.cpp */; };
 		76E6C51327A502A30036A26F /* Tensor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51127A502A30036A26F /* Tensor.cpp */; };
@@ -385,6 +387,10 @@
 		76BA779427C6CCB700AA896B /* im2col.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = im2col.hpp; sourceTree = "<group>"; };
 		76BA779627C6CD2300AA896B /* vol2col.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = vol2col.cpp; sourceTree = "<group>"; };
 		76BA779727C6CD2300AA896B /* vol2col.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vol2col.hpp; sourceTree = "<group>"; };
+		76CF3F3527FC6E4B009BF242 /* DeconvolutionLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DeconvolutionLayer.cpp; sourceTree = "<group>"; };
+		76CF3F3627FC6E4B009BF242 /* DeconvolutionLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DeconvolutionLayer.hpp; sourceTree = "<group>"; };
+		76CF3F3D27FC92A8009BF242 /* EltwiseLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EltwiseLayer.cpp; sourceTree = "<group>"; };
+		76CF3F3E27FC92A8009BF242 /* EltwiseLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EltwiseLayer.hpp; sourceTree = "<group>"; };
 		76D1284F27EC2C3C00A54E6F /* TypeProperties.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TypeProperties.cpp; sourceTree = "<group>"; };
 		76D1285027EC2C3C00A54E6F /* TypeProperties.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TypeProperties.hpp; sourceTree = "<group>"; };
 		76E5EC7927C4A6D800A2B38A /* BatchNormalizationLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BatchNormalizationLayer.cpp; sourceTree = "<group>"; };
@@ -807,12 +813,16 @@
 				7687217427C14890006640CF /* InputLayer.hpp */,
 				7687217C27C2A850006640CF /* ConvolutionLayer.cpp */,
 				7687217D27C2A850006640CF /* ConvolutionLayer.hpp */,
+				76CF3F3527FC6E4B009BF242 /* DeconvolutionLayer.cpp */,
+				76CF3F3627FC6E4B009BF242 /* DeconvolutionLayer.hpp */,
 				76E5EC7927C4A6D800A2B38A /* BatchNormalizationLayer.cpp */,
 				76E5EC7A27C4A6D800A2B38A /* BatchNormalizationLayer.hpp */,
 				7628DEE227CE096600B136FA /* LReluLayer.cpp */,
 				7628DEE327CE096600B136FA /* LReluLayer.hpp */,
 				7628DEE527CE155400B136FA /* ShortCutLayer.cpp */,
 				7628DEE627CE155400B136FA /* ShortCutLayer.hpp */,
+				76CF3F3D27FC92A8009BF242 /* EltwiseLayer.cpp */,
+				76CF3F3E27FC92A8009BF242 /* EltwiseLayer.hpp */,
 				7628E02727CEA4B600B136FA /* SplitLayer.cpp */,
 				7628E02827CEA4B600B136FA /* SplitLayer.hpp */,
 				7628E02A27CF1C5B00B136FA /* MaxPoolLayer.cpp */,
@@ -823,14 +833,14 @@
 				7628E17F27CFDB5900B136FA /* ConcatLayer.hpp */,
 				769279D227D49BC90088BD9F /* UpsampleLayer.cpp */,
 				769279D327D49BC90088BD9F /* UpsampleLayer.hpp */,
-				76927B3327D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp */,
-				76927B3427D4E2780088BD9F /* Yolov3DetectionOutputLayer.hpp */,
 				760A333627F62553003F0542 /* ChannelShuffleLayer.cpp */,
 				760A333727F62553003F0542 /* ChannelShuffleLayer.hpp */,
 				760A333927F62800003F0542 /* SliceLayer.cpp */,
 				760A333A27F62800003F0542 /* SliceLayer.hpp */,
 				760A333F27F7949F003F0542 /* SigmoidLayer.cpp */,
 				760A334027F7949F003F0542 /* SigmoidLayer.hpp */,
+				76927B3327D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp */,
+				76927B3427D4E2780088BD9F /* Yolov3DetectionOutputLayer.hpp */,
 				76AA4A0627FBC6C500F0F3C6 /* NanodetPlusDetectionOutputLayer.cpp */,
 				76AA4A0727FBC6C500F0F3C6 /* NanodetPlusDetectionOutputLayer.hpp */,
 			);
@@ -1039,6 +1049,7 @@
 				76927B3527D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp in Sources */,
 				7687217E27C2A850006640CF /* ConvolutionLayer.cpp in Sources */,
 				76E6C54E27A53AAA0036A26F /* TensorResize.cpp in Sources */,
+				76CF3F3F27FC92A8009BF242 /* EltwiseLayer.cpp in Sources */,
 				7620AF8127B552B20081C210 /* WarpDimUtils.cpp in Sources */,
 				76F336F227AF133300E3AEF1 /* TensorConversion.cpp in Sources */,
 				7628E02927CEA4B600B136FA /* SplitLayer.cpp in Sources */,
@@ -1163,6 +1174,7 @@
 				76E6C51927A5038F0036A26F /* Allocator.cpp in Sources */,
 				76E6C53127A506C50036A26F /* TensorFactory.cpp in Sources */,
 				76E6C52B27A505D50036A26F /* MaybeOwned.cpp in Sources */,
+				76CF3F3727FC6E4B009BF242 /* DeconvolutionLayer.cpp in Sources */,
 				762E3B3627BB7B050075F983 /* Unfold2DKernel.cpp in Sources */,
 				76E6C52227A504FC0036A26F /* PerspectiveView.cpp in Sources */,
 				76E6C55427A578980036A26F /* Loop.cpp in Sources */,
