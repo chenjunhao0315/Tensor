@@ -7,6 +7,7 @@
 
 #include "Activation.hpp"
 #include "TensorFunction.hpp"
+#include "TensorCompare.hpp"
 
 namespace otter {
 
@@ -38,4 +39,20 @@ DEFINE_IMPL_FUNCTION(threshold_out)(const Tensor& self, const Scalar& threshold,
     threshold_stub(Device::CPU, *this, threshold, value);
 }
 
+Tensor relu(const Tensor & self) {
+    return otter::clamp_min(self, 0);
 }
+
+Tensor & relu_(Tensor & self) {
+    return otter::clamp_min_(self, 0);
+}
+
+Tensor relu6(const Tensor& self) {
+    return otter::clamp(self, 0, 6);
+}
+
+Tensor& reul6_(Tensor& self) {
+    return otter::clamp_(self, 0, 6);
+}
+
+}   // end namespace otter
