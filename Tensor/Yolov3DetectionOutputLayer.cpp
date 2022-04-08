@@ -6,7 +6,6 @@
 //
 
 #include "Yolov3DetectionOutputLayer.hpp"
-#include "LayerRegistry.hpp"
 #include "Parallel.hpp"
 #include "TensorFactory.hpp"
 

@@ -6,7 +6,6 @@
 //
 
 #include "ConcatLayer.hpp"
-#include "LayerRegistry.hpp"
 #include "TensorShape.hpp"
 
 namespace otter {

@@ -8,7 +8,6 @@
 #include "DropoutLayer.hpp"
 #include "Dropout.hpp"
 #include "NetOption.hpp"
-#include "LayerRegistry.hpp"
 
 namespace otter {
 

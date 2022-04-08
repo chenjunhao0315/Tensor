@@ -6,7 +6,6 @@
 //
 
 #include "NanodetPlusDetectionOutputLayer.hpp"
-#include "LayerRegistry.hpp"
 #include "TensorFactory.hpp"
 #include "TensorMaker.hpp"
 #include "TensorInterpolation.hpp"

@@ -10,7 +10,6 @@
 #include "TensorFactory.hpp"
 #include "TensorMaker.hpp"
 #include "Convolution.hpp"
-#include "LayerRegistry.hpp"
 
 namespace otter {
 

@@ -7,7 +7,6 @@
 
 #include "ChannelShuffleLayer.hpp"
 #include "ChannelShuffle.hpp"
-#include "LayerRegistry.hpp"
 
 namespace otter {
 

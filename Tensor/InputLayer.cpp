@@ -6,7 +6,6 @@
 //
 
 #include "InputLayer.hpp"
-#include "LayerRegistry.hpp"
 
 #include "TensorMaker.hpp"
 

@@ -7,7 +7,6 @@
 
 #include "UpsampleLayer.hpp"
 #include "TensorFunction.hpp"
-#include "LayerRegistry.hpp"
 
 namespace otter {
 

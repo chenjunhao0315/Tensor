@@ -23,6 +23,7 @@
 #include "TensorInterpolation.hpp"
 #include "ChannelShuffle.hpp"
 #include "Net.hpp"
+#include "Activation.hpp"
 
 
 #endif /* OTensor_h */

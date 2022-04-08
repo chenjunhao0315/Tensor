@@ -9,7 +9,6 @@
 #include "Tensor.hpp"
 #include "TensorFactory.hpp"
 #include "TensorOperator.hpp"
-#include "LayerRegistry.hpp"
 
 namespace otter {
 

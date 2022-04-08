@@ -12,6 +12,7 @@
 #include "NetOption.hpp"
 #include "ParamDict.hpp"
 #include "Initializer.hpp"
+#include "LayerRegistry.hpp"
 
 #include <unordered_map>
 

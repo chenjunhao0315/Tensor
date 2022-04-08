@@ -6,7 +6,6 @@
 //
 
 #include "SplitLayer.hpp"
-#include "LayerRegistry.hpp"
 
 namespace otter {
 
