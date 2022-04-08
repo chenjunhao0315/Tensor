@@ -112,43 +112,51 @@ DEFINE_DISPATCH(ge_stub);
 DEFINE_DISPATCH(eq_stub);
 DEFINE_DISPATCH(ne_stub);
 
-DEFINE_IMPL_FUNCTION(add_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Scalar& alpha, const Tensor& /*result*/) {
+DEFINE_IMPL_FUNCTION(add_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Scalar& alpha, const Tensor& result) {
     add_stub(Device::CPU, *this, alpha);
+    (void)result;
     assert(result.scalar_type() == output().scalar_type());
 }
 
-DEFINE_IMPL_FUNCTION(sub_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Scalar& alpha, const Tensor& /*result*/) {
+DEFINE_IMPL_FUNCTION(sub_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Scalar& alpha, const Tensor& result) {
     sub_stub(Device::CPU, *this, alpha);
+    (void)result;
     assert(result.scalar_type() == output().scalar_type());
 }
 
-DEFINE_IMPL_FUNCTION(mul_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Tensor& /*result*/) {
+DEFINE_IMPL_FUNCTION(mul_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Tensor& result) {
     mul_stub(Device::CPU, *this);
+    (void)result;
     assert(result.scalar_type() == output().scalar_type());
 }
 
-DEFINE_IMPL_FUNCTION(div_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Tensor& /*result*/) {
+DEFINE_IMPL_FUNCTION(div_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Tensor& result) {
     div_true_stub(Device::CPU, *this);
+    (void)result;
     assert(result.scalar_type() == output().scalar_type());
 }
 
-DEFINE_IMPL_FUNCTION(remainder_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Tensor& /*result*/) {
+DEFINE_IMPL_FUNCTION(remainder_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Tensor& result) {
     remainder_stub(Device::CPU, *this);
+    (void)result;
     assert(result.scalar_type() == output().scalar_type());
 }
 
-DEFINE_IMPL_FUNCTION(bitwise_and_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Tensor& /*result*/) {
+DEFINE_IMPL_FUNCTION(bitwise_and_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Tensor& result) {
     bitwise_and_stub(Device::CPU, *this);
+    (void)result;
     assert(result.scalar_type() == output().scalar_type());
 }
 
-DEFINE_IMPL_FUNCTION(bitwise_or_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Tensor& /*result*/) {
+DEFINE_IMPL_FUNCTION(bitwise_or_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Tensor& result) {
     bitwise_or_stub(Device::CPU, *this);
+    (void)result;
     assert(result.scalar_type() == output().scalar_type());
 }
 
-DEFINE_IMPL_FUNCTION(bitwise_xor_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Tensor& /*result*/) {
+DEFINE_IMPL_FUNCTION(bitwise_xor_out) (const Tensor& /*self*/, const Tensor& /*other*/, const Tensor& result) {
     bitwise_xor_stub(Device::CPU, *this);
+    (void)result;
     assert(result.scalar_type() == output().scalar_type());
 }
 
