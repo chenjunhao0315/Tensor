@@ -328,6 +328,4 @@ int Yolov3DetectionOutputLayer::forward(const std::vector<Tensor>& bottom_blobs,
     return 0;
 }
 
-REGISTER_LAYER_CLASS(Yolov3DetectionOutput);
-
 }   // end namespace otter

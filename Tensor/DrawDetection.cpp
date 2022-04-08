@@ -18,12 +18,12 @@ static const char* coco_class_names[] = {
 };
 
 void draw_coco_detection(otter::Tensor& image, const otter::Tensor& pred, int width, int height) {
-    int count = pred.size(0);
+    size_t count = pred.size(0);
     
     std::vector<Object> objects(count);
     
     auto pred_a = pred.accessor<float, 2>();
-    for (int i = 0; i < count; ++i) {
+    for (size_t i = 0; i < count; ++i) {
         Object& object = objects[i];
         auto obj = pred_a[i];
         

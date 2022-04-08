@@ -118,7 +118,4 @@ int UpsampleLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const Ne
     return 0;
 }
 
-REGISTER_LAYER_CLASS(Upsample);
-
-
 }   // end namespace otter

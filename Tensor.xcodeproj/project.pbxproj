@@ -393,6 +393,7 @@
 		76CEF55627FCACDE00AC46F6 /* TensorCompare.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorCompare.hpp; sourceTree = "<group>"; };
 		76CEF55827FCAFA900AC46F6 /* TensorCompareKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorCompareKernel.cpp; sourceTree = "<group>"; };
 		76CEF55927FCAFA900AC46F6 /* TensorCompareKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorCompareKernel.hpp; sourceTree = "<group>"; };
+		76CEF55B2800745200AC46F6 /* LayerDeclaration.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LayerDeclaration.hpp; sourceTree = "<group>"; };
 		76CF3F3527FC6E4B009BF242 /* DeconvolutionLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DeconvolutionLayer.cpp; sourceTree = "<group>"; };
 		76CF3F3627FC6E4B009BF242 /* DeconvolutionLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DeconvolutionLayer.hpp; sourceTree = "<group>"; };
 		76CF3F3D27FC92A8009BF242 /* EltwiseLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EltwiseLayer.cpp; sourceTree = "<group>"; };
@@ -811,6 +812,7 @@
 		7687216527C0E569006640CF /* Layer */ = {
 			isa = PBXGroup;
 			children = (
+				76CEF55B2800745200AC46F6 /* LayerDeclaration.hpp */,
 				7687217927C28140006640CF /* LayerRegistry.cpp */,
 				7687217A27C28140006640CF /* LayerRegistry.hpp */,
 				7687216227C0E379006640CF /* Layer.cpp */,

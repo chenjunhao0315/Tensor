@@ -177,6 +177,4 @@ int DeconvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, con
     return 0;
 }
 
-REGISTER_LAYER_CLASS(Deconvolution);
-
 }   // end namespace otter

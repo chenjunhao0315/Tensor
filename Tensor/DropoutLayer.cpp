@@ -42,6 +42,4 @@ int DropoutLayer::forward_inplace(Tensor &bottom_blob, const NetOption &opt) con
     return 0;
 }
 
-REGISTER_LAYER_CLASS(Dropout);
-
 }   // end namespace otter

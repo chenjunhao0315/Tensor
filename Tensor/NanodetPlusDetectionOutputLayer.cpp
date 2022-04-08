@@ -104,8 +104,6 @@ int NanodetPlusDetectionOutputLayer::forward(const std::vector<Tensor>& bottom_b
     return 0;
 }
 
-REGISTER_LAYER_CLASS(NanodetPlusDetectionOutput);
-
 using Object = NanodetPlusDetectionOutputLayer::Object;
 
 static inline float sigmoid(float x) {

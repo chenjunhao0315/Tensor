@@ -36,6 +36,4 @@ int ChannelShuffleLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, co
     return 0;
 }
 
-REGISTER_LAYER_CLASS(ChannelShuffle);
-
 }   // end namespace otter

@@ -173,6 +173,4 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
     return 0;
 }
 
-REGISTER_LAYER_CLASS(Convolution);
-
 }   // end namespace otter

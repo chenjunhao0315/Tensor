@@ -78,7 +78,4 @@ int ShortCutLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<
     return 0;
 }
 
-REGISTER_LAYER_CLASS(ShortCut);
-
-
 }

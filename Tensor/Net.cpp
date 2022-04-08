@@ -8,7 +8,7 @@
 #include "Exception.hpp"
 
 #include "Net.hpp"
-#include "LayerRegistry.hpp"
+#include "LayerDeclaration.hpp"
 #include "Initializer.hpp"
 #include "Otter.hpp"
 

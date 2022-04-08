@@ -1228,11 +1228,11 @@ void conv2d_1x1s1_neon_impl(
     auto output_shape = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
     output.resize_(output_shape);
     
-    int64_t inch = self.size(1);
+    int inch  = (int)self.size(1);
 
-    int64_t outw  = output_shape[3];
-    int64_t outh  = output_shape[2];
-    int64_t outch = output_shape[1];
+    int outw  = (int)output_shape[3];
+    int outh  = (int)output_shape[2];
+    int outch = (int)output_shape[1];
 
     const float* kernel = weight.data_ptr<float>();
     const float* bias = (bias_.defined()) ? bias_.data_ptr<float>() : nullptr;
@@ -1249,7 +1249,7 @@ void conv2d_1x1s1_neon_impl(
     remain_outch_start = nn_outch << 3;
 
     otter::parallel_for(0, nn_outch, 0, [&](int64_t begin, int64_t end) {
-        for (const auto pp : otter::irange(begin, end))
+        for (const int pp : otter::irange(begin, end))
         {
             int p = pp * 8;
 
@@ -1879,7 +1879,7 @@ void conv2d_1x1s1_neon_impl(
     otter::parallel_for(0, nn_outch, 0, [&](int64_t begin, int64_t end) {
         for (const auto pp : otter::irange(begin, end))
         {
-            int p = pp * 6;
+            int p = (int)pp * 6;
 
             auto out0 = output_t[p + 0];
             auto out1 = output_t[p + 1];
@@ -2269,7 +2269,7 @@ void conv2d_1x1s1_neon_impl(
     otter::parallel_for(0, nn_outch, 0, [&](int64_t begin, int64_t end) {
         for (const auto pp : otter::irange(begin, end))
         {
-            int p = remain_outch_start + pp * 4;
+            int p = remain_outch_start + (int)pp * 4;
 
             auto out0 = output_t[p + 0];
             auto out1 = output_t[p + 1];

@@ -53,6 +53,4 @@ int InputLayer::forward_inplace(Tensor& /*bottom_top_blob*/, const NetOption& /*
     return 0;
 }
 
-REGISTER_LAYER_CLASS(Input);
-
 }   // end namespace otter

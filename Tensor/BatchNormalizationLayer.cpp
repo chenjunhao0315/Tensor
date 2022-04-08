@@ -68,6 +68,4 @@ int BatchNormalizationLayer::forward_inplace(Tensor& bottom_blob, const NetOptio
     return 0;
 }
 
-REGISTER_LAYER_CLASS(BatchNormalization);
-
 }   // end namespace otter

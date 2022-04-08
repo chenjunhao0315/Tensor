@@ -79,6 +79,4 @@ int EltwiseLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<T
     return 0;
 }
 
-REGISTER_LAYER_CLASS(Eltwise);
-
 }   // end namespace otter

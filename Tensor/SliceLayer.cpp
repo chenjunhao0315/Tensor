@@ -74,6 +74,4 @@ int SliceLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOp
     return 0;
 }
 
-REGISTER_LAYER_CLASS(Slice);
-
 }   // end namespace otter

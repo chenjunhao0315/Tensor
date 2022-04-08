@@ -135,6 +135,4 @@ int MaxPoolLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const Net
     return 0;
 }
 
-REGISTER_LAYER_CLASS(MaxPool);
-
 }   // end namespace otter

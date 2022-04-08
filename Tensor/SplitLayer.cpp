@@ -30,6 +30,4 @@ int SplitLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Ten
     return 0;
 }
 
-REGISTER_LAYER_CLASS(Split);
-
 }   // end namespace otter

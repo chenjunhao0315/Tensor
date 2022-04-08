@@ -55,6 +55,4 @@ int ConcatLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Te
     return 0;
 }
 
-REGISTER_LAYER_CLASS(Concat);
-
 }

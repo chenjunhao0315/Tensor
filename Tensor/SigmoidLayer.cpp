@@ -24,6 +24,4 @@ int SigmoidLayer::forward_inplace(Tensor& bottom_blob, const NetOption& /*opt*/)
     return 0;
 }
 
-REGISTER_LAYER_CLASS(Sigmoid);
-
 }
