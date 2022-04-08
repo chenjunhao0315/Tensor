@@ -959,7 +959,7 @@ void im2col_sgemm_conv2d_impl_neon(
 }
 
 #else
-void im2col_sgemm_conv2d_impl_neon(const Tensor& im2col_, const Tensor& kernel_pack4x4_, const Tensor& bias_, int64_t input_channels, int64_t output_channels, Tensor& output) {}
+void im2col_sgemm_conv2d_impl_neon(const Tensor& /*im2col_*/, const Tensor& /*kernel_pack4x4_*/, const Tensor& /*bias_*/, int64_t /*input_channels*/, int64_t /*output_channels*/, Tensor& /*output*/) {}
 #endif
 
 #ifdef __ARM_NEON__
@@ -1066,7 +1066,7 @@ static void convolution_im2col_sgemm_transform_kernel_neon(const Tensor& kernel_
     }
 }
 #else
-static void convolution_im2col_sgemm_transform_kernel_neon(const Tensor& _kernel, Tensor& kernel_tf, int64_t input_channels, int64_t out_chnnels, int64_t kernel_width, int64_t kernel_height) {
+static void convolution_im2col_sgemm_transform_kernel_neon(const Tensor& /*_kernel*/, Tensor& /*kernel_tf*/, int64_t /*input_channels*/, int64_t /*out_chnnels*/, int64_t /*kernel_width*/, int64_t /*kernel_height*/) {
 }
 #endif
 
@@ -1074,7 +1074,7 @@ Tensor& sgemm_conv2d_1x1s1_neon_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
-    IntArrayRef kernel_size,
+    IntArrayRef /*kernel_size*/,
     IntArrayRef stride,
     IntArrayRef padding,
     Tensor& output) {
@@ -1219,7 +1219,7 @@ void conv2d_1x1s1_neon_impl(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias_,
-    IntArrayRef kernel_size,
+    IntArrayRef /*kernel_size*/,
     IntArrayRef stride,
     IntArrayRef padding,
     Tensor& output) {

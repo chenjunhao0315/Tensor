@@ -76,7 +76,7 @@ std::tuple<Tensor, Tensor, Tensor> batchnorm_cpu_transform_input_template(const 
     return std::make_tuple(output, save_mean, save_invstd);
 }
 
-std::tuple<Tensor, Tensor, Tensor> batchnorm_cpu(const Tensor& self, const Tensor& weight, const Tensor& bias, const Tensor& running_mean, const Tensor& running_var, bool train, double momentum, double eps) {
+std::tuple<Tensor, Tensor, Tensor> batchnorm_cpu(const Tensor& self, const Tensor& weight, const Tensor& bias, const Tensor& running_mean, const Tensor& running_var, bool train, double /*momentum*/, double eps) {
     return OTTER_DISPATCH_FLOATING_TYPES(self.scalar_type(), "batchnorm", [&] {
         if (!train) {
             auto save_mean = otter::empty({0} ,self.options());

@@ -20,7 +20,7 @@ EltwiseLayer::EltwiseLayer() {
 int EltwiseLayer::parse_param(LayerOption& option, ParamDict& pd) {
     std::string type_str = opt_find_string(option, "type", "Sum");
     
-    int type;
+    int type = 2;
     
     if (type_str == "Prod") {
         type = 1;
@@ -47,7 +47,7 @@ int EltwiseLayer::compute_output_shape(ParamDict &pd) {
     return 0;
 }
 
-int EltwiseLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const {
+int EltwiseLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& /*opt*/) const {
     
     const Tensor& bottom_blob = bottom_blobs[0];
     
@@ -59,7 +59,7 @@ int EltwiseLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<T
         
         top_blob = bottom_blob * bottom_blob1;
         
-        for (int i = 2; i < bottom_blobs.size(); ++i) {
+        for (size_t i = 2; i < bottom_blobs.size(); ++i) {
             const Tensor& bottom_blob1 = bottom_blobs[i];
             
             top_blob *= bottom_blob1;
@@ -69,7 +69,7 @@ int EltwiseLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<T
         
         top_blob = bottom_blob + bottom_blob1;
         
-        for (int i = 2; i < bottom_blobs.size(); ++i) {
+        for (size_t i = 2; i < bottom_blobs.size(); ++i) {
             const Tensor& bottom_blob1 = bottom_blobs[i];
             
             top_blob += bottom_blob1;

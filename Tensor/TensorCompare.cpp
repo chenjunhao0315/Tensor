@@ -21,7 +21,7 @@ DEFINE_DISPATCH(clamp_min_scalar_stub);
 DEFINE_DISPATCH(clamp_max_scalar_stub);
 
 // Maybe be abandoned
-DEFINE_META_FUNCTION(clamp) (const Tensor& self, const Scalar min, Scalar max) {
+DEFINE_META_FUNCTION(clamp) (const Tensor& self, const Scalar /*min*/, Scalar /*max*/) {
     build_borrowing_unary_op(maybe_get_output(), self);
 }
 

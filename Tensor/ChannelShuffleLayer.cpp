@@ -30,7 +30,7 @@ int ChannelShuffleLayer::load_param(const ParamDict &pd) {
     return 0;
 }
 
-int ChannelShuffleLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const {
+int ChannelShuffleLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& /*opt*/) const {
     top_blob = otter::channel_shuffle(bottom_blob, groups);
     
     return 0;

@@ -15,7 +15,7 @@ namespace native {
 //bool is_cuda(const Tensor& self) {
 //  return self.is_cuda();
 //}
-bool is_distributed(const Tensor& self) {
+bool is_distributed(const Tensor& /*self*/) {
     return false;
 }
 //bool is_complex(const Tensor& self) {

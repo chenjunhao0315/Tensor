@@ -29,7 +29,7 @@ struct MaybeOwnedTraitsNucleus {
         lhs = rhs;
     }
     
-    static void destory_borrow(borrow_type& target) {}
+    static void destory_borrow(borrow_type& /*toDestroy*/) {}
     
     static const owned_type& referenceFromBorrow(const borrow_type& borrow) {
         return *borrow;

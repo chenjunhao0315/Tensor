@@ -27,7 +27,7 @@ static void report_at_maximum_capacity(size_t MaxSize) {
 }
 
 template <class Size_T>
-static size_t getNewCapacity(size_t MinSize, size_t TSize, size_t OldCapacity) {
+static size_t getNewCapacity(size_t MinSize, size_t /*TSize*/, size_t OldCapacity) {
     constexpr size_t MaxSize = std::numeric_limits<Size_T>::max();
     
     if (MinSize > MaxSize)

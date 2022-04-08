@@ -34,7 +34,7 @@ DEFINE_DISPATCH(exp_stub);
 DEFINE_DISPATCH(sqrt_stub);
 
 #define DEFINE_UNARY_IMPL_FUNCTION(name, op) \
-DEFINE_IMPL_FUNCTION(name) (const Tensor& self, const Tensor& out) { \
+DEFINE_IMPL_FUNCTION(name) (const Tensor& /*self*/, const Tensor& /*out*/) { \
     op(Device::CPU, *this); \
 }
 

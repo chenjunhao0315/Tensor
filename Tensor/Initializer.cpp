@@ -25,7 +25,7 @@ InitializerFromDataReader::InitializerFromDataReader(const DataReader& dr_) : In
 InitializerFromDataReader::~InitializerFromDataReader() {
 }
 
-Tensor InitializerFromDataReader::load(IntArrayRef shape, int type) const {
+Tensor InitializerFromDataReader::load(IntArrayRef shape, int /*type*/) const {
     int64_t nread = 0;
     void* refbuf = nullptr;
     Tensor result;
@@ -187,7 +187,7 @@ InitializerXavierNormal::InitializerXavierNormal(double gain_) : gain(gain_) {
 InitializerXavierNormal::~InitializerXavierNormal() {
 }
 
-Tensor InitializerXavierNormal::load(IntArrayRef shape, int type) const {
+Tensor InitializerXavierNormal::load(IntArrayRef shape, int /*type*/) const {
     Tensor result = otter::empty(shape, otter::ScalarType::Float);
     
     Fan fan(result);
@@ -203,7 +203,7 @@ InitializerXavierUniform::InitializerXavierUniform(double gain_) : gain(gain_) {
 InitializerXavierUniform::~InitializerXavierUniform() {
 }
 
-Tensor InitializerXavierUniform::load(IntArrayRef shape, int type) const {
+Tensor InitializerXavierUniform::load(IntArrayRef shape, int /*type*/) const {
     Tensor result = otter::empty(shape, otter::ScalarType::Float);
     
     Fan fan(result);

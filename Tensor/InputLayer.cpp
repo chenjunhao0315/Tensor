@@ -49,7 +49,7 @@ int InputLayer::load_param(const ParamDict& pd) {
     return 0;
 }
 
-int InputLayer::forward_inplace(Tensor &bottom_top_blob, const NetOption &opt) const {
+int InputLayer::forward_inplace(Tensor& /*bottom_top_blob*/, const NetOption& /*opt*/) const {
     return 0;
 }
 

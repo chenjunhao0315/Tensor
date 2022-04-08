@@ -123,6 +123,8 @@ protected:
     }
     
     void assertSafeToReferenceAfterResize(const void* Elt, size_t NewSize) {
+        (void)Elt; // Suppress unused variable warning
+        (void)NewSize; // Suppress unused variable warning
         assert(isSafeToReferenceAfterResize(Elt, NewSize) &&
                "Attempting to reference an element of the vector in an operation "
                "that invalidates it");

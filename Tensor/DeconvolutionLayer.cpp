@@ -161,7 +161,7 @@ int DeconvolutionLayer::load_model(const Initializer& initializer) {
     return 0;
 }
 
-int DeconvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const NetOption &opt) const {
+int DeconvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const NetOption& /*opt*/) const {
     
     top_blob = otter::convolution(
         bottom_blob, weight_data, bias_data,

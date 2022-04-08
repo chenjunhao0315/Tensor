@@ -424,8 +424,6 @@ Tensor& slide_win_conv_transpose2d_out(
     
     const int64_t kernel_height   = kernel_size[0];
     const int64_t kernel_width    = kernel_size[1];
-    const int64_t pad_height      = padding[0];
-    const int64_t pad_width       = padding[1];
     const int64_t stride_height   = stride[0];
     const int64_t stride_width    = stride[1];
     const int64_t dilation_height = dilation[0];

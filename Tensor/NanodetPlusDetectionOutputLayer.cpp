@@ -48,7 +48,7 @@ int NanodetPlusDetectionOutputLayer::parse_param(LayerOption& option, ParamDict&
     return 0;
 }
 
-int NanodetPlusDetectionOutputLayer::compute_output_shape(ParamDict& pd) {
+int NanodetPlusDetectionOutputLayer::compute_output_shape(ParamDict& /*pd*/) {
     return 0;
 }
 
@@ -60,7 +60,7 @@ int NanodetPlusDetectionOutputLayer::load_param(const ParamDict &pd) {
     return 0;
 }
 
-int NanodetPlusDetectionOutputLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const {
+int NanodetPlusDetectionOutputLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& /*opt*/) const {
     
     std::vector<Object> proposals;
     
@@ -113,7 +113,7 @@ static inline float sigmoid(float x) {
 }
 
 void NanodetPlusDetectionOutputLayer::generate_proposals(const otter::Tensor& pred, int stride, float prob_threshold, std::vector<Object>& objects) const {
-    const int num_grid = pred.size(2);
+//    const int num_grid = pred.size(2);
     
     int num_grid_x = pred.size(3);
     int num_grid_y = pred.size(2);

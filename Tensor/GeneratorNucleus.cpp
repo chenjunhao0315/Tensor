@@ -23,7 +23,7 @@ Device GeneratorNucleus::device() const {
 
 namespace detail {
 
-uint64_t getNonDeterministicRandom(bool is_cuda) {
+uint64_t getNonDeterministicRandom(bool /*is_cuda*/) {
     uint64_t s;
     s = (uint64_t)std::chrono::high_resolution_clock::now()
         .time_since_epoch()

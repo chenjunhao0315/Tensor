@@ -18,8 +18,8 @@ Tensor& depthwise_conv2d_3x3s1_x86_sse_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias_,
-    IntArrayRef stride,
-    IntArrayRef padding,
+    IntArrayRef /*stride*/,
+    IntArrayRef /*padding*/,
     Tensor& output) {
     
     int w = self.size(3);
@@ -29,7 +29,7 @@ Tensor& depthwise_conv2d_3x3s1_x86_sse_out(
 
     const int group = self.size(1);
 
-    const int tailstep = w - 2 * outw + w;
+//    const int tailstep = w - 2 * outw + w;
 
     const float* kernel = weight.data_ptr<float>();
     const float* bias = (bias_.defined()) ? bias_.data_ptr<float>() : nullptr;

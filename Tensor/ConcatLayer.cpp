@@ -29,7 +29,7 @@ int ConcatLayer::compute_output_shape(ParamDict& pd) {
     
     auto shape = bottom_shapes[0].clone();
     auto shape_a = shape.accessor<int, 1>();
-    for (int i = 1; i < bottom_shapes.size(); ++i) {
+    for (size_t i = 1; i < bottom_shapes.size(); ++i) {
         auto bottom_shape_a = bottom_shapes[i].accessor<int, 1>();
         shape_a[axis] += bottom_shape_a[axis];
     }

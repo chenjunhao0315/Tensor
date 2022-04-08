@@ -11,6 +11,8 @@
 
 namespace otter {
 
+float get_color(int c, int x, int max);
+
 static const char* coco_class_names[] = {
     "background", "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"
 };
@@ -49,9 +51,9 @@ void draw_coco_detection(otter::Tensor& image, const otter::Tensor& pred, int wi
         
         const int classes = 80;
         int offset = obj.label * 123457 % classes;
-        float red = 1;
-        float green = 0;
-        float blue = 0;
+        float red = get_color(2, offset, classes);
+        float green = get_color(1, offset, classes);
+        float blue = get_color(0, offset, classes);
         
         int text_size = std::max(height / 500, 1);
         int line_width = std::floor(std::min(width, height) / 1000.0) + 1;
@@ -68,4 +70,15 @@ void draw_coco_detection(otter::Tensor& image, const otter::Tensor& pred, int wi
     }
 }
 
+float colors[6][3] = { {1,0,1}, {0,0,1}, {0,1,1}, {0,1,0}, {1,1,0}, {1,0,0} };
+
+float get_color(int c, int x, int max) {
+    float ratio = ((float)x / max) * 5;
+    int i = floor(ratio);
+    int j = ceil(ratio);
+    ratio -= i;
+    float r = (1 - ratio) * colors[i][c] + ratio * colors[j][c];
+    return r;
 }
+
+}   // end namespace otter

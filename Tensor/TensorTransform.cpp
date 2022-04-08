@@ -27,6 +27,7 @@ static void cut_border(const Tensor& src_, Tensor &dst_, int64_t top, int64_t le
         scalar_t* dst_ptr = dst.data_ptr<scalar_t>();
         
         for (const auto y : otter::irange(0, output_height)) {
+            (void)y;
             if (output_width < 12) {
                 for (const auto x : otter::irange(0, output_width)) {
                     dst_ptr[x] = src_ptr[x];

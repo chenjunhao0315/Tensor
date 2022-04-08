@@ -31,7 +31,7 @@ struct UniformStub {
 template<typename RNG>
 struct UniformMeta {
     // No-op!
-    void operator()(TensorIterator& iter, double from, double to, Generator gen) {
+    void operator()(TensorIterator& /*iter*/, double /*from*/, double /*to*/, Generator /*gen*/) {
     }
 };
 
@@ -57,7 +57,7 @@ struct NormalStub {
 template<typename RNG>
 struct NormalMeta {
     // No-op!
-    void operator()(Tensor& self, double mean, double std, Generator gen) {
+    void operator()(Tensor& /*self*/, double /*mean*/, double /*std*/, Generator /*gen*/) {
     }
 };
 
@@ -157,9 +157,9 @@ struct RandomFromToStub {
 template<typename RNG>
 struct RandomFromToMeta {
     // No-op!
-    void operator()(TensorIterator& iter, uint64_t range, int64_t from, Generator gen) {
+    void operator()(TensorIterator& /*iter*/, uint64_t /*range*/, int64_t /*from*/, Generator /*gen*/) {
     }
-    void operator()(TensorIterator& iter, Generator gen) {
+    void operator()(TensorIterator& /*iter*/, Generator /*gen*/) {
     }
 };
 
@@ -179,7 +179,7 @@ Tensor& random_(Tensor& self, int64_t to, Generator gen) {
     return random_(self, 0, to, gen);
 }
 
-Tensor& random_meta_(Tensor& self, Generator gen) {
+Tensor& random_meta_(Tensor& self, Generator /*gen*/) {
     // No error checking yay
     return self;
 }

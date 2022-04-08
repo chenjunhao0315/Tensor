@@ -18,7 +18,7 @@ Layer::~Layer() {
     
 }
 
-int Layer::parse_param(LayerOption& option, ParamDict& pd) {
+int Layer::parse_param(LayerOption& /*option*/, ParamDict& /*pd*/) {
     return 0;
 }
 
@@ -30,7 +30,7 @@ int Layer::compute_output_shape(ParamDict &pd) {
     return -1;
 }
 
-int Layer::load_param(const ParamDict &pd) {
+int Layer::load_param(const ParamDict& /*pd*/) {
     return 0;
 }
 
@@ -38,7 +38,7 @@ int Layer::init_model() {
     return 0;
 }
 
-int Layer::load_model(const Initializer& initializer) {
+int Layer::load_model(const Initializer& /*initializer*/) {
     return 0;
 }
 
@@ -53,7 +53,7 @@ int Layer::forward(const Tensor &bottom_blob, Tensor &top_blob, const NetOption 
     return forward_inplace(top_blob, opt);
 }
 
-int Layer::forward_inplace(Tensor &bottom_blob, const NetOption &opt) const {
+int Layer::forward_inplace(Tensor& /*bottom_blob*/, const NetOption& /*opt*/) const {
     return -1;
 }
 
@@ -71,7 +71,7 @@ int Layer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>&
     return forward_inplace(top_blobs, opt);
 }
 
-int Layer::forward_inplace(std::vector<Tensor>& bottom_blobs, const NetOption& opt) const {
+int Layer::forward_inplace(std::vector<Tensor>& /*bottom_blobs*/, const NetOption& /*opt*/) const {
     return -1;
 }
 

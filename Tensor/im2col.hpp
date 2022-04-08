@@ -105,7 +105,7 @@ Tensor& im2col_out_cpu(const Tensor& input, IntArrayRef kernel_size, IntArrayRef
 
 static inline void im2col_shape_check(
     const Tensor& input,
-    const Tensor& grad_output,
+    const Tensor& /*grad_output*/,
     int64_t kernel_height,
     int64_t kernel_width,
     int64_t dilation_height,

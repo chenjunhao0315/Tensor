@@ -92,7 +92,7 @@ int Yolov3DetectionOutputLayer::parse_param(LayerOption& option, ParamDict& pd) 
     return 0;
 }
 
-int Yolov3DetectionOutputLayer::compute_output_shape(ParamDict &pd) {
+int Yolov3DetectionOutputLayer::compute_output_shape(ParamDict& /*pd*/) {
     return 0;
 }
 
@@ -186,7 +186,7 @@ static inline float sigmoid(float x) {
     return static_cast<float>(1.f / (1.f + exp(-x)));
 }
 
-int Yolov3DetectionOutputLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const {
+int Yolov3DetectionOutputLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& /*opt*/) const {
     
     std::vector<BBox> all_bbox;
     

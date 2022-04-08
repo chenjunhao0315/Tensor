@@ -476,12 +476,12 @@ int Net::load_otter(const char *model_structure, CompileMode comopile_mode) {
     core::OtterLeader leader;
     leader.readProject(model_structure);
     
-    for (int i = 0; i < leader.teams_size(); ++i) {
+    for (size_t i = 0; i < leader.teams_size(); ++i) {
         std::vector<core::Param> params = leader.getTeamParams(i);
         std::string type = leader.getTeamName(i);
         LayerOption opt;
         opt["type"] = type;
-        for (int j = 0; j < params.size(); ++j) {
+        for (size_t j = 0; j < params.size(); ++j) {
             core::Param param = params[j];
             opt[param.type] = param.info;
         }
@@ -599,7 +599,7 @@ int Extractor::extract(std::string blob_name, Tensor &feat, int type) {
     return extract(blob_index, feat, type);
 }
 
-int Extractor::extract(int blob_index, Tensor &feat, int type) {
+int Extractor::extract(int blob_index, Tensor &feat, int /*type*/) {
     if (blob_index < 0 ||  blob_index >= (int)blob_tensors_.size())
         return -1;
     

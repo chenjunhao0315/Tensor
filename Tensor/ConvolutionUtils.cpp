@@ -101,6 +101,8 @@ bool ConvParams::use_cpu_depthwise3x3_winograd(const Tensor& input, const Tensor
         !is_dilated() &&
         !transposed;
 #else
+    (void)input;
+    (void)weight;
     return false;
 #endif
 }
@@ -112,6 +114,8 @@ bool ConvParams::use_cpu_neon(const Tensor& input, const Tensor& weight) const {
     (input.device() == Device::CPU) &&
     (weight.device() == Device::CPU);
 #else
+    (void)input;
+    (void)weight;
     return false;
 #endif
 }

@@ -102,7 +102,7 @@ static void check_shape_forward(const Tensor& input, const IntArrayRef& weight_s
 ConvBackend select_proper_conv_backend(
     const Tensor& input,
     const Tensor& weight,
-    const Tensor& bias,
+    const Tensor& /*bias*/,
     const bool need_backward,
     const ConvParams& params) {
     

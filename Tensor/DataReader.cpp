@@ -15,15 +15,15 @@ DataReader::DataReader() {
 DataReader::~DataReader() {
 }
 
-size_t DataReader::scan(const char *format, void *p) const {
+size_t DataReader::scan(const char* /*format*/, void* /*p*/) const {
     return 0;
 }
 
-size_t DataReader::read(void *buf, size_t size) const {
+size_t DataReader::read(void* /*buf*/, size_t /*size*/) const {
     return 0;
 }
 
-size_t DataReader::reference(size_t size, void **buf) const {
+size_t DataReader::reference(size_t /*size*/, void** /*buf*/) const {
     return 0;
 }
 

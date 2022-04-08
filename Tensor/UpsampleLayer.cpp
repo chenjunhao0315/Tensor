@@ -102,7 +102,7 @@ int UpsampleLayer::load_param(const ParamDict &pd) {
     return 0;
 }
 
-int UpsampleLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const {
+int UpsampleLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& /*opt*/) const {
     int input_height = (int)bottom_blob.size(2);
     int input_width = (int)bottom_blob.size(3);
     

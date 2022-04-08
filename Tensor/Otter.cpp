@@ -86,7 +86,7 @@ std::vector<Param> Otter::getParams() const {
     std::vector<Param> paramss;
     paramss.insert(paramss.end(), params.begin(), params.end());
     
-    for (int i = 0; i < partners.size(); ++i) {
+    for (size_t i = 0; i < partners.size(); ++i) {
         std::vector<Param> param = partners[i].getParams();
         paramss.insert(paramss.end(), param.begin(), param.end());
     }
@@ -135,7 +135,7 @@ void Otter::saveBlueprint(FILE *project, int format) {
     WRITE_SPACE(project, format);
     fprintf(project, "%s {\n", name_.c_str());
     
-    for (int i = 0; i < params.size(); ++i) {
+    for (size_t i = 0; i < params.size(); ++i) {
         WRITE_SPACE(project, (format + 4));
         if (params[i].info.find(' ') != std::string::npos)
             fprintf(project, "%s: \"%s\"\n", params[i].type.c_str(), params[i].info.c_str());
@@ -143,7 +143,7 @@ void Otter::saveBlueprint(FILE *project, int format) {
             fprintf(project, "%s: %s\n", params[i].type.c_str(), params[i].info.c_str());
     }
     
-    for (int i = 0; i < partners.size(); ++i) {
+    for (size_t i = 0; i < partners.size(); ++i) {
         partners[i].saveBlueprint(project, format + 4);
     }
     
@@ -238,14 +238,14 @@ bool OtterLeader::saveProject(const char *project_path) {
     if (!project) return false;
     
     fprintf(project, "name: \"%s\"\n", project_name.c_str());
-    for (int i = 0; i < params.size(); ++i) {
+    for (size_t i = 0; i < params.size(); ++i) {
         if (params[i].info.find(' ') == std::string::npos)
             fprintf(project, "%s: %s\n", params[i].type.c_str(), params[i].info.c_str());
         else
             fprintf(project, "%s: \"%s\"\n", params[i].type.c_str(), params[i].info.c_str());
     }
     
-    for (int i = 0; i < teams.size(); ++i) {
+    for (size_t i = 0; i < teams.size(); ++i) {
         teams[i].saveBlueprint(project);
     }
     
