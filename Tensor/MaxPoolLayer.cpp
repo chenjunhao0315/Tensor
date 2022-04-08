@@ -6,7 +6,6 @@
 //
 
 #include "MaxPoolLayer.hpp"
-#include "LayerRegistry.hpp"
 #include "Pool.hpp"
 #include "Padding.hpp"
 

@@ -7,7 +7,6 @@
 
 #include "SliceLayer.hpp"
 #include "TensorShape.hpp"
-#include "LayerRegistry.hpp"
 #include "TensorMaker.hpp"
 #include "Formatting.hpp"
 

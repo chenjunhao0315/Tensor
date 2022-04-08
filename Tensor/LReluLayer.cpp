@@ -6,7 +6,6 @@
 //
 
 #include "LReluLayer.hpp"
-#include "LayerRegistry.hpp"
 #include "TensorFunction.hpp"
 
 namespace otter {

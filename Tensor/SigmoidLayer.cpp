@@ -6,7 +6,6 @@
 //
 
 #include "SigmoidLayer.hpp"
-#include "LayerRegistry.hpp"
 
 namespace otter {
 

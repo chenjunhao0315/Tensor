@@ -6,7 +6,6 @@
 //
 
 #include "ConvolutionLayer.hpp"
-#include "LayerRegistry.hpp"
 #include "Convolution.hpp"
 
 #include "TensorFactory.hpp"

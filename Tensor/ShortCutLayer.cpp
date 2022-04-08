@@ -6,7 +6,6 @@
 //
 
 #include "ShortCutLayer.hpp"
-#include "LayerRegistry.hpp"
 #include "TensorOperator.hpp"
 #include "TensorFactory.hpp"
 
