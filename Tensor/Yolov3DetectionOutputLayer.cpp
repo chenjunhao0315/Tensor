@@ -9,6 +9,7 @@
 #include "Parallel.hpp"
 #include "TensorFactory.hpp"
 #include "TensorInterpolation.hpp"
+#include "TensorMaker.hpp"
 
 #include <float.h>
 
@@ -93,7 +94,9 @@ int Yolov3DetectionOutputLayer::parse_param(LayerOption& option, ParamDict& pd) 
     return 0;
 }
 
-int Yolov3DetectionOutputLayer::compute_output_shape(ParamDict& /*pd*/) {
+int Yolov3DetectionOutputLayer::compute_output_shape(ParamDict& pd) {
+    pd.set(OUTPUT_SHAPE_HINT, otter::tensor({6, 0, 0, 0}));
+    
     return 0;
 }
 

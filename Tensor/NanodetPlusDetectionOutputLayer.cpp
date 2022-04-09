@@ -48,7 +48,9 @@ int NanodetPlusDetectionOutputLayer::parse_param(LayerOption& option, ParamDict&
     return 0;
 }
 
-int NanodetPlusDetectionOutputLayer::compute_output_shape(ParamDict& /*pd*/) {
+int NanodetPlusDetectionOutputLayer::compute_output_shape(ParamDict& pd) {
+    pd.set(OUTPUT_SHAPE_HINT, otter::tensor({6, 0, 0, 0}));
+    
     return 0;
 }
 
