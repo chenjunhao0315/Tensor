@@ -50,7 +50,7 @@ int main(int argc, const char * argv[]) {
     i.stop_and_show();
 
     otter::draw_coco_detection(image, pred_fix, width, height);
-    otter::cv::save_image(image, "test");
+    otter::cv::save_image(image, "nanodet-plus");
     
     return 0;
 }

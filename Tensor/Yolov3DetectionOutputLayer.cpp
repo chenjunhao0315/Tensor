@@ -8,6 +8,7 @@
 #include "Yolov3DetectionOutputLayer.hpp"
 #include "Parallel.hpp"
 #include "TensorFactory.hpp"
+#include "TensorInterpolation.hpp"
 
 #include <float.h>
 
@@ -326,6 +327,35 @@ int Yolov3DetectionOutputLayer::forward(const std::vector<Tensor>& bottom_blobs,
     }
     
     return 0;
+}
+
+Tensor yolo_pre_process(const Tensor& img, int target_size) {
+    auto resize = otter::Interpolate(img, {target_size, target_size}, {0, 0}, otter::InterpolateMode::BILINEAR, false);
+    resize *= 0.00392157;
+    
+    return resize;
+}
+
+Tensor yolo_post_process(const Tensor& pred, int image_width, int image_height) {
+    
+    auto pred_fix = otter::empty_like(pred);
+    
+    auto pred_a = pred.accessor<float, 2>();
+    auto pred_fix_a = pred_fix.accessor<float, 2>();
+    
+    for (int64_t i = 0; i < pred.size(0); ++i) {
+        auto obj = pred_a[i];
+        auto obj_fix = pred_fix_a[i];
+        
+        obj_fix[0] = obj[0];
+        obj_fix[1] = obj[1];
+        obj_fix[2] = obj[2] * image_width;
+        obj_fix[3] = obj[3] * image_height;
+        obj_fix[4] = obj[4] * image_width - obj_fix[2];
+        obj_fix[5] = obj[5] * image_height - obj_fix[3];
+    }
+    
+    return pred_fix;
 }
 
 }   // end namespace otter

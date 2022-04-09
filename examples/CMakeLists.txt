@@ -11,3 +11,4 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../Tensor)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/../Tensor)
 
 otter_add_example(Nanodet)
+otter_add_example(YoloFastest)
