@@ -117,8 +117,6 @@ if(OTTER_DISABLE_EXCEPTION)
 endif()
 
 if(OTTER_TARGET_ARCH STREQUAL "x86")
-    message("SSE2: ${OTTER_SSE2}")
-    message("RUNTIME_CPU: ${OTTER_RUNTIME_CPU}")
     if(OTTER_SSE2)
         if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC" OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_SIMULATE_ID MATCHES "MSVC" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT MATCHES "MSVC"))
             target_compile_options(otter PRIVATE /arch:SSE2 /D__SSE2__)
@@ -184,9 +182,9 @@ if(OTTER_TARGET_ARCH STREQUAL "x86")
             endif()
         else()
             target_compile_options(otter PRIVATE -mavx)
-            if(OTTER_XOP)
-                target_compile_options(otter PRIVATE -mxop)
-            endif()
+#             if(OTTER_XOP)
+#                 target_compile_options(otter PRIVATE -mxop)
+#             endif()
             if(OTTER_F16C)
                 target_compile_options(otter PRIVATE -mf16c)
             endif()
@@ -202,6 +200,56 @@ if(((IOS AND CMAKE_OSX_ARCHITECTURES MATCHES "arm64") OR (APPLE AND CMAKE_OSX_AR
             target_compile_options(otter PRIVATE -march=armv8.2-a+fp16)
         endif()
     endif()
+endif()
+
+if(OTTER_TARGET_ARCH STREQUAL "mips")
+    if(NOT OTTER_RUNTIME_CPU AND OTTER_MSA)
+        target_compile_options(otter PRIVATE -mmsa)
+    endif()
+    if(NOT OTTER_RUNTIME_CPU AND OTTER_MMI)
+        target_compile_options(otter PRIVATE -mloongson-mmi)
+    endif()
+endif()
+
+if(OTTER_TARGET_ARCH STREQUAL "riscv" AND NOT C906)
+    if(NOT OTTER_RUNTIME_CPU AND OTTER_RVV)
+        if(OTTER_COMPILER_SUPPORT_RVV_FP16)
+            target_compile_options(otter PRIVATE -march=rv64gcv_zfh)
+        elseif(OTTER_COMPILER_SUPPORT_RVV)
+            target_compile_options(otter PRIVATE -march=rv64gcv)
+        endif()
+    endif()
+endif()
+
+if(OTTER_INSTALL_SDK)
+    install(TARGETS otter EXPORT otter
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+    )
+    install(FILES
+        OTensor.hpp
+        Formatting.hpp
+        TensorOptions.hpp
+        TensorFactory.hpp
+        TensorMaker.hpp
+        TensorOperator.hpp
+        TensorShape.hpp
+        UnaryOps.hpp
+        BinaryOps.hpp
+        TensorCompare.hpp
+        TensorFunction.hpp
+        Convolution.hpp
+        Padding.hpp
+        TensorInterpolation.hpp
+        ChannelShuffle.hpp
+        Net.hpp
+        Activation.hpp
+        DESTINATION include/otter
+    )
+    install(EXPORT otter DESTINATION lib/cmake/otter)
+    configure_file(${CMAKE_CURRENT_LIST_DIR}/../cmake/otterConfig.cmake.in otterConfig.cmake @ONLY)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/otterConfig.cmake DESTINATION lib/cmake/otter)
 endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
