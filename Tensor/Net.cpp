@@ -477,8 +477,8 @@ int Net::load_otter(const char *model_structure, CompileMode comopile_mode) {
     leader.readProject(model_structure);
     
     for (size_t i = 0; i < leader.teams_size(); ++i) {
-        std::vector<core::Param> params = leader.getTeamParams(i);
-        std::string type = leader.getTeamName(i);
+        std::vector<core::Param> params = leader.getTeamParams(int(i));
+        std::string type = leader.getTeamName(int(i));
         LayerOption opt;
         opt["type"] = type;
         for (size_t j = 0; j < params.size(); ++j) {

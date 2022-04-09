@@ -113,11 +113,11 @@ static inline float sigmoid(float x) {
 void NanodetPlusDetectionOutputLayer::generate_proposals(const otter::Tensor& pred, int stride, float prob_threshold, std::vector<Object>& objects) const {
 //    const int num_grid = pred.size(2);
     
-    int num_grid_x = pred.size(3);
-    int num_grid_y = pred.size(2);
+    int num_grid_x = (int)pred.size(3);
+    int num_grid_y = (int)pred.size(2);
     
     const int num_class = 80; // number of classes. 80 for COCO
-    const int reg_max_1 = (pred.size(1) - num_class) / 4;
+    const int reg_max_1 = ((int)pred.size(1) - num_class) / 4;
     
     auto pred_a = pred.accessor<float, 4>()[0];
     
@@ -292,8 +292,8 @@ void NanodetPlusDetectionOutputLayer::qsort_descent_inplace(std::vector<Object>&
 }
 
 Tensor nanodet_pre_process(const Tensor& img, int target_size, float& scale, int& wpad, int& hpad) {
-    int width  = img.size(3);
-    int height = img.size(2);
+    int width  = (int)img.size(3);
+    int height = (int)img.size(2);
     
     int w = width;
     int h = height;

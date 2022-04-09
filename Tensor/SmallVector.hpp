@@ -8,12 +8,19 @@
 #ifndef SmallVector_hpp
 #define SmallVector_hpp
 
+#include "Macro.hpp"
+
 #include <limits>
 #include <memory>
 #include <cstring>
 #include <cstdint>
 #include <cassert>
 #include <iostream>
+
+OTTER_CLANG_DIAGNOSTIC_PUSH()
+#if OTTER_CLANG_HAS_WARNING("-Wshorten-64-to-32")
+OTTER_CLANG_DIAGNOSTIC_IGNORE("-Wshorten-64-to-32")
+#endif
 
 namespace otter {
 

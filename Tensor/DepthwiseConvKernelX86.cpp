@@ -18,23 +18,27 @@ Tensor& depthwise_conv2d_3x3s1_x86_sse_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias_,
-    IntArrayRef /*stride*/,
-    IntArrayRef /*padding*/,
+    IntArrayRef stride,
+    IntArrayRef padding,
     Tensor& output) {
     
-    int w = self.size(3);
+    auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0);
+    auto output_shape = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    output.resize_(output_shape);
+    
+    int w = int(input.size(3));
 
-    int outw = output.size(3);
-    int outh = output.size(2);
+    int outw = int(output.size(3));
+    int outh = int(output.size(2));
 
-    const int group = self.size(1);
+    const int group = int(self.size(1));
 
 //    const int tailstep = w - 2 * outw + w;
 
     const float* kernel = weight.data_ptr<float>();
     const float* bias = (bias_.defined()) ? bias_.data_ptr<float>() : nullptr;
     
-    auto input_a = self.accessor<float, 4>()[0];
+    auto input_a = input.accessor<float, 4>()[0];
     auto output_a = output.accessor<float, 4>()[0];
 
     otter::parallel_for(0, group, 0, [&](int64_t begin, int64_t end) {
@@ -152,11 +156,9 @@ Tensor depthwise_conv2d_3x3s1_x86_sse(
     IntArrayRef stride,
     IntArrayRef padding) {
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
-    auto output = otter::empty(output_size, self.options());
-    auto input = otter::constant_pad(self, {padding[0], padding[0], padding[1], padding[1]}, 0);
+    auto output = otter::empty({}, self.options());
 
-    return depthwise_conv2d_3x3s1_x86_sse_out(input, weight, bias, stride, padding, output);
+    return depthwise_conv2d_3x3s1_x86_sse_out(self, weight, bias, stride, padding, output);
 }
 
 Tensor& depthwise_conv2d_3x3s2_x86_sse_out(
@@ -167,19 +169,23 @@ Tensor& depthwise_conv2d_3x3s2_x86_sse_out(
     IntArrayRef padding,
     Tensor& output) {
     
-    int w = self.size(3);
+    auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0);
+    auto output_shape = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    output.resize_(output_shape);
+    
+    int w = int(input.size(3));
 
-    int outw = output.size(3);
-    int outh = output.size(2);
+    int outw = int(output.size(3));
+    int outh = int(output.size(2));
 
-    const int group = self.size(1);
+    const int group = int(self.size(1));
 
     const int tailstep = w - 2 * outw + w;
 
     const float* kernel = weight.data_ptr<float>();
     const float* bias = (bias_.defined()) ? bias_.data_ptr<float>() : nullptr;
     
-    auto input_a = self.accessor<float, 4>()[0];
+    auto input_a = input.accessor<float, 4>()[0];
     auto output_a = output.accessor<float, 4>()[0];
 
     otter::parallel_for(0, group, 0, [&](int64_t begin, int64_t end) {
@@ -247,11 +253,9 @@ Tensor depthwise_conv2d_3x3s2_x86_sse(
     IntArrayRef stride,
     IntArrayRef padding) {
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
-    auto output = otter::empty(output_size, self.options());
-    auto input = otter::constant_pad(self, {padding[0], padding[0], padding[1], padding[1]}, 0);
+    auto output = otter::empty({}, self.options());
 
-    return depthwise_conv2d_3x3s2_x86_sse_out(input, weight, bias, stride, padding, output);
+    return depthwise_conv2d_3x3s2_x86_sse_out(self, weight, bias, stride, padding, output);
 }
 
 }   // end namespace otter
