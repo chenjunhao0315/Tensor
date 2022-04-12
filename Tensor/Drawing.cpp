@@ -114,7 +114,7 @@ LineAA(Tensor& img, Point2l pt1, Point2l pt2, const void* color) {
     int ep_table[9];
     int cb = ((unsigned char*)color)[0], cg = ((unsigned char*)color)[1], cr = ((unsigned char*)color)[2], ca = ((unsigned char*)color)[3];
     int _cb, _cg, _cr, _ca;
-    int nch = img.size(2);
+    int nch = (int)img.size(2);
     unsigned char* ptr = img.data_ptr<unsigned char>();
     size_t step = (int)(img.size(1) * img.size(2) * img.itemsize());
     Size2l size0(Size((int)img.size(1), (int)img.size(0))), size = size0;
@@ -744,7 +744,7 @@ static void
 EllipseEx(Tensor& img, Point2l center, Size2l axes,
           int angle, int arc_start, int arc_end,
           const void* color, int thickness, int line_type) {
-    axes.width = std::abs(axes.width), axes.height = std::abs(axes.height);
+    axes.width = std::abs(axes.width); axes.height = std::abs(axes.height);
     int delta = (int)((std::max(axes.width,axes.height)+(XY_ONE>>1))>>XY_SHIFT);
     delta = delta < 3 ? 90 : delta < 10 ? 30 : delta < 15 ? 18 : 5;
     
@@ -842,7 +842,7 @@ FillConvexPoly(Tensor& img, const Point2l* v, int npts, const void* color, int l
     if (line_type < CV_AA)
         delta1 = delta2 = XY_ONE >> 1;
     else
-        delta1 = XY_ONE - 1, delta2 = 0;
+        delta1 = XY_ONE - 1; delta2 = 0;
     
     p0 = v[npts - 1];
     p0.x <<= XY_SHIFT - shift;
@@ -940,7 +940,7 @@ FillConvexPoly(Tensor& img, const Point2l* v, int npts, const void* color, int l
         if (y >= 0) {
             int left = 0, right = 1;
             if (edge[0].x > edge[1].x) {
-                left = 1, right = 0;
+                left = 1; right = 0;
             }
             
             int xx1 = (int)((edge[left].x + delta1) >> XY_SHIFT);

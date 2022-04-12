@@ -169,7 +169,7 @@ void LineIterator::init(const Tensor &img, Rect rect, Point pt1_, Point pt2_, in
     p = pt1;
     if (!point_mode) {
         ptr0 = img.data_ptr<unsigned char>();
-        pix_size = (int)img.itemsize() * img.size(2);
+        pix_size = (int)(img.itemsize() * img.size(2));
         step = (int)(img.size(1) * pix_size);
         ptr = (unsigned char*)ptr0 + (size_t)p.y * step + (size_t)p.x * pix_size;
         plusStep = plusStep * step + plusShift * pix_size;

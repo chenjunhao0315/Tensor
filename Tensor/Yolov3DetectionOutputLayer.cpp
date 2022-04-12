@@ -6,9 +6,10 @@
 //
 
 #include "Yolov3DetectionOutputLayer.hpp"
-#include "LayerRegistry.hpp"
 #include "Parallel.hpp"
 #include "TensorFactory.hpp"
+#include "TensorInterpolation.hpp"
+#include "TensorMaker.hpp"
 
 #include <float.h>
 
@@ -93,7 +94,9 @@ int Yolov3DetectionOutputLayer::parse_param(LayerOption& option, ParamDict& pd) 
     return 0;
 }
 
-int Yolov3DetectionOutputLayer::compute_output_shape(ParamDict &pd) {
+int Yolov3DetectionOutputLayer::compute_output_shape(ParamDict& pd) {
+    pd.set(OUTPUT_SHAPE_HINT, otter::tensor({6, 0, 0, 0}));
+    
     return 0;
 }
 
@@ -187,7 +190,7 @@ static inline float sigmoid(float x) {
     return static_cast<float>(1.f / (1.f + exp(-x)));
 }
 
-int Yolov3DetectionOutputLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const {
+int Yolov3DetectionOutputLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& /*opt*/) const {
     
     std::vector<BBox> all_bbox;
     
@@ -329,6 +332,33 @@ int Yolov3DetectionOutputLayer::forward(const std::vector<Tensor>& bottom_blobs,
     return 0;
 }
 
-REGISTER_LAYER_CLASS(Yolov3DetectionOutput);
+Tensor yolo_pre_process(const Tensor& img, int target_size) {
+    auto resize = otter::Interpolate(img, {target_size, target_size}, {0, 0}, otter::InterpolateMode::BILINEAR, false);
+    resize *= 0.00392157;
+    
+    return resize;
+}
+
+Tensor yolo_post_process(const Tensor& pred, int image_width, int image_height) {
+    
+    auto pred_fix = otter::empty_like(pred);
+    
+    auto pred_a = pred.accessor<float, 2>();
+    auto pred_fix_a = pred_fix.accessor<float, 2>();
+    
+    for (int64_t i = 0; i < pred.size(0); ++i) {
+        auto obj = pred_a[i];
+        auto obj_fix = pred_fix_a[i];
+        
+        obj_fix[0] = obj[0];
+        obj_fix[1] = obj[1];
+        obj_fix[2] = obj[2] * image_width;
+        obj_fix[3] = obj[3] * image_height;
+        obj_fix[4] = obj[4] * image_width - obj_fix[2];
+        obj_fix[5] = obj[5] * image_height - obj_fix[3];
+    }
+    
+    return pred_fix;
+}
 
 }   // end namespace otter

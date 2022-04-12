@@ -122,6 +122,7 @@ OTTER_ALL_SCALAR_TYPES(SPECIALIZE_CppTypeToScalarType)
 
 template <typename To, typename From>
 typename std::enable_if<std::is_same<From, bool>::value, bool>::type overflows(From f) {
+    (void)f;
     return false;
 }
 
@@ -133,12 +134,15 @@ struct scalar_value_type {
 // Returns false since we cannot have x < 0 if x is unsigned.
 template <typename T>
 static inline constexpr bool is_negative(const T& x, std::true_type is_unsigned) {
+    (void)x;
+    (void)is_unsigned;
     return false;
 }
 
 // Returns true if a signed variable x < 0
 template <typename T>
 static inline constexpr bool is_negative(const T& x, std::false_type is_unsigned) {
+    (void)is_unsigned;
     return x < T(0);
 }
 
@@ -151,12 +155,14 @@ inline constexpr bool is_negative(const T& x) {
 // Returns the sign of an unsigned variable x as 0, 1
 template <typename T>
 static inline constexpr int signum(const T& x, std::true_type is_unsigned) {
+    (void)is_unsigned;
     return T(0) < x;
 }
 
 // Returns the sign of a signed variable x as -1, 0, 1
 template <typename T>
 static inline constexpr int signum(const T& x, std::false_type is_unsigned) {
+    (void)is_unsigned;
     return (T(0) < x) - (x < T(0));
 }
 
@@ -182,6 +188,8 @@ inline constexpr bool greater_than_max(const T& x) {
 // Returns true if x < lowest(Limit). Standard comparison
 template <typename Limit, typename T>
 static inline constexpr bool less_than_lowest(const T& x, std::false_type limit_is_unsigned, std::false_type x_is_unsigned) {
+    (void)limit_is_unsigned;
+    (void)x_is_unsigned;
     return x < std::numeric_limits<Limit>::lowest();
 }
 
@@ -189,6 +197,9 @@ static inline constexpr bool less_than_lowest(const T& x, std::false_type limit_
 // negative values but x cannot be negative because it is unsigned
 template <typename Limit, typename T>
 static inline constexpr bool less_than_lowest(const T& x, std::false_type limit_is_unsigned, std::true_type x_is_unsigned) {
+    (void)x;
+    (void)limit_is_unsigned;
+    (void)x_is_unsigned;
     return false;
 }
 
@@ -196,12 +207,17 @@ static inline constexpr bool less_than_lowest(const T& x, std::false_type limit_
 // Limit is not signed, so its lower value is zero
 template <typename Limit, typename T>
 static inline constexpr bool less_than_lowest(const T& x, std::true_type limit_is_unsigned, std::false_type x_is_unsigned) {
+    (void)limit_is_unsigned;
+    (void)x_is_unsigned;
     return x < T(0);
 }
 
 // Returns false sign both types are unsigned
 template <typename Limit, typename T>
 static inline constexpr bool less_than_lowest(const T& x, std::true_type limit_is_unsigned, std::true_type x_is_unsigned) {
+    (void)x;
+    (void)limit_is_unsigned;
+    (void)x_is_unsigned;
     return false;
 }
 

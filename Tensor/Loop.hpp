@@ -129,6 +129,7 @@ static inline void unroll_contiguous_scalar_checks(
     const int64_t* strides,
     std::index_sequence<>,
     cb_t&& cb) {
+    (void)strides;
     
     cb(0);
 }

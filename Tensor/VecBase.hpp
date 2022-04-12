@@ -430,6 +430,48 @@ inline void convert(const src_T *src, dst_T *dst, int64_t n) {
     }
 }
 
+template <class T, typename std::enable_if<true, int>::type = 0>
+Vectorized<T> inline minimum(const Vectorized<T> &a, const Vectorized<T> &b) {
+    Vectorized<T> c;
+    for (int i = 0; i != Vectorized<T>::size(); i++) {
+        c[i] = (std::abs(a[i]) < std::abs(b[i])) ? a[i] : b[i];
+        if (_isnan(a[i])) {
+            // If either input is NaN, propagate a NaN.
+            // NOTE: The case where b[i] was NaN is handled correctly by the naive
+            // ternary operator above.
+            c[i] = a[i];
+        }
+    }
+    return c;
+}
+
+template <class T, typename std::enable_if<true, int>::type = 0>
+Vectorized<T> inline clamp(const Vectorized<T> &a, const Vectorized<T> &min_vec, const Vectorized<T> &max_vec) {
+    Vectorized<T> c;
+    for (int i = 0; i != Vectorized<T>::size(); i++) {
+        c[i] = std::min(std::max(a[i], min_vec[i]), max_vec[i]);
+    }
+    return c;
+}
+
+template <class T, typename std::enable_if<true, int>::type = 0>
+Vectorized<T> inline clamp_max(const Vectorized<T> &a, const Vectorized<T> &max_vec) {
+    Vectorized<T> c;
+    for (int i = 0; i != Vectorized<T>::size(); i++) {
+        c[i] = a[i] > max_vec[i] ? max_vec[i] : a[i];
+    }
+    return c;
+}
+
+template <class T, typename std::enable_if<true, int>::type = 0>
+Vectorized<T> inline clamp_min(const Vectorized<T> &a, const Vectorized<T> &min_vec) {
+    Vectorized<T> c;
+    for (int i = 0; i != Vectorized<T>::size(); i++) {
+        c[i] = a[i] < min_vec[i] ? min_vec[i] : a[i];
+    }
+    return c;
+}
+
 #if defined(CPU_CAPABILITY_AVX2) || defined(CPU_CAPABILITY_AVX512)
 template <class T, typename Op>
 static inline Vectorized<T> bitwise_binary_op(const Vectorized<T> &a, const Vectorized<T> &b, Op op) {

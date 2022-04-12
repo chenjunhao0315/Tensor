@@ -6,7 +6,6 @@
 //
 
 #include "InputLayer.hpp"
-#include "LayerRegistry.hpp"
 
 #include "TensorMaker.hpp"
 
@@ -50,10 +49,8 @@ int InputLayer::load_param(const ParamDict& pd) {
     return 0;
 }
 
-int InputLayer::forward_inplace(Tensor &bottom_top_blob, const NetOption &opt) const {
+int InputLayer::forward_inplace(Tensor& /*bottom_top_blob*/, const NetOption& /*opt*/) const {
     return 0;
 }
-
-REGISTER_LAYER_CLASS(Input);
 
 }   // end namespace otter

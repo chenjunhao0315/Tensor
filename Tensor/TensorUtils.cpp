@@ -12,6 +12,10 @@
 namespace otter {
 
 void check_dim_size(const Tensor& tensor, int64_t dim, int64_t dim_size, int64_t size) {
+    (void)tensor;
+    (void)dim;
+    (void)dim_size;
+    (void)size;
     assert(tensor.dim() == dim && tensor.size(dim_size) == size);
 }
 

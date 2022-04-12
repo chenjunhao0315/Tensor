@@ -6,7 +6,6 @@
 //
 
 #include "SigmoidLayer.hpp"
-#include "LayerRegistry.hpp"
 
 namespace otter {
 
@@ -15,14 +14,14 @@ SigmoidLayer::SigmoidLayer() {
     support_inplace = true;
 }
 
-int SigmoidLayer::load_param(const ParamDict &pd) {
+int SigmoidLayer::load_param(const ParamDict& /*pd*/) {
     return 0;
 }
 
-int SigmoidLayer::forward_inplace(Tensor& bottom_blob, const NetOption& opt) const {
+int SigmoidLayer::forward_inplace(Tensor& bottom_blob, const NetOption& /*opt*/) const {
+    (void)bottom_blob;
+    
     return 0;
 }
-
-REGISTER_LAYER_CLASS(Sigmoid);
 
 }

@@ -20,6 +20,7 @@ Tensor create_out(IntArrayRef sizes, IntArrayRef strides, TensorOptions options)
 }
 
 void resize_out(const Tensor &out, IntArrayRef sizes, IntArrayRef strides, const TensorOptions &options) {
+    (void)options;
     assert(out.dtype() == options.dtype());
     assert(out.device() == options.device());
     
@@ -32,6 +33,9 @@ void resize_out(const Tensor &out, IntArrayRef sizes, IntArrayRef strides, const
 }
 
 void check_inplace(const Tensor &self, IntArrayRef sizes, const TensorOptions &options) {
+    (void)self;
+    (void)sizes;
+    (void)options;
     // "Bad in-place call: ", "input tensor dtype ", self.dtype(), " and output tensor dtype ", options.dtype(), " should match"
     assert(options.dtype() == self.dtype());
     // "Bad in-place call: ", "input tensor device ", self.device(), " and output tensor device ", options.device(), " should match"
@@ -472,7 +476,7 @@ Tensor & wrapper_addmm_out(const Tensor & self, const Tensor & mat1, const Tenso
 
 struct structured_addmm_out_cpu_inplace : structured_addmm_out_cpu {
     structured_addmm_out_cpu_inplace(Tensor& out0) : outputs_{ std::ref(out0) } {}
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef /*strides*/, TensorOptions options) override {
         const auto& out = outputs_[output_idx].get();
         check_inplace(out, sizes, options);
     }
@@ -531,7 +535,7 @@ Tensor & wrapper_mm_out(const Tensor & self, const Tensor & other, Tensor & out)
 
 struct structured_mm_out_cpu_inplace : structured_mm_out_cpu {
     structured_mm_out_cpu_inplace(Tensor& out0) : outputs_{ std::ref(out0) } {}
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef /*strides*/, TensorOptions options) override {
         const auto& out = outputs_[output_idx].get();
         check_inplace(out, sizes, options);
     }

@@ -13,6 +13,7 @@
 #include <map>
 
 namespace otter {
+class Layer;
 
 class LayerRegistry {
 public:

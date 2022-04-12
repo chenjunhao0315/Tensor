@@ -6,7 +6,6 @@
 //
 
 #include "LReluLayer.hpp"
-#include "LayerRegistry.hpp"
 #include "TensorFunction.hpp"
 
 namespace otter {
@@ -41,7 +40,5 @@ int LReluLayer::forward_inplace(Tensor &bottom_blob, const NetOption &opt) const
     
     return 0;
 }
-
-REGISTER_LAYER_CLASS(LRelu);
 
 }   // end namespace otter

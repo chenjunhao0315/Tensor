@@ -6,7 +6,6 @@
 //
 
 #include "ConvolutionLayer.hpp"
-#include "LayerRegistry.hpp"
 #include "Convolution.hpp"
 
 #include "TensorFactory.hpp"
@@ -158,7 +157,7 @@ int ConvolutionLayer::load_model(const Initializer& initializer) {
     return 0;
 }
 
-int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const NetOption &opt) const {
+int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const NetOption& /*opt*/) const {
     
     top_blob = otter::convolution(
         bottom_blob, weight_data, bias_data,
@@ -173,7 +172,5 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
     
     return 0;
 }
-
-REGISTER_LAYER_CLASS(Convolution);
 
 }   // end namespace otter

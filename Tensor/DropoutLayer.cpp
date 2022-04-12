@@ -8,7 +8,6 @@
 #include "DropoutLayer.hpp"
 #include "Dropout.hpp"
 #include "NetOption.hpp"
-#include "LayerRegistry.hpp"
 
 namespace otter {
 
@@ -42,7 +41,5 @@ int DropoutLayer::forward_inplace(Tensor &bottom_blob, const NetOption &opt) con
     }
     return 0;
 }
-
-REGISTER_LAYER_CLASS(Dropout);
 
 }   // end namespace otter

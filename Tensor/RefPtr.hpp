@@ -62,10 +62,10 @@ class Ptr_quantum {
 protected:
     virtual ~Ptr_quantum() {}
     constexpr Ptr_quantum() noexcept : refCount_(0) {}
-    Ptr_quantum(const Ptr_quantum&& other) noexcept : Ptr_quantum() {}
-    Ptr_quantum& operator=(const Ptr_quantum&& other) { return *this; }
-    Ptr_quantum(const Ptr_quantum& other) noexcept : Ptr_quantum() {}
-    Ptr_quantum& operator=(const Ptr_quantum& other) { return *this; }
+    Ptr_quantum(const Ptr_quantum&& /*other*/) noexcept : Ptr_quantum() {}
+    Ptr_quantum& operator=(const Ptr_quantum&& /*other*/) { return *this; }
+    Ptr_quantum(const Ptr_quantum& /*other*/) noexcept : Ptr_quantum() {}
+    Ptr_quantum& operator=(const Ptr_quantum& /*other*/) { return *this; }
     
 private:
     virtual void release_resources() {}

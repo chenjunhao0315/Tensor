@@ -178,7 +178,7 @@ struct CheckAlmostAllZeroStrides {
 
 template <int non_zero_stride_dim, typename scalar_t, typename index_t, int interp_size>
 struct CheckAlmostAllZeroStrides<0, non_zero_stride_dim, scalar_t, index_t, interp_size> {
-    static inline bool eval(const int64_t* strides) {
+    static inline bool eval(const int64_t* /*strides*/) {
         return true;
     }
 };
@@ -589,7 +589,7 @@ struct HelperInterpBase {
     template <typename scalar_t, typename aa_filter_fn_t>
     static inline std::vector<Tensor> _compute_indices_weights_aa(
         int64_t input_size, int64_t output_size, int64_t stride, int64_t ndims,
-        int64_t reshape_dim, bool align_corners, scalar_t scale,
+        int64_t reshape_dim, bool /*align_corners*/, scalar_t scale,
         int interp_size, aa_filter_fn_t aa_filter_fn
     ) {
 

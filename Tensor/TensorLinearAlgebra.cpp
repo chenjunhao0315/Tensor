@@ -15,7 +15,7 @@
 
 namespace otter {
 
-DEFINE_META_FUNCTION(addmm) (const Tensor& self, const Tensor& mat1, const Tensor& mat2, const Scalar& beta, const Scalar& alpha) {
+DEFINE_META_FUNCTION(addmm) (const Tensor& self, const Tensor& mat1, const Tensor& mat2, const Scalar& /*beta*/, const Scalar& /*alpha*/) {
     // Ensure that it is 2D matrix
     assert(mat1.dim() == 2);
     assert(mat2.dim() == 2);
@@ -138,6 +138,8 @@ void addmm_impl_cpu_(Tensor &result, const Tensor &self, Tensor m1, Tensor m2, c
 Tensor matmul(Tensor& output, const Tensor& tensor1, const Tensor& tensor2) {
     auto dim_tensor1 = tensor1.dim();
     auto dim_tensor2 = tensor2.dim();
+    (void)dim_tensor1;
+    (void)dim_tensor2;
     
     return output;
 }

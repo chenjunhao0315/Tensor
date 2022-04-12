@@ -59,11 +59,11 @@ static void im2col_sgemm_conv2d_impl_x86(
     
     {
 #if __AVX__
-        int nn_size = outSize / 8;
+        int nn_size = (int)outSize / 8;
 
         otter::parallel_for(0, nn_size, 0, [&](int64_t begin, int64_t end) {
             for (const auto ii : otter::irange(begin, end)) {
-                int i = ii * 8;
+                int i = (int)ii * 8;
 
                 float* tmpptr = tmp_a[i / 8].data();
 
@@ -83,15 +83,15 @@ static void im2col_sgemm_conv2d_impl_x86(
         });
 
         int remain_size_start = nn_size * 8;
-        nn_size = (outSize - remain_size_start) / 4;
+        nn_size = ((int)outSize - remain_size_start) / 4;
 #else
-        int nn_size = size / 4;
+        int nn_size = outSize / 4;
         int remain_size_start = 0;
 #endif
 
         otter::parallel_for(0, nn_size, 0, [&](int64_t begin, int64_t end) {
             for (const auto ii : otter::irange(begin, end)) {
-                int i = remain_size_start + ii * 4;
+                int i = remain_size_start + (int)ii * 4;
 
 #if __AVX__
                 float* tmpptr = tmp_a[i / 8 + (i % 8) / 4].data();
@@ -165,7 +165,7 @@ static void im2col_sgemm_conv2d_impl_x86(
 
     otter::parallel_for(0, nn_outch, 0, [&](int64_t begin, int64_t end) {
         for (const auto pp : otter::irange(begin, end)) {
-            int p = pp * 8;
+            int p = (int)pp * 8;
 
             float* outptr0 = output_a[p + 0].data();
             float* outptr1 = output_a[p + 1].data();
@@ -341,7 +341,7 @@ static void im2col_sgemm_conv2d_impl_x86(
     #endif
                 const float* kptr = kernel_a[p / 8].data();
 
-                int nn = input_channels * kernelSize; // input_channels always > 0
+                int nn = (int)input_channels * kernelSize; // input_channels always > 0
 
                 __m128 _sum0 = _mm_set1_ps(biasptr[0]);
                 __m128 _sum1 = _mm_set1_ps(biasptr[1]);
@@ -495,7 +495,7 @@ static void im2col_sgemm_conv2d_impl_x86(
     #endif
                 const float* kptr = kernel_a[p / 8].data();
 
-                int nn = input_channels * kernelSize; // input_channels always > 0
+                int nn = (int)input_channels * kernelSize; // input_channels always > 0
 
     #if __AVX__
                 __m256 _sum = _mm256_loadu_ps(biasptr);
@@ -601,7 +601,7 @@ static void im2col_sgemm_conv2d_impl_x86(
 
     otter::parallel_for(0, nn_outch, 0, [&](int64_t begin, int64_t end) {
         for (const auto pp : otter::irange(begin, end)) {
-            int p = remain_outch_start + pp * 4;
+            int p = remain_outch_start + (int)pp * 4;
 
             float* outptr0 = output_a[p + 0].data();
             float* outptr1 = output_a[p + 1].data();
@@ -618,7 +618,7 @@ static void im2col_sgemm_conv2d_impl_x86(
                 const float* tmpptr = tmp_a[i / 8].data();
                 const float* kptr = kernel_a[p / 8 + (p % 8) / 4].data();
 
-                int nn = input_channels * kernelSize; // input_channels always > 0
+                int nn = (int)input_channels * kernelSize; // input_channels always > 0
 
                 __m256 _sum0 = _mm256_broadcast_ss(biasptr);
                 __m256 _sum1 = _mm256_broadcast_ss(biasptr + 1);
@@ -716,7 +716,7 @@ static void im2col_sgemm_conv2d_impl_x86(
     #endif
                 const float* kptr = kernel_a[p / 8 + (p % 8) / 4].data();
 
-                int nn = input_channels * kernelSize; // input_channels always > 0
+                int nn = (int)input_channels * kernelSize; // input_channels always > 0
 
                 __m128 _sum0 = _mm_set1_ps(biasptr[0]);
                 __m128 _sum1 = _mm_set1_ps(biasptr[1]);
@@ -813,7 +813,7 @@ static void im2col_sgemm_conv2d_impl_x86(
     #endif
                 const float* kptr = kernel_a[p / 8 + (p % 8) / 4].data();
 
-                int nn = input_channels * kernelSize; // input_channels always > 0
+                int nn = (int)input_channels * kernelSize; // input_channels always > 0
 
                 __m128 _sum = _mm_loadu_ps(biasptr);
 
@@ -880,7 +880,7 @@ static void im2col_sgemm_conv2d_impl_x86(
                 const float* tmpptr = tmp_a[i / 8].data();
                 const float* kptr = kernel_a[p / 8 + (p % 8) / 4 + p % 4].data();
 
-                int nn = input_channels * kernelSize; // input_channels always > 0
+                int nn = (int)input_channels * kernelSize; // input_channels always > 0
 
                 __m256 _sum0 = _mm256_set1_ps(bias0);
 
@@ -929,7 +929,7 @@ static void im2col_sgemm_conv2d_impl_x86(
     #endif
                 const float* kptr = kernel_a[p / 8 + (p % 8) / 4 + p % 4].data();
 
-                int nn = input_channels * kernelSize; // input_channels always > 0
+                int nn = (int)input_channels * kernelSize; // input_channels always > 0
 
                 __m128 _sum0 = _mm_set1_ps(bias0);
 
@@ -977,7 +977,7 @@ static void im2col_sgemm_conv2d_impl_x86(
     #endif
                 const float* kptr = kernel_a[p / 8 + (p % 8) / 4 + p % 4].data();
 
-                int nn = input_channels * kernelSize; // input_channels always > 0
+                int nn = (int)input_channels * kernelSize; // input_channels always > 0
 
                 float sum0 = bias0;
 

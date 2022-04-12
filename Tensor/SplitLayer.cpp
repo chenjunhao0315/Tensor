@@ -6,7 +6,6 @@
 //
 
 #include "SplitLayer.hpp"
-#include "LayerRegistry.hpp"
 
 namespace otter {
 
@@ -22,7 +21,7 @@ int SplitLayer::compute_output_shape(ParamDict &pd) {
     return 0;
 }
 
-int SplitLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const {
+int SplitLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& /*opt*/) const {
     const Tensor& bottom_blob = bottom_blobs[0];
     for (size_t i = 0; i < top_blobs.size(); i++) {
         top_blobs[i] = bottom_blob;
@@ -30,7 +29,5 @@ int SplitLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Ten
     
     return 0;
 }
-
-REGISTER_LAYER_CLASS(Split);
 
 }   // end namespace otter

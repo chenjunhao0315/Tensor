@@ -67,6 +67,10 @@ enum class Yolov3DetectionParam {
     Input_width
 };
 
-}
+Tensor yolo_pre_process(const Tensor& img, int target_size);
+
+Tensor yolo_post_process(const Tensor& pred, int image_width, int image_height);
+
+}   // end namespace otter
 
 #endif /* Yolov3DetectionOutputLayer_hpp */

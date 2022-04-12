@@ -5,7 +5,6 @@
 //  Created by 陳均豪 on 2022/2/22.
 //
 
-#include "LayerRegistry.hpp"
 #include "Normalization.hpp"
 #include "BatchNormalizationLayer.hpp"
 #include "TensorFactory.hpp"
@@ -61,14 +60,12 @@ int BatchNormalizationLayer::load_model(const Initializer& initializer) {
     return 0;
 }
 
-int BatchNormalizationLayer::forward_inplace(Tensor& bottom_blob, const NetOption& opt) const {
+int BatchNormalizationLayer::forward_inplace(Tensor& bottom_blob, const NetOption& /*opt*/) const {
     
 //    bottom_blob = otter::batchnorm_alpha_beta(bottom_blob, alpha, beta);
     bottom_blob = otter::batchnorm(bottom_blob, scale_data, bias_data, mean_data, var_data, false, 0, 0.000001);
     
     return 0;
 }
-
-REGISTER_LAYER_CLASS(BatchNormalization);
 
 }   // end namespace otter

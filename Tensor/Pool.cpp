@@ -65,7 +65,7 @@ DEFINE_META_FUNCTION(max_pool2d_with_indices) (const Tensor& input, IntArrayRef 
     }
 }
 
-DEFINE_IMPL_FUNCTION(max_pool2d_with_indices_out_cpu) (const Tensor& input, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode, const Tensor& output, const Tensor& indices) {
+DEFINE_IMPL_FUNCTION(max_pool2d_with_indices_out_cpu) (const Tensor& input, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool /*ceil_mode*/, const Tensor& output, const Tensor& indices) {
     
     const int kH = safe_downcast<int, int64_t>(kernel_size[0]);
     const int kW = kernel_size.size() == 1 ? kH : safe_downcast<int, int64_t>(kernel_size[1]);

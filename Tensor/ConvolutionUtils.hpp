@@ -42,21 +42,24 @@ enum class ConvBackend {
     SlowDilated2d,
     SlowDilated3d,
     Slow2d,
+    SlowTranspose2d,
+    SlideWinTranspose2d,
     Sgemm2dNeon,
     Sgemm2dNeon_1x1s1,
     Sgemm2dNeon_1x1s2,
     Sgemm2dX86,
-    Sw2dNeon_1x1s1,
+    SlideWin2dNeon_1x1s1,
     SlideWin2d,
     DepthwiseNeon_3x3s2,
     DepthwiseNeon_5x5s1,
+    DepthwiseNeon_5x5s2,
     DepthwiseX86_3x3s1,
     DepthwiseX86_3x3s2,
     Slow3d,
     Overrideable
 };
 
-inline std::vector<int64_t> expand_param_if_needed(IntArrayRef list_param, const char* param_name, int64_t expected_dim) {
+inline std::vector<int64_t> expand_param_if_needed(IntArrayRef list_param, const char* /*param_name*/, int64_t expected_dim) {
     if (list_param.size() == 1) {
         return std::vector<int64_t>(expected_dim, list_param[0]);
     } else if ((int64_t)list_param.size() != expected_dim) {

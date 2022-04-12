@@ -29,8 +29,9 @@ Add some drawing for image, which is powered by [OpenCV][5].
 ### Linux, MacOS
 
 ```
-cmake .
-cmake --build .
+mkdir build && cd build
+cmake ..
+make -j 8
 ```
 
 ### Windows

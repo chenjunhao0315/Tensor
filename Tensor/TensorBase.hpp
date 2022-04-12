@@ -112,7 +112,7 @@ public:
         
         perspective_view_.set_sizes(newSizes);
         if (new_dim > 0) {
-            for (size_t dim = new_dim; dim--; ) {
+            for (int64_t dim = new_dim; dim--; ) {
                 if (newStrides[dim] >= 0) {
                     perspective_view_.stride_at(dim) = newStrides[dim];
                 } else {

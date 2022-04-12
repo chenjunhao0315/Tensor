@@ -26,7 +26,7 @@ void copy_same_dtype(TensorIterator& iter) {
     direct_copy_kernel(iter);
 }
 
-void copy_kernel(TensorIterator& iter, bool non_blocking) {
+void copy_kernel(TensorIterator& iter, bool /*non_blocking*/) {
     ScalarType dtype = iter.dtype(0);
     
     if (dtype == iter.dtype(1)) {

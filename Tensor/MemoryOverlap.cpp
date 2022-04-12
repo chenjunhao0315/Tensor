@@ -37,6 +37,7 @@ void assert_no_internal_overlap(const TensorBase& t) {
 }
 
 void assert_no_internal_overlap(TensorNucleus* t) {
+    (void)t;
     assert(has_internal_overlap(t) != MemOverlap::YES);
     // "unsupported operation: more than one element of the written-to tensor "
     // "refers to a single memory location. Please clone() the tensor before "
@@ -83,6 +84,8 @@ void assert_no_partial_overlap(const TensorBase& a, const TensorBase& b) {
 }
 
 void assert_no_partial_overlap(TensorNucleus* a, TensorNucleus* b) {
+    (void)a;
+    (void)b;
     assert(get_overlap_status(a, b) != MemOverlapStatus::PARTIAL);
     // "unsupported operation: some elements of the input tensor and "
     // "the written-to tensor refer to a single memory location. "

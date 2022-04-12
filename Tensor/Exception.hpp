@@ -62,14 +62,14 @@ private:
 };
 
 template <typename... Args>
-decltype(auto) torchCheckMsgImpl(const char* msg, const Args&... args) {
+decltype(auto) torchCheckMsgImpl(const char* /*msg*/, const Args&... args) {
     return str(args...);
 }
 inline const char* torchCheckMsgImpl(const char* msg) {
     return msg;
 }
 
-inline const char* torchCheckMsgImpl(const char* msg, const char* args) {
+inline const char* torchCheckMsgImpl(const char* /*msg*/, const char* args) {
     return args;
 }
 
@@ -110,7 +110,7 @@ if (!(cond)) { \
     const char* file,
     uint32_t line,
     const char* condMsg,
-    otter::CompileTimeEmptyString userMsg) {
+    otter::CompileTimeEmptyString /*userMsg*/) {
     torchCheckFail(func, file, line, condMsg);
 }
 [[noreturn]] void torchInternalAssertFail(
