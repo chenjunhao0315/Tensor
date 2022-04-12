@@ -84,6 +84,7 @@
 		76486AF427DDCE2C0078FF9B /* Drawing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AF227DDCE2C0078FF9B /* Drawing.cpp */; };
 		76486AF727DF7A510078FF9B /* GraphicAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AF527DF7A510078FF9B /* GraphicAPI.cpp */; };
 		76486AFA27DF7CD80078FF9B /* LineIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AF827DF7CD80078FF9B /* LineIterator.cpp */; };
+		7651B6C62805CA77006710F5 /* LineDetection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7651B6C42805CA77006710F5 /* LineDetection.cpp */; };
 		7687216127C0E31C006640CF /* Module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687215F27C0E31C006640CF /* Module.cpp */; };
 		7687216427C0E379006640CF /* Layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216227C0E379006640CF /* Layer.cpp */; };
 		7687216827C12145006640CF /* NetOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216627C12145006640CF /* NetOption.cpp */; };
@@ -339,6 +340,8 @@
 		76486AF627DF7A510078FF9B /* GraphicAPI.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GraphicAPI.hpp; sourceTree = "<group>"; };
 		76486AF827DF7CD80078FF9B /* LineIterator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LineIterator.cpp; sourceTree = "<group>"; };
 		76486AF927DF7CD80078FF9B /* LineIterator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LineIterator.hpp; sourceTree = "<group>"; };
+		7651B6C42805CA77006710F5 /* LineDetection.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LineDetection.cpp; sourceTree = "<group>"; };
+		7651B6C52805CA77006710F5 /* LineDetection.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LineDetection.hpp; sourceTree = "<group>"; };
 		7687215F27C0E31C006640CF /* Module.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Module.cpp; sourceTree = "<group>"; };
 		7687216027C0E31C006640CF /* Module.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Module.hpp; sourceTree = "<group>"; };
 		7687216227C0E379006640CF /* Layer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Layer.cpp; sourceTree = "<group>"; };
@@ -796,6 +799,8 @@
 				760704DD27E6425300D5E00D /* ImageThreshold.hpp */,
 				76AA4A0927FBF0A400F0F3C6 /* DrawDetection.cpp */,
 				76AA4A0A27FBF0A400F0F3C6 /* DrawDetection.hpp */,
+				7651B6C42805CA77006710F5 /* LineDetection.cpp */,
+				7651B6C52805CA77006710F5 /* LineDetection.hpp */,
 			);
 			name = cv;
 			sourceTree = "<group>";
@@ -1059,6 +1064,7 @@
 				760382C727BFD6DE00CD599F /* WarpDimMinimal.cpp in Sources */,
 				76F336EF27AEF75000E3AEF1 /* UnaryOpsKernel.cpp in Sources */,
 				76927B3527D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp in Sources */,
+				7651B6C62805CA77006710F5 /* LineDetection.cpp in Sources */,
 				7687217E27C2A850006640CF /* ConvolutionLayer.cpp in Sources */,
 				76E6C54E27A53AAA0036A26F /* TensorResize.cpp in Sources */,
 				76CF3F3F27FC92A8009BF242 /* EltwiseLayer.cpp in Sources */,

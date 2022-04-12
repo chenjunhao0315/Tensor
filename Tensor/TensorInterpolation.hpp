@@ -17,7 +17,7 @@ enum InterpolateMode {
     BILINEAR
 };
 
-Tensor Interpolate(const Tensor& input, IntArrayRef size, IntArrayRef scale_factor, InterpolateMode mode, bool align_corners = false);
+Tensor Interpolate(const Tensor& input, IntArrayRef size, ArrayRef<double> scale_factor, InterpolateMode mode, bool align_corners = false);
 
 };
 
