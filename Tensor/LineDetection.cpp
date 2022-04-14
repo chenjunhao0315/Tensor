@@ -87,7 +87,7 @@ void HoughLinesStandard(const otter::Tensor& img, std::vector<Vec2f>& lines, flo
     linesMax = std::min(linesMax, (int)_sort_buf.size());
     
     float scale = 1.0 / (numrho + 2);
-    for (i = 0; i < linesMax; i++) {
+    for (int i = 0; i < linesMax; i++) {
         LinePolar line;
         int idx = _sort_buf[i];
         int n = std::floor(idx * scale) - 1;
