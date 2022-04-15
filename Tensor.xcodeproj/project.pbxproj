@@ -114,6 +114,7 @@
 		76CEF55A27FCAFA900AC46F6 /* TensorCompareKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CEF55827FCAFA900AC46F6 /* TensorCompareKernel.cpp */; };
 		76CF3F3727FC6E4B009BF242 /* DeconvolutionLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CF3F3527FC6E4B009BF242 /* DeconvolutionLayer.cpp */; };
 		76CF3F3F27FC92A8009BF242 /* EltwiseLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CF3F3D27FC92A8009BF242 /* EltwiseLayer.cpp */; };
+		76CFA2C22808B7D800205034 /* ReluLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CFA2C02808B7D800205034 /* ReluLayer.cpp */; };
 		76D1285127EC2C3C00A54E6F /* TypeProperties.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76D1284F27EC2C3C00A54E6F /* TypeProperties.cpp */; };
 		76E5EC7B27C4A6D800A2B38A /* BatchNormalizationLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E5EC7927C4A6D800A2B38A /* BatchNormalizationLayer.cpp */; };
 		76E6C51327A502A30036A26F /* Tensor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51127A502A30036A26F /* Tensor.cpp */; };
@@ -401,6 +402,8 @@
 		76CF3F3627FC6E4B009BF242 /* DeconvolutionLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DeconvolutionLayer.hpp; sourceTree = "<group>"; };
 		76CF3F3D27FC92A8009BF242 /* EltwiseLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EltwiseLayer.cpp; sourceTree = "<group>"; };
 		76CF3F3E27FC92A8009BF242 /* EltwiseLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = EltwiseLayer.hpp; sourceTree = "<group>"; };
+		76CFA2C02808B7D800205034 /* ReluLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ReluLayer.cpp; sourceTree = "<group>"; };
+		76CFA2C12808B7D800205034 /* ReluLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ReluLayer.hpp; sourceTree = "<group>"; };
 		76D1284F27EC2C3C00A54E6F /* TypeProperties.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TypeProperties.cpp; sourceTree = "<group>"; };
 		76D1285027EC2C3C00A54E6F /* TypeProperties.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TypeProperties.hpp; sourceTree = "<group>"; };
 		76E5EC7927C4A6D800A2B38A /* BatchNormalizationLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BatchNormalizationLayer.cpp; sourceTree = "<group>"; };
@@ -836,6 +839,8 @@
 				76E5EC7A27C4A6D800A2B38A /* BatchNormalizationLayer.hpp */,
 				7628DEE227CE096600B136FA /* LReluLayer.cpp */,
 				7628DEE327CE096600B136FA /* LReluLayer.hpp */,
+				76CFA2C02808B7D800205034 /* ReluLayer.cpp */,
+				76CFA2C12808B7D800205034 /* ReluLayer.hpp */,
 				7628DEE527CE155400B136FA /* ShortCutLayer.cpp */,
 				7628DEE627CE155400B136FA /* ShortCutLayer.hpp */,
 				76CF3F3D27FC92A8009BF242 /* EltwiseLayer.cpp */,
@@ -1201,6 +1206,7 @@
 				76486AF427DDCE2C0078FF9B /* Drawing.cpp in Sources */,
 				76F4A59D27C9872500DFFD9E /* ConvolutionMM2DNeon.cpp in Sources */,
 				76F0064327B67E4C009D67F5 /* TensorProperties.cpp in Sources */,
+				76CFA2C22808B7D800205034 /* ReluLayer.cpp in Sources */,
 				76F336D627A7AD1600E3AEF1 /* TensorFunction.cpp in Sources */,
 				760704C227E3B2B800D5E00D /* Generator.cpp in Sources */,
 				760A333B27F62800003F0542 /* SliceLayer.cpp in Sources */,

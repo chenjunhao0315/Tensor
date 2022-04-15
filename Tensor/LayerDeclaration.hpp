@@ -14,6 +14,7 @@
 #include "DeconvolutionLayer.hpp"
 #include "BatchNormalizationLayer.hpp"
 #include "LReluLayer.hpp"
+#include "ReluLayer.hpp"
 #include "ShortCutLayer.hpp"
 #include "EltwiseLayer.hpp"
 #include "SplitLayer.hpp"
@@ -34,6 +35,7 @@ REGISTER_LAYER_CLASS(Convolution);
 REGISTER_LAYER_CLASS(Deconvolution);
 REGISTER_LAYER_CLASS(BatchNormalization);
 REGISTER_LAYER_CLASS(LRelu);
+REGISTER_LAYER_CLASS(Relu);
 REGISTER_LAYER_CLASS(ShortCut);
 REGISTER_LAYER_CLASS(Eltwise);
 REGISTER_LAYER_CLASS(Split);
