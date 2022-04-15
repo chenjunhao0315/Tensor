@@ -61,6 +61,12 @@ void Net::addLayer(LayerOption option) {
     if (opt_check_string(option, "activation")) {
         LayerOption auto_option;
         std::string activation = option["activation"];
+        
+        if (activation == "Relu6") {
+            activation = "Relu";
+            auto_option["relu6"] = "true";
+        }
+        
         auto_option["type"] = activation;
         std::string abbreviate = activation.substr(0, 2);
         std::transform(abbreviate.begin(), abbreviate.end(), abbreviate.begin(),
