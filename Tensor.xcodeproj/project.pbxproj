@@ -765,14 +765,14 @@
 		762E3B5127BD629F0075F983 /* vec */ = {
 			isa = PBXGroup;
 			children = (
-				762E3B5227BD63B20075F983 /* Vec256_float.hpp */,
-				760384B627C0525C00CD599F /* Vec256_float_neon.hpp */,
 				762E3B4F27BD5D7A0075F983 /* Vec.hpp */,
-				762E3B5027BD62290075F983 /* Vec256.hpp */,
-				762E3B4427BCBAA10075F983 /* VecBase.hpp */,
-				762E3B4327BCBAA10075F983 /* VecBase.cpp */,
 				762E3B4127BCA1AE0075F983 /* VecIntrinsic.hpp */,
 				762E3B4027BCA1AE0075F983 /* VecIntrinsic.cpp */,
+				762E3B4427BCBAA10075F983 /* VecBase.hpp */,
+				762E3B4327BCBAA10075F983 /* VecBase.cpp */,
+				762E3B5027BD62290075F983 /* Vec256.hpp */,
+				762E3B5227BD63B20075F983 /* Vec256_float.hpp */,
+				760384B627C0525C00CD599F /* Vec256_float_neon.hpp */,
 			);
 			name = vec;
 			sourceTree = "<group>";

@@ -135,11 +135,11 @@ std::vector<int64_t> resolve_roi(IntArrayRef shape, IntArrayRef border) {
     return {};
 }
 
-Tensor crop(const Tensor& input, IntArrayRef border) {
+Tensor& crop_(const Tensor& input, IntArrayRef border, Tensor& output) {
     OTTER_CHECK(input.dim() <= 4, "Expect input dim <= 4 but get", input.dim());
     
     auto output_shape = resolve_roi(input.sizes(), border);
-    auto output = otter::empty(output_shape, input.options());
+    output.resize_(output_shape);
     
     if (input.dim() == 1) {
         if (output_shape[0] == input.size(0)) {
@@ -195,6 +195,12 @@ Tensor crop(const Tensor& input, IntArrayRef border) {
     }
     
     return output;
+}
+
+Tensor crop(const Tensor& input, IntArrayRef border) {
+    auto output = otter::empty({}, input.options());
+    
+    return crop_(input, border, output);
 }
 
 }   // end namespace otter
