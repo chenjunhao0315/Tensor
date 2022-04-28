@@ -80,6 +80,57 @@ Tensor sgemm_conv2d_1x1s2_neon(
     IntArrayRef stride,
     IntArrayRef padding);
 
+Tensor& conv2d_3x3s1_neon_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_3x3s1_neon(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding);
+
+Tensor& conv2d_3x3s1_winograd64_neon_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_3x3s1_winograd64_neon(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding);
+
+Tensor& conv2d_3x3s2_packed_neon_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_3x3s2_packed_neon(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding);
+
 }
 
 #endif /* ConvolutionMM2DNeon_hpp */

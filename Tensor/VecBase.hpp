@@ -430,6 +430,22 @@ inline void convert(const src_T *src, dst_T *dst, int64_t n) {
     }
 }
 
+template <class T,
+typename std::enable_if<true, int>::type = 0>
+Vectorized<T> inline maximum(const Vectorized<T> &a, const Vectorized<T> &b) {
+    Vectorized<T> c;
+    for (int i = 0; i != Vectorized<T>::size(); i++) {
+        c[i] = (a[i] > b[i]) ? a[i] : b[i];
+        if (std::isnan(a[i])) {
+            // If either input is NaN, propagate a NaN.
+            // NOTE: The case where b[i] was NaN is handled correctly by the naive
+            // ternary operator above.
+            c[i] = a[i];
+        }
+    }
+    return c;
+}
+
 template <class T, typename std::enable_if<true, int>::type = 0>
 Vectorized<T> inline minimum(const Vectorized<T> &a, const Vectorized<T> &b) {
     Vectorized<T> c;

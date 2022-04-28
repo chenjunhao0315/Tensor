@@ -36,9 +36,9 @@ int ReluLayer::load_param(const ParamDict& pd) {
 int ReluLayer::forward_inplace(Tensor& bottom_blob, const NetOption& opt) const {
     
     if (relu6)
-        bottom_blob = otter::relu6(bottom_blob);
+        otter::relu6_(bottom_blob);
     
-    bottom_blob = otter::relu(bottom_blob);
+    otter::relu_(bottom_blob);
     
     return 0;
 }

@@ -413,6 +413,13 @@ inline Vectorized<float> Vectorized<float>::le(const Vectorized<float>& other) c
 }
 
 template <>
+Vectorized<float> inline maximum(const Vectorized<float>& a, const Vectorized<float>& b) {
+    float32x4_t r0 = vmaxq_f32(a.get_low(), b.get_low());
+    float32x4_t r1 = vmaxq_f32(a.get_high(), b.get_high());
+    return Vectorized<float>(r0, r1);
+}
+
+template <>
 Vectorized<float> inline minimum(const Vectorized<float>& a, const Vectorized<float>& b) {
     float32x4_t r0 = vminq_f32(a.get_low(), b.get_low());
     float32x4_t r1 = vminq_f32(a.get_high(), b.get_high());

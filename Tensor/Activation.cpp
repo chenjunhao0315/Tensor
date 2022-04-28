@@ -51,7 +51,7 @@ Tensor relu6(const Tensor& self) {
     return otter::clamp(self, 0, 6);
 }
 
-Tensor& reul6_(Tensor& self) {
+Tensor& relu6_(Tensor& self) {
     return otter::clamp_(self, 0, 6);
 }
 

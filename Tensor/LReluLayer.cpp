@@ -35,7 +35,8 @@ int LReluLayer::forward_inplace(Tensor &bottom_blob, const NetOption &opt) const
     if (opt.use_non_lib_optimize) {
         // TODO: leaky relu enhancement
     } else {
-        bottom_blob = otter::native::leaky_relu(bottom_blob, neg_slope);
+        otter::native::leaky_relu_(bottom_blob, neg_slope);
+//        bottom_blob = otter::native::leaky_relu(bottom_blob, neg_slope);
     }
     
     return 0;
