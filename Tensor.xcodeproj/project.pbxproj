@@ -85,6 +85,10 @@
 		76486AF727DF7A510078FF9B /* GraphicAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AF527DF7A510078FF9B /* GraphicAPI.cpp */; };
 		76486AFA27DF7CD80078FF9B /* LineIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AF827DF7CD80078FF9B /* LineIterator.cpp */; };
 		7651B6C62805CA77006710F5 /* LineDetection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7651B6C42805CA77006710F5 /* LineDetection.cpp */; };
+		7663C21F281AF75900102057 /* Observer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C21D281AF75900102057 /* Observer.cpp */; };
+		7663C233281B503200102057 /* PoseEstimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C231281B503200102057 /* PoseEstimation.cpp */; };
+		7663C239281D4B7C00102057 /* KalmanFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C237281D4B7C00102057 /* KalmanFilter.cpp */; };
+		7663C23C281D93CC00102057 /* AutoBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C23A281D93CC00102057 /* AutoBuffer.cpp */; };
 		7687216127C0E31C006640CF /* Module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687215F27C0E31C006640CF /* Module.cpp */; };
 		7687216427C0E379006640CF /* Layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216227C0E379006640CF /* Layer.cpp */; };
 		7687216827C12145006640CF /* NetOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216627C12145006640CF /* NetOption.cpp */; };
@@ -343,6 +347,14 @@
 		76486AF927DF7CD80078FF9B /* LineIterator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LineIterator.hpp; sourceTree = "<group>"; };
 		7651B6C42805CA77006710F5 /* LineDetection.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LineDetection.cpp; sourceTree = "<group>"; };
 		7651B6C52805CA77006710F5 /* LineDetection.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LineDetection.hpp; sourceTree = "<group>"; };
+		7663C21D281AF75900102057 /* Observer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Observer.cpp; sourceTree = "<group>"; };
+		7663C21E281AF75900102057 /* Observer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Observer.hpp; sourceTree = "<group>"; };
+		7663C231281B503200102057 /* PoseEstimation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PoseEstimation.cpp; sourceTree = "<group>"; };
+		7663C232281B503200102057 /* PoseEstimation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PoseEstimation.hpp; sourceTree = "<group>"; };
+		7663C237281D4B7C00102057 /* KalmanFilter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = KalmanFilter.cpp; sourceTree = "<group>"; };
+		7663C238281D4B7C00102057 /* KalmanFilter.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KalmanFilter.hpp; sourceTree = "<group>"; };
+		7663C23A281D93CC00102057 /* AutoBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AutoBuffer.cpp; sourceTree = "<group>"; };
+		7663C23B281D93CC00102057 /* AutoBuffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AutoBuffer.hpp; sourceTree = "<group>"; };
 		7687215F27C0E31C006640CF /* Module.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Module.cpp; sourceTree = "<group>"; };
 		7687216027C0E31C006640CF /* Module.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Module.hpp; sourceTree = "<group>"; };
 		7687216227C0E379006640CF /* Layer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Layer.cpp; sourceTree = "<group>"; };
@@ -581,6 +593,8 @@
 		760382C427BF4D0800CD599F /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				7663C23A281D93CC00102057 /* AutoBuffer.cpp */,
+				7663C23B281D93CC00102057 /* AutoBuffer.hpp */,
 				760382C827BFFD7600CD599F /* Exception.cpp */,
 				760382C927BFFD7600CD599F /* Exception.hpp */,
 				760382CB27BFFE2F00CD599F /* StringUtils.cpp */,
@@ -986,6 +1000,12 @@
 				7687216C27C1233A006640CF /* Net */,
 				7687216527C0E569006640CF /* Layer */,
 				76486AEB27DBCDF70078FF9B /* cv */,
+				7663C21D281AF75900102057 /* Observer.cpp */,
+				7663C21E281AF75900102057 /* Observer.hpp */,
+				7663C231281B503200102057 /* PoseEstimation.cpp */,
+				7663C232281B503200102057 /* PoseEstimation.hpp */,
+				7663C237281D4B7C00102057 /* KalmanFilter.cpp */,
+				7663C238281D4B7C00102057 /* KalmanFilter.hpp */,
 			);
 			path = Tensor;
 			sourceTree = "<group>";
@@ -1070,6 +1090,7 @@
 				76F336EF27AEF75000E3AEF1 /* UnaryOpsKernel.cpp in Sources */,
 				76927B3527D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp in Sources */,
 				7651B6C62805CA77006710F5 /* LineDetection.cpp in Sources */,
+				7663C23C281D93CC00102057 /* AutoBuffer.cpp in Sources */,
 				7687217E27C2A850006640CF /* ConvolutionLayer.cpp in Sources */,
 				76E6C54E27A53AAA0036A26F /* TensorResize.cpp in Sources */,
 				76CF3F3F27FC92A8009BF242 /* EltwiseLayer.cpp in Sources */,
@@ -1081,6 +1102,7 @@
 				762E3B3027BB5D260075F983 /* ConvolutionMM2D.cpp in Sources */,
 				76E6C55A27A57BE00036A26F /* C++17.cpp in Sources */,
 				76BA779827C6CD2300AA896B /* vol2col.cpp in Sources */,
+				7663C239281D4B7C00102057 /* KalmanFilter.cpp in Sources */,
 				7637DDB127ED524D000A5B08 /* main.cpp in Sources */,
 				7620AF8627B5899A0081C210 /* Formatting.cpp in Sources */,
 				76F0063A27B64D63009D67F5 /* TensorBlas.cpp in Sources */,
@@ -1143,6 +1165,7 @@
 				760704B527E2934200D5E00D /* ColorMap.cpp in Sources */,
 				7687217827C14A28006640CF /* ParamDict.cpp in Sources */,
 				760704BB27E3A31700D5E00D /* Transformation.cpp in Sources */,
+				7663C233281B503200102057 /* PoseEstimation.cpp in Sources */,
 				76F336C127A5B61E00E3AEF1 /* Scalar.cpp in Sources */,
 				7687217527C14890006640CF /* InputLayer.cpp in Sources */,
 				760A333827F62553003F0542 /* ChannelShuffleLayer.cpp in Sources */,
@@ -1168,6 +1191,7 @@
 				7687218827C35B9F006640CF /* BatchNormalization.cpp in Sources */,
 				7628E17D27CFCFCB00B136FA /* Dropout.cpp in Sources */,
 				760A333E27F6585E003F0542 /* Otter.cpp in Sources */,
+				7663C21F281AF75900102057 /* Observer.cpp in Sources */,
 				76E6C52E27A505FE0036A26F /* TensorOptions.cpp in Sources */,
 				76AA466327F8855600F0F3C6 /* ConvolutionMM2DX86.cpp in Sources */,
 				762B4D6927EF7E3D00A98E34 /* flat_hash_map.cpp in Sources */,

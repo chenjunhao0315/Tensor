@@ -59,6 +59,11 @@ Tensor randn(IntArrayRef size, TensorOptions options);
 Tensor randn_like(IntArrayRef size, ScalarType dtype);
 Tensor randn_like(IntArrayRef size, TensorOptions options);
 
+Tensor& eye_out(int64_t n, Tensor& result);
+Tensor& eye_out(int64_t n, int64_t m, Tensor& result);
+Tensor eye(int64_t n, ScalarType dtype);
+Tensor eye(int64_t n, int64_t m, ScalarType dtype);
+
 
 }   // namespace otter
 

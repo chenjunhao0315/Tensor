@@ -104,13 +104,11 @@ inline InferExpandGeometryResult<Container> inferExpandGeometryImpl(
         int64_t stride = (dim >= 0) ? tensor_strides[dim] : expandedSizes[i + 1] * expandedStrides[i + 1];
         int64_t targetSize = sizes[i];
         if (targetSize == -1) {
-            // "The expanded size of the tensor (", targetSize, ") isn't allowed in a leading, non-existing dimension ", i
-            assert(dim >= 0);
+            OTTER_CHECK(dim >= 0, "The expanded size of the tensor (", targetSize, ") isn't allowed in a leading, non-existing dimension ", i);
             targetSize = size;
         }
         if (size != targetSize) {
-            // "The expanded size of the tensor (", targetSize, ") must match the existing size (", size, ") at non-singleton dimension ", i, ".  Target sizes: ", sizes, ".  Tensor sizes: ", tensor_sizes
-            assert(size == 1);
+            OTTER_CHECK(size == 1, "The expanded size of the tensor (", targetSize, ") must match the existing size (", size, ") at non-singleton dimension ", i, ".  Target sizes: ", sizes, ".  Tensor sizes: ", tensor_sizes);
             size = targetSize;
             stride = 0;
         }

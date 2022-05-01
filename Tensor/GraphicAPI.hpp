@@ -314,6 +314,37 @@ inline Color::Color(double v0, double v1, double v2, double v3) {
 
 void colorToRawData(const Color& color, void *buf, otter::ScalarType dtype, int64_t channels, int64_t unroll_to);
 
+template <typename scalar_t, int l>
+class Vec_ {
+public:
+    enum {
+        length = l
+    };
+    
+    Vec_() {
+        memset(&val, 0, length * sizeof(scalar_t));
+    }
+    
+    Vec_(scalar_t val_1, scalar_t val_2) {
+        val[0] = val_1;
+        val[1] = val_2;
+    }
+    
+    scalar_t operator[](int index) {
+        return val[index];
+    }
+private:
+    scalar_t val[l];
+};
+
+typedef Vec_<int, 2> Vec2i;
+typedef Vec_<float, 2> Vec2f;
+
+template <typename scalar_t, int l>
+inline std::ostream& operator<<(std::ostream& o, Vec_<scalar_t, l>& vec) {
+    return o << "(" << vec[0] << ", " << vec[1] << ")";
+}
+
 }   // end namespace cv
 }   // end namespace otter
 

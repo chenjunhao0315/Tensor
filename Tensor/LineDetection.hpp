@@ -9,22 +9,10 @@
 #define LineDetection_hpp
 
 #include "Tensor.hpp"
+#include "GraphicAPI.hpp"
 
 namespace otter {
 namespace cv {
-
-struct Vec2f {
-    Vec2f(float v0, float v1) {
-        val[0] = v0;
-        val[1] = v1;
-    }
-
-    float operator[](int index) {
-        return val[index];
-    }
-
-    float val[2];
-};
 
 struct most_param {
     most_param(float t = 0, int m = 0) : theta(t), most(m) {}

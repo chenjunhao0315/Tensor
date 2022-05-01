@@ -8,6 +8,8 @@
 #include "TensorFactory.hpp"
 #include "EmptyTensor.hpp"
 #include "RangeFactory.hpp"
+#include "Parallel.hpp"
+#include "Dispatch.hpp"
 
 namespace otter {
 
@@ -195,6 +197,38 @@ Tensor randn_like(const Tensor& self, ScalarType dtype) {
 Tensor randn_like(const Tensor& self, TensorOptions options) {
     auto result = empty_like(self, options);
     result.normal_(0, 1);
+    
+    return result;
+}
+
+Tensor eye(int64_t n, ScalarType dtype) {
+    return eye(n, n, dtype);
+}
+
+Tensor eye(int64_t n, int64_t m, ScalarType dtype) {
+    auto output = otter::empty({}, dtype);
+    
+    return eye_out(n, m, output);
+}
+
+Tensor& eye_out(int64_t n, Tensor& result) {
+    return eye_out(n, n, result);
+}
+
+Tensor& eye_out(int64_t n, int64_t m, Tensor& result) {
+    OTTER_CHECK(n >= 0, "n must be greater or equal to 0, got ", n);
+    OTTER_CHECK(m >= 0, "m must be greater or equal to 0, got ", m);
+
+    result.resize_({n, m});
+    result.zero_();
+    
+    int64_t sz = std::min<int64_t>(n, m);
+    OTTER_DISPATCH_ALL_TYPES_AND(ScalarType::Bool, result.scalar_type(), "eye", [&]() -> void {
+        scalar_t* result_data = result.data_ptr<scalar_t>();
+        otter::parallel_for(0, sz, 32768, [&](int64_t p_begin, int64_t p_end) {
+            for (const auto i : otter::irange(p_begin, p_end))result_data[i*(result.strides()[0] + result.strides()[1])] = 1;
+        });
+    });
     
     return result;
 }
