@@ -964,7 +964,7 @@ void im2col_sgemm_conv2d_impl_neon(const Tensor& /*im2col_*/, const Tensor& /*ke
 #endif
 
 #ifdef __ARM_NEON__
-static void convolution_im2col_sgemm_transform_kernel_neon(const Tensor& kernel_, Tensor& kernel_tf, int64_t input_channels, int64_t output_channels, int64_t kernel_width, int64_t kernel_height) {
+void convolution_im2col_sgemm_transform_kernel_neon(const Tensor& kernel_, Tensor& kernel_tf, int64_t input_channels, int64_t output_channels, int64_t kernel_width, int64_t kernel_height) {
     const int64_t kernelSize = kernel_width * kernel_height;
     
     auto kernel = kernel_.view({output_channels, input_channels, kernelSize});
@@ -1067,7 +1067,7 @@ static void convolution_im2col_sgemm_transform_kernel_neon(const Tensor& kernel_
     }
 }
 #else
-static void convolution_im2col_sgemm_transform_kernel_neon(const Tensor& /*_kernel*/, Tensor& /*kernel_tf*/, int64_t /*input_channels*/, int64_t /*out_chnnels*/, int64_t /*kernel_width*/, int64_t /*kernel_height*/) {
+void convolution_im2col_sgemm_transform_kernel_neon(const Tensor& /*_kernel*/, Tensor& /*kernel_tf*/, int64_t /*input_channels*/, int64_t /*out_chnnels*/, int64_t /*kernel_width*/, int64_t /*kernel_height*/) {
 }
 #endif
 
@@ -4339,7 +4339,7 @@ Tensor conv2d_3x3s1_neon(
 }
 
 #ifdef __ARM_NEON__
-static void conv3x3s1_winograd64_transform_kernel_neon5(const Tensor& kernel_, Tensor& kernel_tf, int64_t input_channels, int64_t output_channels) {
+void conv3x3s1_winograd64_transform_kernel_neon5(const Tensor& kernel_, Tensor& kernel_tf, int64_t input_channels, int64_t output_channels) {
     const int64_t kernelSize = 3 * 3;
     
     float* kernel = kernel_.view({output_channels, input_channels, kernelSize}).data_ptr<float>();
@@ -4512,7 +4512,7 @@ static void conv3x3s1_winograd64_transform_kernel_neon5(const Tensor& kernel_, T
     kernel_tf = kernel_tf2;
 }
 #else
-static void conv3x3s1_winograd64_transform_kernel_neon5(const Tensor& /*kernel_*/, Tensor& /*kernel_tf*/, int64_t /*input_channels*/, int64_t /*output_channels*/) {}
+void conv3x3s1_winograd64_transform_kernel_neon5(const Tensor& /*kernel_*/, Tensor& /*kernel_tf*/, int64_t /*input_channels*/, int64_t /*output_channels*/) {}
 #endif
 
 Tensor& conv2d_3x3s1_winograd64_neon_out(
@@ -7847,7 +7847,7 @@ Tensor conv2d_3x3s1_winograd64_neon(
 }
 
 #ifdef __ARM_NEON__
-static void conv3x3s2_transform_kernel_neon(const Tensor& kernel_, Tensor& kernel_tf, int64_t input_channels, int64_t output_channels) {
+void conv3x3s2_transform_kernel_neon(const Tensor& kernel_, Tensor& kernel_tf, int64_t input_channels, int64_t output_channels) {
     const int64_t kernelSize = 3 * 3;
     
     float* kernel = kernel_.view({output_channels, input_channels, kernelSize}).data_ptr<float>();
@@ -7914,7 +7914,7 @@ static void conv3x3s2_transform_kernel_neon(const Tensor& kernel_, Tensor& kerne
     }
 }
 #else
-static void conv3x3s2_transform_kernel_neon(const Tensor& /*kernel_*/, Tensor& /*kernel_tf*/, int64_t /*input_channels*/, int64_t /*output_channels*/) {}
+void conv3x3s2_transform_kernel_neon(const Tensor& /*kernel_*/, Tensor& /*kernel_tf*/, int64_t /*input_channels*/, int64_t /*output_channels*/) {}
 #endif
 
 Tensor& conv2d_3x3s2_packed_neon_out(

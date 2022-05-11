@@ -1037,7 +1037,7 @@ static void im2col_sgemm_conv2d_impl_x86(
 #endif
 
 #ifdef __SSE2__
-static void convolution_im2col_sgemm_transform_kernel_x86(const Tensor& kernel_, Tensor& kernel_tf, int64_t input_channels, int64_t output_channels, int64_t kernel_width, int64_t kernel_height) {
+void convolution_im2col_sgemm_transform_kernel_x86(const Tensor& kernel_, Tensor& kernel_tf, int64_t input_channels, int64_t output_channels, int64_t kernel_width, int64_t kernel_height) {
     const int64_t kernelSize = kernel_width * kernel_height;
     
     auto kernel = kernel_.view({output_channels, input_channels, kernelSize});
@@ -1141,13 +1141,14 @@ static void convolution_im2col_sgemm_transform_kernel_x86(const Tensor& kernel_,
 #endif // __SSE2__
 }
 #else
-static void convolution_im2col_sgemm_transform_kernel_x86(const Tensor& _kernel, Tensor& kernel_tf, int64_t input_channels, int64_t out_chnnels, int64_t kernel_width, int64_t kernel_height) {
+void convolution_im2col_sgemm_transform_kernel_x86(const Tensor& _kernel, Tensor& kernel_tf, int64_t input_channels, int64_t out_chnnels, int64_t kernel_width, int64_t kernel_height) {
 }
 #endif
 
 Tensor& sgemm_conv2d_x86_out(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -1168,7 +1169,10 @@ Tensor& sgemm_conv2d_x86_out(
     
     Tensor im2col = otter::im2col_cpu(input, kernel_size, stride, padding, {1, 1});
     Tensor kernel_packed;
-    otter::convolution_im2col_sgemm_transform_kernel_x86(weight, kernel_packed, input_channels, output_channels, kernel_width, kernel_height);
+    if (weight_o.defined())
+        kernel_packed = weight_o;
+    else
+        otter::convolution_im2col_sgemm_transform_kernel_x86(weight, kernel_packed, input_channels, output_channels, kernel_width, kernel_height);
     otter::im2col_sgemm_conv2d_impl_x86(im2col, kernel_packed, bias, input_channels, output_channels, output);
     
     return output;
@@ -1177,6 +1181,7 @@ Tensor& sgemm_conv2d_x86_out(
 Tensor sgemm_conv2d_x86(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -1185,7 +1190,7 @@ Tensor sgemm_conv2d_x86(
     auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
     auto output = otter::empty(output_size, self.options());
     
-    return sgemm_conv2d_x86_out(self, weight, bias, kernel_size, stride, padding, output);
+    return sgemm_conv2d_x86_out(self, weight, weight_o, bias, kernel_size, stride, padding, output);
 }
 
 }   // end namespace otter

@@ -50,6 +50,7 @@ public:
     int weight_data_size;
     
     Tensor weight_data;
+    Tensor weight_opt_data;
     Tensor bias_data;
 };
 
