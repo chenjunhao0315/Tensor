@@ -4539,7 +4539,6 @@ Tensor& conv2d_3x3s1_winograd64_neon_out(
     
     // padding: [height, width]
     // constnat_pad: [left, right, top, bottom]
-//    auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0);
     auto output_shape = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
     output.resize_(output_shape);
     

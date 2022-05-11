@@ -217,6 +217,10 @@ public:
         return memory_offset_;
     }
     
+    int64_t elempack() const {
+        return elempack_;
+    }
+    
     bool has_memory() const {
         return memory_;
     }
@@ -236,6 +240,13 @@ public:
     }
     
     void set_sizes_contiguous(IntArrayRef newSizes) {
+        perspective_view_.set_sizes(newSizes);
+        this->update_numel();
+        this->empty_tensor_restride(MemoryFormat::Contiguous);
+    }
+    
+    void set_sizes_contiguous_and_elempack(IntArrayRef newSizes, int64_t elempack) {
+        elempack_ = elempack;
         perspective_view_.set_sizes(newSizes);
         this->update_numel();
         this->empty_tensor_restride(MemoryFormat::Contiguous);
@@ -348,6 +359,7 @@ private:
     Memory memory_;
     int64_t memory_offset_ = 0;
     int64_t numel_ = 1;
+    int64_t elempack_ = 1;
     
     TypeMeta data_type_;
     PerspectiveView perspective_view_;
@@ -512,6 +524,10 @@ public:
     
     size_t itemsize() const {
         return tensor_nucleus_->itemsize();
+    }
+    
+    int64_t elempack() const {
+        return tensor_nucleus_->elempack();
     }
     
     TensorOptions options() const {

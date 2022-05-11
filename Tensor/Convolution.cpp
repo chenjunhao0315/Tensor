@@ -134,25 +134,28 @@ ConvBackend select_proper_conv_backend(
                         if (weight.size(2) == 1 && weight.size(3) == 1 && params.stride[0] == 1 && params.stride[1] == 1) {
                             if (input.size(1) >= 64 && weight.size(0) >= 64) {
                                 return ConvBackend::Sgemm2dNeon_1x1s1;
+                            } else {
+                                return ConvBackend::SlideWin2dNeon_1x1s1;
                             }
-                            return ConvBackend::SlideWin2dNeon_1x1s1;
                         } else if (weight.size(2) == 1 && weight.size(3) == 1 && params.stride[0] == 2 && params.stride[1] == 2) {
                             return ConvBackend::Sgemm2dNeon_1x1s2;
                         } else if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
                             if (input.size(1) >= 16 && weight.size(0) >= 16 && input.size(3) <= 120 && input.size(2) <= 120) {
                                 return ConvBackend::WinogradNeon_3x3s1;
+                            } else {
+                                return ConvBackend::SlideWin2dNeon_3x3s1;
                             }
-                            return ConvBackend::SlideWin2dNeon_3x3s1;
                             
-                            if (!need_backward && params.use_cpu_depthwise3x3_winograd(input, weight)) {
-                                return ConvBackend::Winograd3x3Depthwise;
-                            }
+//                            if (!need_backward && params.use_cpu_depthwise3x3_winograd(input, weight)) {
+//                                return ConvBackend::Winograd3x3Depthwise;
+//                            }
                         } else if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
                             auto output_shape = otter::calculate_conv_output_size(input.sizes(), weight.sizes(), params.stride, params.padding);
                             if (!(output_shape[2] >= 8 && output_shape[3] >= 8)) {
                                 return ConvBackend::Sgemm2dNeon;
+                            } else {
+                                return ConvBackend::Packed2DNeon_3x3s2;
                             }
-                            return ConvBackend::Packed2DNeon_3x3s2;
                         } else {
                             bool prefer_sgemm = (params.stride[0] == 1 && params.stride[1] == 1 && (input.size(1) >= 12 || weight.size(0) >= 12)) || ((params.stride[0] >= 2 || params.stride[1] >= 2) && (input.size(1) >= 16 || weight.size(0) >= 16));
                             
@@ -172,6 +175,9 @@ ConvBackend select_proper_conv_backend(
                             }
                         }
                         // General
+                        if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1 && input.size(1) >= 16 && weight.size(0) >= 16) {
+                            return ConvBackend::WinogradX86_3x3s1;
+                        }
                         return ConvBackend::Sgemm2dX86;
                     } else {
                         return ConvBackend::Slow2d;
@@ -287,6 +293,7 @@ Tensor convolution(
         case ConvBackend::SlideWin2dNeon_3x3s1:
         case ConvBackend::WinogradNeon_3x3s1:
         case ConvBackend::Packed2DNeon_3x3s2:
+        case ConvBackend::WinogradX86_3x3s1:
         case ConvBackend::SlowDilated2d:
             if (params.groups == 1) {
                 output = otter::convolution_nogroup_backend(input.contiguous(), weight, weight_o, bias, backend, params);
@@ -340,6 +347,8 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
             return otter::conv2d_3x3s1_winograd64_neon(self, weight, weight_o, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::Packed2DNeon_3x3s2:
             return otter::conv2d_3x3s2_packed_neon(self, weight, weight_o, bias, kernel_size, params.stride, params.padding);
+        case ConvBackend::WinogradX86_3x3s1:
+            return otter::conv2d_3x3s1_winograd23_x86(self, weight, weight_o, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::SlideWin2d:
             return otter::slide_win_conv2d(self, weight, bias, kernel_size, params.stride, params.padding);
         default:
@@ -347,106 +356,6 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
     }
     
     return Tensor();
-}
-
-Tensor optimize_convolution_kernel(
-    const Tensor& input_r,
-    const Tensor& weight_r,
-    const Tensor& bias_r,
-    IntArrayRef stride_,
-    IntArrayRef padding_,
-    IntArrayRef dilation_,
-    bool transposed_,
-    IntArrayRef output_padding_,
-    int64_t groups_,
-    bool benchmark) {
-    
-    auto input = input_r;
-    auto weight = weight_r;
-    auto bias = bias_r;
-    auto k = weight.dim();
-    auto dim = k - 2;
-    
-    OTTER_CHECK(k > 0, "weight should have at least three dimensions");
-    
-    auto weight_sizes = weight.sizes();
-    
-    ConvParams params;
-    params.stride    = expand_param_if_needed(stride_, "stride", dim);
-    params.padding   = expand_param_if_needed(padding_, "padding", dim);
-    params.dilation  = expand_param_if_needed(dilation_, "dilation", dim);
-    params.output_padding = expand_param_if_needed(output_padding_, "output_padding", dim);
-    params.transposed = transposed_;
-    params.benchmark = benchmark;
-    params.groups    = groups_;
-    
-    check_shape_forward(input, weight_sizes, bias, params);
-    
-    if (k == 3) {
-        // avoid accidentally going through NHWC for permuted 3d input.
-        input = input.contiguous();
-        params.view_1d_as_2d();
-        input  = view4d(input);
-        weight = view4d(weight);
-    }
-    
-    bool need_backward = false; // TODO: backward propogation
-    ConvBackend backend = select_proper_conv_backend(input, weight, bias, need_backward, params);
-    
-    const int64_t input_channels  = input.size(1);
-    const int64_t output_channels = weight.size(0);
-    const int64_t kernel_width = weight.size(3);
-    const int64_t kernel_height = weight.size(2);
-    
-    Tensor optimize_kernel;
-    
-    switch (backend) {
-        case ConvBackend::Winograd3x3Depthwise:
-            break;
-        case ConvBackend::DepthwiseNeon_3x3s1:
-            break;
-        case ConvBackend::DepthwiseNeon_3x3s2:
-            break;
-        case ConvBackend::DepthwiseNeon_5x5s1:
-            break;
-        case ConvBackend::DepthwiseNeon_5x5s2:
-            break;
-        case ConvBackend::DepthwiseX86_3x3s1:
-            break;
-        case ConvBackend::DepthwiseX86_3x3s2:
-            break;
-        case ConvBackend::Slow2d:
-            break;
-        case ConvBackend::SlowTranspose2d:
-            break;
-        case ConvBackend::SlideWinTranspose2d:
-            break;
-        case ConvBackend::Sgemm2dNeon_1x1s1:
-        case ConvBackend::Sgemm2dNeon_1x1s2:
-        case ConvBackend::Sgemm2dNeon:
-            convolution_im2col_sgemm_transform_kernel_neon(weight, optimize_kernel, input_channels, output_channels, kernel_width, kernel_height);
-            break;
-        case ConvBackend::Sgemm2dX86:
-            convolution_im2col_sgemm_transform_kernel_x86(weight, optimize_kernel, input_channels, output_channels, kernel_width, kernel_height);
-            break;
-        case ConvBackend::SlideWin2dNeon_1x1s1:
-            break;
-        case ConvBackend::SlideWin2d:
-            break;
-        case ConvBackend::SlideWin2dNeon_3x3s1:
-            break;
-        case ConvBackend::WinogradNeon_3x3s1:
-            conv3x3s1_winograd64_transform_kernel_neon5(weight, optimize_kernel, input_channels, output_channels);
-            break;
-        case ConvBackend::Packed2DNeon_3x3s2:
-            conv3x3s2_transform_kernel_neon(weight, optimize_kernel, input_channels, output_channels);
-            break;
-        case ConvBackend::SlowDilated2d:
-            break;
-        default:
-            break;
-    }
-    return optimize_kernel;
 }
 
 }   // end namespace otter

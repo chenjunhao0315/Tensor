@@ -11,7 +11,7 @@
 #include "TensorFactory.hpp"
 #include "TensorMaker.hpp"
 
-#include "ConvolutionMM2DNeon.hpp";
+#include "ConvolutionMM2DNeon.hpp"
 #include "ConvolutionMM2DX86.hpp"
 
 namespace otter {
@@ -206,6 +206,9 @@ int ConvolutionLayer::create_pipeline() {
     if (in_channels == groups) {
         return 0;
     }
+    if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
+        otter::conv3x3s1_winograd23_transform_kernel_x86(weight_data, weight_3x3_winograd23_data, in_channels, out_channels);
+    }
     otter::convolution_im2col_sgemm_transform_kernel_x86(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
 #endif
     
@@ -247,8 +250,9 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
             auto output_shape = otter::calculate_conv_output_size(bottom_blob.sizes(), weight_data.sizes(), params.stride, params.padding);
             if (!(output_shape[2] >= 8 && output_shape[3] >= 8)) {
                 optimize_kernel = weight_sgemm_data;
+            } else {
+                optimize_kernel = weight_3x3s2_data;
             }
-            optimize_kernel = weight_3x3s2_data;
         } else {
             bool prefer_sgemm = (params.stride[0] == 1 && params.stride[1] == 1 && (bottom_blob.size(1) >= 12 || weight_data.size(0) >= 12)) || ((params.stride[0] >= 2 || params.stride[1] >= 2) && (bottom_blob.size(1) >= 16 || weight_data.size(0) >= 16));
             
@@ -257,7 +261,11 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
             }
         }
     } else if (params.use_cpu_x86(bottom_blob, weight_data)) {
-        optimize_kernel = weight_sgemm_data;
+        if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1 && in_channels >= 16 && out_channels >= 16) {
+            optimize_kernel = weight_3x3_winograd23_data;
+        } else {
+            optimize_kernel = weight_sgemm_data;
+        }
     }
     
     top_blob = otter::convolution(

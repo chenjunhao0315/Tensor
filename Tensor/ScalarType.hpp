@@ -15,6 +15,8 @@
 #include "Exception.hpp"
 #include "TypeCast.hpp"
 
+#include "PackedData.hpp"
+
 namespace otter {
 
 #define OTTER_ALL_SCALAR_TYPES_WO_BOOL(_) \

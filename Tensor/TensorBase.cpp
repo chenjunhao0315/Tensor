@@ -112,7 +112,7 @@ bool TensorNucleus::compute_strides_like_channels_last_2d() const {
 
 void TensorBase::print() const {
     if (this->defined()) {
-        std::cerr << "[" << toString() << " " << sizes() << "]" << std::endl;
+        std::cerr << "[" << toString() << " " << sizes() << " elempack: " << elempack() << "]" << std::endl;
     } else {
         std::cerr << "[UndefinedTensor]" << std::endl;
     }

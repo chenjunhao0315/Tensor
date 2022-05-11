@@ -19,7 +19,7 @@ size_t computeStorageNbytes(
         if(sizes[i] == 0) {
             return 0;
         }
-        size += strides[i]*(sizes[i]-1);
+        size += strides[i] * (sizes[i] - 1);
     }
     return size * itemsize_bytes;
 }
@@ -104,6 +104,20 @@ Tensor empty_strided_generic(
     Tensor tensor = otter::make_tensor<otter::TensorNucleus>(std::move(memory), dtype);
 
     tensor.unsafeGetTensorNucleus()->set_sizes_and_strides(size, stride);
+    
+    return tensor;
+}
+
+Tensor empty_cpu_elemsize_elempack(IntArrayRef size, int64_t elemsize, int64_t elempack, Allocator* allocator, ScalarType scalar_type) {
+    TypeMeta dtype = scalarTypeToTypeMeta(scalar_type);
+    
+    int64_t nelements = multiply_integers(size);
+    int64_t size_bytes = nelements * elemsize;
+    
+    Memory memory = make_otterptr<MemoryNucleus>(size_bytes, allocator);
+    Tensor tensor = otter::make_tensor<otter::TensorNucleus>(std::move(memory), dtype);
+    
+    tensor.unsafeGetTensorNucleus()->set_sizes_contiguous_and_elempack(size, elempack);
     
     return tensor;
 }

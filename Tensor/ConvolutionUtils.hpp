@@ -52,6 +52,7 @@ enum class ConvBackend {
     SlideWin2dNeon_3x3s1,
     WinogradNeon_3x3s1,
     Packed2DNeon_3x3s2,
+    WinogradX86_3x3s1,
     SlideWin2d,
     DepthwiseNeon_3x3s1,
     DepthwiseNeon_3x3s2,

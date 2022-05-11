@@ -12,6 +12,7 @@
 #include "Parallel.hpp"
 #include "Padding.hpp"
 #include "VecIntrinsic.hpp"
+#include "TensorTransform.hpp"
 
 namespace otter {
 
@@ -1155,10 +1156,8 @@ Tensor& sgemm_conv2d_x86_out(
     IntArrayRef padding,
     Tensor& output) {
     
-    if (!output.defined()) {
-        auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
-        output.resize_(output_size);
-    }
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    output.resize_(output_size);
     
     const int64_t kernel_height = kernel_size[0];
     const int64_t kernel_width  = kernel_size[1];
@@ -1187,10 +1186,676 @@ Tensor sgemm_conv2d_x86(
     IntArrayRef stride,
     IntArrayRef padding) {
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
-    auto output = otter::empty(output_size, self.options());
+    auto output = otter::empty({}, self.options());
     
     return sgemm_conv2d_x86_out(self, weight, weight_o, bias, kernel_size, stride, padding, output);
+}
+
+void conv3x3s1_winograd23_transform_kernel_x86(
+    const Tensor& kernel_,
+    Tensor& kernel_tf,
+    int64_t input_channels,
+    int64_t output_channels) {
+    
+    const int64_t kernelSize = 3 * 3;
+    
+    float* kernel = kernel_.view({output_channels, input_channels, kernelSize}).data_ptr<float>();
+    
+    kernel_tf = otter::empty({output_channels, input_channels, 4 * 4}, otter::ScalarType::Float);
+
+    // G
+    const float ktm[4][3] = {
+        {1.0f, 0.0f, 0.0f},
+        {1.0f / 2, 1.0f / 2, 1.0f / 2},
+        {1.0f / 2, -1.0f / 2, 1.0f / 2},
+        {0.0f, 0.0f, 1.0f}
+    };
+    
+    auto kernel_tf_a = kernel_tf.accessor<float, 3>();
+
+    otter::parallel_for(0, output_channels, 0, [&](int64_t begin, int64_t end) {
+        for (const auto p : otter::irange(begin, end)) {
+            for (int q = 0; q < input_channels; q++) {
+                const float* kernel0 = (const float*)kernel + p * input_channels * 9 + q * 9;
+                float* kernel_tm0 = kernel_tf_a[p][q].data();
+
+                // transform kernel
+                const float* k0 = kernel0;
+                const float* k1 = kernel0 + 3;
+                const float* k2 = kernel0 + 6;
+
+                // h
+                float tmp[4][3];
+                for (int i = 0; i < 4; i++)
+                {
+                    tmp[i][0] = k0[0] * ktm[i][0] + k0[1] * ktm[i][1] + k0[2] * ktm[i][2];
+                    tmp[i][1] = k1[0] * ktm[i][0] + k1[1] * ktm[i][1] + k1[2] * ktm[i][2];
+                    tmp[i][2] = k2[0] * ktm[i][0] + k2[1] * ktm[i][1] + k2[2] * ktm[i][2];
+                }
+
+                // U
+                for (int j = 0; j < 4; j++)
+                {
+                    float* tmpp = &tmp[j][0];
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        kernel_tm0[j * 4 + i] = tmpp[0] * ktm[i][0] + tmpp[1] * ktm[i][1] + tmpp[2] * ktm[i][2];
+                    }
+                }
+            }
+        }
+    });
+}
+
+Tensor& conv2d_3x3s1_winograd23_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias_,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    Tensor& output) {
+    
+    auto output_shape = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    output.resize_(output_shape);
+    
+    int origin_w = (int)self.size(3) + 2 * (int)padding[1];
+    int origin_h = (int)self.size(2) + 2 * (int)padding[0];
+    
+    int w = origin_w;
+    int h = origin_h;
+    int inch  = (int)self.size(1);
+    
+    int outw  = (int)output_shape[3];
+    int outh  = (int)output_shape[2];
+    int outch = (int)output_shape[1];
+    
+    outw = (outw + 1) / 2 * 2;
+    outh = (outh + 1) / 2 * 2;
+
+    w = outw + 2;
+    h = outh + 2;
+    
+    Tensor input = otter::constant_pad(self, {padding[1], padding[1] + w - origin_w, padding[0], padding[0] + h - origin_h}, 0);
+    
+    Tensor kernel_tf;
+    if (weight_o.defined())
+        kernel_tf = weight_o;
+    else
+        otter::conv3x3s1_winograd23_transform_kernel_x86(weight, kernel_tf, inch, outch);
+    auto kernel_tf_a = kernel_tf.accessor<float, 3>();
+    
+    const float* bias = (bias_.defined()) ? bias_.data_ptr<float>() : nullptr;
+    
+    auto input_a = input.accessor<float, 4>()[0];
+    
+    Tensor input_tf;
+    {
+        int w_tm = outw / 2 * 4;
+        int h_tm = outh / 2 * 4;
+
+        int nColBlocks = h_tm / 4; // may be the block num in Feathercnn
+        int nRowBlocks = w_tm / 4;
+
+        const int tiles = nColBlocks * nRowBlocks;
+        
+        input_tf = otter::empty({inch, tiles, 4 * 4}, otter::ScalarType::Float);
+        
+        auto input_tf_a = input_tf.accessor<float, 3>();
+
+        // BT
+        // const float itm[4][4] = {
+        //     {1.0f,  0.0f, -1.0f,  0.0f},
+        //     {0.0f,  1.0f,  1.00f, 0.0f},
+        //     {0.0f, -1.0f,  1.00f, 0.0f},
+        //     {0.0f, -1.0f,  0.00f, 1.0f}
+        // };
+        otter::parallel_for(0, inch, 0, [&](int64_t begin, int64_t end) {
+            for (const auto q : otter::irange(begin, end)) {
+                const float* img = input_a[q].data();
+                float* out_tm0 = input_tf_a[q].data();
+
+                for (int j = 0; j < nColBlocks; j++) {
+                    const float* r0 = img + w * j * 2;
+                    const float* r1 = r0 + w;
+                    const float* r2 = r1 + w;
+                    const float* r3 = r2 + w;
+
+                    for (int i = 0; i < nRowBlocks; i++) {
+    #if __AVX__
+                        __m128 _d0, _d1, _d2, _d3;
+                        __m128 _w0, _w1, _w2, _w3;
+
+                        // load
+                        _d0 = _mm_loadu_ps(r0);
+                        _d1 = _mm_loadu_ps(r1);
+                        _d2 = _mm_loadu_ps(r2);
+                        _d3 = _mm_loadu_ps(r3);
+
+                        // w = B_t * d
+                        _w0 = _mm_sub_ps(_d0, _d2);
+                        _w1 = _mm_add_ps(_d1, _d2);
+                        _w2 = _mm_sub_ps(_d2, _d1);
+                        _w3 = _mm_sub_ps(_d3, _d1);
+
+                        // transpose d to d_t
+                        _MM_TRANSPOSE4_PS(_w0, _w1, _w2, _w3);
+
+                        // d = B_t * d_t
+                        _d0 = _mm_sub_ps(_w0, _w2);
+                        _d1 = _mm_add_ps(_w1, _w2);
+                        _d2 = _mm_sub_ps(_w2, _w1);
+                        _d3 = _mm_sub_ps(_w3, _w1);
+
+                        // save to out_tm
+                        _mm_storeu_ps(out_tm0, _d0);
+                        _mm_storeu_ps(out_tm0 + 4, _d1);
+                        _mm_storeu_ps(out_tm0 + 8, _d2);
+                        _mm_storeu_ps(out_tm0 + 12, _d3);
+    #else
+                        float d0[4], d1[4], d2[4], d3[4];
+                        float w0[4], w1[4], w2[4], w3[4];
+                        float t0[4], t1[4], t2[4], t3[4];
+                        // load
+                        for (int n = 0; n < 4; n++)
+                        {
+                            d0[n] = r0[n];
+                            d1[n] = r1[n];
+                            d2[n] = r2[n];
+                            d3[n] = r3[n];
+                        }
+                        // w = B_t * d
+                        for (int n = 0; n < 4; n++)
+                        {
+                            w0[n] = d0[n] - d2[n];
+                            w1[n] = d1[n] + d2[n];
+                            w2[n] = d2[n] - d1[n];
+                            w3[n] = d3[n] - d1[n];
+                        }
+                        // transpose d to d_t
+                        {
+                            t0[0] = w0[0];
+                            t1[0] = w0[1];
+                            t2[0] = w0[2];
+                            t3[0] = w0[3];
+                            t0[1] = w1[0];
+                            t1[1] = w1[1];
+                            t2[1] = w1[2];
+                            t3[1] = w1[3];
+                            t0[2] = w2[0];
+                            t1[2] = w2[1];
+                            t2[2] = w2[2];
+                            t3[2] = w2[3];
+                            t0[3] = w3[0];
+                            t1[3] = w3[1];
+                            t2[3] = w3[2];
+                            t3[3] = w3[3];
+                        }
+                        // d = B_t * d_t
+                        for (int n = 0; n < 4; n++)
+                        {
+                            d0[n] = t0[n] - t2[n];
+                            d1[n] = t1[n] + t2[n];
+                            d2[n] = t2[n] - t1[n];
+                            d3[n] = t3[n] - t1[n];
+                        }
+                        // save to out_tm
+                        for (int n = 0; n < 4; n++)
+                        {
+                            out_tm0[n] = d0[n];
+                            out_tm0[n + 4] = d1[n];
+                            out_tm0[n + 8] = d2[n];
+                            out_tm0[n + 12] = d3[n];
+                        }
+    #endif
+                        r0 += 2;
+                        r1 += 2;
+                        r2 += 2;
+                        r3 += 2;
+
+                        out_tm0 += 16;
+                    }
+                }
+            }
+        });
+    }
+    input.reset();
+    
+    Tensor output_tf;
+    {
+        int w_tm = outw / 2 * 4;
+        int h_tm = outh / 2 * 4;
+
+        int nColBlocks = h_tm / 4; // may be the block num in Feathercnn
+        int nRowBlocks = w_tm / 4;
+
+        const int tiles = nColBlocks * nRowBlocks;
+        
+        output_tf = otter::empty({outch, tiles, 16}, otter::ScalarType::Float);
+        
+        auto output_tf_a = output_tf.accessor<float, 3>();
+
+        int nn_outch = outch >> 2;
+        int remain_outch_start = nn_outch << 2;
+        
+        auto input_tf_a = input_tf.accessor<float, 3>();
+
+        otter::parallel_for(0, nn_outch, 0, [&](int64_t begin, int64_t end) {
+            for (const auto pp : otter::irange(begin, end)) {
+                int p = pp * 4;
+
+                auto out0_tm = output_tf_a[p + 0];
+                auto out1_tm = output_tf_a[p + 1];
+                auto out2_tm = output_tf_a[p + 2];
+                auto out3_tm = output_tf_a[p + 3];
+
+                const auto kernel0_tm = kernel_tf_a[p + 0];
+                const auto kernel1_tm = kernel_tf_a[p + 1];
+                const auto kernel2_tm = kernel_tf_a[p + 2];
+                const auto kernel3_tm = kernel_tf_a[p + 3];
+
+                for (int i = 0; i < tiles; i++)
+                {
+                    float* output0_tm = out0_tm[i].data();
+                    float* output1_tm = out1_tm[i].data();
+                    float* output2_tm = out2_tm[i].data();
+                    float* output3_tm = out3_tm[i].data();
+
+    #if __AVX__
+                    float zero_val = 0.f;
+
+                    __m256 _sum0 = _mm256_broadcast_ss(&zero_val);
+                    __m256 _sum0n = _mm256_broadcast_ss(&zero_val);
+                    __m256 _sum1 = _mm256_broadcast_ss(&zero_val);
+                    __m256 _sum1n = _mm256_broadcast_ss(&zero_val);
+                    __m256 _sum2 = _mm256_broadcast_ss(&zero_val);
+                    __m256 _sum2n = _mm256_broadcast_ss(&zero_val);
+                    __m256 _sum3 = _mm256_broadcast_ss(&zero_val);
+                    __m256 _sum3n = _mm256_broadcast_ss(&zero_val);
+
+                    int q = 0;
+
+                    for (; q + 3 < inch; q += 4)
+                    {
+                        const float* r0 = input_tf_a[q + 0][i].data();
+                        const float* r1 = input_tf_a[q + 1][i].data();
+                        const float* r2 = input_tf_a[q + 2][i].data();
+                        const float* r3 = input_tf_a[q + 3][i].data();
+
+                        const float* k0 = kernel0_tm[q].data();
+                        const float* k1 = kernel1_tm[q].data();
+                        const float* k2 = kernel2_tm[q].data();
+                        const float* k3 = kernel3_tm[q].data();
+
+                        __m256 _r0 = _mm256_loadu_ps(r0);
+                        __m256 _r0n = _mm256_loadu_ps(r0 + 8);
+                        // k0
+                        __m256 _k0 = _mm256_loadu_ps(k0);
+                        __m256 _k0n = _mm256_loadu_ps(k0 + 8);
+                        __m256 _k1 = _mm256_loadu_ps(k1);
+                        __m256 _k1n = _mm256_loadu_ps(k1 + 8);
+                        __m256 _k2 = _mm256_loadu_ps(k2);
+                        __m256 _k2n = _mm256_loadu_ps(k2 + 8);
+                        __m256 _k3 = _mm256_loadu_ps(k3);
+                        __m256 _k3n = _mm256_loadu_ps(k3 + 8);
+                        _sum0 = _mm256_comp_fmadd_ps(_r0, _k0, _sum0);
+                        _sum0n = _mm256_comp_fmadd_ps(_r0n, _k0n, _sum0n);
+                        _sum1 = _mm256_comp_fmadd_ps(_r0, _k1, _sum1);
+                        _sum1n = _mm256_comp_fmadd_ps(_r0n, _k1n, _sum1n);
+                        _sum2 = _mm256_comp_fmadd_ps(_r0, _k2, _sum2);
+                        _sum2n = _mm256_comp_fmadd_ps(_r0n, _k2n, _sum2n);
+                        _sum3 = _mm256_comp_fmadd_ps(_r0, _k3, _sum3);
+                        _sum3n = _mm256_comp_fmadd_ps(_r0n, _k3n, _sum3n);
+
+                        // k1
+                        _r0 = _mm256_loadu_ps(r1);
+                        _r0n = _mm256_loadu_ps(r1 + 8);
+                        _k0 = _mm256_loadu_ps(k0 + 16);
+                        _k0n = _mm256_loadu_ps(k0 + 24);
+                        _k1 = _mm256_loadu_ps(k1 + 16);
+                        _k1n = _mm256_loadu_ps(k1 + 24);
+                        _k2 = _mm256_loadu_ps(k2 + 16);
+                        _k2n = _mm256_loadu_ps(k2 + 24);
+                        _k3 = _mm256_loadu_ps(k3 + 16);
+                        _k3n = _mm256_loadu_ps(k3 + 24);
+                        _sum0 = _mm256_comp_fmadd_ps(_r0, _k0, _sum0);
+                        _sum0n = _mm256_comp_fmadd_ps(_r0n, _k0n, _sum0n);
+                        _sum1 = _mm256_comp_fmadd_ps(_r0, _k1, _sum1);
+                        _sum1n = _mm256_comp_fmadd_ps(_r0n, _k1n, _sum1n);
+                        _sum2 = _mm256_comp_fmadd_ps(_r0, _k2, _sum2);
+                        _sum2n = _mm256_comp_fmadd_ps(_r0n, _k2n, _sum2n);
+                        _sum3 = _mm256_comp_fmadd_ps(_r0, _k3, _sum3);
+                        _sum3n = _mm256_comp_fmadd_ps(_r0n, _k3n, _sum3n);
+                        // k2
+                        _r0 = _mm256_loadu_ps(r2);
+                        _r0n = _mm256_loadu_ps(r2 + 8);
+                        _k0 = _mm256_loadu_ps(k0 + 32);
+                        _k0n = _mm256_loadu_ps(k0 + 40);
+                        _k1 = _mm256_loadu_ps(k1 + 32);
+                        _k1n = _mm256_loadu_ps(k1 + 40);
+                        _k2 = _mm256_loadu_ps(k2 + 32);
+                        _k2n = _mm256_loadu_ps(k2 + 40);
+                        _k3 = _mm256_loadu_ps(k3 + 32);
+                        _k3n = _mm256_loadu_ps(k3 + 40);
+                        _sum0 = _mm256_comp_fmadd_ps(_r0, _k0, _sum0);
+                        _sum0n = _mm256_comp_fmadd_ps(_r0n, _k0n, _sum0n);
+                        _sum1 = _mm256_comp_fmadd_ps(_r0, _k1, _sum1);
+                        _sum1n = _mm256_comp_fmadd_ps(_r0n, _k1n, _sum1n);
+                        _sum2 = _mm256_comp_fmadd_ps(_r0, _k2, _sum2);
+                        _sum2n = _mm256_comp_fmadd_ps(_r0n, _k2n, _sum2n);
+                        _sum3 = _mm256_comp_fmadd_ps(_r0, _k3, _sum3);
+                        _sum3n = _mm256_comp_fmadd_ps(_r0n, _k3n, _sum3n);
+                        // k3
+                        _r0 = _mm256_loadu_ps(r3);
+                        _r0n = _mm256_loadu_ps(r3 + 8);
+                        _k0 = _mm256_loadu_ps(k0 + 48);
+                        _k0n = _mm256_loadu_ps(k0 + 56);
+                        _k1 = _mm256_loadu_ps(k1 + 48);
+                        _k1n = _mm256_loadu_ps(k1 + 56);
+                        _k2 = _mm256_loadu_ps(k2 + 48);
+                        _k2n = _mm256_loadu_ps(k2 + 56);
+                        _k3 = _mm256_loadu_ps(k3 + 48);
+                        _k3n = _mm256_loadu_ps(k3 + 56);
+                        _sum0 = _mm256_comp_fmadd_ps(_r0, _k0, _sum0);
+                        _sum0n = _mm256_comp_fmadd_ps(_r0n, _k0n, _sum0n);
+                        _sum1 = _mm256_comp_fmadd_ps(_r0, _k1, _sum1);
+                        _sum1n = _mm256_comp_fmadd_ps(_r0n, _k1n, _sum1n);
+                        _sum2 = _mm256_comp_fmadd_ps(_r0, _k2, _sum2);
+                        _sum2n = _mm256_comp_fmadd_ps(_r0n, _k2n, _sum2n);
+                        _sum3 = _mm256_comp_fmadd_ps(_r0, _k3, _sum3);
+                        _sum3n = _mm256_comp_fmadd_ps(_r0n, _k3n, _sum3n);
+                    }
+
+                    for (; q < inch; q++)
+                    {
+                        const float* r0 = input_tf_a[q][i].data();
+
+                        const float* k0 = kernel0_tm[q].data();
+                        const float* k1 = kernel1_tm[q].data();
+                        const float* k2 = kernel2_tm[q].data();
+                        const float* k3 = kernel3_tm[q].data();
+
+                        __m256 _r0 = _mm256_loadu_ps(r0);
+                        __m256 _r0n = _mm256_loadu_ps(r0 + 8);
+                        __m256 _k0 = _mm256_loadu_ps(k0);
+                        __m256 _k0n = _mm256_loadu_ps(k0 + 8);
+                        __m256 _k1 = _mm256_loadu_ps(k1);
+                        __m256 _k1n = _mm256_loadu_ps(k1 + 8);
+                        __m256 _k2 = _mm256_loadu_ps(k2);
+                        __m256 _k2n = _mm256_loadu_ps(k2 + 8);
+                        __m256 _k3 = _mm256_loadu_ps(k3);
+                        __m256 _k3n = _mm256_loadu_ps(k3 + 8);
+
+                        _sum0 = _mm256_comp_fmadd_ps(_r0, _k0, _sum0);
+                        _sum0n = _mm256_comp_fmadd_ps(_r0n, _k0n, _sum0n);
+                        _sum1 = _mm256_comp_fmadd_ps(_r0, _k1, _sum1);
+                        _sum1n = _mm256_comp_fmadd_ps(_r0n, _k1n, _sum1n);
+                        _sum2 = _mm256_comp_fmadd_ps(_r0, _k2, _sum2);
+                        _sum2n = _mm256_comp_fmadd_ps(_r0n, _k2n, _sum2n);
+                        _sum3 = _mm256_comp_fmadd_ps(_r0, _k3, _sum3);
+                        _sum3n = _mm256_comp_fmadd_ps(_r0n, _k3n, _sum3n);
+                    }
+
+                    _mm256_storeu_ps(output0_tm, _sum0);
+                    _mm256_storeu_ps(output0_tm + 8, _sum0n);
+                    _mm256_storeu_ps(output1_tm, _sum1);
+                    _mm256_storeu_ps(output1_tm + 8, _sum1n);
+                    _mm256_storeu_ps(output2_tm, _sum2);
+                    _mm256_storeu_ps(output2_tm + 8, _sum2n);
+                    _mm256_storeu_ps(output3_tm, _sum3);
+                    _mm256_storeu_ps(output3_tm + 8, _sum3n);
+    #else
+                    float sum0[16] = {0.0f};
+                    float sum1[16] = {0.0f};
+                    float sum2[16] = {0.0f};
+                    float sum3[16] = {0.0f};
+
+                    int q = 0;
+                    for (; q + 3 < inch; q += 4)
+                    {
+                        const float* r0 = input_tf_a[q + 0][i].data();
+                        const float* r1 = input_tf_a[q + 1][i].data();
+                        const float* r2 = input_tf_a[q + 2][i].data();
+                        const float* r3 = input_tf_a[q + 3][i].data();
+
+                        const float* k0 = kernel0_tm[q].data();
+                        const float* k1 = kernel1_tm[q].data();
+                        const float* k2 = kernel2_tm[q].data();
+                        const float* k3 = kernel3_tm[q].data();
+
+                        for (int n = 0; n < 16; n++)
+                        {
+                            sum0[n] += r0[n] * k0[n];
+                            k0 += 16;
+                            sum0[n] += r1[n] * k0[n];
+                            k0 += 16;
+                            sum0[n] += r2[n] * k0[n];
+                            k0 += 16;
+                            sum0[n] += r3[n] * k0[n];
+                            k0 -= 16 * 3;
+
+                            sum1[n] += r0[n] * k1[n];
+                            k1 += 16;
+                            sum1[n] += r1[n] * k1[n];
+                            k1 += 16;
+                            sum1[n] += r2[n] * k1[n];
+                            k1 += 16;
+                            sum1[n] += r3[n] * k1[n];
+                            k1 -= 16 * 3;
+
+                            sum2[n] += r0[n] * k2[n];
+                            k2 += 16;
+                            sum2[n] += r1[n] * k2[n];
+                            k2 += 16;
+                            sum2[n] += r2[n] * k2[n];
+                            k2 += 16;
+                            sum2[n] += r3[n] * k2[n];
+                            k2 -= 16 * 3;
+
+                            sum3[n] += r0[n] * k3[n];
+                            k3 += 16;
+                            sum3[n] += r1[n] * k3[n];
+                            k3 += 16;
+                            sum3[n] += r2[n] * k3[n];
+                            k3 += 16;
+                            sum3[n] += r3[n] * k3[n];
+                            k3 -= 16 * 3;
+                        }
+                    }
+
+                    for (; q < inch; q++)
+                    {
+                        const float* r0 = input_tf_a[q][i].data();
+
+                        const float* k0 = kernel0_tm[q].data();
+                        const float* k1 = kernel1_tm[q].data();
+                        const float* k2 = kernel2_tm[q].data();
+                        const float* k3 = kernel3_tm[q].data();
+
+                        for (int n = 0; n < 16; n++)
+                        {
+                            sum0[n] += r0[n] * k0[n];
+                            sum1[n] += r0[n] * k1[n];
+                            sum2[n] += r0[n] * k2[n];
+                            sum3[n] += r0[n] * k3[n];
+                        }
+                    }
+
+                    for (int n = 0; n < 16; n++)
+                    {
+                        output0_tm[n] = sum0[n];
+                        output1_tm[n] = sum1[n];
+                        output2_tm[n] = sum2[n];
+                        output3_tm[n] = sum3[n];
+                    }
+    #endif
+                }
+            }
+        });
+
+        otter::parallel_for(remain_outch_start, outch, 0, [&](int64_t begin, int64_t end) {
+            for (const auto p : otter::irange(begin, end)) {
+                auto out0_tm = output_tf_a[p];
+                const auto kernel0_tm = kernel_tf_a[p];
+
+                for (int i = 0; i < tiles; i++)
+                {
+                    float* output0_tm = out0_tm[i].data();
+
+                    float sum0[16] = {0.0f};
+
+                    int q = 0;
+                    for (; q + 3 < inch; q += 4)
+                    {
+                        const float* r0 = input_tf_a[q + 0][i].data();
+                        const float* r1 = input_tf_a[q + 1][i].data();
+                        const float* r2 = input_tf_a[q + 2][i].data();
+                        const float* r3 = input_tf_a[q + 3][i].data();
+
+                        const float* k0 = kernel0_tm[q + 0].data();
+                        const float* k1 = kernel0_tm[q + 1].data();
+                        const float* k2 = kernel0_tm[q + 2].data();
+                        const float* k3 = kernel0_tm[q + 3].data();
+
+                        for (int n = 0; n < 16; n++)
+                        {
+                            sum0[n] += r0[n] * k0[n];
+                            sum0[n] += r1[n] * k1[n];
+                            sum0[n] += r2[n] * k2[n];
+                            sum0[n] += r3[n] * k3[n];
+                        }
+                    }
+
+                    for (; q < inch; q++)
+                    {
+                        const float* r0 = input_tf_a[q][i].data();
+                        const float* k0 = kernel0_tm[q].data();
+
+                        for (int n = 0; n < 16; n++)
+                        {
+                            sum0[n] += r0[n] * k0[n];
+                        }
+                    }
+
+                    for (int n = 0; n < 16; n++)
+                    {
+                        output0_tm[n] = sum0[n];
+                    }
+                }
+            }
+        });
+    }
+    input_tf.reset();
+    
+    Tensor output_bordered;
+    if (outw == output_shape[3] && outh == output_shape[2]) {
+        output_bordered = output;
+    } else {
+        // assume batchsize = 1
+        output_bordered = otter::empty({1, outch, outh, outw}, otter::ScalarType::Float);
+    }
+    
+    auto output_tf_a = output_tf.accessor<float, 3>();
+    auto output_bordered_a = output_bordered.accessor<float, 4>()[0];
+    
+    {
+        // AT
+        // const float itm[2][4] = {
+        //     {1.0f,  1.0f,  1.0f,  0.0f},
+        //     {0.0f,  1.0f, -1.0f,  1.0f}
+        // };
+
+        int w_tm = outw / 2 * 4;
+        int h_tm = outh / 2 * 4;
+
+        int nColBlocks = h_tm / 4; // may be the block num in Feathercnn
+        int nRowBlocks = w_tm / 4;
+
+        otter::parallel_for(0, outch, 0, [&](int64_t begin, int64_t end) {
+            for (const auto p : otter::irange(begin, end)) {
+                auto out_tm = output_tf_a[p];
+                auto out = output_bordered_a[p];
+
+                const float bias0 = bias ? bias[p] : 0.f;
+
+                for (int j = 0; j < nColBlocks; j++)
+                {
+                    float* outRow0 = out[j * 2 + 0].data();
+                    float* outRow1 = out[j * 2 + 1].data();
+
+                    for (int i = 0; i < nRowBlocks; i++)
+                    {
+                        float* out_tile = out_tm[j * nRowBlocks + i].data();
+
+                        float s0[4], s1[4], s2[4], s3[4];
+                        float w0[4], w1[4];
+                        float d0[2], d1[2], d2[2], d3[2];
+                        float o0[2], o1[2];
+                        // load
+                        for (int n = 0; n < 4; n++)
+                        {
+                            s0[n] = out_tile[n];
+                            s1[n] = out_tile[n + 4];
+                            s2[n] = out_tile[n + 8];
+                            s3[n] = out_tile[n + 12];
+                        }
+                        // w = A_T * W
+                        for (int n = 0; n < 4; n++)
+                        {
+                            w0[n] = s0[n] + s1[n] + s2[n];
+                            w1[n] = s1[n] - s2[n] + s3[n];
+                        }
+                        // transpose w to w_t
+                        {
+                            d0[0] = w0[0];
+                            d0[1] = w1[0];
+                            d1[0] = w0[1];
+                            d1[1] = w1[1];
+                            d2[0] = w0[2];
+                            d2[1] = w1[2];
+                            d3[0] = w0[3];
+                            d3[1] = w1[3];
+                        }
+                        // Y = A_T * w_t
+                        for (int n = 0; n < 2; n++)
+                        {
+                            o0[n] = d0[n] + d1[n] + d2[n] + bias0;
+                            o1[n] = d1[n] - d2[n] + d3[n] + bias0;
+                        }
+                        // save to top blob tm
+                        outRow0[0] = o0[0];
+                        outRow0[1] = o0[1];
+                        outRow1[0] = o1[0];
+                        outRow1[1] = o1[1];
+
+                        outRow0 += 2;
+                        outRow1 += 2;
+                    }
+                }
+            }
+        });
+    }
+    
+    if (output_bordered.size(3) != output_shape[3] || output.size(2) != output_shape[2])
+        otter::crop_(output_bordered, {0, output_bordered.size(3) - output_shape[3], 0, output_bordered.size(2) - output_shape[2]}, output);
+    
+    return output;
+}
+
+Tensor conv2d_3x3s1_winograd23_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding) {
+    
+    auto output = otter::empty({}, self.options());
+    
+    return conv2d_3x3s1_winograd23_x86_out(self, weight, weight_o, bias, kernel_size, stride, padding, output);
 }
 
 }   // end namespace otter

@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <string.h>
 
 #include "Dispatch.hpp"
 

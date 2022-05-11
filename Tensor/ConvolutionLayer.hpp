@@ -54,6 +54,7 @@ public:
     Tensor weight_data;
     Tensor weight_sgemm_data;
     Tensor weight_3x3s2_data;
+    Tensor weight_3x3_winograd23_data;
     Tensor weight_3x3_winograd64_data;
     Tensor bias_data;
 };

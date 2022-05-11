@@ -398,6 +398,7 @@
 		76AA4A0A27FBF0A400F0F3C6 /* DrawDetection.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DrawDetection.hpp; sourceTree = "<group>"; };
 		76B680D3282BC372005E67A1 /* TensorPacked.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorPacked.cpp; sourceTree = "<group>"; };
 		76B680D4282BC372005E67A1 /* TensorPacked.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorPacked.hpp; sourceTree = "<group>"; };
+		76B680D6282C12EE005E67A1 /* PackedData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PackedData.hpp; sourceTree = "<group>"; };
 		76BA778A27C66DC000AA896B /* DilatedConvolution.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DilatedConvolution.cpp; sourceTree = "<group>"; };
 		76BA778B27C66DC000AA896B /* DilatedConvolution.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DilatedConvolution.hpp; sourceTree = "<group>"; };
 		76BA778D27C674DA00AA896B /* DilatedConvolutionUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DilatedConvolutionUtils.cpp; sourceTree = "<group>"; };
@@ -575,6 +576,7 @@
 				76E6C51E27A504C80036A26F /* ScalarType.hpp */,
 				760382BE27BF4AAB00CD599F /* DefaultDtype.cpp */,
 				760382BF27BF4AAB00CD599F /* DefaultDtype.hpp */,
+				76B680D6282C12EE005E67A1 /* PackedData.hpp */,
 			);
 			name = Dtype;
 			sourceTree = "<group>";

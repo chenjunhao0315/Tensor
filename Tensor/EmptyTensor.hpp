@@ -28,7 +28,8 @@ Tensor empty_strided_cpu(IntArrayRef size, IntArrayRef stride, ScalarType dtype)
 
 Tensor empty_strided_generic(IntArrayRef size, IntArrayRef stride, Allocator* allocator, ScalarType scalar_type);
 
+Tensor empty_cpu_elemsize_elempack(IntArrayRef size, int64_t elemsize, int64_t elempack, Allocator* allocator, ScalarType scalar_type);
 
-}
+}   // end namespace otter
 
 #endif /* EmptyTensor_hpp */
