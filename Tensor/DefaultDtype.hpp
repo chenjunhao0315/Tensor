@@ -8,7 +8,7 @@
 #ifndef DefaultDtype_hpp
 #define DefaultDtype_hpp
 
-#include "DType.hpp"
+#include "TypeMeta.hpp"
 #include "ScalarType.hpp"
 
 namespace otter {

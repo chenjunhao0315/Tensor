@@ -1074,6 +1074,7 @@ void convolution_im2col_sgemm_transform_kernel_neon(const Tensor& /*_kernel*/, T
 Tensor& sgemm_conv2d_1x1s1_neon_out(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef /*kernel_size*/,
     IntArrayRef stride,
@@ -1089,7 +1090,10 @@ Tensor& sgemm_conv2d_1x1s1_neon_out(
     
     Tensor im2col = self.view({self.size(0), self.size(1), -1});
     Tensor kernel_pack4x4;
-    otter::convolution_im2col_sgemm_transform_kernel_neon(weight, kernel_pack4x4, input_channels, output_channels, 1, 1);
+    if (weight_o.defined())
+        kernel_pack4x4 = weight_o;
+    else
+        otter::convolution_im2col_sgemm_transform_kernel_neon(weight, kernel_pack4x4, input_channels, output_channels, 1, 1);
     otter::im2col_sgemm_conv2d_impl_neon(im2col, kernel_pack4x4, bias, input_channels, output_channels, output);
     
     return output;
@@ -1098,6 +1102,7 @@ Tensor& sgemm_conv2d_1x1s1_neon_out(
 Tensor sgemm_conv2d_1x1s1_neon(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -1105,12 +1110,13 @@ Tensor sgemm_conv2d_1x1s1_neon(
     
     auto output = otter::empty({}, self.options());
     
-    return sgemm_conv2d_1x1s1_neon_out(self, weight, bias, kernel_size, stride, padding, output);
+    return sgemm_conv2d_1x1s1_neon_out(self, weight, weight_o, bias, kernel_size, stride, padding, output);
 }
 
 Tensor& sgemm_conv2d_1x1s2_neon_out(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -1153,12 +1159,13 @@ Tensor& sgemm_conv2d_1x1s2_neon_out(
         }
     });
     
-    return otter::sgemm_conv2d_1x1s1_neon_out(self_shrink, weight, bias, kernel_size, stride, padding, output);
+    return otter::sgemm_conv2d_1x1s1_neon_out(self_shrink, weight, weight_o, bias, kernel_size, stride, padding, output);
 }
 
 Tensor sgemm_conv2d_1x1s2_neon(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -1166,12 +1173,13 @@ Tensor sgemm_conv2d_1x1s2_neon(
 
     auto output = otter::empty({}, self.options());
     
-    return sgemm_conv2d_1x1s2_neon_out(self, weight, bias, kernel_size, stride, padding, output);
+    return sgemm_conv2d_1x1s2_neon_out(self, weight, weight_o, bias, kernel_size, stride, padding, output);
 }
 
 Tensor& sgemm_conv2d_neon_out(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -1190,7 +1198,10 @@ Tensor& sgemm_conv2d_neon_out(
     
     Tensor im2col = otter::im2col_cpu(input, kernel_size, stride, padding, {1, 1});
     Tensor kernel_pack4x4;
-    otter::convolution_im2col_sgemm_transform_kernel_neon(weight, kernel_pack4x4, input_channels, output_channels, kernel_width, kernel_height);
+    if (weight_o.defined())
+        kernel_pack4x4 = weight_o;
+    else
+        otter::convolution_im2col_sgemm_transform_kernel_neon(weight, kernel_pack4x4, input_channels, output_channels, kernel_width, kernel_height);
     
     im2col_sgemm_conv2d_impl_neon(
         im2col,
@@ -1206,6 +1217,7 @@ Tensor& sgemm_conv2d_neon_out(
 Tensor sgemm_conv2d_neon(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -1213,7 +1225,7 @@ Tensor sgemm_conv2d_neon(
 
     auto output = otter::empty({}, self.options());
     
-    return sgemm_conv2d_neon_out(self, weight, bias, kernel_size, stride, padding, output);
+    return sgemm_conv2d_neon_out(self, weight, weight_o, bias, kernel_size, stride, padding, output);
 }
 
 void conv2d_1x1s1_neon_impl(
@@ -4518,6 +4530,7 @@ void conv3x3s1_winograd64_transform_kernel_neon5(const Tensor& /*kernel_*/, Tens
 Tensor& conv2d_3x3s1_winograd64_neon_out(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias_,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -4550,7 +4563,10 @@ Tensor& conv2d_3x3s1_winograd64_neon_out(
     Tensor input = otter::constant_pad(self, {padding[1], padding[1] + w - origin_w, padding[0], padding[0] + h - origin_h}, 0);
     
     Tensor kernel_tf;
-    otter::conv3x3s1_winograd64_transform_kernel_neon5(weight, kernel_tf, inch, outch);
+    if (weight_o.defined())
+        kernel_tf = weight_o;
+    else
+        otter::conv3x3s1_winograd64_transform_kernel_neon5(weight, kernel_tf, inch, outch);
     auto kernel_tf_a = kernel_tf.accessor<float, 3>();
     
     const float* bias = (bias_.defined()) ? bias_.data_ptr<float>() : nullptr;
@@ -7836,6 +7852,7 @@ Tensor& conv2d_3x3s1_winograd64_neon_out(
 Tensor conv2d_3x3s1_winograd64_neon(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -7843,7 +7860,7 @@ Tensor conv2d_3x3s1_winograd64_neon(
     
     auto output = otter::empty({}, self.options());
     
-    return conv2d_3x3s1_winograd64_neon_out(self, weight, bias, kernel_size, stride, padding, output);
+    return conv2d_3x3s1_winograd64_neon_out(self, weight, weight_o, bias, kernel_size, stride, padding, output);
 }
 
 #ifdef __ARM_NEON__
@@ -7920,6 +7937,7 @@ void conv3x3s2_transform_kernel_neon(const Tensor& /*kernel_*/, Tensor& /*kernel
 Tensor& conv2d_3x3s2_packed_neon_out(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias_,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -7942,7 +7960,10 @@ Tensor& conv2d_3x3s2_packed_neon_out(
     const float* bias = (bias_.defined()) ? bias_.data_ptr<float>() : nullptr;
     
     Tensor kernel_packed;
-    otter::conv3x3s2_transform_kernel_neon(weight, kernel_packed, inch, outch);
+    if (weight_o.defined())
+        kernel_packed = weight_o;
+    else
+        otter::conv3x3s2_transform_kernel_neon(weight, kernel_packed, inch, outch);
     
     auto input_a = input.accessor<float, 4>()[0];
     auto output_t = output[0];
@@ -9015,6 +9036,7 @@ Tensor& conv2d_3x3s2_packed_neon_out(
 Tensor conv2d_3x3s2_packed_neon(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -9022,7 +9044,7 @@ Tensor conv2d_3x3s2_packed_neon(
     
     auto output = otter::empty({}, self.options());
     
-    return conv2d_3x3s2_packed_neon_out(self, weight, bias, kernel_size, stride, padding, output);
+    return conv2d_3x3s2_packed_neon_out(self, weight, weight_o, bias, kernel_size, stride, padding, output);
 }
 
 

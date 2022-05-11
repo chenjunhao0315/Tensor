@@ -35,6 +35,7 @@ void conv3x3s2_transform_kernel_neon(
 Tensor& sgemm_conv2d_neon_out(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -44,6 +45,7 @@ Tensor& sgemm_conv2d_neon_out(
 Tensor sgemm_conv2d_neon(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -52,6 +54,7 @@ Tensor sgemm_conv2d_neon(
 Tensor& sgemm_conv2d_1x1s1_neon_out(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -61,6 +64,7 @@ Tensor& sgemm_conv2d_1x1s1_neon_out(
 Tensor sgemm_conv2d_1x1s1_neon(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -86,6 +90,7 @@ Tensor conv2d_1x1s1_neon(
 Tensor& sgemm_conv2d_1x1s2_neon_out(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -95,6 +100,7 @@ Tensor& sgemm_conv2d_1x1s2_neon_out(
 Tensor sgemm_conv2d_1x1s2_neon(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -120,6 +126,7 @@ Tensor conv2d_3x3s1_neon(
 Tensor& conv2d_3x3s1_winograd64_neon_out(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -129,6 +136,7 @@ Tensor& conv2d_3x3s1_winograd64_neon_out(
 Tensor conv2d_3x3s1_winograd64_neon(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -137,6 +145,7 @@ Tensor conv2d_3x3s1_winograd64_neon(
 Tensor& conv2d_3x3s2_packed_neon_out(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
@@ -146,6 +155,7 @@ Tensor& conv2d_3x3s2_packed_neon_out(
 Tensor conv2d_3x3s2_packed_neon(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,

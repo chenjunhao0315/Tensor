@@ -10,7 +10,7 @@
 
 #include <stdexcept>
 
-#include "DType.hpp"
+#include "TypeMeta.hpp"
 #include "ScalarType.hpp"
 
 namespace otter {

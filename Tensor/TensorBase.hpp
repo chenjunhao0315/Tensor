@@ -9,7 +9,7 @@
 #define TensorBase_hpp
 
 #include "Memory.hpp"
-#include "DType.hpp"
+#include "TypeMeta.hpp"
 #include "PerspectiveView.hpp"
 #include "MaybeOwned.hpp"
 #include "TensorOptions.hpp"

@@ -9,7 +9,7 @@
 #define TensorOptionss_hpp
 
 #include "Allocator.hpp"
-#include "DType.hpp"
+#include "TypeMeta.hpp"
 #include "MemoryFormat.hpp"
 
 namespace otter {

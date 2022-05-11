@@ -20,7 +20,7 @@
 #include "TensorProperties.hpp"
 #include "TensorScalar.hpp"
 #include "TensorDistribution.hpp"
-#include "DType.hpp"
+#include "TypeMeta.hpp"
 
 namespace otter {
 

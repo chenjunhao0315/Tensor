@@ -558,6 +558,12 @@ int Net::load_weight(const Initializer& initializer) {
         }
     }
     
+    for (const auto i : otter::irange(layers.size())) {
+        Layer* layer = layers[i];
+        
+        layer->create_pipeline();
+    }
+    
     return 0;
 }
 

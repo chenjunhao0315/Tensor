@@ -109,6 +109,7 @@
 		76AA4A0527FB35FB00F0F3C6 /* TensorTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76AA4A0327FB35FB00F0F3C6 /* TensorTransform.cpp */; };
 		76AA4A0827FBC6C500F0F3C6 /* NanodetPlusDetectionOutputLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76AA4A0627FBC6C500F0F3C6 /* NanodetPlusDetectionOutputLayer.cpp */; };
 		76AA4A0B27FBF0A400F0F3C6 /* DrawDetection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76AA4A0927FBF0A400F0F3C6 /* DrawDetection.cpp */; };
+		76B680D5282BC372005E67A1 /* TensorPacked.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76B680D3282BC372005E67A1 /* TensorPacked.cpp */; };
 		76BA778C27C66DC000AA896B /* DilatedConvolution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA778A27C66DC000AA896B /* DilatedConvolution.cpp */; };
 		76BA778F27C674DA00AA896B /* DilatedConvolutionUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA778D27C674DA00AA896B /* DilatedConvolutionUtils.cpp */; };
 		76BA779227C6CA8F00AA896B /* TensorScalar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA779027C6CA8F00AA896B /* TensorScalar.cpp */; };
@@ -124,7 +125,7 @@
 		76E6C51327A502A30036A26F /* Tensor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51127A502A30036A26F /* Tensor.cpp */; };
 		76E6C51627A502F60036A26F /* Memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51427A502F60036A26F /* Memory.cpp */; };
 		76E6C51927A5038F0036A26F /* Allocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51727A5038F0036A26F /* Allocator.cpp */; };
-		76E6C51C27A504000036A26F /* DType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51A27A504000036A26F /* DType.cpp */; };
+		76E6C51C27A504000036A26F /* TypeMeta.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51A27A504000036A26F /* TypeMeta.cpp */; };
 		76E6C51F27A504C80036A26F /* ScalarType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51D27A504C80036A26F /* ScalarType.cpp */; };
 		76E6C52227A504FC0036A26F /* PerspectiveView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C52027A504FC0036A26F /* PerspectiveView.cpp */; };
 		76E6C52527A505250036A26F /* ArrayRef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C52327A505250036A26F /* ArrayRef.cpp */; };
@@ -395,6 +396,8 @@
 		76AA4A0727FBC6C500F0F3C6 /* NanodetPlusDetectionOutputLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NanodetPlusDetectionOutputLayer.hpp; sourceTree = "<group>"; };
 		76AA4A0927FBF0A400F0F3C6 /* DrawDetection.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DrawDetection.cpp; sourceTree = "<group>"; };
 		76AA4A0A27FBF0A400F0F3C6 /* DrawDetection.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DrawDetection.hpp; sourceTree = "<group>"; };
+		76B680D3282BC372005E67A1 /* TensorPacked.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorPacked.cpp; sourceTree = "<group>"; };
+		76B680D4282BC372005E67A1 /* TensorPacked.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorPacked.hpp; sourceTree = "<group>"; };
 		76BA778A27C66DC000AA896B /* DilatedConvolution.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DilatedConvolution.cpp; sourceTree = "<group>"; };
 		76BA778B27C66DC000AA896B /* DilatedConvolution.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DilatedConvolution.hpp; sourceTree = "<group>"; };
 		76BA778D27C674DA00AA896B /* DilatedConvolutionUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DilatedConvolutionUtils.cpp; sourceTree = "<group>"; };
@@ -427,8 +430,8 @@
 		76E6C51527A502F60036A26F /* Memory.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Memory.hpp; sourceTree = "<group>"; };
 		76E6C51727A5038F0036A26F /* Allocator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Allocator.cpp; sourceTree = "<group>"; };
 		76E6C51827A5038F0036A26F /* Allocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Allocator.hpp; sourceTree = "<group>"; };
-		76E6C51A27A504000036A26F /* DType.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DType.cpp; sourceTree = "<group>"; };
-		76E6C51B27A504000036A26F /* DType.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DType.hpp; sourceTree = "<group>"; };
+		76E6C51A27A504000036A26F /* TypeMeta.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TypeMeta.cpp; sourceTree = "<group>"; };
+		76E6C51B27A504000036A26F /* TypeMeta.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TypeMeta.hpp; sourceTree = "<group>"; };
 		76E6C51D27A504C80036A26F /* ScalarType.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScalarType.cpp; sourceTree = "<group>"; };
 		76E6C51E27A504C80036A26F /* ScalarType.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ScalarType.hpp; sourceTree = "<group>"; };
 		76E6C52027A504FC0036A26F /* PerspectiveView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PerspectiveView.cpp; sourceTree = "<group>"; };
@@ -566,8 +569,8 @@
 		760382C227BF4C8600CD599F /* Dtype */ = {
 			isa = PBXGroup;
 			children = (
-				76E6C51A27A504000036A26F /* DType.cpp */,
-				76E6C51B27A504000036A26F /* DType.hpp */,
+				76E6C51A27A504000036A26F /* TypeMeta.cpp */,
+				76E6C51B27A504000036A26F /* TypeMeta.hpp */,
 				76E6C51D27A504C80036A26F /* ScalarType.cpp */,
 				76E6C51E27A504C80036A26F /* ScalarType.hpp */,
 				760382BE27BF4AAB00CD599F /* DefaultDtype.cpp */,
@@ -1006,6 +1009,8 @@
 				7663C232281B503200102057 /* PoseEstimation.hpp */,
 				7663C237281D4B7C00102057 /* KalmanFilter.cpp */,
 				7663C238281D4B7C00102057 /* KalmanFilter.hpp */,
+				76B680D3282BC372005E67A1 /* TensorPacked.cpp */,
+				76B680D4282BC372005E67A1 /* TensorPacked.hpp */,
 			);
 			path = Tensor;
 			sourceTree = "<group>";
@@ -1194,9 +1199,10 @@
 				7663C21F281AF75900102057 /* Observer.cpp in Sources */,
 				76E6C52E27A505FE0036A26F /* TensorOptions.cpp in Sources */,
 				76AA466327F8855600F0F3C6 /* ConvolutionMM2DX86.cpp in Sources */,
+				76B680D5282BC372005E67A1 /* TensorPacked.cpp in Sources */,
 				762B4D6927EF7E3D00A98E34 /* flat_hash_map.cpp in Sources */,
 				7620AF7427B4F3F50081C210 /* TensorMaker.cpp in Sources */,
-				76E6C51C27A504000036A26F /* DType.cpp in Sources */,
+				76E6C51C27A504000036A26F /* TypeMeta.cpp in Sources */,
 				76F336E627AEA7E400E3AEF1 /* TensorOperator.cpp in Sources */,
 				7620AF7727B536330081C210 /* TensorCopy.cpp in Sources */,
 				76F0064627B6BF60009D67F5 /* TensorLinearAlgebra.cpp in Sources */,

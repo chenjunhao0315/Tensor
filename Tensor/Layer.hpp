@@ -36,6 +36,8 @@ public:
     virtual int init_model();
     virtual int load_model(const Initializer& initializer);
     
+    virtual int create_pipeline();
+    
     virtual std::string type() const { return "Undefined"; }
     
 public:

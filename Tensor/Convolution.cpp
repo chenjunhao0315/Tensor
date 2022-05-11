@@ -325,21 +325,21 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
         case ConvBackend::SlowDilated2d:
             return otter::slow_conv_dilated2d(self, weight, bias, kernel_size, params.stride, params.padding, params.dilation);
         case ConvBackend::Sgemm2dNeon:
-            return otter::sgemm_conv2d_neon(self, weight, bias, kernel_size, params.stride, params.padding);
+            return otter::sgemm_conv2d_neon(self, weight, weight_o, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::Sgemm2dNeon_1x1s1:
-            return otter::sgemm_conv2d_1x1s1_neon(self, weight, bias, kernel_size, params.stride, params.padding);
+            return otter::sgemm_conv2d_1x1s1_neon(self, weight, weight_o, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::Sgemm2dX86:
             return otter::sgemm_conv2d_x86(self, weight, weight_o, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::SlideWin2dNeon_1x1s1:
             return otter::conv2d_1x1s1_neon(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::Sgemm2dNeon_1x1s2:
-            return otter::sgemm_conv2d_1x1s2_neon(self, weight, bias, kernel_size, params.stride, params.padding);
+            return otter::sgemm_conv2d_1x1s2_neon(self, weight, weight_o, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::SlideWin2dNeon_3x3s1:
             return otter::conv2d_3x3s1_neon(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::WinogradNeon_3x3s1:
-            return otter::conv2d_3x3s1_winograd64_neon(self, weight, bias, kernel_size, params.stride, params.padding);
+            return otter::conv2d_3x3s1_winograd64_neon(self, weight, weight_o, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::Packed2DNeon_3x3s2:
-            return otter::conv2d_3x3s2_packed_neon(self, weight, bias, kernel_size, params.stride, params.padding);
+            return otter::conv2d_3x3s2_packed_neon(self, weight, weight_o, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::SlideWin2d:
             return otter::slide_win_conv2d(self, weight, bias, kernel_size, params.stride, params.padding);
         default:

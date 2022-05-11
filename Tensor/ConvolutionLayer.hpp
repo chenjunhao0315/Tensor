@@ -26,6 +26,8 @@ public:
     
     virtual int load_model(const Initializer& initializer);
     
+    virtual int create_pipeline();
+    
     virtual int forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
     
     virtual std::string type() const { return "Convoltuion"; }
@@ -50,7 +52,9 @@ public:
     int weight_data_size;
     
     Tensor weight_data;
-    Tensor weight_opt_data;
+    Tensor weight_sgemm_data;
+    Tensor weight_3x3s2_data;
+    Tensor weight_3x3_winograd64_data;
     Tensor bias_data;
 };
 

@@ -42,6 +42,10 @@ int Layer::load_model(const Initializer& /*initializer*/) {
     return 0;
 }
 
+int Layer::create_pipeline() {
+    return 0;
+}
+
 int Layer::forward(const Tensor &bottom_blob, Tensor &top_blob, const NetOption &opt) const {
     if (!support_inplace)
         return -1;

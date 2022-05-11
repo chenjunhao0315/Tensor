@@ -11,6 +11,9 @@
 #include "TensorFactory.hpp"
 #include "TensorMaker.hpp"
 
+#include "ConvolutionMM2DNeon.hpp";
+#include "ConvolutionMM2DX86.hpp"
+
 namespace otter {
 
 ConvolutionLayer::ConvolutionLayer() {
@@ -157,15 +160,113 @@ int ConvolutionLayer::load_model(const Initializer& initializer) {
     return 0;
 }
 
+int ConvolutionLayer::create_pipeline() {
+    auto k = weight_data.dim();
+    auto dim = k - 2;
+    
+    ConvParams params;
+    params.stride    = expand_param_if_needed({stride_height, stride_width}, "stride", dim);
+    params.padding   = expand_param_if_needed({padding_height, padding_width}, "padding", dim);
+    params.dilation  = expand_param_if_needed({dilation_height, dilation_width}, "dilation", dim);
+    params.output_padding = expand_param_if_needed({output_padding_height, output_padding_width}, "output_padding", dim);
+    params.transposed = false;
+    params.benchmark = false;
+    params.groups    = groups;
+    
+    if (k == 3)
+        params.view_1d_as_2d();
+    
+#if defined(__ARM_NEON__)
+    if (in_channels == groups) {
+        return 0;
+    }
+    if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 1 && params.stride[1] == 1) {
+        if (in_channels >= 64 && out_channels >= 64) {
+            otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
+        }
+    } else if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 2 && params.stride[1] == 2) {
+        otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
+    } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
+        if (in_channels >= 16 && weight_data.size(0) >= 16) {
+            otter::conv3x3s1_winograd64_transform_kernel_neon5(weight_data, weight_3x3_winograd64_data, in_channels, out_channels);
+        }
+    } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
+        otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
+        otter::conv3x3s2_transform_kernel_neon(weight_data, weight_3x3s2_data, in_channels, out_channels);
+    } else {
+        bool prefer_sgemm = (params.stride[0] == 1 && params.stride[1] == 1 && (in_channels >= 12 || weight_data.size(0) >= 12)) || ((params.stride[0] >= 2 || params.stride[1] >= 2) && (in_channels >= 16 || weight_data.size(0) >= 16));
+        
+        if (prefer_sgemm) {
+            otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
+        }
+    }
+#endif
+    
+#if __SSE2__
+    if (in_channels == groups) {
+        return 0;
+    }
+    otter::convolution_im2col_sgemm_transform_kernel_x86(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
+#endif
+    
+    return 0;
+}
+
 int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const NetOption& /*opt*/) const {
     
+    Tensor optimize_kernel;
+    
+    auto k = weight_data.dim();
+    auto dim = k - 2;
+    
+    ConvParams params;
+    params.stride    = expand_param_if_needed({stride_height, stride_width}, "stride", dim);
+    params.padding   = expand_param_if_needed({padding_height, padding_width}, "padding", dim);
+    params.dilation  = expand_param_if_needed({dilation_height, dilation_width}, "dilation", dim);
+    params.output_padding = expand_param_if_needed({output_padding_height, output_padding_width}, "output_padding", dim);
+    params.transposed = false;
+    params.benchmark = false;
+    params.groups    = groups;
+    
+    if (k == 3)
+        params.view_1d_as_2d();
+    
+    if (params.use_cpu_neon(bottom_blob, weight_data)) {
+        // General
+        if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 1 && params.stride[1] == 1) {
+            if (bottom_blob.size(1) >= 64 && weight_data.size(0) >= 64) {
+                optimize_kernel = weight_sgemm_data;
+            }
+        } else if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 2 && params.stride[1] == 2) {
+            optimize_kernel = weight_sgemm_data;
+        } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
+            if (bottom_blob.size(1) >= 16 && weight_data.size(0) >= 16 && bottom_blob.size(3) <= 120 && bottom_blob.size(2) <= 120) {
+                optimize_kernel = weight_3x3_winograd64_data;
+            }
+        } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
+            auto output_shape = otter::calculate_conv_output_size(bottom_blob.sizes(), weight_data.sizes(), params.stride, params.padding);
+            if (!(output_shape[2] >= 8 && output_shape[3] >= 8)) {
+                optimize_kernel = weight_sgemm_data;
+            }
+            optimize_kernel = weight_3x3s2_data;
+        } else {
+            bool prefer_sgemm = (params.stride[0] == 1 && params.stride[1] == 1 && (bottom_blob.size(1) >= 12 || weight_data.size(0) >= 12)) || ((params.stride[0] >= 2 || params.stride[1] >= 2) && (bottom_blob.size(1) >= 16 || weight_data.size(0) >= 16));
+            
+            if (prefer_sgemm) {
+                optimize_kernel = weight_sgemm_data;
+            }
+        }
+    } else if (params.use_cpu_x86(bottom_blob, weight_data)) {
+        optimize_kernel = weight_sgemm_data;
+    }
+    
     top_blob = otter::convolution(
-        bottom_blob, weight_data, weight_opt_data, bias_data,
-        {stride_height, stride_width},
-        {padding_height, padding_width},
-        {dilation_height, dilation_width},
+        bottom_blob, weight_data, optimize_kernel, bias_data,
+        params.stride,
+        params.padding,
+        params.dilation,
         false,      // transpose
-        {output_padding_height, output_padding_width},
+        params.output_padding,
         groups,
         false       // benchmark
     );

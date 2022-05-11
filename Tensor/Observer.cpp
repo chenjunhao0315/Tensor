@@ -91,7 +91,7 @@ otter::cv::Point2f Observer::getRefPoint(ObservePosition& position, otter::cv::R
         case ObservePosition::RIGHT:
             return otter::cv::Point2f(obj.x + obj.width, obj.y + obj.height / 2);
         case ObservePosition::TOP:
-            return otter::cv::Point2f(obj.x + obj.height / 2, 0);
+            return otter::cv::Point2f(obj.x + obj.height / 2, obj.y);
         case ObservePosition::BOTTOM:
             return otter::cv::Point2f(obj.x + obj.height / 2, obj.y + obj.height);
         default:
