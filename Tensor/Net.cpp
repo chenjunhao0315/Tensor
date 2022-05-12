@@ -366,7 +366,7 @@ int Net::forward_layer(int layer_index, std::vector<Tensor>& blob_tensors, const
     
     int ret = do_forward_layer(layer, blob_tensors, opt);
     if (ret != 0)
-            return ret;
+        return ret;
     
     return 0;
 }

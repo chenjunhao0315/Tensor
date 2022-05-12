@@ -63,11 +63,7 @@ int ShortCutLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<
                 break;
             }
             case ShortCutBackend::Eltwise_add: {
-                if (opt.use_non_lib_optimize) {
-                    // TODO: shortcut enhancement
-                } else {
-                    output = output + bottom_blob_next;
-                }
+                output = output + bottom_blob_next;
                 break;
             }
         }

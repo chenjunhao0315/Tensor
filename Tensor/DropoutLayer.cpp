@@ -33,11 +33,7 @@ int DropoutLayer::load_param(const ParamDict &pd) {
 
 int DropoutLayer::forward_inplace(Tensor &bottom_blob, const NetOption &opt) const {
     if (opt.train) {
-        if (opt.use_non_lib_optimize) {
-            // TODO: dropout enhancement
-        } else {
-            bottom_blob = std::get<0>(otter::dropout(bottom_blob, probability, true));
-        }
+        bottom_blob = std::get<0>(otter::dropout(bottom_blob, probability, true));
     }
     return 0;
 }
