@@ -12,6 +12,10 @@
 #include "TensorResize.hpp"
 #include "Dispatch.hpp"
 
+#if __ARM_NEON
+#include <arm_neon.h>
+#endif // __ARM_NEON
+
 namespace otter {
 namespace cv {
 
@@ -40,7 +44,7 @@ void convertCheck(const Tensor& self, int in_channels) {
 Tensor convertRGBtoGray(const Tensor& self) {
     convertCheck(self, 3);
     
-    auto out = otter::empty({self.size(0), self.size(1), 1}, self.scalar_type());
+    auto out = otter::empty({self.size(0), self.size(1), 1}, otter::ScalarType::Float);
     
     const unsigned char Y_shift = 8; //14
     const unsigned char R2Y = 77;
@@ -52,7 +56,7 @@ Tensor convertRGBtoGray(const Tensor& self) {
     // Byte neon optimize
     if (self.scalar_type() == otter::ScalarType::Byte) {
         unsigned char *rgb = self.data_ptr<unsigned char>();
-        unsigned char *ptr = out.data_ptr<unsigned char>();
+        float *ptr = out.data_ptr<float>();
         
 #if __ARM_NEON
         int nn = w >> 3;
