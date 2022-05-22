@@ -90,6 +90,7 @@
 		7663C239281D4B7C00102057 /* KalmanFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C237281D4B7C00102057 /* KalmanFilter.cpp */; };
 		7663C23C281D93CC00102057 /* AutoBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C23A281D93CC00102057 /* AutoBuffer.cpp */; };
 		767B03FA283A282800466736 /* Interpreter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 767B03F8283A282700466736 /* Interpreter.cpp */; };
+		767B03FD283A7BAE00466736 /* Benchmark.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 767B03FB283A7BAE00466736 /* Benchmark.cpp */; };
 		7687216127C0E31C006640CF /* Module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687215F27C0E31C006640CF /* Module.cpp */; };
 		7687216427C0E379006640CF /* Layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216227C0E379006640CF /* Layer.cpp */; };
 		7687216827C12145006640CF /* NetOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216627C12145006640CF /* NetOption.cpp */; };
@@ -363,6 +364,8 @@
 		7663C23B281D93CC00102057 /* AutoBuffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AutoBuffer.hpp; sourceTree = "<group>"; };
 		767B03F8283A282700466736 /* Interpreter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Interpreter.cpp; sourceTree = "<group>"; };
 		767B03F9283A282800466736 /* Interpreter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Interpreter.hpp; sourceTree = "<group>"; };
+		767B03FB283A7BAE00466736 /* Benchmark.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Benchmark.cpp; sourceTree = "<group>"; };
+		767B03FC283A7BAE00466736 /* Benchmark.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Benchmark.hpp; sourceTree = "<group>"; };
 		7687215F27C0E31C006640CF /* Module.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Module.cpp; sourceTree = "<group>"; };
 		7687216027C0E31C006640CF /* Module.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Module.hpp; sourceTree = "<group>"; };
 		7687216227C0E379006640CF /* Layer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Layer.cpp; sourceTree = "<group>"; };
@@ -918,6 +921,8 @@
 				7687216A27C12334006640CF /* Net.hpp */,
 				7687216D27C12AAB006640CF /* Blob.cpp */,
 				7687216E27C12AAB006640CF /* Blob.hpp */,
+				767B03FB283A7BAE00466736 /* Benchmark.cpp */,
+				767B03FC283A7BAE00466736 /* Benchmark.hpp */,
 			);
 			name = Net;
 			sourceTree = "<group>";
@@ -1227,6 +1232,7 @@
 				76F336C727A5CEEC00E3AEF1 /* DispatchStub.cpp in Sources */,
 				7620AF6E27B4060A0081C210 /* RangeFactory.cpp in Sources */,
 				7687218827C35B9F006640CF /* BatchNormalization.cpp in Sources */,
+				767B03FD283A7BAE00466736 /* Benchmark.cpp in Sources */,
 				7628E17D27CFCFCB00B136FA /* Dropout.cpp in Sources */,
 				760A333E27F6585E003F0542 /* Otter.cpp in Sources */,
 				7663C21F281AF75900102057 /* Observer.cpp in Sources */,

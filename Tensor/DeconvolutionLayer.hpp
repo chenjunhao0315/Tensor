@@ -30,7 +30,7 @@ public:
     
     virtual int forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
     
-    virtual std::string type() const { return "Deconvoltuion"; }
+    virtual std::string type() const { return "Deconvolution"; }
 
 public:
     int in_channels;

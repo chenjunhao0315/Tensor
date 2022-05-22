@@ -16,7 +16,7 @@
 
 #define OTTER_OPENCV_DRAW 1
 
-#define OTTER_BENCHMARK 0
+#define OTTER_BENCHMARK 1
 
 #if OTTER_MOBILE
 

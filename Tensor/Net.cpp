@@ -12,6 +12,11 @@
 #include "Initializer.hpp"
 #include "Otter.hpp"
 
+#if OTTER_BENCHMARK
+#include "Benchmark.hpp"
+#include "TensorFactory.hpp"
+#endif
+
 #include <regex>
 
 namespace otter {
@@ -567,6 +572,53 @@ int Net::load_weight(const Initializer& initializer) {
     return 0;
 }
 
+#if OTTER_BENCHMARK
+int Net::forward_layer_benchmark(int layer_index, std::vector<Tensor>& blob_tensors, const NetOption& opt) const {
+    const Layer* layer = layers[layer_index];
+    
+    if (layer->one_blob_only) {
+        int bottom_blob_index = layer->bottoms[0];
+        
+        if (!blob_tensors[bottom_blob_index].defined()) {
+            int ret = forward_layer_benchmark(blobs[bottom_blob_index].producer, blob_tensors, opt);
+            if (ret != 0)
+                return ret;
+        }
+    } else {
+        for (const auto i : otter::irange(layer->bottoms.size())) {
+            int bottom_blob_index = layer->bottoms[i];
+
+            if (!blob_tensors[bottom_blob_index].defined()) {
+                int ret = forward_layer_benchmark(blobs[bottom_blob_index].producer, blob_tensors, opt);
+                if (ret != 0)
+                    return ret;
+            }
+        }
+    }
+    double start = get_current_time();
+    Tensor bottom_blob;
+    if (layer->one_blob_only) {
+        int bottom_blob_index = layer->bottoms[0];
+        bottom_blob = blob_tensors[bottom_blob_index];
+    }
+
+    int ret = do_forward_layer(layer, blob_tensors, opt);
+
+    double end = get_current_time();
+    if (layer->one_blob_only) {
+        int top_blob_index = layer->tops[0];
+        benchmark(layer, bottom_blob, blob_tensors[top_blob_index], start, end);
+    } else {
+        benchmark(layer, start, end);
+    }
+
+    if (ret != 0)
+        return ret;
+    
+    return 0;
+}
+#endif
+
 Extractor Net::create_extractor() const {
     return Extractor(this, blobs.size());
 }
@@ -627,4 +679,24 @@ int Extractor::extract(int blob_index, Tensor &feat, int /*type*/) {
     return ret;
 }
 
+#if OTTER_BENCHMARK
+int Extractor::benchmark(std::string start_name, std::string end_name, IntArrayRef input_shape) {
+    Tensor input = otter::rand(input_shape, otter::ScalarType::Float);
+    this->input(start_name, input);
+    
+    int blob_index = net_->find_blob_index_by_name(end_name);
+    
+    OTTER_CHECK(blob_index >= -1 && blob_index < blob_tensors_.size(), "Extract failed!\n");
+    
+    int ret = 0;
+    
+    if (!blob_tensors_[blob_index].defined()) {
+        int layer_index = net_->blobs[blob_index].producer;
+        ret = net_->forward_layer_benchmark(layer_index, blob_tensors_, option);
+    }
+    
+    return ret;
 }
+#endif
+
+}   // end namespace otter

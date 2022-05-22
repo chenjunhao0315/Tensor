@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+namespace otter {
+namespace core {
+
 Interpreter::~Interpreter() {
     for (auto command : commands)
         delete command;
@@ -562,3 +565,6 @@ void InterpreteNode::printPrefix(CommandNode *root) {
         printPrefix(root->right);
     }
 }
+
+}   // end namespace core
+}   // end namespace otter

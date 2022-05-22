@@ -103,6 +103,9 @@ int main(int argc, const char * argv[]) {
     }
 
     otter::cv::save_image(img, "final");
+    
+    auto ex = net.create_extractor();
+    ex.benchmark("data", "nanodet", {1, 3, 416, 320});
 
     return 0;
 }

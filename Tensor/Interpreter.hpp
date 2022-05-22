@@ -11,6 +11,9 @@
 #include <tuple>
 #include <unordered_map>
 
+namespace otter {
+namespace core {
+
 #define MAXLEN 256
 
 typedef enum {
@@ -127,5 +130,8 @@ public:
     int step = 1;
     std::vector<StepCommand*> command_line;
 };
+
+}   // end namespace core
+}   // end namespace otter
 
 #endif

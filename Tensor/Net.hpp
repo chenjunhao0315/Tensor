@@ -57,6 +57,11 @@ public:
 private:
     int forward_layer(int layer_index, std::vector<Tensor>& blob_tensors, const NetOption& opt) const;
     int do_forward_layer(const Layer* layer, std::vector<Tensor>& blob_mats, const NetOption& opt) const;
+    
+#if OTTER_BENCHMARK
+    int forward_layer_benchmark(int layer_index, std::vector<Tensor>& blob_tensors, const NetOption& opt) const;
+#endif
+    
 private:
     std::vector<Layer*> layers;
     std::vector<Blob> blobs;
@@ -86,6 +91,10 @@ public:
     int extract(int blob_index, Tensor& feat, int type);
     
     int extract(std::string blob_name, Tensor& feat, int type);
+    
+#if OTTER_BENCHMARK
+    int benchmark(std::string start_name, std::string end_name, IntArrayRef input_shape);
+#endif
     
 protected:
     Extractor(const Net* net, size_t blob_count);
