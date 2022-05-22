@@ -20,11 +20,11 @@ public:
     
     void init(int DP, int MP, int CP, otter::ScalarType dtype);
     
-    const Tensor& predict(const Tensor& control);
+    const Tensor& predict(const Tensor& control = Tensor());
     
     const Tensor& correct(const Tensor& measurement);
     
-private:
+//private:
     otter::Tensor statePre;
     otter::Tensor statePost;
     otter::Tensor transitionMatrix;

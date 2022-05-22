@@ -12,6 +12,7 @@
 
 #include "GraphicAPI.hpp"
 #include "Tensor.hpp"
+#include "Interpreter.hpp"
 
 namespace otter {
 namespace core {
@@ -42,7 +43,25 @@ inline std::ostream& operator<<(std::ostream& o, Anchor& anchor) {
     return o << "[Anchor] name: " << anchor.name << " type: " << anchor.type << " pos: " << anchor.pos;
 }
 
-enum class ObservePosition {
+enum class ObservePosition : int {
+    NOSE                = 0,
+    RIGHT_EYE           = 1,
+    LEFT_EYE            = 2,
+    RIGHT_EAR           = 3,
+    LEFT_EAR            = 4,
+    RIGHT_SHOULDER      = 5,
+    LEFT_SHOULDER       = 6,
+    RIGHT_ELBOW         = 7,
+    LEFT_ELBOW          = 8,
+    RIGHT_WRIST         = 9,
+    LEFT_WRIST          = 10,
+    RIGHT_HIP           = 11,
+    LEFT_HIP            = 12,
+    RIGHT_KNEE          = 13,
+    LEFT_KNEE           = 14,
+    RIGHT_ANKLE         = 15,
+    LEFT_ANKLE          = 16,
+    CENTER_EYE,
     CENTER,
     LEFT,
     RIGHT,
@@ -66,19 +85,28 @@ public:
     
     void addMethod(ObserveMethod method);
     
-    otter::Tensor getTarget(otter::Tensor& objects);
+    int getTarget(otter::Tensor& objects);
     
-    otter::cv::Vec2f observe(otter::Tensor& objects);
+    void addCommand(const char* command);
     
-    otter::cv::Vec2f getVec(ObserveMethod& method, otter::cv::Rect2f& obj);
+    void addTable(std::string name, float value);
+    
+    void getTable(std::string name);
+    
+    ObserveMethod getMethod(const otter::Tensor& target, otter::Tensor& objs, otter::Tensor& keypoints);
+    
+    otter::cv::Vec2f observe(int index, otter::Tensor& target, otter::Tensor& keypoints);
+    
+    otter::cv::Vec2f getVec(ObserveMethod& method, otter::cv::Rect2f& obj, otter::Tensor& keypoints);
     
     otter::cv::Point2f getAlignPoint(Anchor& anchor, otter::cv::Point2f& obj);
     
-    otter::cv::Point2f getRefPoint(ObservePosition& position, otter::cv::Rect2f& obj);
+    otter::cv::Point2f getRefPoint(ObservePosition& position, otter::cv::Rect2f& obj, otter::Tensor& keypoints);
     
 private:
     std::unordered_map<int, ObserveMethod> methods;
     std::unordered_map<std::string, Anchor> anchors;
+    Interpreter interpreter;
 };
 
 }   // end namespace core

@@ -44,6 +44,7 @@ enum class ConvBackend {
     Slow2d,
     SlowTranspose2d,
     SlideWinTranspose2d,
+    Transpose2dNeon_4x4s2,
     Sgemm2dNeon,
     Sgemm2dNeon_1x1s1,
     Sgemm2dNeon_1x1s2,
@@ -60,6 +61,7 @@ enum class ConvBackend {
     DepthwiseNeon_5x5s2,
     DepthwiseX86_3x3s1,
     DepthwiseX86_3x3s2,
+    DepthwiseTransposeNeon,
     Slow3d,
     Overrideable
 };
@@ -89,6 +91,27 @@ inline std::vector<int64_t> calculate_conv_output_size(
         weight_size[0],
         calc_output_dimension(input_size[2], weight_size[2], stride[0], padding[0]),
         calc_output_dimension(input_size[3], weight_size[3], stride[1], padding[1]),
+    };
+}
+
+inline std::vector<int64_t> calculate_deconv_output_size_without_padding(
+    const IntArrayRef input_size,
+    const IntArrayRef weight_size,
+    const IntArrayRef stride,
+    const IntArrayRef dilation,
+    const IntArrayRef padding,
+    const IntArrayRef output_padding) {
+    
+    const auto calc_output_dimension = [](
+        const int64_t input, const int64_t kernel, const int64_t stride, const int64_t dilation, const int64_t padding, const int64_t output_padding) {
+            return (input - 1) * stride + (dilation * (kernel - 1) + 1) + output_padding;
+        };
+
+    return std::vector<int64_t> {
+        input_size[0],
+        weight_size[1],
+        calc_output_dimension(input_size[2], weight_size[2], stride[0], dilation[0], padding[0], output_padding[0]),
+        calc_output_dimension(input_size[3], weight_size[3], stride[1], dilation[1], padding[1], output_padding[1]),
     };
 }
 

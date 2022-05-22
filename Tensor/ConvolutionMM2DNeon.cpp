@@ -1919,12 +1919,12 @@ void conv2d_1x1s1_neon_impl(
 
             for (; q + 3 < inch; q += 4)
             {
-                float* outptr0 = out0.accessor<float, 3>().data();
-                float* outptr1 = out1.accessor<float, 3>().data();
-                float* outptr2 = out2.accessor<float, 3>().data();
-                float* outptr3 = out3.accessor<float, 3>().data();
-                float* outptr4 = out4.accessor<float, 3>().data();
-                float* outptr5 = out5.accessor<float, 3>().data();
+                float* outptr0 = out0.data_ptr<float>();
+                float* outptr1 = out1.data_ptr<float>();
+                float* outptr2 = out2.data_ptr<float>();
+                float* outptr3 = out3.data_ptr<float>();
+                float* outptr4 = out4.data_ptr<float>();
+                float* outptr5 = out5.data_ptr<float>();
 
                 const float* img0 = input_a[q + 0].data();
                 const float* img1 = input_a[q + 1].data();
@@ -2097,12 +2097,12 @@ void conv2d_1x1s1_neon_impl(
 
             for (; q < inch; q++)
             {
-                float* outptr0 = out0.accessor<float, 3>().data();
-                float* outptr1 = out1.accessor<float, 3>().data();
-                float* outptr2 = out2.accessor<float, 3>().data();
-                float* outptr3 = out3.accessor<float, 3>().data();
-                float* outptr4 = out4.accessor<float, 3>().data();
-                float* outptr5 = out5.accessor<float, 3>().data();
+                float* outptr0 = out0.data_ptr<float>();
+                float* outptr1 = out1.data_ptr<float>();
+                float* outptr2 = out2.data_ptr<float>();
+                float* outptr3 = out3.data_ptr<float>();
+                float* outptr4 = out4.data_ptr<float>();
+                float* outptr5 = out5.data_ptr<float>();
 
                 const float* img0 = input_a[q].data();
 
@@ -2279,10 +2279,10 @@ void conv2d_1x1s1_neon_impl(
 
             for (; q + 3 < inch; q += 4)
             {
-                float* outptr0 = out0.accessor<float, 3>().data();
-                float* outptr1 = out1.accessor<float, 3>().data();
-                float* outptr2 = out2.accessor<float, 3>().data();
-                float* outptr3 = out3.accessor<float, 3>().data();
+                float* outptr0 = out0.data_ptr<float>();
+                float* outptr1 = out1.data_ptr<float>();
+                float* outptr2 = out2.data_ptr<float>();
+                float* outptr3 = out3.data_ptr<float>();
 
                 const float* img0 = input_a[q + 0].data();
                 const float* img1 = input_a[q + 1].data();
@@ -2582,10 +2582,10 @@ void conv2d_1x1s1_neon_impl(
 
             for (; q < inch; q++)
             {
-                float* outptr0 = out0.accessor<float, 3>().data();
-                float* outptr1 = out1.accessor<float, 3>().data();
-                float* outptr2 = out2.accessor<float, 3>().data();
-                float* outptr3 = out3.accessor<float, 3>().data();
+                float* outptr0 = out0.data_ptr<float>();
+                float* outptr1 = out1.data_ptr<float>();
+                float* outptr2 = out2.data_ptr<float>();
+                float* outptr3 = out3.data_ptr<float>();
 
                 const float* img0 = input_a[q].data();
 
@@ -2769,7 +2769,7 @@ void conv2d_1x1s1_neon_impl(
 
             for (; q + 3 < inch; q += 4)
             {
-                float* outptr = out.accessor<float, 3>().data();
+                float* outptr = out.data_ptr<float>();
 
                 const float* img0 = input_a[q + 0].data();
                 const float* img1 = input_a[q + 1].data();
@@ -2920,7 +2920,7 @@ void conv2d_1x1s1_neon_impl(
 
             for (; q < inch; q++)
             {
-                float* outptr = out.accessor<float, 3>().data();
+                float* outptr = out.data_ptr<float>();
 
                 const float* img0 = input_a[q].data();
 

@@ -14,6 +14,8 @@
 #include "DepthwiseConvKernelX86.hpp"
 #include "DilatedConvolution.hpp"
 #include "ConvolutionMM2DTranspose.hpp"
+#include "ConvolutionMM2DTransposeNeon.hpp"
+#include "DepthwiseConvTransposeKernelNeon.hpp"
 
 namespace otter {
 
@@ -109,9 +111,19 @@ ConvBackend select_proper_conv_backend(
     if (input.device() == Device::CPU) { // or input.is_cuda()
         if (params.transposed) {
             if (input.dim() == 4) {
-                return ConvBackend::SlowTranspose2d;
+                if (params.is_dilated()) {
+                    return ConvBackend::SlowTranspose2d;
+                } else {
+//                    if (input.size(1) == params.groups) {
+//                        return ConvBackend::DepthwiseTransposeNeon;
+//                    }
+                    if (weight.size(2) == 4 && weight.size(3) == 4 && params.stride[0] == 2 && params.stride[1] == 2) {
+                        return ConvBackend::Transpose2dNeon_4x4s2;
+                    }
+                    return ConvBackend::SlideWinTranspose2d;
+//                    return ConvBackend::SlowTranspose2d;
+                }
             }
-            // unsupport
         } else {
             if (input.dim() == 4) {
                 if (params.is_dilated()) {
@@ -281,9 +293,13 @@ Tensor convolution(
         case ConvBackend::DepthwiseX86_3x3s2:
             output = depthwise_conv2d_3x3s2_x86_sse(input.contiguous(), weight, bias, params.stride, params.padding);
             break;
+        case ConvBackend::DepthwiseTransposeNeon:
+            output = depthwise_deconv2d_neon(input.contiguous(), weight, bias, params.stride, params.padding, params.output_padding, params.dilation);
+            break;
         case ConvBackend::Slow2d:
         case ConvBackend::SlowTranspose2d:
         case ConvBackend::SlideWinTranspose2d:
+        case ConvBackend::Transpose2dNeon_4x4s2:
         case ConvBackend::Sgemm2dNeon:
         case ConvBackend::Sgemm2dNeon_1x1s1:
         case ConvBackend::Sgemm2dNeon_1x1s2:
@@ -329,6 +345,8 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
             return otter::slow_conv_transpose2d(self, weight, kernel_size, bias, params.stride, params.padding, params.output_padding, params.dilation);
         case ConvBackend::SlideWinTranspose2d:
             return otter::slide_win_conv_transpose2d(self, weight, kernel_size, bias, params.stride, params.padding, params.output_padding, params.dilation);
+        case ConvBackend::Transpose2dNeon_4x4s2:
+            return otter::deconv2d_4x4s2_neon(self, weight, bias, params.stride, params.padding, params.output_padding, params.dilation);
         case ConvBackend::SlowDilated2d:
             return otter::slow_conv_dilated2d(self, weight, bias, kernel_size, params.stride, params.padding, params.dilation);
         case ConvBackend::Sgemm2dNeon:

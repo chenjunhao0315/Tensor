@@ -53,9 +53,11 @@ void KalmanFilter::init(int DP, int MP, int CP, otter::ScalarType dtype) {
 const Tensor& KalmanFilter::predict(const Tensor &control) {
     statePre = transitionMatrix.mm(statePost);
     
-    if (controlMatrix.defined()) {
+    if (control.defined()) {
         statePre += controlMatrix.mm(control);
     }
+    
+    temp1 = transitionMatrix.mm(errorCovPost);
     
     otter::native::addmm_out(errorCovPre, processNoiseCov, temp1, transitionMatrix.transpose(0, 1), 1, 1);
     
@@ -71,9 +73,6 @@ const Tensor& KalmanFilter::correct(const Tensor &measurement) {
     otter::native::addmm_out(temp3, measurementNoiseCov, temp2, measurementMatrix.transpose(0, 1), 1, 1);
     
     // temp4 = inv(temp3)*temp2 = Kt(k)
-//    temp2 = temp2.contiguous();
-//    temp3 = temp3.contiguous();
-//    temp4 = temp4.contiguous();
     otter::solve(temp3, temp2, temp4, DECOMP_SVD);
     
     // K(k)

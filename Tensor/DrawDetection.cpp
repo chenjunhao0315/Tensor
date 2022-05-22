@@ -70,8 +70,6 @@ void draw_coco_detection(otter::Tensor& image, const otter::Tensor& pred, int wi
     }
 }
 
-float colors[6][3] = { {1,0,1}, {0,0,1}, {0,1,1}, {0,1,0}, {1,1,0}, {1,0,0} };
-
 float get_color(int c, int x, int max) {
     float ratio = ((float)x / max) * 5;
     int i = floor(ratio);

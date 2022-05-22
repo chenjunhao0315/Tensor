@@ -64,7 +64,6 @@ PoseInput pose_pre_process(const Tensor& pred, const Tensor& img) {
 }
 
 std::vector<KeyPoint> pose_post_process(const Tensor& pred, const PoseInput& preprocess) {
-    auto in = preprocess.image;
     int x1 = preprocess.x1;
     int y1 = preprocess.y1;
     int w = preprocess.w;
@@ -107,6 +106,8 @@ void draw_pose_detection(Tensor& img, std::vector<otter::KeyPoint>& keypoints) {
         const otter::KeyPoint& p2 = keypoints[joint_pairs[i][1]];
         if (p1.prob < 0.2f || p2.prob < 0.2f)
             continue;
+        otter::cv::putText(img, std::to_string(joint_pairs[i][0]), p1.p, otter::cv::FONT_HERSHEY_SCRIPT_COMPLEX, 80, otter::cv::getDefaultColor(otter::cv::RED), 15);
+        otter::cv::putText(img, std::to_string(joint_pairs[i][1]), p2.p, otter::cv::FONT_HERSHEY_SCRIPT_COMPLEX, 80, otter::cv::getDefaultColor(otter::cv::RED), 15);
         otter::cv::line(img, p1.p, p2.p, otter::cv::getDefaultColor(otter::cv::SKY_BLUE), 5);
     }
     // draw joint

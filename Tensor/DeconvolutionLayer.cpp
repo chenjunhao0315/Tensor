@@ -150,7 +150,7 @@ int DeconvolutionLayer::load_model(const Initializer& initializer) {
         }
     }
     
-    weight_data = initializer.load({out_channels, in_channels / groups, kernel_height, kernel_width}, 0);
+    weight_data = initializer.load({in_channels, out_channels / groups, kernel_height, kernel_width}, 0);
     
     if (initializer.type == InitializerType::Ncnn) {
         if (bias_term) {

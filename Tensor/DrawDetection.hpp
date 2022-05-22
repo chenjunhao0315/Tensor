@@ -12,16 +12,19 @@
 #include "GraphicAPI.hpp"
 
 namespace otter {
-namespace {
+
 struct Object {
     otter::cv::Rect_<float> rect;
     int label;
     float prob;
 };
-}   // end namespace
+
+static float colors[6][3] = { {1,0,1}, {0,0,1}, {0,1,1}, {0,1,0}, {1,1,0}, {1,0,0} };
+
+float get_color(int c, int x, int max);
 
 void draw_coco_detection(otter::Tensor& image, const otter::Tensor& pred, int width, int height);
 
-}   // end namespace otter
+}   // end namespace otter 
 
 #endif /* DrawDetection_hpp */
