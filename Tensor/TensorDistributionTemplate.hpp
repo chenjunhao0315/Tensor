@@ -290,6 +290,7 @@ struct RandomKernel {
 
 
 #ifdef CPU_CAPABILITY_AVX2
+#if __FMA__
 static inline void normal_fill_16_AVX2(float *data,
                                 const __m256* two_pi,
                                 const __m256* one,
@@ -336,6 +337,7 @@ void normal_fill_AVX2(const TensorBase &self, const float mean, const float std,
     }
 }
 #endif
+#endif
 template <typename scalar_t>
 static void normal_fill_16(scalar_t *data, const scalar_t mean, const scalar_t std) {
     for (const auto j : otter::irange(8)) {
@@ -374,7 +376,11 @@ void normal_kernel(const TensorBase &self, double mean, double std, RNG generato
     auto size = self.numel();
     if (self.scalar_type() == ScalarType::Float && size >= 16 && self.is_contiguous()) {
 #ifdef CPU_CAPABILITY_AVX2
+#if __FMA__
         normal_fill_AVX2(self, static_cast<float>(mean), static_cast<float>(std), generator);
+#else
+        normal_fill(self, static_cast<float>(mean), static_cast<float>(std), generator);
+#endif
 #else
         normal_fill(self, static_cast<float>(mean), static_cast<float>(std), generator);
 #endif
