@@ -9,6 +9,7 @@
 #include "TensorFactory.hpp"
 #include "TensorTransform.hpp"
 #include "Parallel.hpp"
+#include "ConvolutionUtils.hpp"
 
 namespace otter {
 
@@ -16,8 +17,8 @@ void depthwise_deconv2d_kernel_transform(const Tensor& weight, Tensor& kernel_tf
     kernel_tf = otter::empty_like(weight);
     
     int64_t channels = weight.size(0);
-    int64_t num_output = weight.size(1);
     int64_t group = channels;
+    int64_t num_output = weight.size(1) * group;
     
     int64_t maxk = weight.size(2) * weight.size(3);
     
@@ -39,6 +40,7 @@ void depthwise_deconv2d_kernel_transform(const Tensor& weight, Tensor& kernel_tf
 Tensor& depthwise_deconv2d_neon_out(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -46,27 +48,27 @@ Tensor& depthwise_deconv2d_neon_out(
     IntArrayRef dilation,
     Tensor& output) {
     
-    int64_t w = self.size(3);
-    int64_t h = self.size(2);
-    int64_t channels = self.size(1);
+    const int64_t w = self.size(3);
+    const int64_t h = self.size(2);
+    const int64_t inch = self.size(1);
     
-    int64_t kernel_w = weight.size(3);
-    int64_t kernel_h = weight.size(2);
+    const int64_t kernel_w = weight.size(3);
+    const int64_t kernel_h = weight.size(2);
     
-    int64_t dilation_w = dilation[1];
-    int64_t dilation_h = dilation[0];
+    const int64_t stride_w = stride[1];
+    const int64_t stride_h = stride[0];
     
-    int64_t stride_w = stride[1];
-    int64_t stride_h = stride[0];
-
+    const int64_t dilation_w = dilation[1];
+    const int64_t dilation_h = dilation[0];
+    
     const int64_t kernel_extent_w = dilation_w * (kernel_w - 1) + 1;
     const int64_t kernel_extent_h = dilation_h * (kernel_h - 1) + 1;
     
-    int64_t outw = (w - 1) * stride_w + kernel_extent_w + output_padding[1];
-    int64_t outh = (h - 1) * stride_h + kernel_extent_h + output_padding[0];
-    int64_t outch = weight.size(1);
+    const int64_t outw = (w - 1) * stride_w + kernel_extent_w + output_padding[1];
+    const int64_t outh = (h - 1) * stride_h + kernel_extent_h + output_padding[0];
+    const int64_t outch = weight.size(0);
     
-    auto output_pad = otter::empty({1, outch, outh, outw}, self.options());
+    auto output_pad = otter::empty({1, outch, outh, outw}, otter::ScalarType::Float);
     
     auto input_a = self.accessor<float, 4>()[0];
     
@@ -77,12 +79,16 @@ Tensor& depthwise_deconv2d_neon_out(
     float* bias_data = (bias_term) ? bias.data_ptr<float>() : nullptr;
     
     Tensor kernel_tf;
-    otter::depthwise_deconv2d_kernel_transform(weight, kernel_tf);
+    if (weight_o.defined())
+        kernel_tf = weight_o;
+    else
+        otter::depthwise_deconv2d_kernel_transform(weight, kernel_tf);
     
+    auto output_pad_a = output_pad.accessor<float, 4>()[0];
     
-    otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
+    otter::parallel_for(0, inch, 0, [&](int64_t begin, int64_t end) {
         for (const auto g : otter::irange(begin, end)) {
-            float* outptr = output_pad[0][g].data_ptr<float>();
+            float* outptr = output_pad_a[g].data();
             const float* kptr = (const float*)kernel_tf.data_ptr<float>() + maxk * g;
             const auto m = input_a[g];
 
@@ -149,6 +155,7 @@ Tensor& depthwise_deconv2d_neon_out(
 Tensor depthwise_deconv2d_neon(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -157,7 +164,7 @@ Tensor depthwise_deconv2d_neon(
     
     auto output = otter::empty({}, self.options());
     
-    return depthwise_deconv2d_neon_out(self, weight, bias, stride, padding, output_padding, dilation, output);
+    return depthwise_deconv2d_neon_out(self, weight, weight_o, bias, stride, padding, output_padding, dilation, output);
 }
 
 }   // end namespace otter

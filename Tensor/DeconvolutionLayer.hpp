@@ -26,6 +26,8 @@ public:
     
     virtual int load_model(const Initializer& initializer);
     
+    virtual int create_pipeline();
+    
     virtual int forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
     
     virtual std::string type() const { return "Deconvoltuion"; }

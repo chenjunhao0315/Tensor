@@ -12,9 +12,12 @@
 
 namespace otter {
 
+void depthwise_deconv2d_kernel_transform(const Tensor& weight, Tensor& kernel_tf);
+
 Tensor& depthwise_deconv2d_neon_out(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -25,6 +28,7 @@ Tensor& depthwise_deconv2d_neon_out(
 Tensor depthwise_deconv2d_neon(
     const Tensor& self,
     const Tensor& weight,
+    const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef stride,
     IntArrayRef padding,

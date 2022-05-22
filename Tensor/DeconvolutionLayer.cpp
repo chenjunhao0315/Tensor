@@ -10,6 +10,7 @@
 #include "TensorFactory.hpp"
 #include "TensorMaker.hpp"
 #include "Convolution.hpp"
+#include "DepthwiseConvTransposeKernelNeon.hpp"
 
 namespace otter {
 
@@ -157,6 +158,13 @@ int DeconvolutionLayer::load_model(const Initializer& initializer) {
             bias_data = initializer.load({out_channels}, 1);
         }
     }
+    
+    return 0;
+}
+
+int DeconvolutionLayer::create_pipeline() {
+    
+    otter::depthwise_deconv2d_kernel_transform(weight_data, weight_opt_data);
     
     return 0;
 }

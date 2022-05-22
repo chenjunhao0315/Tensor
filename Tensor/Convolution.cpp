@@ -114,14 +114,16 @@ ConvBackend select_proper_conv_backend(
                 if (params.is_dilated()) {
                     return ConvBackend::SlowTranspose2d;
                 } else {
-//                    if (input.size(1) == params.groups) {
-//                        return ConvBackend::DepthwiseTransposeNeon;
-//                    }
-                    if (weight.size(2) == 4 && weight.size(3) == 4 && params.stride[0] == 2 && params.stride[1] == 2) {
-                        return ConvBackend::Transpose2dNeon_4x4s2;
+                    if (params.use_cpu_neon(input, weight)) {
+                        if (params.is_transpose_depthwise(input, weight)) {
+                            return ConvBackend::DepthwiseTransposeNeon;
+                        }
+                        if (weight.size(2) == 4 && weight.size(3) == 4 && params.stride[0] == 2 && params.stride[1] == 2) {
+                            return ConvBackend::Transpose2dNeon_4x4s2;
+                        }
                     }
-                    return ConvBackend::SlideWinTranspose2d;
-//                    return ConvBackend::SlowTranspose2d;
+//                    return ConvBackend::SlideWinTranspose2d;
+                    return ConvBackend::SlowTranspose2d;
                 }
             }
         } else {
@@ -294,7 +296,7 @@ Tensor convolution(
             output = depthwise_conv2d_3x3s2_x86_sse(input.contiguous(), weight, bias, params.stride, params.padding);
             break;
         case ConvBackend::DepthwiseTransposeNeon:
-            output = depthwise_deconv2d_neon(input.contiguous(), weight, bias, params.stride, params.padding, params.output_padding, params.dilation);
+            output = depthwise_deconv2d_neon(input.contiguous(), weight, weight_o, bias, params.stride, params.padding, params.output_padding, params.dilation);
             break;
         case ConvBackend::Slow2d:
         case ConvBackend::SlowTranspose2d:
