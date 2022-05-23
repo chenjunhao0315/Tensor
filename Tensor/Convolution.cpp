@@ -108,6 +108,15 @@ ConvBackend select_proper_conv_backend(
     const bool need_backward,
     const ConvParams& params) {
     
+    const int64_t w = input.size(3);
+    const int64_t h = input.size(2);
+    const int64_t kernel_w = weight.size(3);
+    const int64_t kernel_h = weight.size(2);
+    const int64_t stride_w = params.stride[1];
+    const int64_t stride_h = params.stride[0];
+    const int64_t num_input = input.size(1);
+    const int64_t num_output = weight.size(0);
+    
     if (input.device() == Device::CPU) { // or input.is_cuda()
         if (params.transposed) {
             if (input.dim() == 4) {
@@ -115,10 +124,10 @@ ConvBackend select_proper_conv_backend(
                     return ConvBackend::SlowTranspose2d;
                 } else {
                     if (params.use_cpu_neon(input, weight)) {
-                        if (params.is_transpose_depthwise(input, weight)) {
-                            return ConvBackend::DepthwiseTransposeNeon;
-                        }
-                        if (weight.size(2) == 4 && weight.size(3) == 4 && params.stride[0] == 2 && params.stride[1] == 2) {
+//                        if (params.is_transpose_depthwise(input, weight)) {
+//                            return ConvBackend::DepthwiseTransposeNeon;
+//                        }
+                        if (kernel_w == 4 && kernel_h == 4 && stride_w == 2 && stride_h == 2) {
                             return ConvBackend::Transpose2dNeon_4x4s2;
                         }
                     }
@@ -134,27 +143,27 @@ ConvBackend select_proper_conv_backend(
                     if (params.use_cpu_neon(input, weight)) {
                         // Depthwise
                         if (params.is_depthwise(input, weight)) {
-                            if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
+                            if (kernel_w == 3 && kernel_h == 3 && stride_w == 1 && stride_h == 1) {
                                 return ConvBackend::DepthwiseNeon_3x3s1;
-                            } else if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
+                            } else if (kernel_w == 3 && kernel_h == 3 && stride_w == 2 && stride_h == 2) {
                                 return ConvBackend::DepthwiseNeon_3x3s2;
-                            } else if (weight.size(2) == 5 && weight.size(3) == 5 && params.stride[0] == 1 && params.stride[1] == 1) {
+                            } else if (kernel_w == 5 && kernel_h == 5 && stride_w == 1 && stride_h == 1) {
                                 return ConvBackend::DepthwiseNeon_5x5s1;
-                            } else if (weight.size(2) == 5 && weight.size(3) == 5 && params.stride[0] == 2 && params.stride[1] == 2) {
+                            } else if (kernel_w == 5 && kernel_h == 5 && stride_w == 2 && stride_h == 2) {
                                 return ConvBackend::DepthwiseNeon_5x5s2;
                             }
                         }
                         // General
-                        if (weight.size(2) == 1 && weight.size(3) == 1 && params.stride[0] == 1 && params.stride[1] == 1) {
-                            if (input.size(1) >= 64 && weight.size(0) >= 64) {
+                        if (kernel_w == 1 && kernel_h == 1 && stride_w == 1 && stride_h == 1) {
+                            if (num_input >= 64 && num_output >= 64) {
                                 return ConvBackend::Sgemm2dNeon_1x1s1;
                             } else {
                                 return ConvBackend::SlideWin2dNeon_1x1s1;
                             }
-                        } else if (weight.size(2) == 1 && weight.size(3) == 1 && params.stride[0] == 2 && params.stride[1] == 2) {
+                        } else if (kernel_w == 1 && kernel_h == 1 && stride_w == 2 && stride_h == 2) {
                             return ConvBackend::Sgemm2dNeon_1x1s2;
-                        } else if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
-                            if (input.size(1) >= 16 && weight.size(0) >= 16 && input.size(3) <= 120 && input.size(2) <= 120) {
+                        } else if (kernel_w == 3 && kernel_h == 3 && stride_w == 1 && stride_h == 1) {
+                            if (num_input >= 16 && num_output >= 16 && w <= 120 && h <= 120) {
                                 return ConvBackend::WinogradNeon_3x3s1;
                             } else {
                                 return ConvBackend::SlideWin2dNeon_3x3s1;
@@ -163,7 +172,7 @@ ConvBackend select_proper_conv_backend(
 //                            if (!need_backward && params.use_cpu_depthwise3x3_winograd(input, weight)) {
 //                                return ConvBackend::Winograd3x3Depthwise;
 //                            }
-                        } else if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
+                        } else if (kernel_w == 3 && kernel_h == 3 && stride_w == 2 && stride_h == 2) {
                             auto output_shape = otter::calculate_conv_output_size(input.sizes(), weight.sizes(), params.stride, params.padding);
                             if (!(output_shape[2] >= 8 && output_shape[3] >= 8)) {
                                 return ConvBackend::Sgemm2dNeon;
@@ -171,7 +180,15 @@ ConvBackend select_proper_conv_backend(
                                 return ConvBackend::Packed2DNeon_3x3s2;
                             }
                         } else {
-                            bool prefer_sgemm = (params.stride[0] == 1 && params.stride[1] == 1 && (input.size(1) >= 12 || weight.size(0) >= 12)) || ((params.stride[0] >= 2 || params.stride[1] >= 2) && (input.size(1) >= 16 || weight.size(0) >= 16));
+                            bool prefer_sgemm = true;
+                            if (num_output == 1) {
+                                if ((kernel_w == 3 && num_input >= 64) || (kernel_w == 4 && num_input >= 3) || kernel_w >= 5)
+                                    prefer_sgemm = false;
+                            }
+                            if (num_output == 2) {
+                                if ((kernel_w == 5 && num_input >= 64) || (kernel_w == 6 && num_input >= 32) || ((kernel_w == 7 || kernel_w == 8 || kernel_w == 9) && num_input >= 16) || (kernel_w >= 10 && num_input >= 8))
+                                        prefer_sgemm = false;
+                            }
                             
                             if (prefer_sgemm) {
                                 return ConvBackend::Sgemm2dNeon;

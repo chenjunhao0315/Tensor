@@ -36,15 +36,17 @@ int Interpreter::addCommand(const char* filename) {
 
 int Interpreter::addCommand(const char* command, int) {
     curToken = UNKNOWN;
+    status = 1;
     ss = std::stringstream(command);
     
     InterpreteNode *interpreter = new InterpreteNode;
     
-    while (ss) {
+    while (ss && status) {
         statement(*interpreter);
     }
     
-    commands.push_back(interpreter);
+    if (status == 1)
+        commands.push_back(interpreter);
     
     return 0;
 }
@@ -60,15 +62,19 @@ int Interpreter::printCommand(void) {
 
 int Interpreter::doCommand() {
     int success = 0;
+    bool status = true;
     for (int i = 0; i < commands.size() && success == 0; ++i) {
-        doCommand(i);
+        status &= doCommand(i);
         success = getTable("success");
     }
-    return success;
+    return status;
 }
 
 int Interpreter::doCommand(int index) {
+    if (index >= commands.size())
+        return -1;
     auto &interpreter = commands[index];
+    status = 1;
     
     for (int i = 0; i < interpreter->command_line.size(); ) {
         auto &step_command = interpreter->command_line[i];
@@ -85,7 +91,7 @@ int Interpreter::doCommand(int index) {
         }
     }
     
-    return 0;
+    return status;
 }
 
 void Interpreter::addTable(std::string name, float value) {
@@ -108,7 +114,9 @@ void Interpreter::printTable(void) {
 CommandNode* Interpreter::statement(InterpreteNode& interpreter) {
     CommandNode* retp = nullptr;
     
-    if (match(ENDFILE)) {
+    if (status != 1) {
+        return retp;
+    } else if (match(ENDFILE)) {
         return retp;
     } else if (match(END)) {
         advance();
@@ -117,8 +125,10 @@ CommandNode* Interpreter::statement(InterpreteNode& interpreter) {
         
         if (match(LPAREN))
             advance();
-        else
+        else {
             printf("[If] Miss (\n");
+            status = 0;
+        }
         
         // If condition
         int step_stack = interpreter.step;
@@ -129,8 +139,15 @@ CommandNode* Interpreter::statement(InterpreteNode& interpreter) {
         
         if (match(RPAREN))
             advance();
-        else
+        else {
             printf("[If] Miss )\n");
+            status = 0;
+        }
+        
+        if (!match(LBRACE)) {
+            printf("[If] Miss {\n");
+            status = 0;
+        }
         
         statement(interpreter);
         
@@ -157,8 +174,10 @@ CommandNode* Interpreter::statement(InterpreteNode& interpreter) {
         
         if (match(RBRACE))
             advance();
-        else
+        else {
             printf("Miss }\n");
+            status = 0;
+        }
     } else {
         interpreter.step++;
         retp = expr();
@@ -168,13 +187,14 @@ CommandNode* Interpreter::statement(InterpreteNode& interpreter) {
             advance();
         } else {
             printf("Synatex error\n");
+            status = 0;
         }
     }
     return retp;
 }
 
-int Interpreter::evaluateTree(CommandNode *root) {
-    int retval = 0, lv = 0, rv = 0;
+float Interpreter::evaluateTree(CommandNode *root) {
+    float retval = 0, lv = 0, rv = 0;
 
     if (root != NULL) {
         switch (root->data) {
@@ -183,6 +203,9 @@ int Interpreter::evaluateTree(CommandNode *root) {
                 break;
             case INT:
                 retval = atoi(root->lexeme);
+                break;
+            case FLOAT:
+                retval = atof(root->lexeme);
                 break;
             case ASSIGN:
                 rv = evaluateTree(root->right);
@@ -232,16 +255,17 @@ int Interpreter::evaluateTree(CommandNode *root) {
     return retval;
 }
 
-int Interpreter::getval(char *str) {
+float Interpreter::getval(char *str) {
     if (table.find(str) != table.end()) {
         return table[str];
     }
     printf("Not found %s in memory\n", str);
+    status = 0;
     
     return 0;
 }
 
-int Interpreter::setval(char *str, int val) {
+float Interpreter::setval(char *str, float val) {
     if (table.find(str) != table.end()) {
         table[str] = val;
         return val;
@@ -266,6 +290,9 @@ CommandNode* Interpreter::factor(void) {
     if (match(INT)) {
         retp = new CommandNode(INT, getLexeme());
         advance();
+    } else if (match(FLOAT)) {
+        retp = new CommandNode(FLOAT, getLexeme());
+        advance();
     } else if (match(ID)) {
         left = new CommandNode(ID, getLexeme());
         advance();
@@ -284,6 +311,9 @@ CommandNode* Interpreter::factor(void) {
         if (match(INT)) {
             retp->right = new CommandNode(INT, getLexeme());
             advance();
+        } else if (match(FLOAT)) {
+            retp->right = new CommandNode(FLOAT, getLexeme());
+            advance();
         } else if (match(ID)) {
             retp->right = new CommandNode(ID, getLexeme());
             advance();
@@ -292,21 +322,27 @@ CommandNode* Interpreter::factor(void) {
             retp->right = expr();
             if (match(RPAREN))
                 advance();
-            else
+            else {
                 printf("MISPAREN\n");
+                status = 0;
+            }
         } else {
             printf("NOTNUMID\n");
+            status = 0;
         }
     } else if (match(LPAREN)) {
         advance();
         retp = expr();
         if (match(RPAREN))
             advance();
-        else
+        else {
             printf("MISPAREN\n");
+            status = 0;
+        }
     } else {
-        std::cout << curToken << ": " << getLexeme() << std::endl;
         printf("NOTNUMID\n");
+        std::cout << curToken << ": " << getLexeme() << std::endl;
+        status = 0;
     }
     return retp;
 }
@@ -319,14 +355,14 @@ CommandNode* Interpreter::term(void) {
 CommandNode* Interpreter::term_tail(CommandNode* left) {
     CommandNode* node = NULL;
 
-    if (match(MULDIV)) {
-        node = new CommandNode(MULDIV, getLexeme());
+    if (match(LOGICAL)) {
+        node = new CommandNode(LOGICAL, getLexeme());
         advance();
         node->left = left;
-        node->right = factor();
+        node->right = expr();
         return term_tail(node);
-    } else if (match(LOGICAL)) {
-        node = new CommandNode(LOGICAL, getLexeme());
+    } else if (match(MULDIV)) {
+        node = new CommandNode(MULDIV, getLexeme());
         advance();
         node->left = left;
         node->right = factor();
@@ -373,6 +409,19 @@ TokenSet Interpreter::getToken(void) {
             lexeme[i] = c;
             ++i;
             c = ss.get();
+        }
+        if (c == '.') {
+            lexeme[i] = c;
+            ++i;
+            c = ss.get();
+            while (isdigit(c) && i < MAXLEN) {
+                lexeme[i] = c;
+                ++i;
+                c = ss.get();
+            }
+            ss.putback(c);
+            lexeme[i] = '\0';
+            return FLOAT;
         }
         ss.putback(c);
         lexeme[i] = '\0';
@@ -516,6 +565,8 @@ std::ostream& operator<<(std::ostream& o, TokenSet t) {
             return o << "ENDFILE";
         case INT:
             return o << "INT";
+        case FLOAT:
+            return o << "FLOAT";
         case ID:
             return o << "ID";
         case ADDSUB:
@@ -543,11 +594,11 @@ std::ostream& operator<<(std::ostream& o, TokenSet t) {
 }
 
 void StepCommand::freeTree(CommandNode* root) {
-//    if (root) {
-//        delete root->left;
-//        delete root->right;
-//        delete root;
-//    }
+    if (root) {
+        delete root->left;
+        delete root->right;
+        delete root;
+    }
 }
 
 void InterpreteNode::print() {

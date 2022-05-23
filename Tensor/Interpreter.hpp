@@ -18,7 +18,7 @@ namespace core {
 
 typedef enum {
     UNKNOWN, END, ENDFILE,
-    INT, ID,
+    INT, ID, FLOAT,
     ADDSUB, MULDIV, LOGICAL,
     INCDEC, ASSIGN,
     LPAREN, RPAREN,
@@ -62,6 +62,8 @@ private:
     TokenSet curToken;
     char lexeme[MAXLEN];
     
+    int status;
+    
     CommandNode* statement(InterpreteNode& interpreter);
     
     void advance(void);
@@ -77,9 +79,9 @@ private:
     
     void printPrefix(CommandNode *root);
     
-    int evaluateTree(CommandNode *root);
-    int getval(char *str);
-    int setval(char *str, int val);
+    float evaluateTree(CommandNode *root);
+    float getval(char *str);
+    float setval(char *str, float val);
 
     std::vector<InterpreteNode*> commands;
     std::unordered_map<std::string, float> table;

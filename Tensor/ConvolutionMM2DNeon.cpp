@@ -1084,8 +1084,7 @@ Tensor& sgemm_conv2d_1x1s1_neon_out(
     auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
     output.resize_(output_size);
     
-    const Tensor input = self.contiguous();
-    const int64_t input_channels  = input.size(1);
+    const int64_t input_channels  = self.size(1);
     const int64_t output_channels = weight.size(0);
     
     Tensor im2col = self.view({self.size(0), self.size(1), -1});

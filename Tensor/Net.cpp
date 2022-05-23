@@ -680,7 +680,38 @@ int Extractor::extract(int blob_index, Tensor &feat, int /*type*/) {
 }
 
 #if OTTER_BENCHMARK
-int Extractor::benchmark(std::string start_name, std::string end_name, IntArrayRef input_shape) {
+int Extractor::benchmark(std::string start_name, std::string end_name, IntArrayRef input_shape, int loop_count) {
+    Tensor input = otter::rand(input_shape, otter::ScalarType::Float);
+    Tensor output;
+    
+    int ret = 0;
+    
+    double min = __FLT_MAX__;
+    double max = 0;
+    double avg = 0;
+    
+    for (int i = 0; i < loop_count; ++i) {
+        for (auto& t : blob_tensors_)
+            t.reset();
+        this->input(start_name, input);
+        
+        double t = get_current_time();
+        ret = this->extract(end_name, output, 0);
+        t = get_current_time() - t;
+        
+        avg += t;
+        if (t > max)
+            max = t;
+        if (t < min)
+            min = t;
+    }
+    
+    printf("min: %.2f max: %.2f avg: %.2f\n", min, max, avg / loop_count);
+    
+    return ret;
+}
+
+int Extractor::benchmark_info(std::string start_name, std::string end_name, IntArrayRef input_shape) {
     Tensor input = otter::rand(input_shape, otter::ScalarType::Float);
     this->input(start_name, input);
     
