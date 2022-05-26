@@ -14,6 +14,8 @@
 namespace otter {
 
 struct Object {
+    Object() = default;
+    Object(const Tensor& obj);
     otter::cv::Rect_<float> rect;
     int label;
     float prob;

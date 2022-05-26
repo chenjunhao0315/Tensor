@@ -81,6 +81,8 @@ int Observer::getTarget(otter::Tensor &objects) {
     return target_index;
 }
 
+static const char *keypoint_name[] = {"nose", "right_eye", "left_eye", "right_ear", "left_ear", "right_shoulder", "left_shoulder", "right_elbow", "left_elbow", "right_wrist", "left_wrist", "right_hip", "left_hip", "right_knee", "left_knee", "right_ankle", "left_ankle"};
+
 ObserveMethod Observer::getMethod(const otter::Tensor& target, otter::Tensor& objs, otter::Tensor& keypoints) {
     auto target_data = target.accessor<float, 1>();
     
@@ -95,44 +97,20 @@ ObserveMethod Observer::getMethod(const otter::Tensor& target, otter::Tensor& ob
     interpreter.addTable("y", target_data[3]);
     interpreter.addTable("w", target_data[4]);
     interpreter.addTable("h", target_data[5]);
-    interpreter.addTable("area", target_data[4] * target_data[5] * 100);
+    interpreter.addTable("area", target_data[4] * target_data[5]);
     interpreter.addTable("method_index", 0);
     interpreter.addTable("success", 0);
     
-    auto right_ankle = keypoints.accessor<float, 2>()[int(ObservePosition::RIGHT_ANKLE)];
-    auto left_ankle = keypoints.accessor<float, 2>()[int(ObservePosition::LEFT_ANKLE)];
-    auto right_knee = keypoints.accessor<float, 2>()[int(ObservePosition::RIGHT_KNEE)];
-    auto left_knee = keypoints.accessor<float, 2>()[int(ObservePosition::LEFT_KNEE)];
-    auto right_hip = keypoints.accessor<float, 2>()[int(ObservePosition::RIGHT_HIP)];
-    auto left_hip = keypoints.accessor<float, 2>()[int(ObservePosition::LEFT_HIP)];
-    auto left_shoulder = keypoints.accessor<float, 2>()[int(ObservePosition::LEFT_SHOULDER)];
-    auto right_shoulder = keypoints.accessor<float, 2>()[int(ObservePosition::RIGHT_SHOULDER)];
-    
-    interpreter.addTable("right_ankle",   right_ankle[2] >= 0.2);
-    interpreter.addTable("right_ankle_x", right_ankle[0]);
-    interpreter.addTable("right_ankle_y", right_ankle[1]);
-    interpreter.addTable("left_ankle",   left_ankle[2] >= 0.2);
-    interpreter.addTable("left_ankle_x", left_ankle[0]);
-    interpreter.addTable("left_ankle_y", left_ankle[1]);
-    interpreter.addTable("right_knee",   right_knee[2] >= 0.2);
-    interpreter.addTable("right_knee_x", right_knee[0]);
-    interpreter.addTable("right_knee_y", right_knee[1]);
-    interpreter.addTable("left_knee",   left_knee[2] >= 0.2);
-    interpreter.addTable("left_knee_x", left_knee[0]);
-    interpreter.addTable("left_knee_y", left_knee[1]);
-    interpreter.addTable("right_hip",   right_hip[2] >= 0.2);
-    interpreter.addTable("right_hip_x", right_hip[0]);
-    interpreter.addTable("right_hip_y", right_hip[1]);
-    interpreter.addTable("left_hip",   left_hip[2] >= 0.2);
-    interpreter.addTable("left_hip_x", left_hip[0]);
-    interpreter.addTable("left_hip_y", left_hip[1]);
-    interpreter.addTable("right_shoulder",   right_shoulder[2] >= 0.2);
-    interpreter.addTable("right_shoulder_x", right_shoulder[0]);
-    interpreter.addTable("right_shoulder_y", right_shoulder[1]);
-    interpreter.addTable("left_shoulder",   left_shoulder[2] >= 0.2);
-    interpreter.addTable("left_shoulder_x", left_shoulder[0]);
-    interpreter.addTable("left_shoulder_y", left_shoulder[1]);
-    
+    if (keypoints.defined()) {
+        auto keypoints_data = keypoints.accessor<float, 2>();
+        for (int i = 0; i < 17; ++i) {
+            auto keypoint_data = keypoints_data[i];
+            
+            interpreter.addTable(keypoint_name[i], keypoint_data[2] >= 0.2);
+            interpreter.addTable(std::string(keypoint_name[i]) + "_x", keypoint_data[0]);
+            interpreter.addTable(std::string(keypoint_name[i]) + "_y", keypoint_data[1]);
+        }
+    }
     
     int success = interpreter.doCommand();
     if (success)

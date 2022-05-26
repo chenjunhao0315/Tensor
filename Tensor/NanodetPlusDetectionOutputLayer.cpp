@@ -333,25 +333,14 @@ Tensor nanodet_pre_process(const Tensor& img, int target_size, float& scale, int
 }
 
 Tensor nanodet_post_process(const Tensor& pred, int image_width, int image_height, float scale, int wpad, int hpad) {
-    int count = (int)pred.size(0);
-    std::vector<Object> objects(count);
-    
     otter::Tensor pred_fix = otter::empty_like(pred);
     
     auto pred_a = pred.accessor<float, 2>();
     auto pred_fix_a = pred_fix.accessor<float, 2>();
     
-    for (int i = 0; i < count; ++i) {
-        Object& object = objects[i];
+    for (const auto i : otter::irange(pred.size(0))) {
         auto obj = pred_a[i];
         auto obj_fix = pred_fix_a[i];
-        
-        object.label  = obj[0];
-        object.prob   = obj[1];
-        object.x      = obj[2];
-        object.y      = obj[3];
-        object.width  = obj[4];
-        object.height = obj[5];
         
         // adjust offset to original unpadded
         float x0 = (obj[2] - (wpad / 2)) / scale;

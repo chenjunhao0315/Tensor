@@ -10,6 +10,7 @@
 
 #include "VecIntrinsic.hpp"
 #include "VecBase.hpp"
+#include "neon_mathfun.hpp"
 
 #include "Utils.hpp"
 
@@ -275,6 +276,18 @@ public:
     }
     Vectorized<float> neg() const {
         return Vectorized<float>(vnegq_f32(values.val[0]), vnegq_f32(values.val[1]));
+    }
+    Vectorized<float> log() const {
+        return Vectorized<float>(log_ps(values.val[0]), log_ps(values.val[1]));
+    }
+    Vectorized<float> exp() const {
+        return Vectorized<float>(exp_ps(values.val[0]), exp_ps(values.val[1]));
+    }
+    Vectorized<float> sin() const {
+        return Vectorized<float>(sin_ps(values.val[0]), sin_ps(values.val[1]));
+    }
+    Vectorized<float> cos() const {
+        return Vectorized<float>(cos_ps(values.val[0]), cos_ps(values.val[1]));
     }
     Vectorized<float> operator==(const Vectorized<float>& other) const {
         float32x4_t r0 =

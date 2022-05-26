@@ -21,8 +21,8 @@ HungarianAlgorithm::~HungarianAlgorithm(){}
 //********************************************************//
 double HungarianAlgorithm::Solve(vector<vector<double>>& DistMatrix, vector<int>& Assignment)
 {
-    unsigned int nRows = DistMatrix.size();
-    unsigned int nCols = DistMatrix[0].size();
+    unsigned long nRows = DistMatrix.size();
+    unsigned long nCols = DistMatrix[0].size();
     
     double *distMatrixIn = new double[nRows * nCols];
     int *assignment = new int[nRows];
@@ -37,7 +37,7 @@ double HungarianAlgorithm::Solve(vector<vector<double>>& DistMatrix, vector<int>
             distMatrixIn[i + nRows * j] = DistMatrix[i][j];
     
     // call solving function
-    assignmentoptimal(assignment, &cost, distMatrixIn, nRows, nCols);
+    assignmentoptimal(assignment, &cost, distMatrixIn, int(nRows), int(nCols));
     
     Assignment.clear();
     for (unsigned int r = 0; r < nRows; r++)

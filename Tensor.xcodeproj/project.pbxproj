@@ -121,6 +121,10 @@
 		76BA779227C6CA8F00AA896B /* TensorScalar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA779027C6CA8F00AA896B /* TensorScalar.cpp */; };
 		76BA779527C6CCB700AA896B /* im2col.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA779327C6CCB700AA896B /* im2col.cpp */; };
 		76BA779827C6CD2300AA896B /* vol2col.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA779627C6CD2300AA896B /* vol2col.cpp */; };
+		76C19980283E323B00A5D737 /* neon_mathfun.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76C1997E283E323B00A5D737 /* neon_mathfun.cpp */; };
+		76C19983283F6C0A00A5D737 /* TensorSoftmax.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76C19981283F6C0A00A5D737 /* TensorSoftmax.cpp */; };
+		76C19986283F6C1D00A5D737 /* TensorSoftmaxKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76C19984283F6C1D00A5D737 /* TensorSoftmaxKernel.cpp */; };
+		76C19989283F786600A5D737 /* VecFunctional.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76C19987283F786600A5D737 /* VecFunctional.cpp */; };
 		76CEF55727FCACDE00AC46F6 /* TensorCompare.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CEF55527FCACDE00AC46F6 /* TensorCompare.cpp */; };
 		76CEF55A27FCAFA900AC46F6 /* TensorCompareKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CEF55827FCAFA900AC46F6 /* TensorCompareKernel.cpp */; };
 		76CF3F3727FC6E4B009BF242 /* DeconvolutionLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CF3F3527FC6E4B009BF242 /* DeconvolutionLayer.cpp */; };
@@ -427,6 +431,15 @@
 		76BA779427C6CCB700AA896B /* im2col.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = im2col.hpp; sourceTree = "<group>"; };
 		76BA779627C6CD2300AA896B /* vol2col.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = vol2col.cpp; sourceTree = "<group>"; };
 		76BA779727C6CD2300AA896B /* vol2col.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vol2col.hpp; sourceTree = "<group>"; };
+		76C1997E283E323B00A5D737 /* neon_mathfun.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = neon_mathfun.cpp; sourceTree = "<group>"; };
+		76C1997F283E323B00A5D737 /* neon_mathfun.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = neon_mathfun.hpp; sourceTree = "<group>"; };
+		76C19981283F6C0A00A5D737 /* TensorSoftmax.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorSoftmax.cpp; sourceTree = "<group>"; };
+		76C19982283F6C0A00A5D737 /* TensorSoftmax.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorSoftmax.hpp; sourceTree = "<group>"; };
+		76C19984283F6C1D00A5D737 /* TensorSoftmaxKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorSoftmaxKernel.cpp; sourceTree = "<group>"; };
+		76C19985283F6C1D00A5D737 /* TensorSoftmaxKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorSoftmaxKernel.hpp; sourceTree = "<group>"; };
+		76C19987283F786600A5D737 /* VecFunctional.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VecFunctional.cpp; sourceTree = "<group>"; };
+		76C19988283F786600A5D737 /* VecFunctional.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VecFunctional.hpp; sourceTree = "<group>"; };
+		76C1998E283F80E500A5D737 /* Vec256_double.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Vec256_double.hpp; sourceTree = "<group>"; };
 		76CEF55527FCACDE00AC46F6 /* TensorCompare.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorCompare.cpp; sourceTree = "<group>"; };
 		76CEF55627FCACDE00AC46F6 /* TensorCompare.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorCompare.hpp; sourceTree = "<group>"; };
 		76CEF55827FCAFA900AC46F6 /* TensorCompareKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorCompareKernel.cpp; sourceTree = "<group>"; };
@@ -774,6 +787,10 @@
 				76CEF55627FCACDE00AC46F6 /* TensorCompare.hpp */,
 				76CEF55827FCAFA900AC46F6 /* TensorCompareKernel.cpp */,
 				76CEF55927FCAFA900AC46F6 /* TensorCompareKernel.hpp */,
+				76C19981283F6C0A00A5D737 /* TensorSoftmax.cpp */,
+				76C19982283F6C0A00A5D737 /* TensorSoftmax.hpp */,
+				76C19984283F6C1D00A5D737 /* TensorSoftmaxKernel.cpp */,
+				76C19985283F6C1D00A5D737 /* TensorSoftmaxKernel.hpp */,
 			);
 			name = Ops;
 			sourceTree = "<group>";
@@ -813,7 +830,12 @@
 				762E3B4327BCBAA10075F983 /* VecBase.cpp */,
 				762E3B5027BD62290075F983 /* Vec256.hpp */,
 				762E3B5227BD63B20075F983 /* Vec256_float.hpp */,
+				76C1998E283F80E500A5D737 /* Vec256_double.hpp */,
 				760384B627C0525C00CD599F /* Vec256_float_neon.hpp */,
+				76C1997E283E323B00A5D737 /* neon_mathfun.cpp */,
+				76C1997F283E323B00A5D737 /* neon_mathfun.hpp */,
+				76C19987283F786600A5D737 /* VecFunctional.cpp */,
+				76C19988283F786600A5D737 /* VecFunctional.hpp */,
 			);
 			name = vec;
 			sourceTree = "<group>";
@@ -1123,6 +1145,7 @@
 				76B4BBBD282DDD3300BE0949 /* KalmanTracker.cpp in Sources */,
 				7687216F27C12AAB006640CF /* Blob.cpp in Sources */,
 				76F336D927A816E200E3AEF1 /* ExclusivelyOwned.cpp in Sources */,
+				76C19983283F6C0A00A5D737 /* TensorSoftmax.cpp in Sources */,
 				762E3B4227BCA1AE0075F983 /* VecIntrinsic.cpp in Sources */,
 				760382C027BF4AAB00CD599F /* DefaultDtype.cpp in Sources */,
 				760382C727BFD6DE00CD599F /* WarpDimMinimal.cpp in Sources */,
@@ -1222,6 +1245,7 @@
 				760704CB27E3DABE00D5E00D /* GeneratorNucleus.cpp in Sources */,
 				7687216827C12145006640CF /* NetOption.cpp in Sources */,
 				7604745427D67ED100FCB785 /* DataReader.cpp in Sources */,
+				76C19986283F6C1D00A5D737 /* TensorSoftmaxKernel.cpp in Sources */,
 				76BA779227C6CA8F00AA896B /* TensorScalar.cpp in Sources */,
 				7687216B27C12334006640CF /* Net.cpp in Sources */,
 				76F336EC27AEEC9500E3AEF1 /* UnaryOps.cpp in Sources */,
@@ -1236,6 +1260,7 @@
 				7628E17D27CFCFCB00B136FA /* Dropout.cpp in Sources */,
 				760A333E27F6585E003F0542 /* Otter.cpp in Sources */,
 				7663C21F281AF75900102057 /* Observer.cpp in Sources */,
+				76C19980283E323B00A5D737 /* neon_mathfun.cpp in Sources */,
 				76E6C52E27A505FE0036A26F /* TensorOptions.cpp in Sources */,
 				76AA466327F8855600F0F3C6 /* ConvolutionMM2DX86.cpp in Sources */,
 				762B4D6927EF7E3D00A98E34 /* flat_hash_map.cpp in Sources */,
@@ -1280,6 +1305,7 @@
 				760A333B27F62800003F0542 /* SliceLayer.cpp in Sources */,
 				760A334127F7949F003F0542 /* SigmoidLayer.cpp in Sources */,
 				762B4D6C27EF80AB00A98E34 /* CPUProfilingAllocator.cpp in Sources */,
+				76C19989283F786600A5D737 /* VecFunctional.cpp in Sources */,
 				76F336DD27A8FCE600E3AEF1 /* EmptyTensor.cpp in Sources */,
 				76486AEA27DBC8FF0078FF9B /* Vision.cpp in Sources */,
 			);
@@ -1419,7 +1445,12 @@
 				OTHER_CFLAGS = (
 					"-Xclang",
 					"-fopenmp",
+					"-mavx",
 					"-mavx2",
+					"-msse3",
+					"-msse4.1",
+					"-msse4.2",
+					"-msse4a",
 					"-mfma",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1441,7 +1472,12 @@
 				OTHER_CFLAGS = (
 					"-Xclang",
 					"-fopenmp",
+					"-mavx",
 					"-mavx2",
+					"-msse3",
+					"-msse4.1",
+					"-msse4.2",
+					"-msse4a",
 					"-mfma",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";

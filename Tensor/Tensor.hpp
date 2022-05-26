@@ -311,6 +311,8 @@ public:
     
     Tensor mm(const Tensor& other) const;
     
+    Tensor softmax(int64_t dim, ScalarType dtype = ScalarType::Undefined) const;
+    
 };
 
 template <typename T, typename... Args>

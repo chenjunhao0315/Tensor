@@ -12,7 +12,6 @@
 #include "TensorBlas.hpp"
 #include "im2col.hpp"
 #include "Parallel.hpp"
-#include "Dispatch.hpp"
 #include "TensorTransform.hpp"
 
 namespace otter {

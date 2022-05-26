@@ -68,9 +68,9 @@ void mul_kernel(TensorIterator& iter) {
     } else {
         OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "mul_cpu", [&]() {
             cpu_kernel_vec(iter,
-                           [=](scalar_t a, scalar_t b) -> scalar_t { return a * b; },
-                           [=](Vectorized<scalar_t> a, Vectorized<scalar_t> b) { return a * b; }
-                           );
+                [=](scalar_t a, scalar_t b) -> scalar_t { return a * b; },
+                [=](Vectorized<scalar_t> a, Vectorized<scalar_t> b) { return a * b; }
+            );
         });
     }
 }

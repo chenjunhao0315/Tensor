@@ -9,9 +9,10 @@
 #define Vec256_h
 
 #include "VecIntrinsic.hpp"
-#include "VecBase.hpp"
 #include "Vec256_float.hpp"
+#include "Vec256_double.hpp"
 #include "Vec256_float_neon.hpp"
+#include "VecBase.hpp"
 
 namespace otter {
 namespace vec{

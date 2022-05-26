@@ -129,7 +129,25 @@ public:
         }
         return vector;
     }
-    
+    template<typename step_t>  // step sometimes requires a higher precision type (e.g., T=int, step_t=double)
+    static Vectorized<T> arange(T base = static_cast<T>(0), step_t step = static_cast<step_t>(1)) {
+        Vectorized vector;
+        for (const auto i : otter::irange(size())) {
+            vector.values[i] = base + i * step;
+        }
+        return vector;
+    }
+    static Vectorized<T> set(const Vectorized<T>& a, const Vectorized<T>& b, int64_t count = size()) {
+        Vectorized vector;
+        for (const auto i : otter::irange(size())) {
+            if (i < count) {
+                vector[i] = b[i];
+            } else {
+                vector[i] = a[i];
+            }
+        }
+        return vector;
+    }
     static Vectorized<T> loadu(const void* ptr) {
         Vectorized vector;
         std::memcpy(vector.values, ptr, VECTOR_WIDTH);

@@ -1476,6 +1476,47 @@ Tensor & wrapper_lt__Tensor(Tensor & self, const Tensor & other) {
     return self;
 }
 
+struct structured_softmax_cpu_out_functional final : public structured_softmax_cpu_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+    }
+    
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+
+Tensor wrapper__softmax(const Tensor & self, int64_t dim, bool half_to_float) {
+    structured_softmax_cpu_out_functional op;
+    op.meta(self, dim, half_to_float);
+    op.impl(self, dim, half_to_float, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+    
+struct structured_softmax_cpu_out_out final : public structured_softmax_cpu_out {
+    structured_softmax_cpu_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+    }
+
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+
+Tensor & wrapper__softmax_out_out(const Tensor & self, int64_t dim, bool half_to_float, Tensor & out) {
+    structured_softmax_cpu_out_out op(out);
+    op.meta(self, dim, half_to_float);
+    op.impl(self, dim, half_to_float, op.outputs_[0]);
+    return out;
+}
+
 namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha) {
@@ -1848,6 +1889,16 @@ Tensor & lt_outf(const Tensor & self, const Tensor & other, Tensor & out) {
 }
 Tensor & lt_(Tensor & self, const Tensor & other) {
     return wrapper_lt__Tensor(self, other);
+}
+
+Tensor _softmax(const Tensor & self, int64_t dim, bool half_to_float) {
+    return wrapper__softmax(self, dim, half_to_float);
+}
+Tensor & _softmax_out(Tensor & out, const Tensor & self, int64_t dim, bool half_to_float) {
+    return wrapper__softmax_out_out(self, dim, half_to_float, out);
+}
+Tensor & _softmax_outf(const Tensor & self, int64_t dim, bool half_to_float, Tensor & out) {
+    return wrapper__softmax_out_out(self, dim, half_to_float, out);
 }
 
 }   // end namespace native

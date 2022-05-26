@@ -195,12 +195,11 @@ void TensorIterator::compute_types(const TensorIteratorConfig &config) {
         }
         
         if (!op.tensor_base().defined()) {
-            if (!op.is_output)
-                fprintf(stderr, "Found undefined input tensor!");
+            OTTER_INTERNAL_ASSERT(op.is_output, "Found undefined input tensor!");
             continue;
         }
         
-        assert(op.target_dtype == op.current_dtype);
+        OTTER_INTERNAL_ASSERT(op.target_dtype == op.current_dtype);
         
         if (common_device == Device::CPU) {
             common_device = op.tensor_base().device();
@@ -225,7 +224,7 @@ void TensorIterator::compute_types(const TensorIteratorConfig &config) {
         }
     }
     
-    assert(!(has_different_input_dtypes && !config.promote_inputs_to_common_dtype_ &&
+    OTTER_INTERNAL_ASSERT(!(has_different_input_dtypes && !config.promote_inputs_to_common_dtype_ &&
              (has_undefined_outputs || config.enforce_safe_casting_to_output_ ||
               config.cast_common_dtype_to_outputs_)));
     
@@ -236,7 +235,7 @@ void TensorIterator::compute_types(const TensorIteratorConfig &config) {
             if (!op.tensor_base().defined()) {
                 continue;
             }
-            assert(op.target_dtype == common_dtype_);
+            OTTER_INTERNAL_ASSERT(op.target_dtype == common_dtype_);
         }
     }
     
@@ -273,7 +272,7 @@ void TensorIterator::compute_types(const TensorIteratorConfig &config) {
         
         if (common_device == Device::CPU) {
             if (config.cast_common_dtype_to_outputs_ && op.is_output && op.current_dtype != common_dtype_) {
-                assert(op.tensor_base().defined());
+                OTTER_INTERNAL_ASSERT(op.tensor_base().defined());
                 op.exchange_tensor(MaybeOwned<TensorBase>::owned(otter::empty_like(op.tensor(), op.tensor_base().options().dtype(common_dtype_))));
                 op.current_dtype = common_dtype_;
                 op.target_dtype = common_dtype_;
@@ -491,6 +490,7 @@ void TensorIterator::set_output(int64_t output_idx, IntArrayRef sizes, IntArrayR
             }
         }
     }
+    op.current_dtype = op.tensor_base().scalar_type();
 }
 
 const Tensor& TensorIterator::maybe_get_output(int64_t output_idx) {

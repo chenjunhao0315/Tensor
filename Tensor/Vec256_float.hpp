@@ -10,6 +10,7 @@
 
 #include "VecIntrinsic.hpp"
 #include "VecBase.hpp"
+#include "Avx_Math.hpp"
 
 #include "Config.hpp"
 #include "Utils.hpp"
@@ -48,7 +49,34 @@ public:
     static Vectorized<float> blendv(const Vectorized<float>& a, const Vectorized<float>& b, const Vectorized<float>& mask) {
         return _mm256_blendv_ps(a.values, b.values, mask.values);
     }
-    
+    template<typename step_t>
+    static Vectorized<float> arange(float base = 0.f, step_t step = static_cast<step_t>(1)) {
+      return Vectorized<float>(
+        base,            base +     step, base + 2 * step, base + 3 * step,
+        base + 4 * step, base + 5 * step, base + 6 * step, base + 7 * step);
+    }
+    static Vectorized<float> set(const Vectorized<float>& a, const Vectorized<float>& b,
+                             int64_t count = size()) {
+      switch (count) {
+        case 0:
+          return a;
+        case 1:
+          return blend<1>(a, b);
+        case 2:
+          return blend<3>(a, b);
+        case 3:
+          return blend<7>(a, b);
+        case 4:
+          return blend<15>(a, b);
+        case 5:
+          return blend<31>(a, b);
+        case 6:
+          return blend<63>(a, b);
+        case 7:
+          return blend<127>(a, b);
+      }
+      return b;
+    }
     static Vectorized<float> loadu(const void* ptr, int64_t count = size()) {
         if (count == size())
             return _mm256_loadu_ps(reinterpret_cast<const float*>(ptr));
@@ -94,6 +122,22 @@ public:
     
     Vectorized<float> neg() const {
         return _mm256_xor_ps(_mm256_set1_ps(-0.f), values);
+    }
+    
+    Vectorized<float> exp() const {
+        return exp256_ps(values);
+    }
+    
+    Vectorized<float> log() const {
+        return log256_ps(values);
+    }
+    
+    Vectorized<float> sin() const {
+        return sin256_ps(values);
+    }
+    
+    Vectorized<float> cos() const {
+        return cos256_ps(values);
     }
     
     Vectorized<float> operator==(const Vectorized<float>& other) const {
@@ -180,6 +224,14 @@ inline Vectorized<float> Vectorized<float>::lt(const Vectorized<float>& other) c
 }
 inline Vectorized<float> Vectorized<float>::le(const Vectorized<float>& other) const {
     return (*this <= other) & Vectorized<float>(1.0f);
+}
+
+template <>
+Vectorized<float> inline maximum(const Vectorized<float>& a, const Vectorized<float>& b) {
+  Vectorized<float> max = _mm256_max_ps(a, b);
+  Vectorized<float> isnan = _mm256_cmp_ps(a, b, _CMP_UNORD_Q);
+  // Exploit the fact that all-ones is a NaN.
+  return _mm256_or_ps(max, isnan);
 }
 
 template <>

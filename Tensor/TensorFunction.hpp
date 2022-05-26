@@ -149,6 +149,10 @@ struct structured_clamp : public TensorIterator {
     void meta(const Tensor & self, Scalar min, Scalar max);
 };
 
+struct structured_softmax : public TensorIterator {
+    void meta(const Tensor & self, int64_t dim, bool half_to_float);
+};
+
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override { \
@@ -329,6 +333,10 @@ struct structured_clamp_out : public structured_clamp {
     void impl(const Tensor & self, Scalar min, Scalar max, const Tensor & out);
 };
 
+struct structured_softmax_cpu_out : public structured_softmax {
+    void impl(const Tensor & self, int64_t dim, bool half_to_float, const Tensor & out);
+};
+
 namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha);
@@ -473,6 +481,10 @@ Tensor lt(const Tensor & self, const Tensor & other);
 Tensor & lt_out(Tensor & out, const Tensor & self, const Tensor & other);
 Tensor & lt_outf(const Tensor & self, const Tensor & other, Tensor & out);
 Tensor & lt_(Tensor & self, const Tensor & other);
+
+Tensor _softmax(const Tensor & self, int64_t dim, bool half_to_float);
+Tensor & _softmax_out(Tensor & out, const Tensor & self, int64_t dim, bool half_to_float);
+Tensor & _softmax_outf(const Tensor & self, int64_t dim, bool half_to_float, Tensor & out);
 
 }   // end namespace native
 

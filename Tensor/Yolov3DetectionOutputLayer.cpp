@@ -340,13 +340,12 @@ Tensor yolo_pre_process(const Tensor& img, int target_size) {
 }
 
 Tensor yolo_post_process(const Tensor& pred, int image_width, int image_height) {
-    
     auto pred_fix = otter::empty_like(pred);
     
     auto pred_a = pred.accessor<float, 2>();
     auto pred_fix_a = pred_fix.accessor<float, 2>();
     
-    for (int64_t i = 0; i < pred.size(0); ++i) {
+    for (const auto i : otter::irange(pred.size(0))) {
         auto obj = pred_a[i];
         auto obj_fix = pred_fix_a[i];
         

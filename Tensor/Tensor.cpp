@@ -490,6 +490,12 @@ Tensor Tensor::mm(const Tensor &other) const {
     return otter::native::mm(*this, other);
 }
 
+Tensor Tensor::softmax(int64_t dim, ScalarType dtype) const {
+    if (dtype != ScalarType::Undefined)
+        return otter::native::_softmax(this->to(dtype), dim, false);
+    return otter::native::_softmax(*this, dim, false);
+}
+
 #define DEFINE_ITEM(T, name)      \
     template <>                         \
     T Tensor::item() const {            \
