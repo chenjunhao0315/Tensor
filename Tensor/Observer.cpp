@@ -98,6 +98,7 @@ ObserveMethod Observer::getMethod(const otter::Tensor& target, otter::Tensor& ob
     interpreter.addTable("w", target_data[4]);
     interpreter.addTable("h", target_data[5]);
     interpreter.addTable("area", target_data[4] * target_data[5]);
+    interpreter.addTable("center_y", target_data[3] + h / 2);
     interpreter.addTable("method_index", 0);
     interpreter.addTable("success", 0);
     
@@ -185,7 +186,15 @@ otter::cv::Point2f Observer::getRefPoint(ObservePosition& position, otter::cv::R
                 return {right_eye[0], right_eye[1]};
             }
             return {-1, -1};
-            
+        }
+        case ObservePosition::DOWN_ANKLE: {
+            auto left_ankle = keypoints.accessor<float, 2>()[int(ObservePosition::LEFT_ANKLE)];
+            auto right_ankle = keypoints.accessor<float, 2>()[int(ObservePosition::RIGHT_ANKLE)];
+            if (left_ankle[1] > right_ankle[1]) {
+                return {left_ankle[0], left_ankle[1]};
+            } else {
+                return {right_ankle[0], right_ankle[1]};
+            }
         }
     }
     return otter::cv::Point(-1, -1);
@@ -199,6 +208,14 @@ otter::cv::Point2f Observer::getAlignPoint(Anchor &anchor, otter::cv::Point2f& o
             if (anchor.pos.x == -1)
                 return {obj.x, anchor.pos.y};
             return {anchor.pos.x, obj.y};
+        case AnchorType::AUTOALIGN:
+            if (obj.x > 0.58) {
+                return {2. / 3, anchor.pos.y};
+            } else if (obj.x > 0.42) {
+                return {1. / 2, anchor.pos.y};
+            } else {
+                return {1. / 3, anchor.pos.y};
+            }
         default:
             break;
     }

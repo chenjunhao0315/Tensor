@@ -19,7 +19,8 @@ namespace core {
 
 enum class AnchorType {
     POINT,
-    LINE
+    LINE,
+    AUTOALIGN
 };
 
 inline std::ostream& operator<<(std::ostream& o, AnchorType type) {
@@ -28,6 +29,8 @@ inline std::ostream& operator<<(std::ostream& o, AnchorType type) {
             return o << "Point";
         case AnchorType::LINE:
             return o << "Line";
+        case AnchorType::AUTOALIGN:
+            return o << "Autoalign";
         default:
             break;
     }
@@ -62,6 +65,7 @@ enum class ObservePosition : int {
     RIGHT_ANKLE         = 15,
     LEFT_ANKLE          = 16,
     CENTER_EYE,
+    DOWN_ANKLE,
     CENTER,
     LEFT,
     RIGHT,
