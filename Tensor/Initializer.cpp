@@ -26,7 +26,7 @@ InitializerFromDataReader::~InitializerFromDataReader() {
 }
 
 Tensor InitializerFromDataReader::load(IntArrayRef shape, int /*type*/) const {
-    int64_t nread = 0;
+    size_t nread = 0;
     void* refbuf = nullptr;
     Tensor result;
     

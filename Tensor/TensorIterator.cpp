@@ -299,7 +299,7 @@ void TensorIterator::mark_resize_outputs(const TensorIteratorConfig& config) {
     }
 }
 
-void TensorIterator::compute_strides(const TensorIteratorConfig &config) {
+void TensorIterator::compute_strides(const TensorIteratorConfig &/*config*/) {
     for (auto& op : operands_) {
         if (op.tensor_base().defined()) {
             IntArrayRef original_shape = op.tensor_base().sizes();
@@ -470,7 +470,7 @@ void TensorIterator::cast_outputs() {
     }
 }
 
-void TensorIterator::set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) {
+void TensorIterator::set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions /*options*/) {
     assert(output_idx < num_outputs_);
     auto& op = operands_[output_idx];
     const auto &t = maybe_get_output(output_idx);

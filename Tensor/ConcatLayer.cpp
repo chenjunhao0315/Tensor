@@ -45,7 +45,7 @@ int ConcatLayer::load_param(const ParamDict &pd) {
     return 0;
 }
 
-int ConcatLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const {
+int ConcatLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& /*opt*/) const {
     top_blobs[0] = otter::native::cat(bottom_blobs, axis);
         
     return 0;

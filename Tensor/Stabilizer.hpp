@@ -49,7 +49,7 @@ public:
             return std::vector<TrackingBox>();
         
         if (trackers.size() == 0) {
-            for (int i = 0 ; i < detected_objs.size(); ++i) {
+            for (size_t i = 0 ; i < detected_objs.size(); ++i) {
                 otter::cv::KalmanTracker trk = otter::cv::KalmanTracker(detected_objs[i]);
                 trackers.push_back(trk);
             }
@@ -159,7 +159,6 @@ public:
     }
     
 private:
-    int iter = 0;
     int total_frames = 0;
     int frame_count = 0;
     int max_age = 1;

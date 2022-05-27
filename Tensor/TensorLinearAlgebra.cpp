@@ -859,12 +859,12 @@ JacobiSVDImpl_(_Tp* At, size_t astep, _Tp* _W, _Tp* Vt, size_t vstep,
     }
 }
 
-void SVD32f(float* At, size_t astep, float* W, float* U, size_t ustep, float* Vt, size_t vstep, int m, int n, int n1)
+void SVD32f(float* At, size_t astep, float* W, float* /*U*/, size_t /*ustep*/, float* Vt, size_t vstep, int m, int n, int n1)
 {
     JacobiSVDImpl_(At, astep, W, Vt, vstep, m, n, !Vt ? 0 : n1 < 0 ? n : n1, FLT_MIN, FLT_EPSILON*2);
 }
 
-void SVD64f(double* At, size_t astep, double* W, double* U, size_t ustep, double* Vt, size_t vstep, int m, int n, int n1)
+void SVD64f(double* At, size_t astep, double* W, double* /*U*/, size_t /*ustep*/, double* Vt, size_t vstep, int m, int n, int n1)
 {
     JacobiSVDImpl_(At, astep, W, Vt, vstep, m, n, !Vt ? 0 : n1 < 0 ? n : n1, DBL_MIN, DBL_EPSILON*10);
 }

@@ -59,12 +59,9 @@ void normalize_last_dims(
 }
 
 inline void dot_check(const Tensor& self, const Tensor& other) {
-    // 1D tensor expected
-    assert(self.dim() == 1 && other.dim() == 1);
-    // Same dtype expected
-    assert(self.dtype() == other.dtype());
-    // Same size expected
-    assert(self.numel() == other.numel());
+    OTTER_CHECK(self.dim() == 1 && other.dim() == 1, "1D tensor expected");
+    OTTER_CHECK(self.dtype() == other.dtype(), "Same dtype expected");
+    OTTER_CHECK(self.numel() == other.numel(), "Same size expected");
 }
 
 Tensor dot(const Tensor& self, const Tensor& other) {

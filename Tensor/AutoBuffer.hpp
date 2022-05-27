@@ -90,7 +90,7 @@ inline AutoBuffer<_Tp, fixed_size>::AutoBuffer(size_t _size, _Tp value) {
     ptr = buf;
     sz = fixed_size;
     allocate(_size);
-    for (int i = 0; i < _size; ++i) {
+    for (size_t i = 0; i < _size; ++i) {
         ptr[i] = value;
     }
 }

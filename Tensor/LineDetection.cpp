@@ -115,9 +115,9 @@ void draw_alllines(otter::Tensor& cdst, std::vector<Vec2f>& lines) {
 }
 
 most_param mostline(std::vector<Vec2f>& lines) {
-    int num_diff = 0;
+    size_t num_diff = 0;
     std::vector<std::vector<float>> angle(lines.size());
-    for (int i = 0; i < lines.size(); ++i) {
+    for (size_t i = 0; i < lines.size(); ++i) {
         angle[i].resize(2);
     }
     
@@ -141,10 +141,10 @@ most_param mostline(std::vector<Vec2f>& lines) {
     }
     
     int most = 0;
-    for (int i = 0; i < num_diff; i++) {
+    for (size_t i = 0; i < num_diff; i++) {
         angle[i][1]++;
     }
-    for (int i = 0; i < num_diff; i++) {
+    for (size_t i = 0; i < num_diff; i++) {
         if (angle[i][1] > angle[most][1]) {
             most = i;
         }

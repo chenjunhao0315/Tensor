@@ -10,7 +10,6 @@
 
 #include "VecIntrinsic.hpp"
 #include "Vec256_float.hpp"
-#include "Vec256_double.hpp"
 #include "Vec256_float_neon.hpp"
 #include "VecBase.hpp"
 

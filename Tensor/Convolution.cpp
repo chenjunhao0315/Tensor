@@ -104,8 +104,8 @@ static void check_shape_forward(const Tensor& input, const IntArrayRef& weight_s
 ConvBackend select_proper_conv_backend(
     const Tensor& input,
     const Tensor& weight,
-    const Tensor& bias,
-    const bool need_backward,
+    const Tensor& /*bias*/,
+    const bool /*need_backward*/,
     const ConvParams& params) {
     
     const int64_t w = input.size(3);

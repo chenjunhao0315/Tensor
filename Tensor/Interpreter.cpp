@@ -52,8 +52,8 @@ int Interpreter::addCommand(const char* command, int) {
 }
 
 int Interpreter::printCommand(void) {
-    for (int i = 0; i < commands.size(); ++i) {
-        printf("Command %d:\n", i + 1);
+    for (size_t i = 0; i < commands.size(); ++i) {
+        printf("Command %lu:\n", i + 1);
         commands[i]->print();
     }
     
@@ -63,7 +63,7 @@ int Interpreter::printCommand(void) {
 int Interpreter::doCommand() {
     int success = 0;
     bool status = true;
-    for (int i = 0; i < commands.size() && success == 0; ++i) {
+    for (size_t i = 0; i < commands.size() && success == 0; ++i) {
         status &= doCommand(i);
         success = getTable("success");
     }
@@ -71,12 +71,12 @@ int Interpreter::doCommand() {
 }
 
 int Interpreter::doCommand(int index) {
-    if (index >= commands.size())
+    if (index >= int(commands.size()))
         return -1;
     auto &interpreter = commands[index];
     status = 1;
     
-    for (int i = 0; i < interpreter->command_line.size(); ) {
+    for (size_t i = 0; i < interpreter->command_line.size(); ) {
         auto &step_command = interpreter->command_line[i];
         
         if (step_command->type == CommandType::IF) {
@@ -602,7 +602,7 @@ void StepCommand::freeTree(CommandNode* root) {
 }
 
 void InterpreteNode::print() {
-    for (int i = 0; i < command_line.size(); ++i) {
+    for (size_t i = 0; i < command_line.size(); ++i) {
         printf("%s: ", (command_line[i]->type == CommandType::IF) ? "If" : "  ");
         printPrefix(command_line[i]->command);
         printf(" -> step: %d\n", command_line[i]->step);

@@ -114,7 +114,7 @@ int MaxPoolLayer::load_param(const ParamDict &pd) {
     return 0;
 }
 
-int MaxPoolLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const {
+int MaxPoolLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& /*opt*/) const {
     if (darknet_mode) {
         int height_offset = (kernel_height - 1) / 2;
         int width_offset = (kernel_width - 1) / 2;

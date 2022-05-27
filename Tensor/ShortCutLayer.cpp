@@ -16,14 +16,14 @@ ShortCutLayer::ShortCutLayer() {
     support_inplace = false;
 }
 
-int ShortCutLayer::parse_param(LayerOption& option, ParamDict &pd) {
+int ShortCutLayer::parse_param(LayerOption& /*option*/, ParamDict &pd) {
     pd.clear();
     // alpha beta
     
     return 0;
 }
 
-int ShortCutLayer::load_param(const ParamDict &pd) {
+int ShortCutLayer::load_param(const ParamDict &/*pd*/) {
     // alpha beta
     
     return 0;
@@ -43,7 +43,7 @@ ShortCutBackend shortcut_check_and_select_backend(const Tensor& self, const Tens
     return (self.size(1) != other.size(1)) ? ShortCutBackend::Darknet_shortcut : ShortCutBackend::Eltwise_add;
 }
 
-int ShortCutLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const {
+int ShortCutLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& /*opt*/) const {
     const Tensor& bottom_blob = bottom_blobs[0];
     const Tensor& bottom_blob_next = bottom_blobs[1];
     Tensor output = bottom_blob.clone();

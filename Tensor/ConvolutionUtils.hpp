@@ -9,6 +9,7 @@
 #define ConvolutionUtils_hpp
 
 #include <vector>
+#include "Exception.hpp"
 #include "ArrayRef.hpp"
 
 namespace otter {
@@ -67,11 +68,11 @@ enum class ConvBackend {
     Overrideable
 };
 
-inline std::vector<int64_t> expand_param_if_needed(IntArrayRef list_param, const char* param_name, int64_t expected_dim) {
+inline std::vector<int64_t> expand_param_if_needed(IntArrayRef list_param, const char* /*param_name*/, int64_t expected_dim) {
     if (list_param.size() == 1) {
         return std::vector<int64_t>(expected_dim, list_param[0]);
     } else if ((int64_t)list_param.size() != expected_dim) {
-        assert(false);  // Expected param to be a single integer value or a list of expected_dim values to match the convolution dimension, but got param_name = list_param
+        OTTER_CHECK(false, "Expected param to be a single integer value or a list of expected_dim values to match the convolution dimension, but got param_name = list_param");
     }
     return list_param.vec();
 }
@@ -104,7 +105,7 @@ inline std::vector<int64_t> calculate_deconv_output_size_without_padding(
     const IntArrayRef output_padding) {
     
     const auto calc_output_dimension = [](
-        const int64_t input, const int64_t kernel, const int64_t stride, const int64_t dilation, const int64_t padding, const int64_t output_padding) {
+        const int64_t input, const int64_t kernel, const int64_t stride, const int64_t dilation, const int64_t /*padding*/, const int64_t output_padding) {
             return (input - 1) * stride + (dilation * (kernel - 1) + 1) + output_padding;
         };
 

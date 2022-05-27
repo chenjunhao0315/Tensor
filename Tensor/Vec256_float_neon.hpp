@@ -19,24 +19,25 @@ namespace vec {
 
 #if defined(__aarch64__)
 
+#ifdef __BIG_ENDIAN__
+#error "Big endian is not supported."
+#endif
+
 template<int index, bool mask_val>
 struct BlendRegs {
-    static float32x4_t impl(
-                            const float32x4_t& a, const float32x4_t& b, float32x4_t& res);
+    static float32x4_t impl(const float32x4_t& a, const float32x4_t& b, float32x4_t& res);
 };
 
 template<int index>
 struct BlendRegs<index, true>{
-    static float32x4_t impl(
-                            const float32x4_t& a, const float32x4_t& b, float32x4_t& res) {
+    static float32x4_t impl(const float32x4_t& /*a*/, const float32x4_t& b, float32x4_t& res) {
         return vsetq_lane_f32(vgetq_lane_f32(b, index), res, index);
     }
 };
 
 template<int index>
 struct BlendRegs<index, false>{
-    static float32x4_t impl(
-                            const float32x4_t& a, const float32x4_t& b, float32x4_t& res) {
+    static float32x4_t impl(const float32x4_t& a, const float32x4_t& /*b*/, float32x4_t& res) {
         return vsetq_lane_f32(vgetq_lane_f32(a, index), res, index);
     }
 };

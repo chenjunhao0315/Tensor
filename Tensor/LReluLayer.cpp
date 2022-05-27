@@ -86,7 +86,7 @@ int LReluLayer::forward_inplace(Tensor &bottom_blob, const NetOption &opt) const
                         "=r"(ptr) // %1
                         : "0"(nn),
                         "1"(ptr),
-                        "r"(slope) // %4
+                        "r"(neg_slope) // %4
                         : "cc", "memory", "q0", "q1", "q2", "q3", "q4");
                 }
             #endif // __aarch64__

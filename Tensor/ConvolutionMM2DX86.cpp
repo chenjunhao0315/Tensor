@@ -1028,12 +1028,12 @@ static void im2col_sgemm_conv2d_impl_x86(
 }
 #else
 static void im2col_sgemm_conv2d_impl_x86(
-    const Tensor& im2col_,
-    const Tensor& kernel_packed_,
-    const Tensor& bias_,
-    int64_t input_channels,
-    int64_t output_channels,
-    Tensor& output) {
+    const Tensor& /*im2col_*/,
+    const Tensor& /*kernel_packed_*/,
+    const Tensor& /*bias_*/,
+    int64_t /*input_channels*/,
+    int64_t /*output_channels*/,
+    Tensor& /*output*/) {
 }
 #endif
 
@@ -1142,7 +1142,7 @@ void convolution_im2col_sgemm_transform_kernel_x86(const Tensor& kernel_, Tensor
 #endif // __SSE2__
 }
 #else
-void convolution_im2col_sgemm_transform_kernel_x86(const Tensor& _kernel, Tensor& kernel_tf, int64_t input_channels, int64_t out_chnnels, int64_t kernel_width, int64_t kernel_height) {
+void convolution_im2col_sgemm_transform_kernel_x86(const Tensor& /*_kernel*/, Tensor& /*kernel_tf*/, int64_t /*input_channels*/, int64_t /*out_chnnels*/, int64_t /*kernel_width*/, int64_t /*kernel_height*/) {
 }
 #endif
 
@@ -1253,7 +1253,7 @@ Tensor& conv2d_3x3s1_winograd23_x86_out(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias_,
-    IntArrayRef kernel_size,
+    IntArrayRef /*kernel_size*/,
     IntArrayRef stride,
     IntArrayRef padding,
     Tensor& output) {

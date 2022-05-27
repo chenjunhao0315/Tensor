@@ -717,7 +717,7 @@ int Extractor::benchmark_info(std::string start_name, std::string end_name, IntA
     
     int blob_index = net_->find_blob_index_by_name(end_name);
     
-    OTTER_CHECK(blob_index >= -1 && blob_index < blob_tensors_.size(), "Extract failed!\n");
+    OTTER_CHECK(blob_index >= -1 && blob_index < int(blob_tensors_.size()), "Extract failed!\n");
     
     int ret = 0;
     

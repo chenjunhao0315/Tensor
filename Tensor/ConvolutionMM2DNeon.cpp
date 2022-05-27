@@ -111,9 +111,6 @@ void im2col_sgemm_conv2d_impl_neon(
         }
     });
     
-    int64_t ccOutChannel = 0;
-    int64_t ccRemainOutChannel = 0;
-    
     auto output_a = output.accessor<float, 4>()[0];
     auto kernel_a = kernel_pack4x4_.accessor<float, 3>();
     
@@ -2498,7 +2495,7 @@ void convolution_im2col_sgemm_transform_kernel_neon(const Tensor& kernel_, Tenso
 #if __aarch64__
     kernel_tf = otter::empty({output_channels / 8 + (output_channels % 8) / 4 + output_channels % 4, input_channels / 4 + input_channels % 4, 32 * kernelSize}, ScalarType::Float);
 #else
-    kernel_tf = otter::empty({outch / 4 + outch % 4, inch / 4 + inch % 4, 16 * maxk}, ScalarType::Float);
+    kernel_tf = otter::empty({output_channels / 4 + output_channels % 4, input_channels / 4 + input_channels % 4, 16 * kernelSize}, ScalarType::Float);
 #endif
     int q = 0;
     
@@ -4564,7 +4561,7 @@ Tensor& conv2d_3x3s1_neon_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias_,
-    IntArrayRef kernel_size,
+    IntArrayRef /*kernel_size*/,
     IntArrayRef stride,
     IntArrayRef padding,
     Tensor& output) {
@@ -5897,10 +5894,8 @@ void conv3x3s1_winograd64_transform_kernel_neon5(const Tensor& kernel_, Tensor& 
     auto kernel_tf_a = kernel_tf.accessor<float, 3>();
 
     otter::parallel_for(0, output_channels, 0, [&](int64_t begin, int64_t end) {
-        for (int p = 0; p < output_channels; p++)
-        {
-            for (int q = 0; q < input_channels; q++)
-            {
+        for (const auto p : otter::irange(begin, end)) {
+            for (int q = 0; q < input_channels; q++) {
                 const float* kernel0 = (const float*)kernel + p * input_channels * 9 + q * 9;
                 float* kernel_tm0 = kernel_tf_a[p][q].data();
 
@@ -6057,7 +6052,7 @@ Tensor& conv2d_3x3s1_winograd64_neon_out(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias_,
-    IntArrayRef kernel_size,
+    IntArrayRef /*kernel_size*/,
     IntArrayRef stride,
     IntArrayRef padding,
     Tensor& output) {
@@ -6960,7 +6955,7 @@ Tensor& conv2d_3x3s1_winograd64_neon_out(
         auto input_tf_a = input_tf.accessor<float, 3>();
 
         otter::parallel_for(0, 64, 0, [&](int64_t begin, int64_t end) {
-            for (int r = 0; r < 64; r++)
+            for (const auto r : otter::irange(begin, end))
             {
                 auto tm2 = input_tf2_a[r];
 
@@ -7052,7 +7047,7 @@ Tensor& conv2d_3x3s1_winograd64_neon_out(
         remain_outch_start = nn_outch << 3;
 
         otter::parallel_for(0, nn_outch, 0, [&](int64_t begin, int64_t end) {
-            for (int pp = 0; pp < nn_outch; pp++)
+            for (const auto pp : otter::irange(begin, end))
             {
                 int p = pp * 8;
 
@@ -9463,7 +9458,7 @@ Tensor& conv2d_3x3s2_packed_neon_out(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias_,
-    IntArrayRef kernel_size,
+    IntArrayRef /*kernel_size*/,
     IntArrayRef stride,
     IntArrayRef padding,
     Tensor& output) {
