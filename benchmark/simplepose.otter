@@ -1,0 +1,1130 @@
+name: "simplepose-opt.param"
+Input {
+    name: data_1
+    output: data_1
+    Param {
+        height: 256
+        width: 192
+        channel: 3
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_1
+    input: data_1
+    output: conv_1
+    Param {
+        out_channels: 16
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 2
+        stride_w: 2
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_2
+    input: re_conv_1
+    output: conv_2
+    Param {
+        out_channels: 16
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 16
+    }
+}
+Convolution {
+    name: conv_3
+    input: re_conv_2
+    output: conv_3
+    Param {
+        out_channels: 8
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_4
+    input: conv_3
+    output: conv_4
+    Param {
+        out_channels: 48
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_5
+    input: re_conv_4
+    output: conv_5
+    Param {
+        out_channels: 48
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 2
+        stride_w: 2
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 48
+    }
+}
+Convolution {
+    name: conv_6
+    input: re_conv_5
+    output: conv_6
+    Param {
+        out_channels: 12
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_7
+    input: conv_6
+    output: conv_7
+    Param {
+        out_channels: 72
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_8
+    input: re_conv_7
+    output: conv_8
+    Param {
+        out_channels: 72
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 72
+    }
+}
+Convolution {
+    name: conv_9
+    input: re_conv_8
+    output: conv_9
+    Param {
+        out_channels: 12
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+ShortCut {
+    name: shortcut_1
+    input: "conv_9, conv_6"
+    output: shortcut_1
+}
+Convolution {
+    activation: Relu6
+    name: conv_10
+    input: shortcut_1
+    output: conv_10
+    Param {
+        out_channels: 72
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_11
+    input: re_conv_10
+    output: conv_11
+    Param {
+        out_channels: 72
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 2
+        stride_w: 2
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 72
+    }
+}
+Convolution {
+    name: conv_12
+    input: re_conv_11
+    output: conv_12
+    Param {
+        out_channels: 16
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_13
+    input: conv_12
+    output: conv_13
+    Param {
+        out_channels: 96
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_14
+    input: re_conv_13
+    output: conv_14
+    Param {
+        out_channels: 96
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 96
+    }
+}
+Convolution {
+    name: conv_15
+    input: re_conv_14
+    output: conv_15
+    Param {
+        out_channels: 16
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+ShortCut {
+    name: shortcut_2
+    input: "conv_15, conv_12"
+    output: shortcut_2
+}
+Convolution {
+    activation: Relu6
+    name: conv_16
+    input: shortcut_2
+    output: conv_16
+    Param {
+        out_channels: 96
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_17
+    input: re_conv_16
+    output: conv_17
+    Param {
+        out_channels: 96
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 96
+    }
+}
+Convolution {
+    name: conv_18
+    input: re_conv_17
+    output: conv_18
+    Param {
+        out_channels: 16
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+ShortCut {
+    name: shortcut_3
+    input: "conv_18, shortcut_2"
+    output: shortcut_3
+}
+Convolution {
+    activation: Relu6
+    name: conv_19
+    input: shortcut_3
+    output: conv_19
+    Param {
+        out_channels: 96
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_20
+    input: re_conv_19
+    output: conv_20
+    Param {
+        out_channels: 96
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 2
+        stride_w: 2
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 96
+    }
+}
+Convolution {
+    name: conv_21
+    input: re_conv_20
+    output: conv_21
+    Param {
+        out_channels: 32
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_22
+    input: conv_21
+    output: conv_22
+    Param {
+        out_channels: 192
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_23
+    input: re_conv_22
+    output: conv_23
+    Param {
+        out_channels: 192
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 192
+    }
+}
+Convolution {
+    name: conv_24
+    input: re_conv_23
+    output: conv_24
+    Param {
+        out_channels: 32
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+ShortCut {
+    name: shortcut_4
+    input: "conv_24, conv_21"
+    output: shortcut_4
+}
+Convolution {
+    activation: Relu6
+    name: conv_25
+    input: shortcut_4
+    output: conv_25
+    Param {
+        out_channels: 192
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_26
+    input: re_conv_25
+    output: conv_26
+    Param {
+        out_channels: 192
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 192
+    }
+}
+Convolution {
+    name: conv_27
+    input: re_conv_26
+    output: conv_27
+    Param {
+        out_channels: 32
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+ShortCut {
+    name: shortcut_5
+    input: "conv_27, shortcut_4"
+    output: shortcut_5
+}
+Convolution {
+    activation: Relu6
+    name: conv_28
+    input: shortcut_5
+    output: conv_28
+    Param {
+        out_channels: 192
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_29
+    input: re_conv_28
+    output: conv_29
+    Param {
+        out_channels: 192
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 192
+    }
+}
+Convolution {
+    name: conv_30
+    input: re_conv_29
+    output: conv_30
+    Param {
+        out_channels: 32
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+ShortCut {
+    name: shortcut_6
+    input: "conv_30, shortcut_5"
+    output: shortcut_6
+}
+Convolution {
+    activation: Relu6
+    name: conv_31
+    input: shortcut_6
+    output: conv_31
+    Param {
+        out_channels: 192
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_32
+    input: re_conv_31
+    output: conv_32
+    Param {
+        out_channels: 192
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 192
+    }
+}
+Convolution {
+    name: conv_33
+    input: re_conv_32
+    output: conv_33
+    Param {
+        out_channels: 48
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_34
+    input: conv_33
+    output: conv_34
+    Param {
+        out_channels: 288
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_35
+    input: re_conv_34
+    output: conv_35
+    Param {
+        out_channels: 288
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 288
+    }
+}
+Convolution {
+    name: conv_36
+    input: re_conv_35
+    output: conv_36
+    Param {
+        out_channels: 48
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+ShortCut {
+    name: shortcut_7
+    input: "conv_36, conv_33"
+    output: shortcut_7
+}
+Convolution {
+    activation: Relu6
+    name: conv_37
+    input: shortcut_7
+    output: conv_37
+    Param {
+        out_channels: 288
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_38
+    input: re_conv_37
+    output: conv_38
+    Param {
+        out_channels: 288
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 288
+    }
+}
+Convolution {
+    name: conv_39
+    input: re_conv_38
+    output: conv_39
+    Param {
+        out_channels: 48
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+ShortCut {
+    name: shortcut_8
+    input: "conv_39, shortcut_7"
+    output: shortcut_8
+}
+Convolution {
+    activation: Relu6
+    name: conv_40
+    input: shortcut_8
+    output: conv_40
+    Param {
+        out_channels: 288
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_41
+    input: re_conv_40
+    output: conv_41
+    Param {
+        out_channels: 288
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 2
+        stride_w: 2
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 288
+    }
+}
+Convolution {
+    name: conv_42
+    input: re_conv_41
+    output: conv_42
+    Param {
+        out_channels: 80
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_43
+    input: conv_42
+    output: conv_43
+    Param {
+        out_channels: 480
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_44
+    input: re_conv_43
+    output: conv_44
+    Param {
+        out_channels: 480
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 480
+    }
+}
+Convolution {
+    name: conv_45
+    input: re_conv_44
+    output: conv_45
+    Param {
+        out_channels: 80
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+ShortCut {
+    name: shortcut_9
+    input: "conv_45, conv_42"
+    output: shortcut_9
+}
+Convolution {
+    activation: Relu6
+    name: conv_46
+    input: shortcut_9
+    output: conv_46
+    Param {
+        out_channels: 480
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_47
+    input: re_conv_46
+    output: conv_47
+    Param {
+        out_channels: 480
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 480
+    }
+}
+Convolution {
+    name: conv_48
+    input: re_conv_47
+    output: conv_48
+    Param {
+        out_channels: 80
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+ShortCut {
+    name: shortcut_10
+    input: "conv_48, shortcut_9"
+    output: shortcut_10
+}
+Convolution {
+    activation: Relu6
+    name: conv_49
+    input: shortcut_10
+    output: conv_49
+    Param {
+        out_channels: 480
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu6
+    name: conv_50
+    input: re_conv_49
+    output: conv_50
+    Param {
+        out_channels: 480
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+        groups: 480
+    }
+}
+Convolution {
+    name: conv_51
+    input: re_conv_50
+    output: conv_51
+    Param {
+        out_channels: 160
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    activation: Relu
+    name: conv_52
+    input: conv_51
+    output: conv_52
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Deconvolution {
+    activation: Relu
+    name: deconv_1
+    input: re_conv_52
+    output: deconv_1
+    Param {
+        out_channels: 128
+        kernel_h: 4
+        kernel_w: 4
+        stride_h: 2
+        stride_w: 2
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        output_padding_h: 0
+        output_padding_w: 0
+        bias_term: true
+        groups: 128
+    }
+}
+Convolution {
+    activation: Relu
+    name: conv_53
+    input: re_deconv_1
+    output: conv_53
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Deconvolution {
+    activation: Relu
+    name: deconv_2
+    input: re_conv_53
+    output: deconv_2
+    Param {
+        out_channels: 128
+        kernel_h: 4
+        kernel_w: 4
+        stride_h: 2
+        stride_w: 2
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        output_padding_h: 0
+        output_padding_w: 0
+        bias_term: true
+        groups: 128
+    }
+}
+Convolution {
+    activation: Relu
+    name: conv_54
+    input: re_deconv_2
+    output: conv_54
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Deconvolution {
+    activation: Relu
+    name: deconv_3
+    input: re_conv_54
+    output: deconv_3
+    Param {
+        out_channels: 128
+        kernel_h: 4
+        kernel_w: 4
+        stride_h: 2
+        stride_w: 2
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        output_padding_h: 0
+        output_padding_w: 0
+        bias_term: true
+        groups: 128
+    }
+}
+Convolution {
+    activation: Relu
+    name: conv_55
+    input: re_deconv_3
+    output: conv_55
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: true
+    }
+}
+Convolution {
+    name: conv_56
+    input: re_conv_55
+    output: conv_56
+    Param {
+        out_channels: 17
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        bias_term: false
+    }
+}

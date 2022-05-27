@@ -619,6 +619,14 @@ int Net::forward_layer_benchmark(int layer_index, std::vector<Tensor>& blob_tens
 }
 #endif
 
+const std::vector<const char*>& Net::input_names() const {
+    return input_blob_names;
+}
+
+const std::vector<const char*>& Net::output_names() const {
+    return output_blob_names;
+}
+
 Extractor Net::create_extractor() const {
     return Extractor(this, blobs.size());
 }

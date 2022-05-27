@@ -21,7 +21,7 @@ CFLAGS += $(OPTS)
 LDFLAGS = -lm
 
 ifeq ($(AVX), 1)
-	CFLAGS += -ffp-contract=fast -mavx -mavx2 -msse3 -msse4.1 -msse4.2 -msse4a
+	CFLAGS += -ffp-contract=fast -mavx -mavx2 -msse3 -msse4.1 -msse4.2 -msse4a -mfma
 endif
 
 ifeq ($(OPENMP), 1)

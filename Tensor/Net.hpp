@@ -50,6 +50,9 @@ public:
     int find_blob_index_by_name(std::string name) const;
     void update_input_output_indexes();
     void update_input_output_names();
+    
+    const std::vector<const char*>& input_names() const;
+    const std::vector<const char*>& output_names() const;
 
 public:
     NetOption option;

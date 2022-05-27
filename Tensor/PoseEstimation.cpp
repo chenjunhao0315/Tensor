@@ -100,14 +100,16 @@ std::vector<KeyPoint> pose_post_process(const Tensor& pred, const PoseInput& pre
     return keypoints;
 }
 
-void draw_pose_detection(Tensor& img, std::vector<otter::KeyPoint>& keypoints) {
+void draw_pose_detection(Tensor& img, std::vector<otter::KeyPoint>& keypoints, bool show_point) {
     for (int i = 0; i < 16; i++) {
         const otter::KeyPoint& p1 = keypoints[joint_pairs[i][0]];
         const otter::KeyPoint& p2 = keypoints[joint_pairs[i][1]];
         if (p1.prob < 0.2f || p2.prob < 0.2f)
             continue;
-        otter::cv::putText(img, std::to_string(joint_pairs[i][0]), p1.p, otter::cv::FONT_HERSHEY_SCRIPT_COMPLEX, 80, otter::cv::getDefaultColor(otter::cv::RED), 15);
-        otter::cv::putText(img, std::to_string(joint_pairs[i][1]), p2.p, otter::cv::FONT_HERSHEY_SCRIPT_COMPLEX, 80, otter::cv::getDefaultColor(otter::cv::RED), 15);
+        if (show_point) {
+            otter::cv::putText(img, std::to_string(joint_pairs[i][0]), p1.p, otter::cv::FONT_HERSHEY_SCRIPT_COMPLEX, 80, otter::cv::getDefaultColor(otter::cv::RED), 15);
+            otter::cv::putText(img, std::to_string(joint_pairs[i][1]), p2.p, otter::cv::FONT_HERSHEY_SCRIPT_COMPLEX, 80, otter::cv::getDefaultColor(otter::cv::RED), 15);
+        }
         otter::cv::line(img, p1.p, p2.p, otter::cv::getDefaultColor(otter::cv::SKY_BLUE), 5);
     }
     // draw joint

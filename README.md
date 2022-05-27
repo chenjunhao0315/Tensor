@@ -26,7 +26,38 @@ Add some drawing for image, which is powered by [OpenCV][5].
 
 ## Build and run
 
-### Linux, MacOS
+### MacOS
+Build for intel
+```
+mkdir build && cd build
+cmake ..
+make -j8
+```
+Build for intel and M1. Note that need to revise `Config.hpp -> OTTER_MOBILE = 1` 
+```
+mkdir build && cd build
+cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" ..
+make -j8
+```
+If you encounter `libomp` problem. Try to install `openmp` with below steps.
+```
+wget https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/openmp-11.0.0.src.tar.xz
+tar -xf openmp-11.0.0.src.tar.xz
+cd openmp-11.0.0.src
+sed -i'' -e '/.size __kmp_unnamed_critical_addr/d' runtime/src/z_Linux_asm.S
+sed -i'' -e 's/__kmp_unnamed_critical_addr/___kmp_unnamed_critical_addr/g' runtime/src/z_Linux_asm.S
+mkdir -p build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
+            -DLIBOMP_ENABLE_SHARED=OFF -DLIBOMP_OMPT_SUPPORT=OFF -DLIBOMP_USE_HWLOC=OFF ..
+cmake --build . -j 2
+cmake --build . --target install
+mkdir openmp-install
+cp -r install/* ./openmp-install
+sudo cp ./openmp-install/include/* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include
+sudo cp ./openmp-install/lib/libomp.a /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib
+```
+
+### Linux
 
 ```
 mkdir build && cd build
@@ -37,12 +68,8 @@ make -j 8
 ### Windows
 
 ```
-g++ -Os -fopenmp -mavx2 -mfma -o otter *.cpp
+g++ -Os -fopenmp -ffp-contract=fast -mavx -mavx2 -msse3 -msse4.1 -msse4.2 -msse4a -mfma -o otter *.cpp
 ```
-
-### Run
-
-* `$ ./otter`
 
 ## Thanks for and reference
 - [ConvNetjs][1]
@@ -62,3 +89,4 @@ g++ -Os -fopenmp -mavx2 -mfma -o otter *.cpp
 [9]: https://github.com/pytorch/pytorch
 [10]: https://github.com/Tencent/ncnn
 [11]: https://github.com/chenjunhao0315/Neural_Network
+

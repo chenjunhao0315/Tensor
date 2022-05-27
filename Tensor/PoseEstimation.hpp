@@ -34,7 +34,7 @@ static const int joint_pairs[16][2] = {
     {0, 1}, {1, 3}, {0, 2}, {2, 4}, {5, 6}, {5, 7}, {7, 9}, {6, 8}, {8, 10}, {5, 11}, {6, 12}, {11, 12}, {11, 13}, {12, 14}, {13, 15}, {14, 16}
 };
 
-void draw_pose_detection(Tensor& img, std::vector<otter::KeyPoint>& keypoints);
+void draw_pose_detection(Tensor& img, std::vector<otter::KeyPoint>& keypoints, bool show_point = false);
 
 }
 
