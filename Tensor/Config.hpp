@@ -24,7 +24,7 @@
 #if OTTER_AVX
 #define CPU_CAPABILITY_AVX2 1
 #else
-#define CPU_CAPABILITY_AVX2 0
+
 #endif
 #endif
 
