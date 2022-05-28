@@ -25,6 +25,11 @@ Add some drawing for image, which is powered by [OpenCV][5].
 * [Online Documentation](https://github.com/chenjunhao0315/Tensor/wiki)
 
 ## Build and run
+Since some consideration, the project configuration is not fully control by `CMake`, but control by `Config.hpp`. Hence, there is some option in `Config.hpp` need to be adjusted before `CMake`,
+
+> `OTTER_MOBILE = 0` to build with mobile optimize. Note that this will disable `AVX` capability <br>
+> `OTTER_OPENMP = 1` to enable multithread with `openmp` <br>
+> `OTTER_AVX = 1` to enable `AVX` capability
 
 ### MacOS
 Build for intel
@@ -56,6 +61,9 @@ cp -r install/* ./openmp-install
 sudo cp ./openmp-install/include/* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include
 sudo cp ./openmp-install/lib/libomp.a /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib
 ```
+
+### Build for iOS with Xcode
+[Detail step](https://github.com/chenjunhao0315/Tensor/wiki/Build-for-iOS-with-Xcode)
 
 ### Linux
 
@@ -89,4 +97,5 @@ g++ -Os -fopenmp -ffp-contract=fast -mavx -mavx2 -msse3 -msse4.1 -msse4.2 -msse4
 [9]: https://github.com/pytorch/pytorch
 [10]: https://github.com/Tencent/ncnn
 [11]: https://github.com/chenjunhao0315/Neural_Network
+
 

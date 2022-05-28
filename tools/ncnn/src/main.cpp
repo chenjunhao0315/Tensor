@@ -18,6 +18,7 @@ int main(int argc, const char * argv[]) {
     
     if (argc < 2) {
         printf("Usage: ./ncnn2otter <ncnn-param> <otter-otter>");
+        return -1;
     }
     
     OtterLeader convert = otter::ncnn2otter(argv[1]);
