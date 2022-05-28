@@ -22,7 +22,7 @@ int main(int argc, const char * argv[]) {
 
     otter::Clock l;
     auto img = otter::cv::load_image_rgb(argv[1]);
-    l.stop_and_show();
+    l.stop_and_show("ms (read image)");
 
     int width = img.size(3);
     int height = img.size(2);
@@ -43,11 +43,11 @@ int main(int argc, const char * argv[]) {
 
     auto pred_fix = otter::nanodet_post_process(pred, width, height, scale, wpad, hpad);
 
-    c.stop_and_show();
+    c.stop_and_show("ms (nanodet)");
 
     otter::Clock i;
     auto image = img.to(otter::ScalarType::Byte).permute({0, 2, 3, 1}).squeeze(0).contiguous();
-    i.stop_and_show();
+    i.stop_and_show("ms (nchw -> nhwc)");
 
     otter::draw_coco_detection(image, pred_fix, width, height);
     otter::cv::save_image(image, "nanodet-plus");

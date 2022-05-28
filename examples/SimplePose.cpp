@@ -11,7 +11,7 @@ using namespace std;
 int main(int argc, const char * argv[]) {
     
     if (argc < 2) {
-        printf("Usage ./Nanodet image_path\n");
+        printf("Usage ./Simplepose image_path\n");
         return -1;
     }
     
