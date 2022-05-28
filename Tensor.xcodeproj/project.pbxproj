@@ -1318,6 +1318,7 @@
 					"-msse4.2",
 					"-msse4a",
 					"-mfma",
+					"-DOTTER_CONFIG=1",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1345,6 +1346,7 @@
 					"-msse4.2",
 					"-msse4a",
 					"-mfma",
+					"-DOTTER_CONFIG=1",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
