@@ -17,6 +17,8 @@
 namespace otter {
 namespace cv {
 
+#if OTTER_OPENCV_DRAW
+
 #ifndef MIN
 #  define MIN(a,b)  ((a) > (b) ? (b) : (a))
 #endif
@@ -1893,6 +1895,8 @@ void putText(Tensor& img, const std::string& text, Point org, int FontFace, int 
     
     putText(img, text, org, FontFace, scale, color, thickness, line_type, bottomLeftOrigin);
 }
+
+#endif // OTTER_OPENCV_DRAW
 
 }   // end namespace cv
 }   // end namespace otter

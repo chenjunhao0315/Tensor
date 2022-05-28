@@ -100,6 +100,7 @@ void HoughLinesStandard(const otter::Tensor& img, std::vector<Vec2f>& lines, flo
 }
 
 void draw_alllines(otter::Tensor& cdst, std::vector<Vec2f>& lines) {
+#if OTTER_OPENCV_DRAW
     for (size_t i = 0; i < lines.size(); i++) {
         float rho = lines[i][0], theta = lines[i][1];
         
@@ -112,6 +113,7 @@ void draw_alllines(otter::Tensor& cdst, std::vector<Vec2f>& lines) {
         pt2.y = std::round(y0 - 5000 * a);
         otter::cv::line(cdst, pt1, pt2, otter::cv::getDefaultColor(otter::cv::GOLD), 1, otter::cv::LINE_AA);
     }
+#endif // OTTER_OPENCV_DRAW
 }
 
 most_param mostline(std::vector<Vec2f>& lines) {
@@ -158,6 +160,7 @@ most_param mostline(std::vector<Vec2f>& lines) {
 }
 
 void draw_mostline(otter::Tensor& cdst, std::vector<Vec2f>& lines, float theta) {
+#if OTTER_OPENCV_DRAW
     for (size_t i = 0; i < lines.size(); i++) {
         if (lines[i][1] == theta) {
             float rho = lines[i][0];
@@ -172,6 +175,7 @@ void draw_mostline(otter::Tensor& cdst, std::vector<Vec2f>& lines, float theta) 
             otter::cv::line(cdst, pt1, pt2, otter::cv::getDefaultColor(otter::cv::BLUE), 1, otter::cv::LINE_AA);
         }
     }
+#endif // OTTER_OPENCV_DRAW
 }
 
 void demo(otter::Tensor& dst, otter::Tensor& cdst, std::vector<Vec2f>& lines, float mul) {

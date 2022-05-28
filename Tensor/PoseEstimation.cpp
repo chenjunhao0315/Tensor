@@ -101,6 +101,7 @@ std::vector<KeyPoint> pose_post_process(const Tensor& pred, const PoseInput& pre
 }
 
 void draw_pose_detection(Tensor& img, std::vector<otter::KeyPoint>& keypoints, bool show_point) {
+#if OTTER_OPENCV_DRAW
     for (int i = 0; i < 16; i++) {
         const otter::KeyPoint& p1 = keypoints[joint_pairs[i][0]];
         const otter::KeyPoint& p2 = keypoints[joint_pairs[i][1]];
@@ -120,6 +121,7 @@ void draw_pose_detection(Tensor& img, std::vector<otter::KeyPoint>& keypoints, b
             continue;
         otter::cv::circle(img, keypoint.p, 7, otter::cv::Color(0, 255, 0), -1);
     }
+#endif // OTTER_OPENCV_DRAW
 }
 
 }   // end namespace otter

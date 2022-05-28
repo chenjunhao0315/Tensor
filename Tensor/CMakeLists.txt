@@ -1,3 +1,5 @@
+configure_file(platform.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/platform.hpp)
+
 function(otter_src_group otter_src_string folder)
     string(REPLACE " " ";" _otter_src_list ${otter_src_string})
 
@@ -413,6 +415,7 @@ if(OTTER_INSTALL_SDK)
         ChannelShuffleLayer.hpp
         LineDetection.hpp
         Otter.hpp
+        ${CMAKE_CURRENT_BINARY_DIR}/platform.hpp
         DESTINATION include/otter
     )
     install(EXPORT otter DESTINATION lib/cmake/otter)

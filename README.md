@@ -76,7 +76,7 @@ make -j 8
 ### Windows
 
 ```
-g++ -Os -fopenmp -ffp-contract=fast -mavx -mavx2 -msse3 -msse4.1 -msse4.2 -msse4a -mfma -o otter *.cpp
+g++ -DOTTER_CONFIG=1 -Os -fopenmp -ffp-contract=fast -mavx -mavx2 -msse3 -msse4.1 -msse4.2 -msse4a -mfma -o otter *.cpp
 ```
 
 ## Thanks for and reference

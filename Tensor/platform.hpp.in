@@ -1,0 +1,19 @@
+//
+//  platform.hpp
+//  Tensor
+//
+//  Created by 陳均豪 on 2022/1/29.
+//
+
+#ifndef PLATFORM_HPP
+#define PLATFORM_HPP
+
+#cmakedefine01 OTTER_MOBILE
+#cmakedefine01 OTTER_OPENMP
+#cmakedefine01 OTTER_AVX
+#cmakedefine01 OTTER_OPENCV_DRAW
+#cmakedefine01 OTTER_BENCHMARK
+
+#cmakedefine OTTER_VERSION_STRING "@OTTER_VERSION_STRING@"
+
+#endif /* platform_hpp */

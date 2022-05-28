@@ -8,15 +8,29 @@
 #ifndef Config_h
 #define Config_h
 
+#ifndef OTTER_CONFIG
+#include "platform.hpp"
+#endif
+
+#ifndef OTTER_MOBILE
 #define OTTER_MOBILE 0
+#endif
 
+#ifndef OTTER_OPENMP
 #define OTTER_OPENMP 1
+#endif
 
+#ifndef OTTER_AVX
 #define OTTER_AVX 1
+#endif
 
+#ifndef OTTER_OPENCV_DRAW
 #define OTTER_OPENCV_DRAW 1
+#endif
 
+#ifndef OTTER_BENCHMARK
 #define OTTER_BENCHMARK 1
+#endif
 
 #if OTTER_MOBILE
 
