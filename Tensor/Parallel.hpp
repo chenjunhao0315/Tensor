@@ -78,7 +78,7 @@ void set_kmp_blocktime(int time_ms);
 
 #if OTTER_OPENMP
 #include "ParallelOpenMP.hpp"
-#else if OTTER_PARALLEL_NATIVE
+#elif OTTER_PARALLEL_NATIVE
 #include "ParallelNative.hpp"
 #endif
 
