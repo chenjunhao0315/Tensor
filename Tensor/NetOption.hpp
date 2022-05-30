@@ -18,6 +18,7 @@ public:
     bool lightmode;
     bool train;
     bool use_non_lib_optimize;
+    int openmp_blocktime;
 };
 
 enum class CompileMode {

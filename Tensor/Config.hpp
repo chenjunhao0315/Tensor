@@ -42,5 +42,11 @@
 #endif
 #endif
 
+#if OTTER_OPENMP
+
+#else
+#define OTTER_PARALLEL_NATIVE 1
+#endif
+
 
 #endif /* Config_h */

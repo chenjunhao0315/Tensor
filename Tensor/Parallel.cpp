@@ -112,4 +112,4 @@ std::string get_openmp_version() {
     return ss.str();
 }
 
-}
+}   // end namespace otter

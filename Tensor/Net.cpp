@@ -11,6 +11,7 @@
 #include "LayerDeclaration.hpp"
 #include "Initializer.hpp"
 #include "Otter.hpp"
+#include "Parallel.hpp"
 
 #if OTTER_BENCHMARK
 #include "Benchmark.hpp"
@@ -675,6 +676,9 @@ int Extractor::extract(int blob_index, Tensor &feat, int /*type*/) {
     if (blob_index < 0 ||  blob_index >= (int)blob_tensors_.size())
         return -1;
     
+    int old_blocktime = get_kmp_blocktime();
+    set_kmp_blocktime(option.openmp_blocktime);
+    
     int ret = 0;
     
     if (!blob_tensors_[blob_index].defined()) {
@@ -683,6 +687,8 @@ int Extractor::extract(int blob_index, Tensor &feat, int /*type*/) {
     }
     
     feat = blob_tensors_[blob_index];
+    
+    set_kmp_blocktime(old_blocktime);
     
     return ret;
 }

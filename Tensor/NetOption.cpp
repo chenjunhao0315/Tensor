@@ -13,6 +13,7 @@ NetOption::NetOption() {
     lightmode = true;
     train = false;
     use_non_lib_optimize = true;
+    openmp_blocktime = 20;
 }
 
 }

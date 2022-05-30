@@ -30,9 +30,9 @@
 namespace otter {
 namespace cv {
 
-Tensor load_image_stb(const char* filename) {
+Tensor load_image_stb(const char* filename, int desired_channels = 0) {
     int w, h, c;
-    unsigned char *data = stbi_load(filename, &w, &h, &c, 0);
+    unsigned char *data = stbi_load(filename, &w, &h, &c, desired_channels);
     OTTER_CHECK(data, "Cannot load image ", filename, " STB Reason: ", stbi_failure_reason());
     
     auto img = otter::from_blob(data, {h, w, c}, otter::ScalarType::Byte).clone();
@@ -43,6 +43,32 @@ Tensor load_image_stb(const char* filename) {
 
 Tensor load_image_pixel(const char* filename) {
     return load_image_stb(filename);
+}
+
+Tensor imread(const std::string& path, int flags) {
+    int desired_channels = 0;
+    if (flags == IMREAD_UNCHANGED) {
+        desired_channels = 0;
+    } else if (flags == IMREAD_GRAYSCALE) {
+        desired_channels = 1;
+    } else if (flags == IMREAD_COLOR) {
+        desired_channels = 3;
+    } else {
+        // unknown flags
+        return Tensor();
+    }
+    
+    Tensor img = load_image_stb(path.c_str(), desired_channels);
+
+    // Convert rgb to bgr
+/*
+    if (img.dim() == 3) {
+        img.permute({2, 1, 0});
+    } else if (img.dim() == 4) {
+        img.permute({2, 1, 0, 3});
+    }
+*/
+    return img;
 }
 
 Tensor load_image_rgb(const char* filename) {
@@ -85,7 +111,7 @@ Tensor check_save_img_and_try_to_fix(const Tensor& img_) {
     return Tensor();
 }
 
-void save_image_options(const Tensor& img_, const char *name, IMG_TYPE type, int quality) {
+int save_image_options(const Tensor& img_, const char *name, IMG_TYPE type, int quality) {
     Tensor img = check_save_img_and_try_to_fix(img_);
     
     char buff[256];
@@ -113,22 +139,57 @@ void save_image_options(const Tensor& img_, const char *name, IMG_TYPE type, int
     
     if (!success)
         fprintf(stderr, "Failed to write image %s\n", buff);
+    return success;
 }
 
-void save_image(const Tensor &img, const char *name) {
-    save_image_jpg(img, name);
+int save_image(const Tensor &img, const char *name) {
+    return save_image_jpg(img, name);
 }
 
-void save_image_jpg(const Tensor& img, const char *name, int quality) {
-    save_image_options(img, name, IMG_TYPE::JPG, quality);
+int save_image_jpg(const Tensor& img, const char *name, int quality) {
+    return save_image_options(img, name, IMG_TYPE::JPG, quality);
 }
 
-void save_image_png(const Tensor& img, const char *name) {
-    save_image_options(img, name, IMG_TYPE::PNG, 100);
+int save_image_png(const Tensor& img, const char *name) {
+    return save_image_options(img, name, IMG_TYPE::PNG, 100);
 }
 
-void save_image_bmp(const Tensor& img, const char *name) {
-    save_image_options(img, name, IMG_TYPE::BMP, 100);
+int save_image_bmp(const Tensor& img, const char *name) {
+    return save_image_options(img, name, IMG_TYPE::BMP, 100);
+}
+
+bool imwrite(const std::string& path, const Tensor& img_, const std::vector<int>& params) {
+    const char* _ext = strrchr(path.c_str(), '.');
+    if (!_ext) {
+        // missing extension
+        return false;
+    }
+    
+    std::string ext = _ext;
+    Tensor img = check_save_img_and_try_to_fix(img_);
+    
+    bool success = false;
+
+    if (ext == ".jpg" || ext == ".jpeg" || ext == ".JPG" || ext == ".JPEG") {
+        int quality = 95;
+        for (size_t i = 0; i < params.size(); i += 2) {
+            if (params[i] == IMWRITE_JPEG_QUALITY) {
+                quality = params[i + 1];
+                break;
+            }
+        }
+        success = save_image_jpg(img, path.c_str(), quality);
+    }
+    else if (ext == ".png" || ext == ".PNG") {
+        success = save_image_png(img, path.c_str());
+    } else if (ext == ".bmp" || ext == ".BMP") {
+        success = save_image_bmp(img, path.c_str());
+    } else {
+        // unknown extension type
+        return false;
+    }
+
+    return success;
 }
 
 

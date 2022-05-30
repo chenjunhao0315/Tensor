@@ -20,12 +20,16 @@ inline int64_t divup(int64_t x, int64_t y) {
     return (x + y - 1) / y;
 }
 
+// Called during new thread initialization
 void init_num_threads();
 
+// Sets the number of threads to be used in parallel region
 void set_num_threads(int num_threads);
 
+// Returns the maximum number of threads that may be used in a parallel region
 int get_num_threads();
 
+// Checks whether the code runs in parallel region
 bool in_parallel_region();
 
 inline void lazy_init_num_threads() {
@@ -54,8 +58,6 @@ private:
 template <class F>
 inline void parallel_for(const int64_t begin, const int64_t end, const int64_t grain_size, const F& f);
 
-
-
 std::string get_parallel_info();
 
 void set_num_interop_threads(int);
@@ -66,16 +68,18 @@ void intraop_launch(std::function<void()> func);
 
 int intraop_default_num_threads();
 
-
 std::string get_openmp_version();
 
-template <class F>
-inline void parallel_for(const int64_t begin, const int64_t end, const int64_t grain_size, const F& f);
+int get_kmp_blocktime();
 
-}
+void set_kmp_blocktime(int time_ms);
+
+}   // end namespace otter
 
 #if OTTER_OPENMP
 #include "ParallelOpenMP.hpp"
+#else if OTTER_PARALLEL_NATIVE
+#include "ParallelNative.hpp"
 #endif
 
 #include "Parallel-inline.hpp"

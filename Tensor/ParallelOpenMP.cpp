@@ -66,6 +66,22 @@ bool in_parallel_region() {
 #endif
 }
 
+int get_kmp_blocktime() {
+#if defined(_OPENMP) && __clang__
+    return kmp_get_blocktime();
+#else
+    return 0;
+#endif
+}
+
+void set_kmp_blocktime(int time_ms) {
+#if defined(_OPENMP) && __clang__
+    kmp_set_blocktime(time_ms);
+#else
+    (void)time_ms;
+#endif
+}
+
 }   // end namespace otter
 
 #endif
