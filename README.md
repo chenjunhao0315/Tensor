@@ -25,7 +25,7 @@ Add some drawing for image, which is powered by [OpenCV][5].
 * [Online Documentation](https://github.com/chenjunhao0315/Tensor/wiki)
 
 ## Build and run
-Since some consideration, the project configuration is not fully control by `CMake`, but control by `Config.hpp`. Hence, there is some option in `Config.hpp` need to be adjusted before `CMake`,
+Since some consideration, the project configuration is dominant by `CMake`. Hence, if you has the requirement of not depend on `CMake`, you need to add a flag `-DOTTER_CONFIG` when compiling, with that, you can manually control the option by `Config.hpp`
 
 > `OTTER_MOBILE = 0` to build with mobile optimize. Note that this will disable `AVX` capability <br>
 > `OTTER_OPENMP = 1` to enable multithread with `openmp` <br>
@@ -97,5 +97,6 @@ g++ -DOTTER_CONFIG=1 -Os -fopenmp -ffp-contract=fast -mavx -mavx2 -msse3 -msse4.
 [9]: https://github.com/pytorch/pytorch
 [10]: https://github.com/Tencent/ncnn
 [11]: https://github.com/chenjunhao0315/Neural_Network
+
 
 

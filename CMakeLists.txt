@@ -51,7 +51,7 @@ endif()
 
 option(OTTER_SHARED_LIB "shared library support" OFF)
 option(OTTER_ENABLE_LTO "enable link-time optimization" OFF)
-option(OTTER_MOBILE "mobile allocator optimize" ON)
+option(OTTER_MOBILE "mobile allocator optimize" OFF)
 option(OTTER_OPENMP "openmp support" ON)
 option(OTTER_OPENCV_DRAW "opencv like drawing function" ON)
 option(OTTER_BENCHMARK "print benchmark information for every layer" ON)
