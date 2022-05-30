@@ -23,6 +23,8 @@ message(STATUS "OTTER_VERSION_STRING = ${OTTER_VERSION_STRING}")
 
 cmake_minimum_required(VERSION 2.8.12)
 
+# if cannot find the CXX_COMPILER maybe try this
+#set(CMAKE_CXX_COMPILER /usr/bin/g++)
 set(CMAKE_CXX_STANDARD 17)
 
 if(NOT CMAKE_BUILD_TYPE)

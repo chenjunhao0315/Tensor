@@ -17,6 +17,7 @@
 #include "datareader.h"
 
 #include <ctype.h>
+#include <cstdlib>
 
 #if NCNN_STDIO
 #include <stdio.h>
