@@ -33,7 +33,7 @@ int BatchNormalizationLayer::load_param(const ParamDict &pd) {
 }
 
 int BatchNormalizationLayer::init_model() {
-    auto shape_a = bottom_shapes[0].accessor<int, 1>();
+    auto shape_a = bottom_shapes[0].accessor<int, 2>()[0];
     bias_data = otter::rand({shape_a[1]}, ScalarType::Float);
     scale_data = otter::rand({shape_a[1]}, ScalarType::Float);
     mean_data = otter::rand({shape_a[1]}, ScalarType::Float);

@@ -88,7 +88,7 @@ int ConvolutionLayer::parse_param(LayerOption& option, ParamDict& pd) {
 }
 
 int ConvolutionLayer::compute_output_shape(ParamDict &pd) {
-    auto shape_a = bottom_shapes[0].accessor<int, 1>();
+    auto shape_a = bottom_shapes[0].accessor<int, 2>()[0];
     int input_batch    = shape_a[0];
     int input_channels = shape_a[1];
     int input_height   = shape_a[2];
@@ -109,7 +109,7 @@ int ConvolutionLayer::compute_output_shape(ParamDict &pd) {
     
     pd.set((int)ConvParam::In_channels, input_channels);
     pd.set((int)ConvParam::Weight_data_size, weight_data_size);
-    pd.set(OUTPUT_SHAPE_HINT, tensor({input_batch, out_channels, out_height, out_width}, ScalarType::Int));
+    pd.set(OUTPUT_SHAPE_HINT, otter::tensor({input_batch, out_channels, out_height, out_width}, ScalarType::Int).view({1, -1}));
     
     return 0;
 }

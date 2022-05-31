@@ -6,6 +6,7 @@
 //
 
 #include "SigmoidLayer.hpp"
+#include "TensorOperator.hpp"
 
 namespace otter {
 
@@ -19,7 +20,7 @@ int SigmoidLayer::load_param(const ParamDict& /*pd*/) {
 }
 
 int SigmoidLayer::forward_inplace(Tensor& bottom_blob, const NetOption& /*opt*/) const {
-    (void)bottom_blob;
+    bottom_blob = 1.0 / (1 + otter::exp(-bottom_blob));
     
     return 0;
 }

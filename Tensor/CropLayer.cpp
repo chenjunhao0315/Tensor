@@ -31,7 +31,7 @@ int CropLayer::parse_param(LayerOption& option, ParamDict& pd) {
 }
 
 int CropLayer::compute_output_shape(ParamDict& pd) {
-    auto shape_a = bottom_shapes[0].accessor<int, 1>();
+    auto shape_a = bottom_shapes[0].accessor<int, 2>()[0];
     int input_batch    = shape_a[0];
     int input_channels = shape_a[1];
     int input_height   = shape_a[2];
@@ -52,7 +52,7 @@ int CropLayer::compute_output_shape(ParamDict& pd) {
     else
         OTTER_CHECK(false, "[Crop] Shape fatal error, expect [1, 3] but get", axis);
     
-    pd.set(OUTPUT_SHAPE_HINT, shape);
+    pd.set(OUTPUT_SHAPE_HINT, shape.view({1, -1}));
     
     return 0;
 }

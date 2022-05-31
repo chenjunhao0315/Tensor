@@ -54,9 +54,9 @@ int UpsampleLayer::parse_param(LayerOption& option, ParamDict& pd) {
 }
 
 int UpsampleLayer::compute_output_shape(ParamDict& pd) {
-    auto shape = bottom_shapes[0].clone();
+    auto shape = bottom_shapes[0][0].clone();
     auto shape_a = shape.accessor<int, 1>();
-    auto bottom_shape_a = bottom_shapes[0].accessor<int, 1>();
+    auto bottom_shape_a = bottom_shapes[0].accessor<int, 2>()[0];
     int output_height = pd.get((int)UpsampleParam::Output_height, 0);
     int output_width = pd.get((int)UpsampleParam::Output_width, 0);
     float scale_height = pd.get((int)UpsampleParam::Height_scale, 0.f);
@@ -85,7 +85,7 @@ int UpsampleLayer::compute_output_shape(ParamDict& pd) {
     shape_a[2] = output_height;
     shape_a[3] = output_width;
     
-    pd.set(OUTPUT_SHAPE_HINT, shape);
+    pd.set(OUTPUT_SHAPE_HINT, shape.view({1, -1}));
     
     return 0;
 }

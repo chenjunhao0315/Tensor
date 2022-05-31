@@ -12,6 +12,7 @@
 #include "Initializer.hpp"
 #include "Otter.hpp"
 #include "Parallel.hpp"
+#include "Formatting.hpp"
 
 #if OTTER_BENCHMARK
 #include "Benchmark.hpp"
@@ -68,16 +69,10 @@ void Net::addLayer(LayerOption option) {
         LayerOption auto_option;
         std::string activation = option["activation"];
         
-        if (activation == "Relu6") {
-            activation = "Relu";
-            auto_option["relu6"] = "true";
-        }
-        
         auto_option["type"] = activation;
-        std::string abbreviate = activation.substr(0, 2);
-        std::transform(abbreviate.begin(), abbreviate.end(), abbreviate.begin(),
+        std::transform(activation.begin(), activation.end(), activation.begin(),
             [](unsigned char c){ return std::tolower(c); });
-        auto_option["name"] = abbreviate + "_" + option["name"];
+        auto_option["name"] = activation + "_" + option["name"];
         auto_option["input"] = layer_options[layer_options.size() - 1]["output"];
         auto_option["output"] = auto_option["name"];
         layer_options.push_back(auto_option);
@@ -132,7 +127,9 @@ void Net::graph_construct() {
     for (size_t i = 0; i < layer_options.size(); ++i) {
 //        printf("process name: %s\n", layer_options[i]["name"].c_str());
         int consume_count = (int)std::count(layer_options[i]["consume_name"].begin(), layer_options[i]["consume_name"].end(), ',');
-        if (consume_count > 1) {
+        int output_count = (int)std::count(layer_options[i]["output"].begin(), layer_options[i]["output"].end(), ',') + 1;
+//        printf("consume_count: %d -> name: %s\n", consume_count, layer_options[i]["consume_name"].c_str());
+        if (consume_count > output_count) {
             ++additional_layer_count;
             LayerOption auto_opt;
             auto_opt["type"] = "Split";
@@ -262,7 +259,8 @@ void Net::compile(CompileMode comopile_mode) {
             for (const auto j : otter::irange(top_count)) {
                 Blob& blob = blobs[layer->tops[j]];
                 
-                blob.shape = shape_hints.clone();
+                int index = (shape_hints.size(0) > 1) ? j : 0;
+                blob.shape = shape_hints[index].view({1, -1}).clone();
             }
         }
         
@@ -337,11 +335,11 @@ void Net::summary() {
     }
     printf("=============================================================\n");
     for (const auto i : otter::irange(blobs.size())) {
-        auto shape_a = blobs[i].shape.accessor<int, 1>();
+        auto shape_a = blobs[i].shape.accessor<int, 2>()[0];
         int n = shape_a[0];
-        int c = shape_a[1];
-        int h = shape_a[2];
-        int w = shape_a[3];
+        int c = (blobs[i].shape[0].numel() >= 2) ? shape_a[1] : 0;
+        int h = (blobs[i].shape[0].numel() >= 3) ? shape_a[2] : 0;
+        int w = (blobs[i].shape[0].numel() >= 4) ? shape_a[3] : 0;
         printf("Blob %-2d name: %-10s producer: %-2d consumer: %-2d shape: (%d, %d, %d, %d)\n", (int)i, blobs[i].name.c_str(), blobs[i].producer, blobs[i].consumer, n, c, h, w);
     }
     printf("=============================================================\n");

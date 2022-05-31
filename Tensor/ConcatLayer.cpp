@@ -27,14 +27,14 @@ int ConcatLayer::parse_param(LayerOption& option, ParamDict& pd) {
 int ConcatLayer::compute_output_shape(ParamDict& pd) {
     int axis = pd.get((int)ConcatParam::Axis, 1);
     
-    auto shape = bottom_shapes[0].clone();
+    auto shape = bottom_shapes[0][0].clone();
     auto shape_a = shape.accessor<int, 1>();
     for (size_t i = 1; i < bottom_shapes.size(); ++i) {
-        auto bottom_shape_a = bottom_shapes[i].accessor<int, 1>();
+        auto bottom_shape_a = bottom_shapes[i].accessor<int, 2>()[0];
         shape_a[axis] += bottom_shape_a[axis];
     }
     
-    pd.set(OUTPUT_SHAPE_HINT, shape);
+    pd.set(OUTPUT_SHAPE_HINT, shape.view({1, -1}));
     
     return 0;
 }

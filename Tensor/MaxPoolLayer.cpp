@@ -66,7 +66,7 @@ int MaxPoolLayer::parse_param(LayerOption& option, ParamDict& pd) {
 }
 
 int MaxPoolLayer::compute_output_shape(ParamDict &pd) {
-    auto shape_a = bottom_shapes[0].accessor<int, 1>();
+    auto shape_a = bottom_shapes[0].accessor<int, 2>()[0];
     int input_batch = shape_a[0];
     int input_channels = shape_a[1];
     int input_height = shape_a[2];
@@ -94,7 +94,7 @@ int MaxPoolLayer::compute_output_shape(ParamDict &pd) {
         out_width = pooling_output_shape(input_width, kernel_width, padding_width, stride_width, dilation_width, ceil_mode);
     }
     
-    pd.set(OUTPUT_SHAPE_HINT, otter::tensor({input_batch, input_channels, out_height, out_width}, ScalarType::Int));
+    pd.set(OUTPUT_SHAPE_HINT, otter::tensor({input_batch, input_channels, out_height, out_width}, ScalarType::Int).view({1, -1}));
     
     return 0;
 }

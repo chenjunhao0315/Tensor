@@ -76,6 +76,10 @@
 		7663C239281D4B7C00102057 /* KalmanFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C237281D4B7C00102057 /* KalmanFilter.cpp */; };
 		767B03FA283A282800466736 /* Interpreter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 767B03F8283A282700466736 /* Interpreter.cpp */; };
 		767B03FD283A7BAE00466736 /* Benchmark.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 767B03FB283A7BAE00466736 /* Benchmark.cpp */; };
+		767B826628465EE500969C9F /* SliceLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 767B826428465EE500969C9F /* SliceLayer.cpp */; };
+		767B826928467F1600969C9F /* ReshapeLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 767B826728467F1600969C9F /* ReshapeLayer.cpp */; };
+		767B826C284681A800969C9F /* Relu6Layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 767B826A284681A800969C9F /* Relu6Layer.cpp */; };
+		767B826F28468C6E00969C9F /* PermuteLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 767B826D28468C6E00969C9F /* PermuteLayer.cpp */; };
 		7687216127C0E31C006640CF /* Module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687215F27C0E31C006640CF /* Module.cpp */; };
 		7687216427C0E379006640CF /* Layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216227C0E379006640CF /* Layer.cpp */; };
 		7687216827C12145006640CF /* NetOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216627C12145006640CF /* NetOption.cpp */; };
@@ -324,6 +328,14 @@
 		767B03F9283A282800466736 /* Interpreter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Interpreter.hpp; sourceTree = "<group>"; };
 		767B03FB283A7BAE00466736 /* Benchmark.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Benchmark.cpp; sourceTree = "<group>"; };
 		767B03FC283A7BAE00466736 /* Benchmark.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Benchmark.hpp; sourceTree = "<group>"; };
+		767B826428465EE500969C9F /* SliceLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SliceLayer.cpp; sourceTree = "<group>"; };
+		767B826528465EE500969C9F /* SliceLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SliceLayer.hpp; sourceTree = "<group>"; };
+		767B826728467F1600969C9F /* ReshapeLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ReshapeLayer.cpp; sourceTree = "<group>"; };
+		767B826828467F1600969C9F /* ReshapeLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ReshapeLayer.hpp; sourceTree = "<group>"; };
+		767B826A284681A800969C9F /* Relu6Layer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Relu6Layer.cpp; sourceTree = "<group>"; };
+		767B826B284681A800969C9F /* Relu6Layer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Relu6Layer.hpp; sourceTree = "<group>"; };
+		767B826D28468C6E00969C9F /* PermuteLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PermuteLayer.cpp; sourceTree = "<group>"; };
+		767B826E28468C6E00969C9F /* PermuteLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PermuteLayer.hpp; sourceTree = "<group>"; };
 		7687215F27C0E31C006640CF /* Module.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Module.cpp; sourceTree = "<group>"; };
 		7687216027C0E31C006640CF /* Module.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Module.hpp; sourceTree = "<group>"; };
 		7687216227C0E379006640CF /* Layer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Layer.cpp; sourceTree = "<group>"; };
@@ -797,8 +809,6 @@
 				7687217A27C28140006640CF /* LayerRegistry.hpp */,
 				7687216227C0E379006640CF /* Layer.cpp */,
 				7687216327C0E379006640CF /* Layer.hpp */,
-				7687217627C14A28006640CF /* ParamDict.cpp */,
-				7687217727C14A28006640CF /* ParamDict.hpp */,
 				7604745527D68F3F00FCB785 /* Initializer.cpp */,
 				7604745627D68F3F00FCB785 /* Initializer.hpp */,
 				7687217327C14890006640CF /* InputLayer.cpp */,
@@ -813,12 +823,12 @@
 				7628DEE327CE096600B136FA /* LReluLayer.hpp */,
 				76CFA2C02808B7D800205034 /* ReluLayer.cpp */,
 				76CFA2C12808B7D800205034 /* ReluLayer.hpp */,
+				767B826A284681A800969C9F /* Relu6Layer.cpp */,
+				767B826B284681A800969C9F /* Relu6Layer.hpp */,
 				7628DEE527CE155400B136FA /* ShortCutLayer.cpp */,
 				7628DEE627CE155400B136FA /* ShortCutLayer.hpp */,
 				76CF3F3D27FC92A8009BF242 /* EltwiseLayer.cpp */,
 				76CF3F3E27FC92A8009BF242 /* EltwiseLayer.hpp */,
-				7628E02727CEA4B600B136FA /* SplitLayer.cpp */,
-				7628E02827CEA4B600B136FA /* SplitLayer.hpp */,
 				7628E02A27CF1C5B00B136FA /* MaxPoolLayer.cpp */,
 				7628E02B27CF1C5B00B136FA /* MaxPoolLayer.hpp */,
 				7628E17827CFCE5700B136FA /* DropoutLayer.cpp */,
@@ -829,8 +839,16 @@
 				769279D327D49BC90088BD9F /* UpsampleLayer.hpp */,
 				760A333627F62553003F0542 /* ChannelShuffleLayer.cpp */,
 				760A333727F62553003F0542 /* ChannelShuffleLayer.hpp */,
+				7628E02727CEA4B600B136FA /* SplitLayer.cpp */,
+				7628E02827CEA4B600B136FA /* SplitLayer.hpp */,
 				760A333927F62800003F0542 /* CropLayer.cpp */,
 				760A333A27F62800003F0542 /* CropLayer.hpp */,
+				767B826428465EE500969C9F /* SliceLayer.cpp */,
+				767B826528465EE500969C9F /* SliceLayer.hpp */,
+				767B826728467F1600969C9F /* ReshapeLayer.cpp */,
+				767B826828467F1600969C9F /* ReshapeLayer.hpp */,
+				767B826D28468C6E00969C9F /* PermuteLayer.cpp */,
+				767B826E28468C6E00969C9F /* PermuteLayer.hpp */,
 				760A333F27F7949F003F0542 /* SigmoidLayer.cpp */,
 				760A334027F7949F003F0542 /* SigmoidLayer.hpp */,
 				76927B3327D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp */,
@@ -846,6 +864,8 @@
 			children = (
 				7687215F27C0E31C006640CF /* Module.cpp */,
 				7687216027C0E31C006640CF /* Module.hpp */,
+				7687217627C14A28006640CF /* ParamDict.cpp */,
+				7687217727C14A28006640CF /* ParamDict.hpp */,
 				7687216627C12145006640CF /* NetOption.cpp */,
 				7687216727C12145006640CF /* NetOption.hpp */,
 				7687216927C12334006640CF /* Net.cpp */,
@@ -1061,7 +1081,10 @@
 				7637DDB127ED524D000A5B08 /* main.cpp in Sources */,
 				7620AF8627B5899A0081C210 /* Formatting.cpp in Sources */,
 				76F0063A27B64D63009D67F5 /* TensorBlas.cpp in Sources */,
+				767B826F28468C6E00969C9F /* PermuteLayer.cpp in Sources */,
+				767B826928467F1600969C9F /* ReshapeLayer.cpp in Sources */,
 				76F0064C27B7FC09009D67F5 /* ExpandUtils.cpp in Sources */,
+				767B826C284681A800969C9F /* Relu6Layer.cpp in Sources */,
 				762E3B3327BB79950075F983 /* Unfold2D.cpp in Sources */,
 				7603BA2527E1DB9C00EA42F1 /* hershey_fonts.cpp in Sources */,
 				760382CA27BFFD7600CD599F /* Exception.cpp in Sources */,
@@ -1083,6 +1106,7 @@
 				7628E02327CE7A6200B136FA /* Pool.cpp in Sources */,
 				7620AF7127B406F70081C210 /* RangeFactoryKernel.cpp in Sources */,
 				762B4D6627EF7D0500A98E34 /* CPUCachingAllocator.cpp in Sources */,
+				767B826628465EE500969C9F /* SliceLayer.cpp in Sources */,
 				7620AF7A27B53BAE0081C210 /* TensorCopyKernel.cpp in Sources */,
 				762E3B3F27BC9F400075F983 /* Clock.cpp in Sources */,
 				76E6C51627A502F60036A26F /* Memory.cpp in Sources */,
