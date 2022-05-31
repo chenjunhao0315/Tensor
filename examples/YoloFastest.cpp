@@ -117,7 +117,7 @@ int main(int argc, const char * argv[]) {
     net.addLayer(otter::LayerOption{{"type", "Convolution"}, {"name", "conv_77"}, {"out_channels", "96"}, {"kernel", "5"}, {"padding", "2"}, {"stride", "1"}, {"groups", "96"}, {"batchnorm", "true"}, {"activation", "LRelu"}});
     net.addLayer(otter::LayerOption{{"type", "Convolution"}, {"name", "conv_78"}, {"out_channels", "96"}, {"kernel", "1"}, {"padding", "0"}, {"stride", "1"}, {"batchnorm", "true"}});
     net.addLayer(otter::LayerOption{{"type", "Convolution"}, {"name", "conv_79"}, {"out_channels", "255"}, {"kernel", "1"}, {"padding", "0"}, {"stride", "1"}});
-    net.addLayer(otter::LayerOption{{"type", "Upsample"}, {"name", "upsample_1"}, {"stride", "2"}, {"darknet_mode", "true"}, {"input", "lr_conv_74"}});
+    net.addLayer(otter::LayerOption{{"type", "Upsample"}, {"name", "upsample_1"}, {"stride", "2"}, {"darknet_mode", "true"}, {"input", "lrelu_conv_74"}});
     net.addLayer(otter::LayerOption{{"type", "Concat"}, {"name", "concat_2"}, {"input", {"upsample_1, sc_13"}}});
     net.addLayer(otter::LayerOption{{"type", "Convolution"}, {"name", "conv_80"}, {"out_channels", "144"}, {"kernel", "5"}, {"padding", "2"}, {"stride", "1"}, {"groups", "144"}, {"batchnorm", "true"}, {"activation", "LRelu"}});
     net.addLayer(otter::LayerOption{{"type", "Convolution"}, {"name", "conv_81"}, {"out_channels", "144"}, {"kernel", "1"}, {"padding", "0"}, {"stride", "1"}, {"batchnorm", "true"}});
@@ -128,7 +128,10 @@ int main(int argc, const char * argv[]) {
     net.compile();
 //    net.summary();
 
-    net.load_weight("yolo-fastest-1.1-xl.dam");
+    int ret = net.load_weight("yolo-fastest-1.1-xl.dam");
+    if (ret) {
+        exit(-1);
+    }
 
     otter::Clock l;
     auto img = otter::cv::load_image_rgb(argv[1]);

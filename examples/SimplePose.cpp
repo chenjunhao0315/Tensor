@@ -17,12 +17,18 @@ int main(int argc, const char * argv[]) {
     
     otter::Net net;
     net.load_otter("nanodet-plus-m-1.5x_416.otter", otter::CompileMode::Inference);
-    net.load_weight("nanodet-plus-m-1.5x_416-opt.bin", otter::Net::WeightType::Ncnn);
-    
+    int ret = net.load_weight("nanodet-plus-m-1.5x_416-opt.bin", otter::Net::WeightType::Ncnn);
+    if (ret) {
+        exit(-1);
+    }
+
     otter::Net pose;
     pose.load_otter("simplepose-opt.otter", otter::CompileMode::Inference);
-    pose.load_weight("simplepose-opt.bin", otter::Net::WeightType::Ncnn);
-    
+    ret = pose.load_weight("simplepose-opt.bin", otter::Net::WeightType::Ncnn);
+    if (ret) {
+        exit(-1);
+    }
+
     otter::Clock l;
     auto img = otter::cv::load_image_rgb(argv[1]);
     l.stop_and_show("ms (read image)");

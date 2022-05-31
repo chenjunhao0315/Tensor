@@ -15,10 +15,13 @@ int main(int argc, const char * argv[]) {
     }
     
     otter::Net net;
-    net.load_otter("nanodet-plus-m-1.5x_416-opt.otter", otter::CompileMode::Inference);
+    net.load_otter("nanodet-plus-m-1.5x_416.otter", otter::CompileMode::Inference);
     net.summary();
 
-    net.load_weight("nanodet-plus-m-1.5x_416-opt.bin", otter::Net::WeightType::Ncnn);
+    int ret = net.load_weight("nanodet-plus-m-1.5x_416-opt.bin", otter::Net::WeightType::Ncnn);
+    if (ret) {
+        exit(-1);
+    }
 
     otter::Clock l;
     auto img = otter::cv::load_image_rgb(argv[1]);

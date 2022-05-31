@@ -43,7 +43,7 @@ int BatchNormalizationLayer::init_model() {
 }
 
 int BatchNormalizationLayer::load_model(const Initializer& initializer) {
-    auto shape_a = bottom_shapes[0].accessor<int, 1>();
+    auto shape_a = bottom_shapes[0].accessor<int, 2>()[0];
     
     if (initializer.type != InitializerType::Ncnn) {
         bias_data = initializer.load({shape_a[1]}, 1);
