@@ -5,7 +5,7 @@
 //  Created by 陳均豪 on 2022/4/1.
 //
 
-#include "SliceLayer.hpp"
+#include "CropLayer.hpp"
 #include "TensorShape.hpp"
 #include "TensorMaker.hpp"
 #include "Formatting.hpp"

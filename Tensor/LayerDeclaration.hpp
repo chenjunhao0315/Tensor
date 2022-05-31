@@ -23,7 +23,7 @@
 #include "ConcatLayer.hpp"
 #include "UpsampleLayer.hpp"
 #include "ChannelShuffleLayer.hpp"
-#include "SliceLayer.hpp"
+#include "CropLayer.hpp"
 #include "SigmoidLayer.hpp"
 #include "Yolov3DetectionOutputLayer.hpp"
 #include "NanodetPlusDetectionOutputLayer.hpp"

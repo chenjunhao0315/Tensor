@@ -27,7 +27,7 @@
 		760A333227F5F733003F0542 /* ChannelShuffle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333027F5F733003F0542 /* ChannelShuffle.cpp */; };
 		760A333527F5F84F003F0542 /* ChannelShuffleKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333327F5F84F003F0542 /* ChannelShuffleKernel.cpp */; };
 		760A333827F62553003F0542 /* ChannelShuffleLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333627F62553003F0542 /* ChannelShuffleLayer.cpp */; };
-		760A333B27F62800003F0542 /* SliceLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333927F62800003F0542 /* SliceLayer.cpp */; };
+		760A333B27F62800003F0542 /* CropLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333927F62800003F0542 /* CropLayer.cpp */; };
 		760A333E27F6585E003F0542 /* Otter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333C27F6585E003F0542 /* Otter.cpp */; };
 		760A334127F7949F003F0542 /* SigmoidLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333F27F7949F003F0542 /* SigmoidLayer.cpp */; };
 		762047A828454A0800B8BEEF /* ParallelNative.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762047A628454A0700B8BEEF /* ParallelNative.cpp */; };
@@ -213,8 +213,8 @@
 		760A333427F5F84F003F0542 /* ChannelShuffleKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ChannelShuffleKernel.hpp; sourceTree = "<group>"; };
 		760A333627F62553003F0542 /* ChannelShuffleLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChannelShuffleLayer.cpp; sourceTree = "<group>"; };
 		760A333727F62553003F0542 /* ChannelShuffleLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ChannelShuffleLayer.hpp; sourceTree = "<group>"; };
-		760A333927F62800003F0542 /* SliceLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SliceLayer.cpp; sourceTree = "<group>"; };
-		760A333A27F62800003F0542 /* SliceLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SliceLayer.hpp; sourceTree = "<group>"; };
+		760A333927F62800003F0542 /* CropLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CropLayer.cpp; sourceTree = "<group>"; };
+		760A333A27F62800003F0542 /* CropLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CropLayer.hpp; sourceTree = "<group>"; };
 		760A333C27F6585E003F0542 /* Otter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Otter.cpp; sourceTree = "<group>"; };
 		760A333D27F6585E003F0542 /* Otter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Otter.hpp; sourceTree = "<group>"; };
 		760A333F27F7949F003F0542 /* SigmoidLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SigmoidLayer.cpp; sourceTree = "<group>"; };
@@ -829,8 +829,8 @@
 				769279D327D49BC90088BD9F /* UpsampleLayer.hpp */,
 				760A333627F62553003F0542 /* ChannelShuffleLayer.cpp */,
 				760A333727F62553003F0542 /* ChannelShuffleLayer.hpp */,
-				760A333927F62800003F0542 /* SliceLayer.cpp */,
-				760A333A27F62800003F0542 /* SliceLayer.hpp */,
+				760A333927F62800003F0542 /* CropLayer.cpp */,
+				760A333A27F62800003F0542 /* CropLayer.hpp */,
 				760A333F27F7949F003F0542 /* SigmoidLayer.cpp */,
 				760A334027F7949F003F0542 /* SigmoidLayer.hpp */,
 				76927B3327D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp */,
@@ -1173,7 +1173,7 @@
 				76F0064327B67E4C009D67F5 /* TensorProperties.cpp in Sources */,
 				76CFA2C22808B7D800205034 /* ReluLayer.cpp in Sources */,
 				76F336D627A7AD1600E3AEF1 /* TensorFunction.cpp in Sources */,
-				760A333B27F62800003F0542 /* SliceLayer.cpp in Sources */,
+				760A333B27F62800003F0542 /* CropLayer.cpp in Sources */,
 				760A334127F7949F003F0542 /* SigmoidLayer.cpp in Sources */,
 				762B4D6C27EF80AB00A98E34 /* CPUProfilingAllocator.cpp in Sources */,
 				76F336DD27A8FCE600E3AEF1 /* EmptyTensor.cpp in Sources */,
