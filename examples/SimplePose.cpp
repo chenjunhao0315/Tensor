@@ -11,7 +11,7 @@ using namespace std;
 int main(int argc, const char * argv[]) {
     
     if (argc < 2) {
-        printf("Usage ./Simplepose image_path\n");
+        printf("Usage: %s image_path\n", argv[0]);
         return -1;
     }
     
@@ -20,7 +20,7 @@ int main(int argc, const char * argv[]) {
     net.load_weight("nanodet-plus-m-1.5x_416-opt.bin", otter::Net::WeightType::Ncnn);
     
     otter::Net pose;
-    pose.load_otter("simplepose.otter", otter::CompileMode::Inference);
+    pose.load_otter("simplepose-opt.otter", otter::CompileMode::Inference);
     pose.load_weight("simplepose-opt.bin", otter::Net::WeightType::Ncnn);
     
     otter::Clock l;
@@ -39,7 +39,7 @@ int main(int argc, const char * argv[]) {
     auto ex = net.create_extractor();
     
     otter::Clock c;
-    ex.input("data", resize_pad);
+    ex.input("data_1", resize_pad);
     otter::Tensor pred;
     ex.extract("nanodet", pred, 0);
     auto pred_fix = otter::nanodet_post_process(pred, width, height, scale, wpad, hpad);

@@ -10,12 +10,12 @@ using namespace std;
 int main(int argc, const char * argv[]) {
     
     if (argc < 2) {
-        printf("Usage ./Nanodet image_path\n");
+        printf("Usage: %s image_path\n", argv[0]);
         return -1;
     }
     
     otter::Net net;
-    net.load_otter("nanodet-plus-m-1.5x_416.otter", otter::CompileMode::Inference);
+    net.load_otter("nanodet-plus-m-1.5x_416-opt.otter", otter::CompileMode::Inference);
     net.summary();
 
     net.load_weight("nanodet-plus-m-1.5x_416-opt.bin", otter::Net::WeightType::Ncnn);

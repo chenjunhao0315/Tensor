@@ -20,14 +20,14 @@ int ReshapeLayer::parse_param(LayerOption& option, ParamDict& pd) {
     
     Tensor shape;
     
-    if (!opt_check_string(option, "shape")) {
+    if (!opt_check_string(option, "reshape")) {
         shape = otter::full({1}, -1, otter::ScalarType::Int);
     } else {
-        int shape_length = (int)std::count(option["shape"].begin(), option["shape"].end(), ',') + 1;
+        int shape_length = (int)std::count(option["reshape"].begin(), option["reshape"].end(), ',') + 1;
         shape = otter::full({shape_length}, -1, otter::ScalarType::Int);
         auto shape_a = shape.accessor<int, 1>();
         std::stringstream ss;
-        ss << option["shape"];
+        ss << option["reshape"];
         int n; char c;
         for (const auto i : otter::irange(shape_length)) {
             ss >> n >> c;

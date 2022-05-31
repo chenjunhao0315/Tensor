@@ -6,10 +6,12 @@
 //
 
 #include "NcnntoOtterConverter.hpp"
+#include <cstdio>
 #include <iostream>
 #include "paramdict.h"
 #include <map>
 #include <sstream>
+#include <string>
 
 using namespace std;
 
@@ -42,6 +44,10 @@ int shuffle = 1;
 int crop = 1;
 int shortcut = 1;
 int yolo = 1;
+int slice = 1;
+int sigmoid = 1;
+int reshape = 1;
+int permute = 1;
 
 OtterLeader ncnn2otter(const char *model_path) {
 #define SCAN_VALUE(fmt, v)                \
@@ -150,13 +156,13 @@ team.addParam({"name", get_layer_name(str, value)})
     
 #define ADD_TRANSFORM_MAP(origin, transform)    \
 {int count = std::count(origin.begin(), origin.end(), ',') + 1;  \
-std::stringstream ss(origin);   \
-for (int i = 0; i < count; ++i) {   \
-std::string name;   \
-getline(ss, name, ','); \
-EARSE_SPACE(name);  \
-printf("add \"%s\" with \"%s\"\n", name.c_str(), transform.c_str());    \
-transform_map[name] = transform;    \
+    std::stringstream ss(origin);   \
+    for (int i = 0; i < count; ++i) {   \
+        std::string name;   \
+        getline(ss, name, ','); \
+        EARSE_SPACE(name);  \
+    printf("add \"%s\" with \"%s\"\n", name.c_str(), transform.c_str());    \
+    transform_map[name] = transform;    \
 }}
     
     std::string layer_name;
@@ -239,23 +245,23 @@ transform_map[name] = transform;    \
 team.addParam({"activation", type});
         if (activation_type == 1) {
             ACTIVATION("Relu");
-            true_output = get_layer_name("re_conv", conv);
+            true_output = get_layer_name("relu_conv", conv);
         } else if (activation_type == 2) {
             ACTIVATION("LRelu");
             sub_team.addParam({"alpha", std::to_string(activation_param[0])});
-            true_output = get_layer_name("lr_conv", conv);
+            true_output = get_layer_name("lrelu_conv", conv);
         } else if (activation_type == 3) {
             // Suppose it is relu 6
             if (activation_param[0] == 0 && activation_param[1] == 6) {
                 ACTIVATION("Relu6");
-                true_output = get_layer_name("re_conv", conv);
+                true_output = get_layer_name("relu6_conv", conv);
             } else {
                 printf("Unsupport activation!\n");
                 exit(-100);
             }
         } else if (activation_type == 4) {
             ACTIVATION("Sigmoid");
-            true_output = get_layer_name("si_conv", conv);
+            true_output = get_layer_name("sigmoid_conv", conv);
         } else {
             true_output = get_layer_name("conv", conv);
         }
@@ -319,23 +325,23 @@ team.addParam({"activation", type});
 team.addParam({"activation", type});
         if (activation_type == 1) {
             ACTIVATION("Relu");
-            true_output = get_layer_name("re_deconv", deconv);
+            true_output = get_layer_name("relu_deconv", deconv);
         } else if (activation_type == 2) {
             ACTIVATION("LRelu");
             sub_team.addParam({"alpha", std::to_string(activation_param[0])});
-            true_output = get_layer_name("lr_deconv", deconv);
+            true_output = get_layer_name("lrelu_deconv", deconv);
         } else if (activation_type == 3) {
             // Suppose it is relu 6
             if (activation_param[0] == 0 && activation_param[1] == 6) {
                 ACTIVATION("Relu6");
-                true_output = get_layer_name("re_deconv", deconv);
+                true_output = get_layer_name("relu6_deconv", deconv);
             } else {
                 printf("Unsupport activation!\n");
                 exit(-100);
             }
         } else if (activation_type == 4) {
             ACTIVATION("Sigmoid");
-            true_output = get_layer_name("si_deconv", deconv);
+            true_output = get_layer_name("sigmoid_deconv", deconv);
         } else {
             true_output = get_layer_name("deconv", deconv);
         }
@@ -420,6 +426,120 @@ team.addParam({"activation", type});
         ADD_PARAM_STRING("input", input);
         ADD_PARAM_STRING("output", output);
         
+    } else if (type == "Slice") {
+        int axis = pd.get(1, 0);
+        auto slice_v = pd.get(0, std::vector<float>());
+
+        std::string slice_param;
+        for (int i = 0; i < slice_v.size(); ++i) {
+            if (i)
+                slice_param += ", ";
+            int value = (slice_v[i] == -233) ? -1 : slice_v[i];
+            slice_param += std::to_string(value);
+        }
+
+        axis += 1; // ncnn is CHW otter is NCHW
+
+        team.setName("Slice");
+        ADD_PARAM("axis", axis);
+        sub_team.addParam({"slice", slice_param});
+
+        std::string input = transform_map[input_name];
+        ADD_PARAM_STRING("input", input);
+
+        int output_count = std::count(output_name.begin(), output_name.end(), ',') + 1;
+        std::stringstream ss(output_name);
+        std::string output;
+        for (int i = 0; i < output_count; ++i) {
+            std::string transform = "slice_" + to_string(slice) + "_" + to_string(i);
+            if (i)
+                output += ", ";
+            output += transform;
+            std::string name;
+            getline(ss, name, ',');
+            EARSE_SPACE(name);
+            printf("add \"%s\" with \"%s\"\n", name.c_str(), transform.c_str());
+            transform_map[name] = transform;
+        }
+        WRITE_LAYER_NAME("slice", slice++);
+        ADD_PARAM_STRING("output", output);
+
+    } else if (type == "Sigmoid") {
+        printf("sigmoid input name: %s\n", input_name.c_str());
+        std::string input = transform_map[input_name];
+        std::string output = get_layer_name("sigmoid", sigmoid);
+        ADD_TRANSFORM_MAP(output_name, output);
+        WRITE_LAYER_NAME("sigmoid", sigmoid++);
+        ADD_PARAM_STRING("input", input);
+        ADD_PARAM_STRING("output", output);
+    } else if (type == "Reshape") {
+        int w = pd.get(0, -233);
+        int h = pd.get(1, -233);
+        int c = pd.get(2, -233);
+
+        w = w == -233 ? 1 : w;
+        h = h == -233 ? 1 : h;
+        c = c == -233 ? 1 : c;
+        std::string shape = "1, " + std::to_string(c) + ", " + std::to_string(h) + ", " + std::to_string(w);
+
+        sub_team.addParam({"reshape", shape});
+
+        printf("reshape input name: %s\n", input_name.c_str());
+
+        std::string input = transform_map[input_name];
+        printf("reshape get transform input name: %s\n", input.c_str());
+
+        std::string output = get_layer_name("reshape", reshape);
+        ADD_TRANSFORM_MAP(output_name, output);
+        WRITE_LAYER_NAME("reshape", reshape++);
+        ADD_PARAM_STRING("input", input);
+        ADD_PARAM_STRING("output", output);
+    } else if (type == "Permute") {
+        int order_type = pd.get(0, 0);
+        // order_type
+        // 0 = w h
+        // 1 = h w
+
+        // order_type
+        // 0 = w h c
+        // 1 = h w c
+        // 2 = w c h
+        // 3 = c w h
+        // 4 = h c w
+        // 5 = c h w
+
+        // order_type
+        // 0 = w h d c
+        // 1 = h w d c
+        // 2 = w d h c
+        // 3 = d w h c
+        // 4 = h d w c
+        // 5 = d h w c
+        // 6 = w h c d
+        // 7 = h w c d
+        // 8 = w c h d
+        // 9 = c w h d
+        //10 = h c w d
+        //11 = c h w d
+        //12 = w d c h
+        //13 = d w c h
+        //14 = w c d h
+        //15 = c w d h
+        //16 = d c w h
+        //17 = c d w h
+        //18 = h d c w
+        //19 = d h c w
+        //20 = h c d w
+        //21 = c h d w
+        //22 = d c h w
+        //23 = c d h w
+
+        std::string input = transform_map[input_name];
+        std::string output = get_layer_name("permute", permute);
+        ADD_TRANSFORM_MAP(output_name, output);
+        WRITE_LAYER_NAME("permute", permute++);
+        ADD_PARAM_STRING("input", input);
+        ADD_PARAM_STRING("output", output);
     } else if (type == "Interp") {
         team.setName("Upsample");
         int resize_type = pd.get(0, 0);
