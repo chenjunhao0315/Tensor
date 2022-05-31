@@ -253,6 +253,7 @@ if(OTTER_INSTALL_SDK)
         CPUGenerator.hpp
         TensorPixel.hpp
         ConvolutionMM2DTranspose.hpp
+        Relu6Layer.hpp
         TypeCast.hpp
         CPUCachingAllocator.hpp
         CPUProfilingAllocator.hpp
@@ -267,17 +268,18 @@ if(OTTER_INSTALL_SDK)
         UpSampleKernel.hpp
         Convolution.hpp
         MaybeOwned.hpp
+        CropLayer.hpp
         TensorCatKernel.hpp
         OTensor.hpp
         EmptyTensor.hpp
         Formatting.hpp
         TensorConversion.hpp
+        ParallelNative.hpp
         VecFunctional.hpp
         BinaryOpsKernel.hpp
         ParamDict.hpp
         Vision.hpp
         TensorBase.hpp
-        PackedData.hpp
         GraphicAPI.hpp
         Drawing.hpp
         DilatedConvolution.hpp
@@ -315,6 +317,7 @@ if(OTTER_INSTALL_SDK)
         TensorLinearAlgebra.hpp
         Padding.hpp
         SmallVector.hpp
+        PermuteLayer.hpp
         LayerDeclaration.hpp
         UnaryOpsKernel.hpp
         TensorDistribution.hpp
@@ -389,6 +392,7 @@ if(OTTER_INSTALL_SDK)
         GeneratorNucleus.hpp
         BatchNormalizationKernel.hpp
         im2col.hpp
+        ReshapeLayer.hpp
         ScalarOps.hpp
         Utils.hpp
         BinaryOps.hpp
