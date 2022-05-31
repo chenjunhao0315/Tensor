@@ -36,7 +36,7 @@ int main(int argc, const char * argv[]) {
     auto ex = net.create_extractor();
 
     otter::Clock c;
-    ex.input("data", resize_pad);
+    ex.input("data_1", resize_pad);
 
     otter::Tensor pred;
     ex.extract("nanodet", pred, 0);

@@ -1,20 +1,20 @@
 //
-//  SliceLayer.hpp
+//  CropLayer.hpp
 //  Tensor
 //
 //  Created by 陳均豪 on 2022/4/1.
 //
 
-#ifndef SliceLayer_hpp
-#define SliceLayer_hpp
+#ifndef CropLayer_hpp
+#define CropLayer_hpp
 
 #include "Layer.hpp"
 
 namespace otter {
 
-class SliceLayer : public Layer {
+class CropLayer : public Layer {
 public:
-    SliceLayer();
+    CropLayer();
     
     virtual int parse_param(LayerOption& option, ParamDict& pd);
     
@@ -24,14 +24,14 @@ public:
     
     virtual int forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
     
-    virtual std::string type() const { return "Slice"; }
+    virtual std::string type() const { return "Crop"; }
 private:
     int axis;
     int start;
     int end;
 };
 
-enum class SliceParam : int {
+enum class CropParam : int {
     Axis,
     Start,
     End
@@ -39,4 +39,4 @@ enum class SliceParam : int {
 
 }   // end namespace otter
 
-#endif /* SliceLayer_hpp */
+#endif /* CropLayer_hpp */

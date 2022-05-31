@@ -1,7 +1,7 @@
-name: "nanodet-plus-m-1.5x_416"
+name: "nanodet-plus-m-1.5x_416-opt"
 Input {
-    name: data
-    output: data
+    name: data_1
+    output: data_1
     Param {
         height: 416
         width: 416
@@ -11,7 +11,7 @@ Input {
 Convolution {
     activation: LRelu
     name: conv_1
-    input: data
+    input: data_1
     output: conv_1
     Param {
         out_channels: 24
@@ -40,7 +40,6 @@ MaxPool {
         padding_w: 1
     }
 }
-
 Convolution {
     name: conv_2
     input: pool_1
@@ -150,21 +149,20 @@ ChannelShuffle {
         groups: 2
     }
 }
-
-Slice {
-    name: slice_1
+Crop {
+    name: crop_1
     input: shuffle_1
-    output: slice_1
+    output: crop_1
     Param {
         start: 0
         end: 88
         axis: 1
     }
 }
-Slice {
-    name: slice_2
+Crop {
+    name: crop_2
     input: shuffle_1
-    output: slice_2
+    output: crop_2
     Param {
         start: 88
         end: 176
@@ -174,7 +172,7 @@ Slice {
 Convolution {
     activation: LRelu
     name: conv_7
-    input: slice_2
+    input: crop_2
     output: conv_7
     Param {
         out_channels: 88
@@ -229,7 +227,7 @@ Convolution {
 }
 Concat {
     name: concat_2
-    input: "slice_1, lr_conv_9"
+    input: "crop_1, lr_conv_9"
     output: concat_2
     Param {
         axis: 1
@@ -243,21 +241,20 @@ ChannelShuffle {
         groups: 2
     }
 }
-
-Slice {
-    name: slice_3
+Crop {
+    name: crop_3
     input: shuffle_2
-    output: slice_3
+    output: crop_3
     Param {
         start: 0
         end: 88
         axis: 1
     }
 }
-Slice {
-    name: slice_4
+Crop {
+    name: crop_4
     input: shuffle_2
-    output: slice_4
+    output: crop_4
     Param {
         start: 88
         end: 176
@@ -267,7 +264,7 @@ Slice {
 Convolution {
     activation: LRelu
     name: conv_10
-    input: slice_4
+    input: crop_4
     output: conv_10
     Param {
         out_channels: 88
@@ -322,7 +319,7 @@ Convolution {
 }
 Concat {
     name: concat_3
-    input: "slice_3, lr_conv_12"
+    input: "crop_3, lr_conv_12"
     output: concat_3
     Param {
         axis: 1
@@ -336,21 +333,20 @@ ChannelShuffle {
         groups: 2
     }
 }
-
-Slice {
-    name: slice_5
+Crop {
+    name: crop_5
     input: shuffle_3
-    output: slice_5
+    output: crop_5
     Param {
         start: 0
         end: 88
         axis: 1
     }
 }
-Slice {
-    name: slice_6
+Crop {
+    name: crop_6
     input: shuffle_3
-    output: slice_6
+    output: crop_6
     Param {
         start: 88
         end: 176
@@ -360,7 +356,7 @@ Slice {
 Convolution {
     activation: LRelu
     name: conv_13
-    input: slice_6
+    input: crop_6
     output: conv_13
     Param {
         out_channels: 88
@@ -415,7 +411,7 @@ Convolution {
 }
 Concat {
     name: concat_4
-    input: "slice_5, lr_conv_15"
+    input: "crop_5, lr_conv_15"
     output: concat_4
     Param {
         axis: 1
@@ -429,7 +425,6 @@ ChannelShuffle {
         groups: 2
     }
 }
-
 Convolution {
     name: conv_16
     input: shuffle_4
@@ -539,21 +534,20 @@ ChannelShuffle {
         groups: 2
     }
 }
-
-Slice {
-    name: slice_7
+Crop {
+    name: crop_7
     input: shuffle_5
-    output: slice_7
+    output: crop_7
     Param {
         start: 0
         end: 176
         axis: 1
     }
 }
-Slice {
-    name: slice_8
+Crop {
+    name: crop_8
     input: shuffle_5
-    output: slice_8
+    output: crop_8
     Param {
         start: 176
         end: 352
@@ -563,7 +557,7 @@ Slice {
 Convolution {
     activation: LRelu
     name: conv_21
-    input: slice_8
+    input: crop_8
     output: conv_21
     Param {
         out_channels: 176
@@ -618,7 +612,7 @@ Convolution {
 }
 Concat {
     name: concat_6
-    input: "slice_7, lr_conv_23"
+    input: "crop_7, lr_conv_23"
     output: concat_6
     Param {
         axis: 1
@@ -632,21 +626,20 @@ ChannelShuffle {
         groups: 2
     }
 }
-
-Slice {
-    name: slice_9
+Crop {
+    name: crop_9
     input: shuffle_6
-    output: slice_9
+    output: crop_9
     Param {
         start: 0
         end: 176
         axis: 1
     }
 }
-Slice {
-    name: slice_10
+Crop {
+    name: crop_10
     input: shuffle_6
-    output: slice_10
+    output: crop_10
     Param {
         start: 176
         end: 352
@@ -656,7 +649,7 @@ Slice {
 Convolution {
     activation: LRelu
     name: conv_24
-    input: slice_10
+    input: crop_10
     output: conv_24
     Param {
         out_channels: 176
@@ -711,7 +704,7 @@ Convolution {
 }
 Concat {
     name: concat_7
-    input: "slice_9, lr_conv_26"
+    input: "crop_9, lr_conv_26"
     output: concat_7
     Param {
         axis: 1
@@ -725,21 +718,20 @@ ChannelShuffle {
         groups: 2
     }
 }
-
-Slice {
-    name: slice_11
+Crop {
+    name: crop_11
     input: shuffle_7
-    output: slice_11
+    output: crop_11
     Param {
         start: 0
         end: 176
         axis: 1
     }
 }
-Slice {
-    name: slice_12
+Crop {
+    name: crop_12
     input: shuffle_7
-    output: slice_12
+    output: crop_12
     Param {
         start: 176
         end: 352
@@ -749,7 +741,7 @@ Slice {
 Convolution {
     activation: LRelu
     name: conv_27
-    input: slice_12
+    input: crop_12
     output: conv_27
     Param {
         out_channels: 176
@@ -804,7 +796,7 @@ Convolution {
 }
 Concat {
     name: concat_8
-    input: "slice_11, lr_conv_29"
+    input: "crop_11, lr_conv_29"
     output: concat_8
     Param {
         axis: 1
@@ -818,21 +810,20 @@ ChannelShuffle {
         groups: 2
     }
 }
-
-Slice {
-    name: slice_13
+Crop {
+    name: crop_13
     input: shuffle_8
-    output: slice_13
+    output: crop_13
     Param {
         start: 0
         end: 176
         axis: 1
     }
 }
-Slice {
-    name: slice_14
+Crop {
+    name: crop_14
     input: shuffle_8
-    output: slice_14
+    output: crop_14
     Param {
         start: 176
         end: 352
@@ -842,7 +833,7 @@ Slice {
 Convolution {
     activation: LRelu
     name: conv_30
-    input: slice_14
+    input: crop_14
     output: conv_30
     Param {
         out_channels: 176
@@ -897,7 +888,7 @@ Convolution {
 }
 Concat {
     name: concat_9
-    input: "slice_13, lr_conv_32"
+    input: "crop_13, lr_conv_32"
     output: concat_9
     Param {
         axis: 1
@@ -911,21 +902,20 @@ ChannelShuffle {
         groups: 2
     }
 }
-
-Slice {
-    name: slice_15
+Crop {
+    name: crop_15
     input: shuffle_9
-    output: slice_15
+    output: crop_15
     Param {
         start: 0
         end: 176
         axis: 1
     }
 }
-Slice {
-    name: slice_16
+Crop {
+    name: crop_16
     input: shuffle_9
-    output: slice_16
+    output: crop_16
     Param {
         start: 176
         end: 352
@@ -935,7 +925,7 @@ Slice {
 Convolution {
     activation: LRelu
     name: conv_33
-    input: slice_16
+    input: crop_16
     output: conv_33
     Param {
         out_channels: 176
@@ -990,7 +980,7 @@ Convolution {
 }
 Concat {
     name: concat_10
-    input: "slice_15, lr_conv_35"
+    input: "crop_15, lr_conv_35"
     output: concat_10
     Param {
         axis: 1
@@ -1004,21 +994,20 @@ ChannelShuffle {
         groups: 2
     }
 }
-
-Slice {
-    name: slice_17
+Crop {
+    name: crop_17
     input: shuffle_10
-    output: slice_17
+    output: crop_17
     Param {
         start: 0
         end: 176
         axis: 1
     }
 }
-Slice {
-    name: slice_18
+Crop {
+    name: crop_18
     input: shuffle_10
-    output: slice_18
+    output: crop_18
     Param {
         start: 176
         end: 352
@@ -1028,7 +1017,7 @@ Slice {
 Convolution {
     activation: LRelu
     name: conv_36
-    input: slice_18
+    input: crop_18
     output: conv_36
     Param {
         out_channels: 176
@@ -1083,7 +1072,7 @@ Convolution {
 }
 Concat {
     name: concat_11
-    input: "slice_17, lr_conv_38"
+    input: "crop_17, lr_conv_38"
     output: concat_11
     Param {
         axis: 1
@@ -1097,21 +1086,20 @@ ChannelShuffle {
         groups: 2
     }
 }
-
-Slice {
-    name: slice_19
+Crop {
+    name: crop_19
     input: shuffle_11
-    output: slice_19
+    output: crop_19
     Param {
         start: 0
         end: 176
         axis: 1
     }
 }
-Slice {
-    name: slice_20
+Crop {
+    name: crop_20
     input: shuffle_11
-    output: slice_20
+    output: crop_20
     Param {
         start: 176
         end: 352
@@ -1121,7 +1109,7 @@ Slice {
 Convolution {
     activation: LRelu
     name: conv_39
-    input: slice_20
+    input: crop_20
     output: conv_39
     Param {
         out_channels: 176
@@ -1176,7 +1164,7 @@ Convolution {
 }
 Concat {
     name: concat_12
-    input: "slice_19, lr_conv_41"
+    input: "crop_19, lr_conv_41"
     output: concat_12
     Param {
         axis: 1
@@ -1190,7 +1178,6 @@ ChannelShuffle {
         groups: 2
     }
 }
-
 Convolution {
     name: conv_42
     input: shuffle_12
@@ -1300,21 +1287,20 @@ ChannelShuffle {
         groups: 2
     }
 }
-
-Slice {
-    name: slice_21
+Crop {
+    name: crop_21
     input: shuffle_13
-    output: slice_21
+    output: crop_21
     Param {
         start: 0
         end: 352
         axis: 1
     }
 }
-Slice {
-    name: slice_22
+Crop {
+    name: crop_22
     input: shuffle_13
-    output: slice_22
+    output: crop_22
     Param {
         start: 352
         end: 704
@@ -1324,7 +1310,7 @@ Slice {
 Convolution {
     activation: LRelu
     name: conv_47
-    input: slice_22
+    input: crop_22
     output: conv_47
     Param {
         out_channels: 352
@@ -1379,7 +1365,7 @@ Convolution {
 }
 Concat {
     name: concat_14
-    input: "slice_21, lr_conv_49"
+    input: "crop_21, lr_conv_49"
     output: concat_14
     Param {
         axis: 1
@@ -1393,21 +1379,20 @@ ChannelShuffle {
         groups: 2
     }
 }
-
-Slice {
-    name: slice_23
+Crop {
+    name: crop_23
     input: shuffle_14
-    output: slice_23
+    output: crop_23
     Param {
         start: 0
         end: 352
         axis: 1
     }
 }
-Slice {
-    name: slice_24
+Crop {
+    name: crop_24
     input: shuffle_14
-    output: slice_24
+    output: crop_24
     Param {
         start: 352
         end: 704
@@ -1417,7 +1402,7 @@ Slice {
 Convolution {
     activation: LRelu
     name: conv_50
-    input: slice_24
+    input: crop_24
     output: conv_50
     Param {
         out_channels: 352
@@ -1472,7 +1457,7 @@ Convolution {
 }
 Concat {
     name: concat_15
-    input: "slice_23, lr_conv_52"
+    input: "crop_23, lr_conv_52"
     output: concat_15
     Param {
         axis: 1
@@ -1486,21 +1471,20 @@ ChannelShuffle {
         groups: 2
     }
 }
-
-Slice {
-    name: slice_25
+Crop {
+    name: crop_25
     input: shuffle_15
-    output: slice_25
+    output: crop_25
     Param {
         start: 0
         end: 352
         axis: 1
     }
 }
-Slice {
-    name: slice_26
+Crop {
+    name: crop_26
     input: shuffle_15
-    output: slice_26
+    output: crop_26
     Param {
         start: 352
         end: 704
@@ -1510,7 +1494,7 @@ Slice {
 Convolution {
     activation: LRelu
     name: conv_53
-    input: slice_26
+    input: crop_26
     output: conv_53
     Param {
         out_channels: 352
@@ -1565,7 +1549,7 @@ Convolution {
 }
 Concat {
     name: concat_16
-    input: "slice_25, lr_conv_55"
+    input: "crop_25, lr_conv_55"
     output: concat_16
     Param {
         axis: 1
@@ -1636,7 +1620,6 @@ Convolution {
         alpha: 0.100000
     }
 }
-
 Upsample {
     name: upsample_1
     input: lr_conv_58
@@ -1655,7 +1638,6 @@ Concat {
         axis: 1
     }
 }
-
 Convolution {
     activation: LRelu
     name: conv_59
@@ -1675,7 +1657,6 @@ Convolution {
         alpha: 0.100000
     }
 }
-
 Convolution {
     activation: LRelu
     name: conv_60
@@ -1721,7 +1702,6 @@ Convolution {
         bias_term: true
     }
 }
-
 Convolution {
     name: conv_62
     input: conv_61
@@ -1788,7 +1768,6 @@ ShortCut {
     input: "concat_19, conv_64"
     output: shortcut_1
 }
-
 Upsample {
     name: upsample_2
     input: shortcut_1
@@ -1807,7 +1786,6 @@ Concat {
         axis: 1
     }
 }
-
 Convolution {
     activation: LRelu
     name: conv_65
@@ -1827,7 +1805,6 @@ Convolution {
         alpha: 0.100000
     }
 }
-
 Convolution {
     activation: LRelu
     name: conv_66
@@ -1873,7 +1850,6 @@ Convolution {
         bias_term: true
     }
 }
-
 Convolution {
     name: conv_68
     input: conv_67
@@ -1940,7 +1916,6 @@ ShortCut {
     input: "concat_22, conv_70"
     output: shortcut_2
 }
-
 Convolution {
     activation: LRelu
     name: conv_71
@@ -1988,7 +1963,6 @@ Concat {
         axis: 1
     }
 }
-
 Convolution {
     activation: LRelu
     name: conv_73
@@ -2008,7 +1982,6 @@ Convolution {
         alpha: 0.100000
     }
 }
-
 Convolution {
     activation: LRelu
     name: conv_74
@@ -2054,7 +2027,6 @@ Convolution {
         bias_term: true
     }
 }
-
 Convolution {
     name: conv_76
     input: conv_75
@@ -2121,7 +2093,6 @@ ShortCut {
     input: "concat_25, conv_78"
     output: shortcut_3
 }
-
 Convolution {
     activation: LRelu
     name: conv_79
@@ -2169,7 +2140,6 @@ Concat {
         axis: 1
     }
 }
-
 Convolution {
     activation: LRelu
     name: conv_81
@@ -2189,7 +2159,6 @@ Convolution {
         alpha: 0.100000
     }
 }
-
 Convolution {
     activation: LRelu
     name: conv_82
@@ -2235,7 +2204,6 @@ Convolution {
         bias_term: true
     }
 }
-
 Convolution {
     name: conv_84
     input: conv_83
@@ -2302,7 +2270,6 @@ ShortCut {
     input: "concat_28, conv_86"
     output: shortcut_4
 }
-
 Convolution {
     activation: LRelu
     name: conv_87

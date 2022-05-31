@@ -39,7 +39,7 @@ int concat = 1;
 int pool = 1;
 int upsample = 1;
 int shuffle = 1;
-int slice = 1;
+int crop = 1;
 int shortcut = 1;
 int yolo = 1;
 
@@ -408,15 +408,15 @@ team.addParam({"activation", type});
             printf("Crop unsupports!\n");
             exit(-100);
         }
-        team.setName("Slice");
+        team.setName("Crop");
         ADD_PARAM("start", (int)start[0]);
         ADD_PARAM("end", (int)end[0]);
         ADD_PARAM("axis", (int)axis[0] + 1);
         
         std::string input = transform_map[input_name];
-        std::string output = get_layer_name("slice", slice);
+        std::string output = get_layer_name("crop", crop);
         ADD_TRANSFORM_MAP(output_name, output);
-        WRITE_LAYER_NAME("slice", slice++);
+        WRITE_LAYER_NAME("crop", crop++);
         ADD_PARAM_STRING("input", input);
         ADD_PARAM_STRING("output", output);
         

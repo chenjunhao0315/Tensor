@@ -23,7 +23,7 @@ int main(int argc, const char * argv[]) {
     
     OtterLeader convert = otter::ncnn2otter(argv[1]);
     
-    convert.saveProject((argc > 3) ? argv[2] : "transform.otter");
+    convert.saveProject((argc > 2) ? argv[2] : "transform.otter");
 
 	return 0;
 }
