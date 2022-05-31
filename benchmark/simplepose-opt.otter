@@ -1,4 +1,4 @@
-name: "simplepose-opt.param"
+name: "simplepose-opt.otter"
 Input {
     name: data_1
     output: data_1
@@ -29,7 +29,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_2
-    input: re_conv_1
+    input: relu6_conv_1
     output: conv_2
     Param {
         out_channels: 16
@@ -47,7 +47,7 @@ Convolution {
 }
 Convolution {
     name: conv_3
-    input: re_conv_2
+    input: relu6_conv_2
     output: conv_3
     Param {
         out_channels: 8
@@ -83,7 +83,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_5
-    input: re_conv_4
+    input: relu6_conv_4
     output: conv_5
     Param {
         out_channels: 48
@@ -101,7 +101,7 @@ Convolution {
 }
 Convolution {
     name: conv_6
-    input: re_conv_5
+    input: relu6_conv_5
     output: conv_6
     Param {
         out_channels: 12
@@ -137,7 +137,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_8
-    input: re_conv_7
+    input: relu6_conv_7
     output: conv_8
     Param {
         out_channels: 72
@@ -155,7 +155,7 @@ Convolution {
 }
 Convolution {
     name: conv_9
-    input: re_conv_8
+    input: relu6_conv_8
     output: conv_9
     Param {
         out_channels: 12
@@ -196,7 +196,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_11
-    input: re_conv_10
+    input: relu6_conv_10
     output: conv_11
     Param {
         out_channels: 72
@@ -214,7 +214,7 @@ Convolution {
 }
 Convolution {
     name: conv_12
-    input: re_conv_11
+    input: relu6_conv_11
     output: conv_12
     Param {
         out_channels: 16
@@ -250,7 +250,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_14
-    input: re_conv_13
+    input: relu6_conv_13
     output: conv_14
     Param {
         out_channels: 96
@@ -268,7 +268,7 @@ Convolution {
 }
 Convolution {
     name: conv_15
-    input: re_conv_14
+    input: relu6_conv_14
     output: conv_15
     Param {
         out_channels: 16
@@ -309,7 +309,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_17
-    input: re_conv_16
+    input: relu6_conv_16
     output: conv_17
     Param {
         out_channels: 96
@@ -327,7 +327,7 @@ Convolution {
 }
 Convolution {
     name: conv_18
-    input: re_conv_17
+    input: relu6_conv_17
     output: conv_18
     Param {
         out_channels: 16
@@ -368,7 +368,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_20
-    input: re_conv_19
+    input: relu6_conv_19
     output: conv_20
     Param {
         out_channels: 96
@@ -386,7 +386,7 @@ Convolution {
 }
 Convolution {
     name: conv_21
-    input: re_conv_20
+    input: relu6_conv_20
     output: conv_21
     Param {
         out_channels: 32
@@ -422,7 +422,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_23
-    input: re_conv_22
+    input: relu6_conv_22
     output: conv_23
     Param {
         out_channels: 192
@@ -440,7 +440,7 @@ Convolution {
 }
 Convolution {
     name: conv_24
-    input: re_conv_23
+    input: relu6_conv_23
     output: conv_24
     Param {
         out_channels: 32
@@ -481,7 +481,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_26
-    input: re_conv_25
+    input: relu6_conv_25
     output: conv_26
     Param {
         out_channels: 192
@@ -499,7 +499,7 @@ Convolution {
 }
 Convolution {
     name: conv_27
-    input: re_conv_26
+    input: relu6_conv_26
     output: conv_27
     Param {
         out_channels: 32
@@ -540,7 +540,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_29
-    input: re_conv_28
+    input: relu6_conv_28
     output: conv_29
     Param {
         out_channels: 192
@@ -558,7 +558,7 @@ Convolution {
 }
 Convolution {
     name: conv_30
-    input: re_conv_29
+    input: relu6_conv_29
     output: conv_30
     Param {
         out_channels: 32
@@ -599,7 +599,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_32
-    input: re_conv_31
+    input: relu6_conv_31
     output: conv_32
     Param {
         out_channels: 192
@@ -617,7 +617,7 @@ Convolution {
 }
 Convolution {
     name: conv_33
-    input: re_conv_32
+    input: relu6_conv_32
     output: conv_33
     Param {
         out_channels: 48
@@ -653,7 +653,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_35
-    input: re_conv_34
+    input: relu6_conv_34
     output: conv_35
     Param {
         out_channels: 288
@@ -671,7 +671,7 @@ Convolution {
 }
 Convolution {
     name: conv_36
-    input: re_conv_35
+    input: relu6_conv_35
     output: conv_36
     Param {
         out_channels: 48
@@ -712,7 +712,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_38
-    input: re_conv_37
+    input: relu6_conv_37
     output: conv_38
     Param {
         out_channels: 288
@@ -730,7 +730,7 @@ Convolution {
 }
 Convolution {
     name: conv_39
-    input: re_conv_38
+    input: relu6_conv_38
     output: conv_39
     Param {
         out_channels: 48
@@ -771,7 +771,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_41
-    input: re_conv_40
+    input: relu6_conv_40
     output: conv_41
     Param {
         out_channels: 288
@@ -789,7 +789,7 @@ Convolution {
 }
 Convolution {
     name: conv_42
-    input: re_conv_41
+    input: relu6_conv_41
     output: conv_42
     Param {
         out_channels: 80
@@ -825,7 +825,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_44
-    input: re_conv_43
+    input: relu6_conv_43
     output: conv_44
     Param {
         out_channels: 480
@@ -843,7 +843,7 @@ Convolution {
 }
 Convolution {
     name: conv_45
-    input: re_conv_44
+    input: relu6_conv_44
     output: conv_45
     Param {
         out_channels: 80
@@ -884,7 +884,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_47
-    input: re_conv_46
+    input: relu6_conv_46
     output: conv_47
     Param {
         out_channels: 480
@@ -902,7 +902,7 @@ Convolution {
 }
 Convolution {
     name: conv_48
-    input: re_conv_47
+    input: relu6_conv_47
     output: conv_48
     Param {
         out_channels: 80
@@ -943,7 +943,7 @@ Convolution {
 Convolution {
     activation: Relu6
     name: conv_50
-    input: re_conv_49
+    input: relu6_conv_49
     output: conv_50
     Param {
         out_channels: 480
@@ -961,7 +961,7 @@ Convolution {
 }
 Convolution {
     name: conv_51
-    input: re_conv_50
+    input: relu6_conv_50
     output: conv_51
     Param {
         out_channels: 160
@@ -997,7 +997,7 @@ Convolution {
 Deconvolution {
     activation: Relu
     name: deconv_1
-    input: re_conv_52
+    input: relu_conv_52
     output: deconv_1
     Param {
         out_channels: 128
@@ -1018,7 +1018,7 @@ Deconvolution {
 Convolution {
     activation: Relu
     name: conv_53
-    input: re_deconv_1
+    input: relu_deconv_1
     output: conv_53
     Param {
         out_channels: 128
@@ -1036,7 +1036,7 @@ Convolution {
 Deconvolution {
     activation: Relu
     name: deconv_2
-    input: re_conv_53
+    input: relu_conv_53
     output: deconv_2
     Param {
         out_channels: 128
@@ -1057,7 +1057,7 @@ Deconvolution {
 Convolution {
     activation: Relu
     name: conv_54
-    input: re_deconv_2
+    input: relu_deconv_2
     output: conv_54
     Param {
         out_channels: 128
@@ -1075,7 +1075,7 @@ Convolution {
 Deconvolution {
     activation: Relu
     name: deconv_3
-    input: re_conv_54
+    input: relu_conv_54
     output: deconv_3
     Param {
         out_channels: 128
@@ -1096,7 +1096,7 @@ Deconvolution {
 Convolution {
     activation: Relu
     name: conv_55
-    input: re_deconv_3
+    input: relu_deconv_3
     output: conv_55
     Param {
         out_channels: 128
@@ -1113,7 +1113,7 @@ Convolution {
 }
 Convolution {
     name: conv_56
-    input: re_conv_55
+    input: relu_conv_55
     output: conv_56
     Param {
         out_channels: 17
