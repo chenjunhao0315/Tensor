@@ -67,6 +67,10 @@ bool ConvParams::is_stride_nonpos() const {
     return is_nonpos;
 }
 
+bool ConvParams::is_int8(const Tensor& input, const Tensor& weight) const {
+    return (weight.scalar_type() == ScalarType::Byte);
+}
+
 bool ConvParams::is_depthwise(const Tensor& input, const Tensor& weight) const {
     return (input.dim() == 4) &&
     (input.size(1) == groups) &&

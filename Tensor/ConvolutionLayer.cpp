@@ -13,7 +13,7 @@
 
 #include "ConvolutionMM2DNeon.hpp"
 #include "ConvolutionMM2DX86.hpp"
-
+ 
 namespace otter {
 
 ConvolutionLayer::ConvolutionLayer() {
@@ -68,6 +68,7 @@ int ConvolutionLayer::parse_param(LayerOption& option, ParamDict& pd) {
         else
             bias_term = 1;
     }
+    int int8_scale_term = opt_find_int(option, "int8_scale_term", 0);
     
     pd.set((int)ConvParam::In_channels, in_channels);
     pd.set((int)ConvParam::Out_channels, out_channels);
@@ -83,6 +84,7 @@ int ConvolutionLayer::parse_param(LayerOption& option, ParamDict& pd) {
     pd.set((int)ConvParam::Output_padding_height, output_padding_height);
     pd.set((int)ConvParam::Group, groups);
     pd.set((int)ConvParam::Bias_term, bias_term);
+    pd.set((int)ConvParam::Int8_scale_term, int8_scale_term);
     
     return 0;
 }
@@ -130,6 +132,7 @@ int ConvolutionLayer::load_param(const ParamDict &pd) {
     groups = pd.get((int)ConvParam::Group, 1);
     bias_term = pd.get((int)ConvParam::Bias_term, 0);
     weight_data_size = pd.get((int)ConvParam::Weight_data_size, 0);
+    int8_scale_term = pd.get((int)ConvParam::Int8_scale_term, 0);
     
     return 0;
 }
@@ -155,12 +158,51 @@ int ConvolutionLayer::load_model(const Initializer& initializer) {
         if (bias_term) {
             bias_data = initializer.load({out_channels}, 1);
         }
+        if (in_channels == groups && groups == out_channels) {
+            if (int8_scale_term == 1 || int8_scale_term == 101) {
+                weight_data_int8_scales = initializer.load({groups}, 1);
+                bottom_blob_int8_scales = initializer.load({1}, 1);
+
+                float bottom_blob_int8_scale = bottom_blob_int8_scales.item().toFloat();
+                bottom_blob_int8_scales = otter::full({groups}, bottom_blob_int8_scale, otter::ScalarType::Float);
+            } else if (int8_scale_term == 2 || int8_scale_term == 102) {
+                weight_data_int8_scales = initializer.load({1}, 1);
+                bottom_blob_int8_scales = initializer.load({1}, 1);
+
+                // extend group if only one provided
+                float weight_data_int8_scale = weight_data_int8_scales.item().toFloat();
+                weight_data_int8_scales = otter::full({groups}, weight_data_int8_scale, otter::ScalarType::Float);
+
+                float bottom_blob_int8_scale = bottom_blob_int8_scales.item().toFloat();
+                bottom_blob_int8_scales = otter::full({groups}, bottom_blob_int8_scale, otter::ScalarType::Float);
+            }
+            
+            if (int8_scale_term > 100) {
+                top_blob_int8_scales = initializer.load({1}, 1);
+
+                float top_blob_int8_scale = top_blob_int8_scales.item().toFloat();
+                top_blob_int8_scales = otter::full({groups}, top_blob_int8_scale, otter::ScalarType::Float);
+            }
+        } else {
+            if (int8_scale_term) {
+                weight_data_int8_scales = initializer.load({out_channels}, 1);
+                bottom_blob_int8_scales = initializer.load({1}, 1);
+            }
+            if (int8_scale_term > 100) {
+                top_blob_int8_scales = initializer.load({1}, 1);
+            }
+        }
     }
     
     return 0;
 }
 
 int ConvolutionLayer::create_pipeline() {
+    
+    if (weight_data.scalar_type() == otter::ScalarType::Byte) {
+        return create_pipeline_int8();
+    }
+    
     auto k = weight_data.dim();
     auto dim = k - 2;
     
@@ -215,6 +257,10 @@ int ConvolutionLayer::create_pipeline() {
     return 0;
 }
 
+int ConvolutionLayer::create_pipeline_int8() {
+    return 0;
+}
+
 int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const NetOption& /*opt*/) const {
     
     Tensor optimize_kernel;
@@ -234,37 +280,41 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
     if (k == 3)
         params.view_1d_as_2d();
     
-    if (params.use_cpu_neon(bottom_blob, weight_data)) {
-        // General
-        if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 1 && params.stride[1] == 1) {
-            if (bottom_blob.size(1) >= 64 && weight_data.size(0) >= 64) {
+    if (int8_scale_term) {
+        
+    } else {
+        if (params.use_cpu_neon(bottom_blob, weight_data)) {
+            // General
+            if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 1 && params.stride[1] == 1) {
+                if (bottom_blob.size(1) >= 64 && weight_data.size(0) >= 64) {
+                    optimize_kernel = weight_sgemm_data;
+                }
+            } else if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 2 && params.stride[1] == 2) {
                 optimize_kernel = weight_sgemm_data;
-            }
-        } else if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 2 && params.stride[1] == 2) {
-            optimize_kernel = weight_sgemm_data;
-        } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
-            if (bottom_blob.size(1) >= 16 && weight_data.size(0) >= 16 && bottom_blob.size(3) <= 120 && bottom_blob.size(2) <= 120) {
-                optimize_kernel = weight_3x3_winograd64_data;
-            }
-        } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
-            auto output_shape = otter::calculate_conv_output_size(bottom_blob.sizes(), weight_data.sizes(), params.stride, params.padding);
-            if (!(output_shape[2] >= 8 && output_shape[3] >= 8)) {
-                optimize_kernel = weight_sgemm_data;
+            } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
+                if (bottom_blob.size(1) >= 16 && weight_data.size(0) >= 16 && bottom_blob.size(3) <= 120 && bottom_blob.size(2) <= 120) {
+                    optimize_kernel = weight_3x3_winograd64_data;
+                }
+            } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
+                auto output_shape = otter::calculate_conv_output_size(bottom_blob.sizes(), weight_data.sizes(), params.stride, params.padding);
+                if (!(output_shape[2] >= 8 && output_shape[3] >= 8)) {
+                    optimize_kernel = weight_sgemm_data;
+                } else {
+                    optimize_kernel = weight_3x3s2_data;
+                }
             } else {
-                optimize_kernel = weight_3x3s2_data;
+                bool prefer_sgemm = (params.stride[0] == 1 && params.stride[1] == 1 && (bottom_blob.size(1) >= 12 || weight_data.size(0) >= 12)) || ((params.stride[0] >= 2 || params.stride[1] >= 2) && (bottom_blob.size(1) >= 16 || weight_data.size(0) >= 16));
+                
+                if (prefer_sgemm) {
+                    optimize_kernel = weight_sgemm_data;
+                }
             }
-        } else {
-            bool prefer_sgemm = (params.stride[0] == 1 && params.stride[1] == 1 && (bottom_blob.size(1) >= 12 || weight_data.size(0) >= 12)) || ((params.stride[0] >= 2 || params.stride[1] >= 2) && (bottom_blob.size(1) >= 16 || weight_data.size(0) >= 16));
-            
-            if (prefer_sgemm) {
+        } else if (params.use_cpu_x86(bottom_blob, weight_data)) {
+            if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1 && in_channels >= 16 && out_channels >= 16) {
+                optimize_kernel = weight_3x3_winograd23_data;
+            } else {
                 optimize_kernel = weight_sgemm_data;
             }
-        }
-    } else if (params.use_cpu_x86(bottom_blob, weight_data)) {
-        if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1 && in_channels >= 16 && out_channels >= 16) {
-            optimize_kernel = weight_3x3_winograd23_data;
-        } else {
-            optimize_kernel = weight_sgemm_data;
         }
     }
     
@@ -276,7 +326,8 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
         false,      // transpose
         params.output_padding,
         groups,
-        false       // benchmark
+        bottom_blob_int8_scales,
+        weight_data_int8_scales
     );
     
     return 0;

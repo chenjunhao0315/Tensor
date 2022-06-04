@@ -535,7 +535,13 @@ int Net::load_weight(const DataReader& dr, WeightType type) {
         case WeightType::Ncnn: {
             InitializerNcnnFromDataReader initializer(dr);
             
-            return load_weight(initializer);
+            int ret = load_weight(initializer);
+            size_t remain = dr.remain();
+            if (remain) {
+                printf("Network may initialize fail, remain weight %zd\n", remain);
+            }
+            
+            return remain || ret;
         }
         default:
             InitializerFromDataReader initializer(dr);

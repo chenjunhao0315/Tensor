@@ -26,9 +26,10 @@ Tensor convolution(
     bool transposed_,
     IntArrayRef output_padding_,
     int64_t groups_,
-    bool benchmark);
+    const Tensor& input_int8_scales = Tensor(),
+    const Tensor& weight_int8_scales = Tensor());
 
-Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, const Tensor& weight_o, const Tensor& bias, ConvBackend backend, ConvParams& params);
+Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, const Tensor& weight_o, const Tensor& bias, ConvBackend backend, ConvParams& params, const Tensor& input_int8_scales = Tensor(), const Tensor& weight_int8_scales = Tensor());
 
 }
 

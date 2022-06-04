@@ -63,6 +63,7 @@ InitializerNcnnFromDataReader::~InitializerNcnnFromDataReader() {
 
 Tensor InitializerNcnnFromDataReader::load(IntArrayRef shape, int type) const {
     const int64_t size = otter::multiply_integers(shape);
+    otter::Tensor result;
     
     if (type == 0) {
         size_t nread;
@@ -90,10 +91,26 @@ Tensor InitializerNcnnFromDataReader::load(IntArrayRef shape, int type) const {
             // fp16
             OTTER_CHECK(false, "Unsupport fp16 data!");
         } else if (flag_struct.tag == 0x000D4B38) {
-            // int8
-            OTTER_CHECK(false, "Unsupport int8 data!");
+            // int8 data
+            size_t align_data_size = alignSize(size, 4);
+            
+            std::vector<signed char> int8_weights;
+            int8_weights.resize(align_data_size);
+            nread = dr.read(int8_weights.data(), align_data_size);
+            if (nread != align_data_size) {
+                printf("ModelBin read int8_weights failed %zd\n", nread);
+                return Tensor();
+            }
+                
+            result = otter::empty(shape, otter::ScalarType::Byte);
+            if (!result.defined())
+                return result;
+                
+            memcpy(result.raw_data(), int8_weights.data(), size);
+            
+            return result;
         } else if (flag_struct.tag == 0x0002C056) {
-            auto result = otter::empty(shape, ScalarType::Float);
+            result = otter::empty(shape, ScalarType::Float);
             
             nread = dr.read(result.raw_data(), size * sizeof(float));
             if (nread != size * sizeof(float)) {
@@ -104,7 +121,7 @@ Tensor InitializerNcnnFromDataReader::load(IntArrayRef shape, int type) const {
             return result;
         }
         
-        auto result = otter::empty(shape, ScalarType::Float);
+        result = otter::empty(shape, ScalarType::Float);
         
         if (flag != 0) {
             // quantized data

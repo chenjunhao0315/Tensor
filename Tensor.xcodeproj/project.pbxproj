@@ -71,6 +71,7 @@
 		76486AF727DF7A510078FF9B /* GraphicAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AF527DF7A510078FF9B /* GraphicAPI.cpp */; };
 		76486AFA27DF7CD80078FF9B /* LineIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AF827DF7CD80078FF9B /* LineIterator.cpp */; };
 		7651B6C62805CA77006710F5 /* LineDetection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7651B6C42805CA77006710F5 /* LineDetection.cpp */; };
+		765D27122847CB0800996934 /* Quantize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 765D27102847CB0800996934 /* Quantize.cpp */; };
 		7663C21F281AF75900102057 /* Observer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C21D281AF75900102057 /* Observer.cpp */; };
 		7663C233281B503200102057 /* PoseEstimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C231281B503200102057 /* PoseEstimation.cpp */; };
 		7663C239281D4B7C00102057 /* KalmanFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C237281D4B7C00102057 /* KalmanFilter.cpp */; };
@@ -317,6 +318,8 @@
 		76486AF927DF7CD80078FF9B /* LineIterator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LineIterator.hpp; sourceTree = "<group>"; };
 		7651B6C42805CA77006710F5 /* LineDetection.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LineDetection.cpp; sourceTree = "<group>"; };
 		7651B6C52805CA77006710F5 /* LineDetection.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LineDetection.hpp; sourceTree = "<group>"; };
+		765D27102847CB0800996934 /* Quantize.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Quantize.cpp; sourceTree = "<group>"; };
+		765D27112847CB0800996934 /* Quantize.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Quantize.hpp; sourceTree = "<group>"; };
 		7663C21D281AF75900102057 /* Observer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Observer.cpp; sourceTree = "<group>"; };
 		7663C21E281AF75900102057 /* Observer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Observer.hpp; sourceTree = "<group>"; };
 		7663C231281B503200102057 /* PoseEstimation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PoseEstimation.cpp; sourceTree = "<group>"; };
@@ -635,6 +638,8 @@
 				76BA779327C6CCB700AA896B /* im2col.cpp */,
 				76BA779427C6CCB700AA896B /* im2col.hpp */,
 				76BA779727C6CD2300AA896B /* vol2col.hpp */,
+				765D27102847CB0800996934 /* Quantize.cpp */,
+				765D27112847CB0800996934 /* Quantize.hpp */,
 			);
 			name = Convolution;
 			sourceTree = "<group>";
@@ -1181,6 +1186,7 @@
 				762047A828454A0800B8BEEF /* ParallelNative.cpp in Sources */,
 				76486AF127DCD0C10078FF9B /* TensorInterpolation.cpp in Sources */,
 				760382D327C00DD000CD599F /* TensorCat.cpp in Sources */,
+				765D27122847CB0800996934 /* Quantize.cpp in Sources */,
 				76E6C51327A502A30036A26F /* Tensor.cpp in Sources */,
 				76E6C52827A505700036A26F /* SmallVector.cpp in Sources */,
 				769279D427D49BC90088BD9F /* UpsampleLayer.cpp in Sources */,
@@ -1333,7 +1339,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = NO;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = /usr/local/opt/llvm/lib/clang/13.0.1/include;
 				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/llvm/13.0.1/lib;
 				OTHER_CFLAGS = (
@@ -1361,7 +1367,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = NO;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = /usr/local/opt/llvm/lib/clang/13.0.1/include;
 				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/llvm/13.0.1/lib;
 				OTHER_CFLAGS = (

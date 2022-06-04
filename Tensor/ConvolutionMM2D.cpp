@@ -15,6 +15,7 @@
 #include "Unfold2D.hpp"
 #include "TensorBlas.hpp"
 #include "Padding.hpp"
+#include "Quantize.hpp"
 
 namespace otter {
 
@@ -319,83 +320,85 @@ Tensor& slide_win_conv2d_out(
     IntArrayRef padding,
     Tensor& output) {
     
-    const int64_t kernel_height = kernel_size[0];
-    const int64_t kernel_width  = kernel_size[1];
-    const int64_t pad_height    = padding[0];
-    const int64_t pad_width     = padding[1];
-    const int64_t stride_height = stride[0];
-    const int64_t stride_width  = stride[1];
+    auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0);
     
-    const int64_t dim_planes = 1;
-    const int64_t dim_height = 2;
-    const int64_t dim_width  = 3;
+    auto output_shape = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    output.resize_(output_shape);
     
-    const Tensor input_pad = otter::constant_pad(self.contiguous(), padding, 0);
-    const int64_t input_channels  = self.size(dim_planes);
-    const int64_t input_height    = self.size(dim_height);
-    const int64_t input_width     = self.size(dim_width);
-    const int64_t output_channels = weight.size(0);
-    const int64_t output_height   = (input_height + 2 * pad_height - kernel_height) / stride_height + 1;
-    const int64_t output_width    = (input_width  + 2 * pad_width  - kernel_width ) / stride_width  + 1;
+    const int kernel_w = kernel_size[1];
+    const int kernel_h = kernel_size[0];
+    const int stride_w = stride[1];
+    const int stride_h = stride[0];
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
-    
-    output.resize_(output_size);
-    
-    const int64_t max_kernel = kernel_height * kernel_width;
-    std::vector<int> space_offset_(max_kernel);
-    int *space_offset = &space_offset_[0];
-    
-    int p1 = 0;
-    int p2 = 0;
-    int gap = int(input_width - kernel_width);
-    for (int64_t i = 0; i < kernel_height; ++i) {
-        for (int64_t j = 0; j < kernel_width; ++j) {
-            space_offset[p1] = p2;
-            p1++;
-            p2++;
-        }
-        p2 += gap;
-    }
-    
-    bool bias_term = bias.defined();
-    
-    otter::parallel_for(0, output_channels, 0, [&](int64_t start, int64_t end) {
-        for (const auto p : otter::irange(start, end)) {
-            OTTER_DISPATCH_ALL_TYPES(self.scalar_type(), "slide_win_conv2d", [&]{
-                auto output_a = output.accessor<scalar_t, 4>()[0];
-                auto input_a = input_pad.accessor<scalar_t, 4>()[0];
-                scalar_t *outptr = output_a[p].data();
-                const scalar_t *weight_data = weight.data_ptr<scalar_t>();
-                const scalar_t *bias_data = (bias_term) ? bias.data_ptr<scalar_t>() : nullptr;
-                
-                for (int i = 0; i < output_height; ++i) {
-                    for (int j = 0; j < output_width; ++j) {
-                        scalar_t sum = 0;
-                        
-                        if (bias_term) {
-                            sum = bias_data[p];
-                        }
+    const int w = (int)input.size(3);
+    const int inch = (int)input.size(1);
 
-                        const scalar_t* kptr = weight_data + max_kernel * input_channels * p;
-                        
-                        for (int q = 0; q < input_channels; ++q) {
-                            const auto input_a_c = input_a[q];
-                            const scalar_t *sptr = input_a_c[i * stride_height].data() + j * stride_width;
-                            
-                            for (int k = 0; k < max_kernel; ++k) {
-                                scalar_t val = sptr[space_offset[k]];
+    const int outw  = (int)output_shape[3];
+    const int outh  = (int)output_shape[2];
+    const int outch = (int)output_shape[1];
+
+    const int bias_term = bias.defined() ? 1 : 0;
+
+    const int maxk = kernel_w * kernel_h;
+
+    // kernel offsets
+    std::vector<int> _space_ofs(maxk);
+    int* space_ofs = &_space_ofs[0];
+    {
+        int p1 = 0;
+        int p2 = 0;
+        int gap = w - kernel_w;
+        for (int i = 0; i < kernel_h; i++) {
+            for (int j = 0; j < kernel_w; j++) {
+                space_ofs[p1] = p2;
+                p1++;
+                p2++;
+            }
+            p2 += gap;
+        }
+    }
+
+    OTTER_DISPATCH_ALL_TYPES(self.scalar_type(), "conv2d", [&] {
+        auto input_a = input.accessor<scalar_t, 4>()[0];
+        auto output_a = output.accessor<scalar_t, 4>()[0];
+        auto bias_data = (bias_term) ? bias.data_ptr<scalar_t>() : nullptr;
+        auto weight_data = weight.data_ptr<scalar_t>();
+        
+        otter::parallel_for(0, outch, 0, [&](int64_t begin, int end) {
+            for (const auto p : otter::irange(begin, end)) {
+                scalar_t* outptr = output_a[p].data();
+
+                for (int i = 0; i < outh; i++) {
+                    for (int j = 0; j < outw; j++) {
+                        scalar_t sum = 0.f;
+
+                        if (bias_term)
+                            sum = bias_data[p];
+
+                        const scalar_t* kptr = (const scalar_t*)weight_data + maxk * inch * p;
+
+                        for (int q = 0; q < inch; q++)
+                        {
+                            const auto m = input_a[q];
+                            const scalar_t* sptr = m[i * stride_h].data() + j * stride_w;
+
+                            for (int k = 0; k < maxk; k++) // 29.23
+                            {
+                                scalar_t val = sptr[space_ofs[k]]; // 20.72
                                 scalar_t wt = kptr[k];
-                                sum += val * wt;
+                                sum += val * wt; // 41.45
                             }
-                            kptr += max_kernel;
+
+                            kptr += maxk;
                         }
+                        
                         outptr[j] = sum;
                     }
-                    outptr += output_width;
+
+                    outptr += outw;
                 }
-            });
-        }
+            }
+        });
     });
     
     return output;
@@ -411,6 +414,134 @@ Tensor slide_win_conv2d(
     
     auto out = otter::empty({}, self.options());
     slide_win_conv2d_out(self, weight, bias, kernel_size, stride, padding, out);
+    
+    return out;
+}
+
+Tensor& slide_win_conv2d_int8_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    const Tensor& input_int8_scales,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation,
+    Tensor& output) {
+    
+    auto input_q = otter::quantize_to_int8(self, input_int8_scales);
+    auto input = otter::constant_pad(input_q, {padding[1], padding[1], padding[0], padding[0]}, 0);
+    
+    auto output_shape = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    output.resize_(output_shape);
+    
+    const int kernel_w = kernel_size[1];
+    const int kernel_h = kernel_size[0];
+    const int stride_w = stride[1];
+    const int stride_h = stride[0];
+    const int dilation_w = dilation[1];
+    const int dilation_h = dilation[0];
+    
+    const int w = (int)input.size(3);
+    const int inch = (int)input.size(1);
+
+    const int outw  = (int)output_shape[3];
+    const int outh  = (int)output_shape[2];
+    const int outch = (int)output_shape[1];
+
+    const int bias_term = bias.defined() ? 1 : 0;
+
+    const int maxk = kernel_w * kernel_h;
+
+    // kernel offsets
+    std::vector<int> _space_ofs(maxk);
+    int* space_ofs = &_space_ofs[0];
+    {
+        int p1 = 0;
+        int p2 = 0;
+        int gap = w * dilation_h - kernel_w * dilation_w;
+        for (int i = 0; i < kernel_h; i++)
+        {
+            for (int j = 0; j < kernel_w; j++)
+            {
+                space_ofs[p1] = p2;
+                p1++;
+                p2 += dilation_w;
+            }
+            p2 += gap;
+        }
+    }
+    
+    float* bias_data = bias_term ? bias.data_ptr<float>() : nullptr;
+    
+    auto output_a = output.accessor<float, 4>()[0];
+    const signed char* weight_data = (const signed char*)weight.data_ptr<unsigned char>();
+    auto weight_data_int8_scales_a = weight_int8_scales.accessor<float, 1>();
+    auto input_int8_scales_a = input_int8_scales.accessor<float, 1>();
+    auto input_a = input.accessor<unsigned char, 4>()[0];
+    
+    otter::parallel_for(0, outch, 0, [&](int64_t begin, int64_t end) {
+        for (const auto p : otter::irange(begin, end)) {
+            signed char* outptr = (signed char*)output_a[p].data();
+
+            for (int i = 0; i < outh; i++) {
+                for (int j = 0; j < outw; j++) {
+                    int sum = 0;
+
+                    const signed char* kptr = (signed char*)weight_data + maxk * inch * p;
+
+                    // channels
+                    for (int q = 0; q < inch; q++)
+                    {
+                        auto m = input_a[q];
+                        const signed char* sptr = (signed char*)m[i * stride_h].data() + j * stride_w;
+
+                        for (int k = 0; k < maxk; k++)
+                        {
+                            int val = sptr[space_ofs[k]];
+                            int wt = kptr[k];
+                            sum += val * wt;
+                        }
+
+                        kptr += maxk;
+                    }
+
+                    float scale_in;
+                    if (weight_data_int8_scales_a[p] == 0)
+                        scale_in = 0;
+                    else
+                        scale_in = 1.f / (input_int8_scales_a[0] * weight_data_int8_scales_a[p]);
+
+                    float sumfp32 = sum * scale_in;
+
+                    if (bias_term)
+                        sumfp32 += bias_data[p];
+
+                    // dequantize
+                    ((float*)outptr)[0] = sumfp32;
+                    outptr += 4;
+                }
+            }
+        }
+    });
+    
+    return output;
+}
+    
+Tensor slide_win_conv2d_int8(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    const Tensor& input_scale_data,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation) {
+    
+    auto out = otter::empty({}, otter::ScalarType::Float);
+    slide_win_conv2d_int8_out(self, weight, weight_int8_scales, bias, input_scale_data, kernel_size, stride, padding, dilation, out);
     
     return out;
 }

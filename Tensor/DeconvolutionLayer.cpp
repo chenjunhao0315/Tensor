@@ -178,8 +178,7 @@ int DeconvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, con
         {dilation_height, dilation_width},
         true,      // transpose
         {output_padding_height, output_padding_width},
-        groups,
-        false       // benchmark
+        groups
     );
     
     return 0;

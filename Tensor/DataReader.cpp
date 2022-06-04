@@ -27,6 +27,10 @@ size_t DataReader::reference(size_t /*size*/, void** /*buf*/) const {
     return 0;
 }
 
+size_t DataReader::remain() const {
+    return 0;
+}
+
 DataReaderFromStdio::DataReaderFromStdio(FILE *file) : DataReader(), file_(file) {
 }
 
@@ -40,6 +44,13 @@ size_t DataReaderFromStdio::scan(const char *format, void *p) const {
 
 size_t DataReaderFromStdio::read(void *buf, size_t size) const {
     return fread(buf, 1, size, file_);
+}
+
+size_t DataReaderFromStdio::remain() const {
+    size_t start = ftell(file_);
+    fseek(file_, 0, SEEK_END);
+    size_t end = ftell(file_);
+    return end - start;
 }
 
 }

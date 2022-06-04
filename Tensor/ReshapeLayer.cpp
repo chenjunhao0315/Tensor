@@ -43,7 +43,8 @@ int ReshapeLayer::parse_param(LayerOption& option, ParamDict& pd) {
 int ReshapeLayer::compute_output_shape(ParamDict& pd) {
     auto input_shape_a = bottom_shapes[0].accessor<int, 2>()[0];
     auto shape = pd.get((int)ReshapeParam::Shape, otter::full({1}, -1, otter::ScalarType::Int));
-    auto shape_a = shape.accessor<int, 1>();
+    auto out_shape = pd.get((int)ReshapeParam::Shape, otter::full({1}, -1, otter::ScalarType::Int)).clone();
+    auto out_shape_a = out_shape.accessor<int, 1>();
     
     int input_numel = 1;
     for (const auto i : otter::irange(bottom_shapes[0][0].size(0))) {
@@ -53,8 +54,8 @@ int ReshapeLayer::compute_output_shape(ParamDict& pd) {
     int numel = 1;
     int auto_place_index = -1;
 
-    for (const auto i : otter::irange(shape.size(0))) {
-        int c = shape_a[i];
+    for (const auto i : otter::irange(out_shape.size(0))) {
+        int c = out_shape_a[i];
         if (c == -1 && auto_place_index == -1) {
             auto_place_index = i;
         } else if (c == -1) {
@@ -64,11 +65,11 @@ int ReshapeLayer::compute_output_shape(ParamDict& pd) {
         }
     }
     if (auto_place_index != -1) {
-        shape_a[auto_place_index] = input_numel / numel;
+        out_shape_a[auto_place_index] = input_numel / numel;
     }
     
     pd.set((int)ReshapeParam::Shape, shape);
-    pd.set(OUTPUT_SHAPE_HINT, shape.view({1, -1}));
+    pd.set(OUTPUT_SHAPE_HINT, out_shape.view({1, -1}));
     
     return 0;
 }

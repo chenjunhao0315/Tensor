@@ -38,7 +38,7 @@ int UpsampleLayer::parse_param(LayerOption& option, ParamDict& pd) {
             align_corner = 1;
     }
     
-    int stride = opt_find_int(option, "stride", 1);
+    float stride = opt_find_float(option, "stride", 1.f);
     
     OTTER_CHECK(mode <= 2, "Unsupport upsample type");
     
@@ -61,14 +61,14 @@ int UpsampleLayer::compute_output_shape(ParamDict& pd) {
     int output_width = pd.get((int)UpsampleParam::Output_width, 0);
     float scale_height = pd.get((int)UpsampleParam::Height_scale, 0.f);
     float scale_width = pd.get((int)UpsampleParam::Width_scale, 0.f);
-    int stride = pd.get((int)UpsampleParam::Stride, 1);
+    float stride = pd.get((int)UpsampleParam::Stride, 1.f);
     
     if (output_height && output_width) {
         scale_height = output_height / bottom_shape_a[2];
         scale_width  = output_width  / bottom_shape_a[3];
     }
     
-    if (stride) {
+    if (stride != 0) {
         scale_height = stride;
         scale_width  = stride;
     }
@@ -77,6 +77,7 @@ int UpsampleLayer::compute_output_shape(ParamDict& pd) {
         output_height = bottom_shape_a[2] * scale_height;
         output_width = bottom_shape_a[3] * scale_width;
     }
+    
     pd.set((int)UpsampleParam::Height_scale, scale_height);
     pd.set((int)UpsampleParam::Width_scale, scale_width);
     pd.set((int)UpsampleParam::Output_height, output_height);

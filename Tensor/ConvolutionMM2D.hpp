@@ -57,6 +57,29 @@ Tensor slide_win_conv2d(
     IntArrayRef stride,
     IntArrayRef padding);
 
+Tensor& slide_win_conv2d_int8_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    const Tensor& input_scale_data,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation,
+    Tensor& output);
+    
+Tensor slide_win_conv2d_int8(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    const Tensor& input_scale_data,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation);
+
 
 }   // end namespace otter
 

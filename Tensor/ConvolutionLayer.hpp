@@ -27,6 +27,7 @@ public:
     virtual int load_model(const Initializer& initializer);
     
     virtual int create_pipeline();
+    virtual int create_pipeline_int8();
     
     virtual int forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
     
@@ -48,6 +49,7 @@ public:
     int groups;
     
     int bias_term;
+    int int8_scale_term;
     
     int weight_data_size;
     
@@ -57,6 +59,10 @@ public:
     Tensor weight_3x3_winograd23_data;
     Tensor weight_3x3_winograd64_data;
     Tensor bias_data;
+    
+    Tensor weight_data_int8_scales;
+    Tensor bottom_blob_int8_scales;
+    Tensor top_blob_int8_scales;
 };
 
 enum class ConvParam : int {
@@ -74,7 +80,8 @@ enum class ConvParam : int {
     Output_padding_width,
     Group,
     Bias_term,
-    Weight_data_size
+    Weight_data_size,
+    Int8_scale_term
 };
 
 }
