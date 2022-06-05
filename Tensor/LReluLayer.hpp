@@ -28,7 +28,7 @@ private:
 };
 
 enum class LReluParam {
-    Neg_slope
+    Neg_slope = 0
 };
 
 }   // end namespace otter

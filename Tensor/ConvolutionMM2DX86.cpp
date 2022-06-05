@@ -1162,11 +1162,10 @@ Tensor& sgemm_conv2d_x86_out(
     const int64_t kernel_height = kernel_size[0];
     const int64_t kernel_width  = kernel_size[1];
     
-    const Tensor input = self.contiguous();
-    const int64_t input_channels  = input.size(1);
+    const int64_t input_channels  = self.size(1);
     const int64_t output_channels = weight.size(0);
     
-    Tensor im2col = otter::im2col_cpu(input, kernel_size, stride, padding, {1, 1});
+    Tensor im2col = otter::im2col_cpu(self, kernel_size, stride, padding, {1, 1});
     Tensor kernel_packed;
     if (weight_o.defined())
         kernel_packed = weight_o;

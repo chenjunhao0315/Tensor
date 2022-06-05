@@ -52,6 +52,10 @@ public:
     
     int weight_data_size;
     
+    int activation_type;
+    Layer* activation;
+    Tensor activation_params;
+    
     Tensor weight_data;
     Tensor weight_opt_data;
     Tensor bias_data;
@@ -72,7 +76,9 @@ enum class DeconvParam : int {
     Output_padding_width,
     Group,
     Bias_term,
-    Weight_data_size
+    Weight_data_size,
+    Activation_type,
+    Activation_params
 };
 
 }   // end namespace otter

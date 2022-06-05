@@ -420,10 +420,10 @@ Tensor slide_win_conv2d(
 
 Tensor& slide_win_conv2d_int8_out(
     const Tensor& self,
+    const Tensor& input_int8_scales,
     const Tensor& weight,
     const Tensor& weight_int8_scales,
     const Tensor& bias,
-    const Tensor& input_int8_scales,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -531,17 +531,17 @@ Tensor& slide_win_conv2d_int8_out(
     
 Tensor slide_win_conv2d_int8(
     const Tensor& self,
+    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_int8_scales,
     const Tensor& bias,
-    const Tensor& input_scale_data,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
     IntArrayRef dilation) {
     
     auto out = otter::empty({}, otter::ScalarType::Float);
-    slide_win_conv2d_int8_out(self, weight, weight_int8_scales, bias, input_scale_data, kernel_size, stride, padding, dilation, out);
+    slide_win_conv2d_int8_out(self, input_scale_data, weight, weight_int8_scales, bias, kernel_size, stride, padding, dilation, out);
     
     return out;
 }

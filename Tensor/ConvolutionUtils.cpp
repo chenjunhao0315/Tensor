@@ -77,8 +77,6 @@ bool ConvParams::is_depthwise(const Tensor& input, const Tensor& weight) const {
     (weight.dim() == 4) &&
     (weight.size(0) % input.size(1) == 0) &&
     (weight.size(1) == 1) &&
-    (input.scalar_type() == ScalarType::Float) &&
-    (weight.scalar_type() == ScalarType::Float) &&
     (input.device() == Device::CPU) &&
     (weight.device() == Device::CPU) &&
     !is_dilated() &&
@@ -91,8 +89,6 @@ bool ConvParams::is_transpose_depthwise(const Tensor& input, const Tensor& weigh
     (weight.dim() == 4) &&
     (weight.size(0) % input.size(1) == 0) &&
     (weight.size(1) == 1) &&
-    (input.scalar_type() == ScalarType::Float) &&
-    (weight.scalar_type() == ScalarType::Float) &&
     (input.device() == Device::CPU) &&
     (weight.device() == Device::CPU) &&
     !is_dilated();

@@ -11,6 +11,7 @@
 #include "TensorMaker.hpp"
 #include "Convolution.hpp"
 #include "DepthwiseConvTransposeKernelNeon.hpp"
+#include "ActivationLayer.hpp"
 
 namespace otter {
 
@@ -67,6 +68,33 @@ int DeconvolutionLayer::parse_param(LayerOption& option, ParamDict& pd) {
             bias_term = 1;
     }
     
+    std::string activation = opt_find_string(option, "activation", "");
+    
+    int activation_type = 0;
+    if (activation == "Relu") {
+        activation_type = 1;
+    } else if (activation == "LRelu") {
+        activation_type = 2;
+    } else if (activation == "Relu6") {
+        activation_type = 3;
+    } else if (activation == "Sigmoid") {
+        activation_type = 4;
+    }
+    
+    Tensor activation_params;
+    if (opt_check_string(option, "activation_params")) {
+        int num_params = (int)std::count(option["activation_params"].begin(), option["activation_params"].end(), ',') + 1;
+        activation_params = otter::empty({num_params}, otter::ScalarType::Float);
+        auto activation_params_a = activation_params.accessor<float, 1>();
+        std::stringstream ss;
+        ss << option["activation_params"];
+        float n; char c;
+        for (const auto i : otter::irange(num_params)) {
+            ss >> n >> c;
+            activation_params_a[i] = n;
+        }
+    }
+    
     pd.set((int)DeconvParam::In_channels, in_channels);
     pd.set((int)DeconvParam::Out_channels, out_channels);
     pd.set((int)DeconvParam::Kernel_height, kernel_height);
@@ -81,6 +109,8 @@ int DeconvolutionLayer::parse_param(LayerOption& option, ParamDict& pd) {
     pd.set((int)DeconvParam::Output_padding_height, output_padding_height);
     pd.set((int)DeconvParam::Group, groups);
     pd.set((int)DeconvParam::Bias_term, bias_term);
+    pd.set((int)DeconvParam::Activation_type, activation_type);
+    pd.set((int)DeconvParam::Activation_params, activation_params);
     
     return 0;
 }
@@ -132,6 +162,8 @@ int DeconvolutionLayer::load_param(const ParamDict &pd) {
     groups = pd.get((int)DeconvParam::Group, 1);
     bias_term = pd.get((int)DeconvParam::Bias_term, 0);
     weight_data_size = pd.get((int)DeconvParam::Weight_data_size, 0);
+    activation_type = pd.get((int)DeconvParam::Activation_type, 0);
+    activation_params = pd.get((int)DeconvParam::Activation_params, Tensor());
     
     return 0;
 }
@@ -164,12 +196,14 @@ int DeconvolutionLayer::load_model(const Initializer& initializer) {
 
 int DeconvolutionLayer::create_pipeline() {
     
+    activation = create_activation_layer(activation_type, activation_params);
+    
     otter::depthwise_deconv2d_kernel_transform(weight_data, weight_opt_data);
     
     return 0;
 }
 
-int DeconvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const NetOption& /*opt*/) const {
+int DeconvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const NetOption& opt) const {
     
     top_blob = otter::convolution(
         bottom_blob, weight_data, weight_opt_data, bias_data,
@@ -180,6 +214,10 @@ int DeconvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, con
         {output_padding_height, output_padding_width},
         groups
     );
+    
+    if (activation) {
+        activation->forward_inplace(top_blob, opt);
+    }
     
     return 0;
 }

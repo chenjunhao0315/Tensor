@@ -63,19 +63,19 @@ void Net::addLayer(LayerOption option) {
         auto_option["input"] = option["output"];
         auto_option["output"] = auto_option["name"];
         layer_options.push_back(auto_option);
-    }
-    
-    if (opt_check_string(option, "activation")) {
-        LayerOption auto_option;
-        std::string activation = option["activation"];
         
-        auto_option["type"] = activation;
-        std::transform(activation.begin(), activation.end(), activation.begin(),
-            [](unsigned char c){ return std::tolower(c); });
-        auto_option["name"] = activation + "_" + option["name"];
-        auto_option["input"] = layer_options[layer_options.size() - 1]["output"];
-        auto_option["output"] = auto_option["name"];
-        layer_options.push_back(auto_option);
+        if (opt_check_string(option, "activation")) {
+            LayerOption auto_option;
+            std::string activation = option["activation"];
+            
+            auto_option["type"] = activation;
+            std::transform(activation.begin(), activation.end(), activation.begin(),
+                [](unsigned char c){ return std::tolower(c); });
+            auto_option["name"] = activation + "_" + option["name"];
+            auto_option["input"] = layer_options[layer_options.size() - 1]["output"];
+            auto_option["output"] = auto_option["name"];
+            layer_options.push_back(auto_option);
+        }
     }
 }
 

@@ -14,6 +14,10 @@ namespace otter {
 
 Tensor quantize_to_int8(const Tensor& src, const Tensor& scale_data);
 
+Tensor dequantize_from_int32(const Tensor& src, const Tensor& scale_data, const Tensor& bias_data);
+
+Tensor requantize_from_int32_to_int8(const Tensor& src, const Tensor& scale_in_data, const Tensor& scale_out_data, const Tensor& bias_data, int activation_type, const Tensor& activation_params);
+
 }   // end namespace otter
 
 #endif /* Quantize_hpp */

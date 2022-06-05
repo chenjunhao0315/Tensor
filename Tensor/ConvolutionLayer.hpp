@@ -9,11 +9,13 @@
 #define ConvolutionLayer_hpp
 
 #include "Layer.hpp"
+#include "ActivationLayer.hpp"
 
 namespace otter {
 
 class ConvolutionLayer : public Layer {
 public:
+    ~ConvolutionLayer();
     ConvolutionLayer();
     
     virtual int parse_param(LayerOption& option, ParamDict& pd);
@@ -27,11 +29,14 @@ public:
     virtual int load_model(const Initializer& initializer);
     
     virtual int create_pipeline();
-    virtual int create_pipeline_int8();
     
     virtual int forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
     
     virtual std::string type() const { return "Convolution"; }
+private:
+    int create_pipeline_int8();
+    
+    int forward_int8(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
 public:
     int in_channels;
     int out_channels;
@@ -53,6 +58,10 @@ public:
     
     int weight_data_size;
     
+    int activation_type;
+    Layer* activation;
+    Tensor activation_params;
+    
     Tensor weight_data;
     Tensor weight_sgemm_data;
     Tensor weight_3x3s2_data;
@@ -63,6 +72,7 @@ public:
     Tensor weight_data_int8_scales;
     Tensor bottom_blob_int8_scales;
     Tensor top_blob_int8_scales;
+    Tensor scale_in_data;
 };
 
 enum class ConvParam : int {
@@ -81,7 +91,9 @@ enum class ConvParam : int {
     Group,
     Bias_term,
     Weight_data_size,
-    Int8_scale_term
+    Int8_scale_term,
+    Activation_type,
+    Activation_params
 };
 
 }

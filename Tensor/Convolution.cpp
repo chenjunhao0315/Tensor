@@ -10,6 +10,7 @@
 #include "Convolution.hpp"
 #include "ConvolutionMM2DNeon.hpp"
 #include "ConvolutionMM2DX86.hpp"
+#include "ConvolutionMM2DInt8X86.hpp"
 #include "DepthwiseConvKernelNeon.hpp"
 #include "DepthwiseConvKernelX86.hpp"
 #include "DilatedConvolution.hpp"
@@ -119,7 +120,7 @@ ConvBackend select_proper_conv_backend(
     
     if (input.device() == Device::CPU) { // or input.is_cuda()
         if (params.is_int8(input, weight)) {
-            return ConvBackend::SlideWin2dInt8;
+            return ConvBackend::Sgemm2dInt8X86;
         } else {
             if (params.transposed) {
                 if (input.dim() == 4) {
@@ -134,7 +135,6 @@ ConvBackend select_proper_conv_backend(
                                 return ConvBackend::Transpose2dNeon_4x4s2;
                             }
                         }
-    //                    return ConvBackend::SlideWinTranspose2d;
                         return ConvBackend::SlowTranspose2d;
                     }
                 }
@@ -327,6 +327,7 @@ Tensor convolution(
         case ConvBackend::Sgemm2dNeon_1x1s1:
         case ConvBackend::Sgemm2dNeon_1x1s2:
         case ConvBackend::Sgemm2dX86:
+        case ConvBackend::Sgemm2dInt8X86:
         case ConvBackend::SlideWin2dNeon_1x1s1:
         case ConvBackend::SlideWin2d:
         case ConvBackend::SlideWin2dNeon_3x3s1:
@@ -396,7 +397,9 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
         case ConvBackend::SlideWin2d:
             return otter::slide_win_conv2d(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::SlideWin2dInt8:
-            return otter::slide_win_conv2d_int8(self, weight, weight_int8_scales, bias, input_int8_scales, kernel_size, params.stride, params.padding, params.dilation);
+            return otter::slide_win_conv2d_int8(self, input_int8_scales, weight, weight_int8_scales, bias, kernel_size, params.stride, params.padding, params.dilation);
+        case ConvBackend::Sgemm2dInt8X86:
+            return otter::sgemm_conv2d_int8_x86(self, input_int8_scales, weight, weight_o, weight_int8_scales, bias, kernel_size, params.stride, params.padding);
         default:
             OTTER_CHECK(false, "Unsupported nogroup conv backend");
     }

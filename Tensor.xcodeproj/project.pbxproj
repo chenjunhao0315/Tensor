@@ -81,6 +81,8 @@
 		767B826928467F1600969C9F /* ReshapeLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 767B826728467F1600969C9F /* ReshapeLayer.cpp */; };
 		767B826C284681A800969C9F /* Relu6Layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 767B826A284681A800969C9F /* Relu6Layer.cpp */; };
 		767B826F28468C6E00969C9F /* PermuteLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 767B826D28468C6E00969C9F /* PermuteLayer.cpp */; };
+		767D3502284C8C4200087A7F /* ConvolutionMM2DInt8X86.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 767D3500284C8C4200087A7F /* ConvolutionMM2DInt8X86.cpp */; };
+		767D3506284D2DFD00087A7F /* QuantizeX86.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 767D3504284D2DFD00087A7F /* QuantizeX86.cpp */; };
 		7687216127C0E31C006640CF /* Module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687215F27C0E31C006640CF /* Module.cpp */; };
 		7687216427C0E379006640CF /* Layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216227C0E379006640CF /* Layer.cpp */; };
 		7687216827C12145006640CF /* NetOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687216627C12145006640CF /* NetOption.cpp */; };
@@ -339,6 +341,12 @@
 		767B826B284681A800969C9F /* Relu6Layer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Relu6Layer.hpp; sourceTree = "<group>"; };
 		767B826D28468C6E00969C9F /* PermuteLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PermuteLayer.cpp; sourceTree = "<group>"; };
 		767B826E28468C6E00969C9F /* PermuteLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PermuteLayer.hpp; sourceTree = "<group>"; };
+		767D3500284C8C4200087A7F /* ConvolutionMM2DInt8X86.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionMM2DInt8X86.cpp; sourceTree = "<group>"; };
+		767D3501284C8C4200087A7F /* ConvolutionMM2DInt8X86.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConvolutionMM2DInt8X86.hpp; sourceTree = "<group>"; };
+		767D3503284D05AF00087A7F /* ActivationLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ActivationLayer.hpp; sourceTree = "<group>"; };
+		767D3504284D2DFD00087A7F /* QuantizeX86.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QuantizeX86.cpp; sourceTree = "<group>"; };
+		767D3505284D2DFD00087A7F /* QuantizeX86.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = QuantizeX86.hpp; sourceTree = "<group>"; };
+		767D3507284D2F8200087A7F /* sse_mathfun.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sse_mathfun.hpp; sourceTree = "<group>"; };
 		7687215F27C0E31C006640CF /* Module.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Module.cpp; sourceTree = "<group>"; };
 		7687216027C0E31C006640CF /* Module.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Module.hpp; sourceTree = "<group>"; };
 		7687216227C0E379006640CF /* Layer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Layer.cpp; sourceTree = "<group>"; };
@@ -602,7 +610,6 @@
 				76F3378127B3AA7B00E3AEF1 /* Math.hpp */,
 				7604745227D67ED100FCB785 /* DataReader.cpp */,
 				7604745327D67ED100FCB785 /* DataReader.hpp */,
-				760704D627E5021200D5E00D /* Avx_Math.hpp */,
 				762B4D6827EF7E3D00A98E34 /* flat_hash_map.hpp */,
 			);
 			name = Utils;
@@ -621,6 +628,8 @@
 				76F4A59C27C9872500DFFD9E /* ConvolutionMM2DNeon.hpp */,
 				76AA466127F8855600F0F3C6 /* ConvolutionMM2DX86.cpp */,
 				76AA466227F8855600F0F3C6 /* ConvolutionMM2DX86.hpp */,
+				767D3500284C8C4200087A7F /* ConvolutionMM2DInt8X86.cpp */,
+				767D3501284C8C4200087A7F /* ConvolutionMM2DInt8X86.hpp */,
 				76AA483027F988D200F0F3C6 /* ConvolutionMM2DTranspose.cpp */,
 				76AA483127F988D200F0F3C6 /* ConvolutionMM2DTranspose.hpp */,
 				76B4B5BB282D6B9200BE0949 /* ConvolutionMM2DTransposeNeon.cpp */,
@@ -640,6 +649,8 @@
 				76BA779727C6CD2300AA896B /* vol2col.hpp */,
 				765D27102847CB0800996934 /* Quantize.cpp */,
 				765D27112847CB0800996934 /* Quantize.hpp */,
+				767D3504284D2DFD00087A7F /* QuantizeX86.cpp */,
+				767D3505284D2DFD00087A7F /* QuantizeX86.hpp */,
 			);
 			name = Convolution;
 			sourceTree = "<group>";
@@ -762,7 +773,9 @@
 				762E3B5227BD63B20075F983 /* Vec256_float.hpp */,
 				760384B627C0525C00CD599F /* Vec256_float_neon.hpp */,
 				76C1997F283E323B00A5D737 /* neon_mathfun.hpp */,
+				760704D627E5021200D5E00D /* Avx_Math.hpp */,
 				76C19988283F786600A5D737 /* VecFunctional.hpp */,
+				767D3507284D2F8200087A7F /* sse_mathfun.hpp */,
 			);
 			name = vec;
 			sourceTree = "<group>";
@@ -818,6 +831,7 @@
 				7604745627D68F3F00FCB785 /* Initializer.hpp */,
 				7687217327C14890006640CF /* InputLayer.cpp */,
 				7687217427C14890006640CF /* InputLayer.hpp */,
+				767D3503284D05AF00087A7F /* ActivationLayer.hpp */,
 				7687217C27C2A850006640CF /* ConvolutionLayer.cpp */,
 				7687217D27C2A850006640CF /* ConvolutionLayer.hpp */,
 				76CF3F3527FC6E4B009BF242 /* DeconvolutionLayer.cpp */,
@@ -1089,6 +1103,7 @@
 				767B826F28468C6E00969C9F /* PermuteLayer.cpp in Sources */,
 				767B826928467F1600969C9F /* ReshapeLayer.cpp in Sources */,
 				76F0064C27B7FC09009D67F5 /* ExpandUtils.cpp in Sources */,
+				767D3506284D2DFD00087A7F /* QuantizeX86.cpp in Sources */,
 				767B826C284681A800969C9F /* Relu6Layer.cpp in Sources */,
 				762E3B3327BB79950075F983 /* Unfold2D.cpp in Sources */,
 				7603BA2527E1DB9C00EA42F1 /* hershey_fonts.cpp in Sources */,
@@ -1106,6 +1121,7 @@
 				760704D427E4FE6A00D5E00D /* TensorDistributionKernel.cpp in Sources */,
 				7687216127C0E31C006640CF /* Module.cpp in Sources */,
 				760704C527E3B81400D5E00D /* CPUGenerator.cpp in Sources */,
+				767D3502284C8C4200087A7F /* ConvolutionMM2DInt8X86.cpp in Sources */,
 				76AA483227F988D200F0F3C6 /* ConvolutionMM2DTranspose.cpp in Sources */,
 				76F336D327A668D900E3AEF1 /* FillKernel.cpp in Sources */,
 				7628E02327CE7A6200B136FA /* Pool.cpp in Sources */,
