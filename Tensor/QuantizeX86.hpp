@@ -8,6 +8,7 @@
 #ifndef QuantizeX86_hpp
 #define QuantizeX86_hpp
 
+#if CPU_CAPABILITY_AVX2
 #include "VecIntrinsic.hpp"
 #include "Avx_Math.hpp"
 #include "Tensor.hpp"
@@ -209,5 +210,6 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
 
 
 }   // end namespace otter
+#endif
 
 #endif /* QuantizeX86_hpp */

@@ -116,7 +116,7 @@ void convolution_im2col_sgemm_transform_kernel_int8_sse(const Tensor& kernel_, T
 #endif // __SSE2__
 }
 #else
-void convolution_im2col_sgemm_transform_kernel_int8_sse(const Tensor& /*_kernel*/, Tensor& /*kernel_tf*/, int64_t /*input_channels*/, int64_t /*out_chnnels*/, int64_t /*kernel_width*/, int64_t /*kernel_height*/);
+void convolution_im2col_sgemm_transform_kernel_int8_sse(const Tensor& /*_kernel*/, Tensor& /*kernel_tf*/, int64_t /*input_channels*/, int64_t /*out_chnnels*/, int64_t /*kernel_width*/, int64_t /*kernel_height*/) {}
 #endif
 
 #if __SSE2__
@@ -1176,7 +1176,7 @@ void im2col_sgemm_conv2d_int8_impl_x86(
     const Tensor& /*bias_*/,
     int64_t /*input_channels*/,
     int64_t /*output_channels*/,
-    Tensor& /*output*/);
+    Tensor& /*output*/) {}
 #endif
 
 Tensor& sgemm_conv2d_int8_x86_out(
