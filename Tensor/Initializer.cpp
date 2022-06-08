@@ -88,8 +88,19 @@ Tensor InitializerNcnnFromDataReader::load(IntArrayRef shape, int type) const {
         
         if (flag_struct.tag == 0x01306B47) {
             // half-precision data
-            // fp16
-            OTTER_CHECK(false, "Unsupport fp16 data!");
+            size_t align_data_size = alignSize(size * sizeof(unsigned short), 4);
+
+            std::vector<unsigned short> float16_weights;
+            float16_weights.resize(align_data_size);
+            nread = dr.read(float16_weights.data(), align_data_size);
+            if (nread != align_data_size) {
+                printf("ModelBin read float16_weights failed %zd\n", nread);
+                return Tensor();
+            }
+
+            result = otter::from_float16(float16_weights.data(), shape);
+
+            return result;
         } else if (flag_struct.tag == 0x000D4B38) {
             // int8 data
             size_t align_data_size = alignSize(size, 4);

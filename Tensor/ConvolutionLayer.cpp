@@ -203,6 +203,7 @@ int ConvolutionLayer::load_model(const Initializer& initializer) {
         if (bias_term) {
             bias_data = initializer.load({out_channels}, 1);
         }
+        // depthwise
         if (in_channels == groups && groups == out_channels) {
             if (int8_scale_term == 1 || int8_scale_term == 101) {
                 weight_data_int8_scales = initializer.load({groups}, 1);

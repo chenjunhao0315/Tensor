@@ -67,6 +67,8 @@ inline Tensor from_blob(void* data, IntArrayRef sizes, TensorOptions options) {
     return for_blob(data, sizes).options(options).make_tensor();
 }
 
+Tensor from_float16(const unsigned short* data, IntArrayRef size);
+
 template <typename T>
 Tensor tensor_cpu(ArrayRef<T> values, const TensorOptions& options);
 

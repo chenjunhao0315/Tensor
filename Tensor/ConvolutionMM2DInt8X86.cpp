@@ -1202,7 +1202,8 @@ Tensor& sgemm_conv2d_int8_x86_out(
     Tensor kernel_tf;
     if (weight_o.defined())
         kernel_tf = weight_o;
-    otter::convolution_im2col_sgemm_transform_kernel_int8_sse(weight, kernel_tf, input_channels, output_channels, kernel_width, kernel_height);
+    else
+        otter::convolution_im2col_sgemm_transform_kernel_int8_sse(weight, kernel_tf, input_channels, output_channels, kernel_width, kernel_height);
     
     Tensor input;
     if (self.scalar_type() != otter::ScalarType::Byte)
