@@ -183,6 +183,35 @@ int ConvolutionLayer::load_param(const ParamDict &pd) {
 }
 
 int ConvolutionLayer::init_model() {
+    if (int8_scale_term) {
+        weight_data = (otter::rand({out_channels, in_channels / groups, kernel_height, kernel_width}, ScalarType::Float)).mul_(100).to(ScalarType::Byte);
+        if (bias_term)
+            bias_data = otter::rand({out_channels}, ScalarType::Float);
+        
+        if (in_channels == groups && groups == out_channels) {
+            if (int8_scale_term == 1 || int8_scale_term == 101) {
+                weight_data_int8_scales = otter::rand({groups}, ScalarType::Float);
+                bottom_blob_int8_scales = otter::rand({groups}, ScalarType::Float);
+            } else if (int8_scale_term == 2 || int8_scale_term == 102) {
+                weight_data_int8_scales = otter::rand({groups}, ScalarType::Float);
+                bottom_blob_int8_scales = otter::rand({groups}, ScalarType::Float);
+            }
+            
+            if (int8_scale_term > 100) {
+                top_blob_int8_scales = otter::rand({groups}, ScalarType::Float);
+            }
+        } else {
+            if (int8_scale_term) {
+                weight_data_int8_scales = otter::rand({out_channels}, ScalarType::Float);
+                bottom_blob_int8_scales = otter::rand({1}, ScalarType::Float);
+            }
+            if (int8_scale_term > 100) {
+                top_blob_int8_scales = otter::rand({1}, ScalarType::Float);
+            }
+        }
+        return 0;
+    }
+    
     weight_data = otter::rand({out_channels, in_channels / groups, kernel_height, kernel_width}, ScalarType::Float);
     if (bias_term)
         bias_data = otter::rand({out_channels}, ScalarType::Float);

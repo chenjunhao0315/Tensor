@@ -16,15 +16,15 @@ int main(int argc, const char * argv[]) {
     }
     
     otter::Net net;
-    net.load_otter("nanodet-plus-m-1.5x_416.otter", otter::CompileMode::Inference);
-    int ret = net.load_weight("nanodet-plus-m-1.5x_416-opt.bin", otter::Net::WeightType::Ncnn);
+    net.load_otter("nanodet-plus-m-1.5x_416_fused.otter", otter::CompileMode::Inference);
+    int ret = net.load_weight("nanodet-plus-m-1.5x_416_fused.bin", otter::Net::WeightType::Ncnn);
     if (ret) {
         exit(-1);
     }
 
     otter::Net pose;
-    pose.load_otter("simplepose-opt.otter", otter::CompileMode::Inference);
-    ret = pose.load_weight("simplepose-opt.bin", otter::Net::WeightType::Ncnn);
+    pose.load_otter("simplepose_fused.otter", otter::CompileMode::Inference);
+    ret = pose.load_weight("simplepose_fused.bin", otter::Net::WeightType::Ncnn);
     if (ret) {
         exit(-1);
     }

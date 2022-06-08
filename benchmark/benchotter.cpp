@@ -83,9 +83,13 @@ void benchmark(const char* model, const otter::Tensor& _in) {
 
 int main(int argc, const char * argv[]) {
     
-    benchmark("nanodet-plus-m-1.5x_416", otter::empty({1, 3, 416, 416}, otter::ScalarType::Float));
+    benchmark("nanodet-plus-m-1.5x_416_fused", otter::empty({1, 3, 416, 416}, otter::ScalarType::Float));
     
-    benchmark("simplepose", otter::empty({1, 3, 256, 192}, otter::ScalarType::Float));
+    benchmark("nanodet-plus-m-1.5x_416_int8_fused", otter::empty({1, 3, 416, 416}, otter::ScalarType::Float));
+    
+    benchmark("nanodet-plus-m-1.5x_416_int8_mixed", otter::empty({1, 3, 416, 416}, otter::ScalarType::Float));
+    
+    benchmark("simplepose_fused", otter::empty({1, 3, 256, 192}, otter::ScalarType::Float));
     
     return 0;
 }

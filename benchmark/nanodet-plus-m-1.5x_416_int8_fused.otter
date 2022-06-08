@@ -1,4 +1,4 @@
-name: "nanodet-plus-m-1.5x_416-opt"
+name: "/Users/chenjunhao/Desktop/NTHUEE_Project/ncnn2otter/nanodet-plus-m-1.5x_416-int8.param"
 Input {
     name: data_1
     output: data_1
@@ -23,13 +23,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 MaxPool {
     name: pool_1
-    input: lrelu_conv_1
+    input: conv_1
     output: pool_1
     Param {
         kernel_h: 3
@@ -54,6 +55,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 24
     }
@@ -73,8 +75,9 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
@@ -92,13 +95,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_5
-    input: lrelu_conv_4
+    input: conv_4
     output: conv_5
     Param {
         out_channels: 88
@@ -110,6 +114,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 88
     }
@@ -129,13 +134,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_1
-    input: "lrelu_conv_3, lrelu_conv_6"
+    input: "conv_3, conv_6"
     output: concat_1
     Param {
         axis: 1
@@ -184,13 +190,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_8
-    input: lrelu_conv_7
+    input: conv_7
     output: conv_8
     Param {
         out_channels: 88
@@ -202,6 +209,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 88
     }
@@ -221,13 +229,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_2
-    input: "crop_1, lrelu_conv_9"
+    input: "crop_1, conv_9"
     output: concat_2
     Param {
         axis: 1
@@ -276,13 +285,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_11
-    input: lrelu_conv_10
+    input: conv_10
     output: conv_11
     Param {
         out_channels: 88
@@ -294,6 +304,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 88
     }
@@ -313,13 +324,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_3
-    input: "crop_3, lrelu_conv_12"
+    input: "crop_3, conv_12"
     output: concat_3
     Param {
         axis: 1
@@ -368,13 +380,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_14
-    input: lrelu_conv_13
+    input: conv_13
     output: conv_14
     Param {
         out_channels: 88
@@ -386,6 +399,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 88
     }
@@ -405,13 +419,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_4
-    input: "crop_5, lrelu_conv_15"
+    input: "crop_5, conv_15"
     output: concat_4
     Param {
         axis: 1
@@ -439,6 +454,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 176
     }
@@ -458,8 +474,9 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
@@ -477,13 +494,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_19
-    input: lrelu_conv_18
+    input: conv_18
     output: conv_19
     Param {
         out_channels: 176
@@ -495,6 +513,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 176
     }
@@ -514,13 +533,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_5
-    input: "lrelu_conv_17, lrelu_conv_20"
+    input: "conv_17, conv_20"
     output: concat_5
     Param {
         axis: 1
@@ -569,13 +589,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_22
-    input: lrelu_conv_21
+    input: conv_21
     output: conv_22
     Param {
         out_channels: 176
@@ -587,6 +608,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 176
     }
@@ -606,13 +628,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_6
-    input: "crop_7, lrelu_conv_23"
+    input: "crop_7, conv_23"
     output: concat_6
     Param {
         axis: 1
@@ -661,13 +684,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_25
-    input: lrelu_conv_24
+    input: conv_24
     output: conv_25
     Param {
         out_channels: 176
@@ -679,6 +703,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 176
     }
@@ -698,13 +723,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_7
-    input: "crop_9, lrelu_conv_26"
+    input: "crop_9, conv_26"
     output: concat_7
     Param {
         axis: 1
@@ -753,13 +779,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_28
-    input: lrelu_conv_27
+    input: conv_27
     output: conv_28
     Param {
         out_channels: 176
@@ -771,6 +798,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 176
     }
@@ -790,13 +818,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_8
-    input: "crop_11, lrelu_conv_29"
+    input: "crop_11, conv_29"
     output: concat_8
     Param {
         axis: 1
@@ -845,13 +874,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_31
-    input: lrelu_conv_30
+    input: conv_30
     output: conv_31
     Param {
         out_channels: 176
@@ -863,6 +893,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 176
     }
@@ -882,13 +913,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_9
-    input: "crop_13, lrelu_conv_32"
+    input: "crop_13, conv_32"
     output: concat_9
     Param {
         axis: 1
@@ -937,13 +969,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_34
-    input: lrelu_conv_33
+    input: conv_33
     output: conv_34
     Param {
         out_channels: 176
@@ -955,6 +988,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 176
     }
@@ -974,13 +1008,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_10
-    input: "crop_15, lrelu_conv_35"
+    input: "crop_15, conv_35"
     output: concat_10
     Param {
         axis: 1
@@ -1029,13 +1064,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_37
-    input: lrelu_conv_36
+    input: conv_36
     output: conv_37
     Param {
         out_channels: 176
@@ -1047,6 +1083,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 176
     }
@@ -1066,13 +1103,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_11
-    input: "crop_17, lrelu_conv_38"
+    input: "crop_17, conv_38"
     output: concat_11
     Param {
         axis: 1
@@ -1121,13 +1159,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_40
-    input: lrelu_conv_39
+    input: conv_39
     output: conv_40
     Param {
         out_channels: 176
@@ -1139,6 +1178,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 176
     }
@@ -1158,13 +1198,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_12
-    input: "crop_19, lrelu_conv_41"
+    input: "crop_19, conv_41"
     output: concat_12
     Param {
         axis: 1
@@ -1192,6 +1233,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 352
     }
@@ -1211,8 +1253,9 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
@@ -1230,13 +1273,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_45
-    input: lrelu_conv_44
+    input: conv_44
     output: conv_45
     Param {
         out_channels: 352
@@ -1248,6 +1292,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 352
     }
@@ -1267,13 +1312,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_13
-    input: "lrelu_conv_43, lrelu_conv_46"
+    input: "conv_43, conv_46"
     output: concat_13
     Param {
         axis: 1
@@ -1322,13 +1368,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_48
-    input: lrelu_conv_47
+    input: conv_47
     output: conv_48
     Param {
         out_channels: 352
@@ -1340,6 +1387,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 352
     }
@@ -1359,13 +1407,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_14
-    input: "crop_21, lrelu_conv_49"
+    input: "crop_21, conv_49"
     output: concat_14
     Param {
         axis: 1
@@ -1414,13 +1463,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_51
-    input: lrelu_conv_50
+    input: conv_50
     output: conv_51
     Param {
         out_channels: 352
@@ -1432,6 +1482,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 352
     }
@@ -1451,13 +1502,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_15
-    input: "crop_23, lrelu_conv_52"
+    input: "crop_23, conv_52"
     output: concat_15
     Param {
         axis: 1
@@ -1506,13 +1558,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_54
-    input: lrelu_conv_53
+    input: conv_53
     output: conv_54
     Param {
         out_channels: 352
@@ -1524,6 +1577,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 352
     }
@@ -1543,13 +1597,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_16
-    input: "crop_25, lrelu_conv_55"
+    input: "crop_25, conv_55"
     output: concat_16
     Param {
         axis: 1
@@ -1578,8 +1633,9 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
@@ -1597,8 +1653,9 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
@@ -1616,13 +1673,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Upsample {
     name: upsample_1
-    input: lrelu_conv_58
+    input: conv_58
     output: upsample_1
     Param {
         stride: 2.000000
@@ -1632,7 +1690,7 @@ Upsample {
 }
 Concat {
     name: concat_17
-    input: "upsample_1, lrelu_conv_57"
+    input: "upsample_1, conv_57"
     output: concat_17
     Param {
         axis: 1
@@ -1653,14 +1711,15 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     activation: LRelu
     name: conv_60
-    input: lrelu_conv_59
+    input: conv_59
     output: conv_60
     Param {
         out_channels: 64
@@ -1672,14 +1731,15 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 1
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 64
     }
 }
 Concat {
     name: concat_18
-    input: "lrelu_conv_59, lrelu_conv_60"
+    input: "conv_59, conv_60"
     output: concat_18
     Param {
         axis: 1
@@ -1699,6 +1759,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
     }
 }
@@ -1716,6 +1777,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 1
         bias_term: true
         groups: 64
     }
@@ -1742,6 +1804,7 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 256
     }
@@ -1760,6 +1823,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
     }
 }
@@ -1780,7 +1844,7 @@ Upsample {
 }
 Concat {
     name: concat_20
-    input: "upsample_2, lrelu_conv_56"
+    input: "upsample_2, conv_56"
     output: concat_20
     Param {
         axis: 1
@@ -1801,14 +1865,15 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     activation: LRelu
     name: conv_66
-    input: lrelu_conv_65
+    input: conv_65
     output: conv_66
     Param {
         out_channels: 64
@@ -1820,14 +1885,15 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 1
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 64
     }
 }
 Concat {
     name: concat_21
-    input: "lrelu_conv_65, lrelu_conv_66"
+    input: "conv_65, conv_66"
     output: concat_21
     Param {
         axis: 1
@@ -1847,6 +1913,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
     }
 }
@@ -1864,6 +1931,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 1
         bias_term: true
         groups: 64
     }
@@ -1890,6 +1958,7 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 256
     }
@@ -1908,6 +1977,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
     }
 }
@@ -1931,15 +2001,16 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_72
-    input: lrelu_conv_71
+    input: conv_71
     output: conv_72
     Param {
         out_channels: 128
@@ -1951,13 +2022,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_23
-    input: "lrelu_conv_72, shortcut_1"
+    input: "conv_72, shortcut_1"
     output: concat_23
     Param {
         axis: 1
@@ -1978,14 +2050,15 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     activation: LRelu
     name: conv_74
-    input: lrelu_conv_73
+    input: conv_73
     output: conv_74
     Param {
         out_channels: 64
@@ -1997,14 +2070,15 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 1
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 64
     }
 }
 Concat {
     name: concat_24
-    input: "lrelu_conv_73, lrelu_conv_74"
+    input: "conv_73, conv_74"
     output: concat_24
     Param {
         axis: 1
@@ -2024,6 +2098,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
     }
 }
@@ -2041,6 +2116,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 1
         bias_term: true
         groups: 64
     }
@@ -2067,6 +2143,7 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 256
     }
@@ -2085,6 +2162,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
     }
 }
@@ -2108,15 +2186,16 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_80
-    input: lrelu_conv_79
+    input: conv_79
     output: conv_80
     Param {
         out_channels: 128
@@ -2128,13 +2207,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_26
-    input: "lrelu_conv_80, lrelu_conv_58"
+    input: "conv_80, conv_58"
     output: concat_26
     Param {
         axis: 1
@@ -2155,14 +2235,15 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     activation: LRelu
     name: conv_82
-    input: lrelu_conv_81
+    input: conv_81
     output: conv_82
     Param {
         out_channels: 64
@@ -2174,14 +2255,15 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 1
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 64
     }
 }
 Concat {
     name: concat_27
-    input: "lrelu_conv_81, lrelu_conv_82"
+    input: "conv_81, conv_82"
     output: concat_27
     Param {
         axis: 1
@@ -2201,6 +2283,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
     }
 }
@@ -2218,6 +2301,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 1
         bias_term: true
         groups: 64
     }
@@ -2244,6 +2328,7 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
         groups: 256
     }
@@ -2262,6 +2347,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
     }
 }
@@ -2273,7 +2359,7 @@ ShortCut {
 Convolution {
     activation: LRelu
     name: conv_87
-    input: lrelu_conv_58
+    input: conv_58
     output: conv_87
     Param {
         out_channels: 128
@@ -2285,15 +2371,16 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_88
-    input: lrelu_conv_87
+    input: conv_87
     output: conv_88
     Param {
         out_channels: 128
@@ -2305,8 +2392,9 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
@@ -2324,15 +2412,16 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_90
-    input: lrelu_conv_89
+    input: conv_89
     output: conv_90
     Param {
         out_channels: 128
@@ -2344,13 +2433,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 ShortCut {
     name: shortcut_5
-    input: "lrelu_conv_88, lrelu_conv_90"
+    input: "conv_88, conv_90"
     output: shortcut_5
 }
 Convolution {
@@ -2368,15 +2458,16 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_92
-    input: lrelu_conv_91
+    input: conv_91
     output: conv_92
     Param {
         out_channels: 128
@@ -2388,14 +2479,15 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     activation: LRelu
     name: conv_93
-    input: lrelu_conv_92
+    input: conv_92
     output: conv_93
     Param {
         out_channels: 128
@@ -2407,15 +2499,16 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_94
-    input: lrelu_conv_93
+    input: conv_93
     output: conv_94
     Param {
         out_channels: 128
@@ -2427,13 +2520,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_95
-    input: lrelu_conv_94
+    input: conv_94
     output: conv_95
     Param {
         out_channels: 112
@@ -2445,6 +2539,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
     }
 }
@@ -2463,15 +2558,16 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_97
-    input: lrelu_conv_96
+    input: conv_96
     output: conv_97
     Param {
         out_channels: 128
@@ -2483,14 +2579,15 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     activation: LRelu
     name: conv_98
-    input: lrelu_conv_97
+    input: conv_97
     output: conv_98
     Param {
         out_channels: 128
@@ -2502,15 +2599,16 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_99
-    input: lrelu_conv_98
+    input: conv_98
     output: conv_99
     Param {
         out_channels: 128
@@ -2522,13 +2620,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_100
-    input: lrelu_conv_99
+    input: conv_99
     output: conv_100
     Param {
         out_channels: 112
@@ -2540,6 +2639,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
     }
 }
@@ -2558,15 +2658,16 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_102
-    input: lrelu_conv_101
+    input: conv_101
     output: conv_102
     Param {
         out_channels: 128
@@ -2578,14 +2679,15 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     activation: LRelu
     name: conv_103
-    input: lrelu_conv_102
+    input: conv_102
     output: conv_103
     Param {
         out_channels: 128
@@ -2597,15 +2699,16 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_104
-    input: lrelu_conv_103
+    input: conv_103
     output: conv_104
     Param {
         out_channels: 128
@@ -2617,13 +2720,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_105
-    input: lrelu_conv_104
+    input: conv_104
     output: conv_105
     Param {
         out_channels: 112
@@ -2635,6 +2739,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
     }
 }
@@ -2653,15 +2758,16 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_107
-    input: lrelu_conv_106
+    input: conv_106
     output: conv_107
     Param {
         out_channels: 128
@@ -2673,14 +2779,15 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     activation: LRelu
     name: conv_108
-    input: lrelu_conv_107
+    input: conv_107
     output: conv_108
     Param {
         out_channels: 128
@@ -2692,15 +2799,16 @@ Convolution {
         padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 101
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_109
-    input: lrelu_conv_108
+    input: conv_108
     output: conv_109
     Param {
         out_channels: 128
@@ -2712,13 +2820,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 102
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_110
-    input: lrelu_conv_109
+    input: conv_109
     output: conv_110
     Param {
         out_channels: 112
@@ -2730,6 +2839,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 2
         bias_term: true
     }
 }

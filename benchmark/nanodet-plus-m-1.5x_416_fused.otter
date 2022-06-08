@@ -1,4 +1,4 @@
-name: "/Users/chenjunhao/Downloads/ncnn-nanodet-m-1.5x-416-int8/nanodet-m-1.5x-416-int8.param"
+name: "/Users/chenjunhao/Desktop/NTHUEE_Project/ncnn2otter/nanodet-plus-m-1.5x_416-opt.param"
 Input {
     name: data_1
     output: data_1
@@ -23,13 +23,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 MaxPool {
     name: pool_1
-    input: lrelu_conv_1
+    input: conv_1
     output: pool_1
     Param {
         kernel_h: 3
@@ -54,6 +55,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 24
     }
@@ -73,8 +75,9 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
@@ -92,13 +95,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_5
-    input: lrelu_conv_4
+    input: conv_4
     output: conv_5
     Param {
         out_channels: 88
@@ -110,6 +114,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 88
     }
@@ -129,13 +134,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_1
-    input: "lrelu_conv_3, lrelu_conv_6"
+    input: "conv_3, conv_6"
     output: concat_1
     Param {
         axis: 1
@@ -184,13 +190,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_8
-    input: lrelu_conv_7
+    input: conv_7
     output: conv_8
     Param {
         out_channels: 88
@@ -202,6 +209,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 88
     }
@@ -221,13 +229,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_2
-    input: "crop_1, lrelu_conv_9"
+    input: "crop_1, conv_9"
     output: concat_2
     Param {
         axis: 1
@@ -276,13 +285,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_11
-    input: lrelu_conv_10
+    input: conv_10
     output: conv_11
     Param {
         out_channels: 88
@@ -294,6 +304,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 88
     }
@@ -313,13 +324,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_3
-    input: "crop_3, lrelu_conv_12"
+    input: "crop_3, conv_12"
     output: concat_3
     Param {
         axis: 1
@@ -368,13 +380,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_14
-    input: lrelu_conv_13
+    input: conv_13
     output: conv_14
     Param {
         out_channels: 88
@@ -386,6 +399,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 88
     }
@@ -405,13 +419,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_4
-    input: "crop_5, lrelu_conv_15"
+    input: "crop_5, conv_15"
     output: concat_4
     Param {
         axis: 1
@@ -439,6 +454,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 176
     }
@@ -458,8 +474,9 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
@@ -477,13 +494,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_19
-    input: lrelu_conv_18
+    input: conv_18
     output: conv_19
     Param {
         out_channels: 176
@@ -495,6 +513,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 176
     }
@@ -514,13 +533,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_5
-    input: "lrelu_conv_17, lrelu_conv_20"
+    input: "conv_17, conv_20"
     output: concat_5
     Param {
         axis: 1
@@ -569,13 +589,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_22
-    input: lrelu_conv_21
+    input: conv_21
     output: conv_22
     Param {
         out_channels: 176
@@ -587,6 +608,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 176
     }
@@ -606,13 +628,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_6
-    input: "crop_7, lrelu_conv_23"
+    input: "crop_7, conv_23"
     output: concat_6
     Param {
         axis: 1
@@ -661,13 +684,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_25
-    input: lrelu_conv_24
+    input: conv_24
     output: conv_25
     Param {
         out_channels: 176
@@ -679,6 +703,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 176
     }
@@ -698,13 +723,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_7
-    input: "crop_9, lrelu_conv_26"
+    input: "crop_9, conv_26"
     output: concat_7
     Param {
         axis: 1
@@ -753,13 +779,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_28
-    input: lrelu_conv_27
+    input: conv_27
     output: conv_28
     Param {
         out_channels: 176
@@ -771,6 +798,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 176
     }
@@ -790,13 +818,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_8
-    input: "crop_11, lrelu_conv_29"
+    input: "crop_11, conv_29"
     output: concat_8
     Param {
         axis: 1
@@ -845,13 +874,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_31
-    input: lrelu_conv_30
+    input: conv_30
     output: conv_31
     Param {
         out_channels: 176
@@ -863,6 +893,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 176
     }
@@ -882,13 +913,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_9
-    input: "crop_13, lrelu_conv_32"
+    input: "crop_13, conv_32"
     output: concat_9
     Param {
         axis: 1
@@ -937,13 +969,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_34
-    input: lrelu_conv_33
+    input: conv_33
     output: conv_34
     Param {
         out_channels: 176
@@ -955,6 +988,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 176
     }
@@ -974,13 +1008,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_10
-    input: "crop_15, lrelu_conv_35"
+    input: "crop_15, conv_35"
     output: concat_10
     Param {
         axis: 1
@@ -1029,13 +1064,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_37
-    input: lrelu_conv_36
+    input: conv_36
     output: conv_37
     Param {
         out_channels: 176
@@ -1047,6 +1083,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 176
     }
@@ -1066,13 +1103,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_11
-    input: "crop_17, lrelu_conv_38"
+    input: "crop_17, conv_38"
     output: concat_11
     Param {
         axis: 1
@@ -1121,13 +1159,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_40
-    input: lrelu_conv_39
+    input: conv_39
     output: conv_40
     Param {
         out_channels: 176
@@ -1139,6 +1178,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 176
     }
@@ -1158,13 +1198,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_12
-    input: "crop_19, lrelu_conv_41"
+    input: "crop_19, conv_41"
     output: concat_12
     Param {
         axis: 1
@@ -1192,6 +1233,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 352
     }
@@ -1211,8 +1253,9 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
@@ -1230,13 +1273,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_45
-    input: lrelu_conv_44
+    input: conv_44
     output: conv_45
     Param {
         out_channels: 352
@@ -1248,6 +1292,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 352
     }
@@ -1267,13 +1312,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_13
-    input: "lrelu_conv_43, lrelu_conv_46"
+    input: "conv_43, conv_46"
     output: concat_13
     Param {
         axis: 1
@@ -1322,13 +1368,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_48
-    input: lrelu_conv_47
+    input: conv_47
     output: conv_48
     Param {
         out_channels: 352
@@ -1340,6 +1387,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 352
     }
@@ -1359,13 +1407,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_14
-    input: "crop_21, lrelu_conv_49"
+    input: "crop_21, conv_49"
     output: concat_14
     Param {
         axis: 1
@@ -1414,13 +1463,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_51
-    input: lrelu_conv_50
+    input: conv_50
     output: conv_51
     Param {
         out_channels: 352
@@ -1432,6 +1482,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 352
     }
@@ -1451,13 +1502,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_15
-    input: "crop_23, lrelu_conv_52"
+    input: "crop_23, conv_52"
     output: concat_15
     Param {
         axis: 1
@@ -1506,13 +1558,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     name: conv_54
-    input: lrelu_conv_53
+    input: conv_53
     output: conv_54
     Param {
         out_channels: 352
@@ -1524,6 +1577,7 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 352
     }
@@ -1543,13 +1597,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Concat {
     name: concat_16
-    input: "crop_25, lrelu_conv_55"
+    input: "crop_25, conv_55"
     output: concat_16
     Param {
         axis: 1
@@ -1564,6 +1619,7 @@ ChannelShuffle {
     }
 }
 Convolution {
+    activation: LRelu
     name: conv_56
     input: shuffle_4
     output: conv_56
@@ -1577,10 +1633,13 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
+        activation_params: 0.100000
     }
 }
 Convolution {
+    activation: LRelu
     name: conv_57
     input: shuffle_12
     output: conv_57
@@ -1594,10 +1653,13 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
+        activation_params: 0.100000
     }
 }
 Convolution {
+    activation: LRelu
     name: conv_58
     input: shuffle_16
     output: conv_58
@@ -1611,7 +1673,9 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
+        activation_params: 0.100000
     }
 }
 Upsample {
@@ -1624,9 +1688,148 @@ Upsample {
         upsample_mode: bilinear
     }
 }
+Concat {
+    name: concat_17
+    input: "upsample_1, conv_57"
+    output: concat_17
+    Param {
+        axis: 1
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_59
+    input: concat_17
+    output: conv_59
+    Param {
+        out_channels: 64
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_60
+    input: conv_59
+    output: conv_60
+    Param {
+        out_channels: 64
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 64
+    }
+}
+Concat {
+    name: concat_18
+    input: "conv_59, conv_60"
+    output: concat_18
+    Param {
+        axis: 1
+    }
+}
+Convolution {
+    name: conv_61
+    input: concat_18
+    output: conv_61
+    Param {
+        out_channels: 64
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+    }
+}
+Convolution {
+    name: conv_62
+    input: conv_61
+    output: conv_62
+    Param {
+        out_channels: 64
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        groups: 64
+    }
+}
+Concat {
+    name: concat_19
+    input: "conv_61, conv_62"
+    output: concat_19
+    Param {
+        axis: 1
+    }
+}
+Convolution {
+    name: conv_63
+    input: concat_17
+    output: conv_63
+    Param {
+        out_channels: 256
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 1
+        stride_w: 1
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        groups: 256
+    }
+}
+Convolution {
+    name: conv_64
+    input: conv_63
+    output: conv_64
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+    }
+}
 ShortCut {
     name: shortcut_1
-    input: "conv_57, upsample_1"
+    input: "concat_19, conv_64"
     output: shortcut_1
 }
 Upsample {
@@ -1639,193 +1842,21 @@ Upsample {
         upsample_mode: bilinear
     }
 }
-ShortCut {
-    name: shortcut_2
-    input: "conv_56, upsample_2"
-    output: shortcut_2
-}
-Upsample {
-    name: upsample_3
-    input: shortcut_2
-    output: upsample_3
-    Param {
-        stride: 0.500000
-        align_corner: false
-        upsample_mode: bilinear
-    }
-}
-ShortCut {
-    name: shortcut_3
-    input: "shortcut_1, upsample_3"
-    output: shortcut_3
-}
-Upsample {
-    name: upsample_4
-    input: shortcut_3
-    output: upsample_4
-    Param {
-        stride: 0.500000
-        align_corner: false
-        upsample_mode: bilinear
-    }
-}
-ShortCut {
-    name: shortcut_4
-    input: "conv_58, upsample_4"
-    output: shortcut_4
-}
-Convolution {
-    activation: LRelu
-    name: conv_59
-    input: shortcut_2
-    output: conv_59
-    Param {
-        out_channels: 128
-        kernel_h: 3
-        kernel_w: 3
-        stride_h: 1
-        stride_w: 1
-        padding_h: 1
-        padding_w: 1
-        dilation_h: 1
-        dilation_w: 1
-        bias_term: true
-        alpha: 0.100000
-        groups: 128
-    }
-}
-Convolution {
-    activation: LRelu
-    name: conv_60
-    input: lrelu_conv_59
-    output: conv_60
-    Param {
-        out_channels: 128
-        kernel_h: 1
-        kernel_w: 1
-        stride_h: 1
-        stride_w: 1
-        padding_h: 0
-        padding_w: 0
-        dilation_h: 1
-        dilation_w: 1
-        bias_term: true
-        alpha: 0.100000
-    }
-}
-Convolution {
-    activation: LRelu
-    name: conv_61
-    input: lrelu_conv_60
-    output: conv_61
-    Param {
-        out_channels: 128
-        kernel_h: 3
-        kernel_w: 3
-        stride_h: 1
-        stride_w: 1
-        padding_h: 1
-        padding_w: 1
-        dilation_h: 1
-        dilation_w: 1
-        bias_term: true
-        alpha: 0.100000
-        groups: 128
-    }
-}
-Convolution {
-    activation: LRelu
-    name: conv_62
-    input: lrelu_conv_61
-    output: conv_62
-    Param {
-        out_channels: 128
-        kernel_h: 1
-        kernel_w: 1
-        stride_h: 1
-        stride_w: 1
-        padding_h: 0
-        padding_w: 0
-        dilation_h: 1
-        dilation_w: 1
-        bias_term: true
-        alpha: 0.100000
-    }
-}
-Convolution {
-    name: conv_63
-    input: lrelu_conv_62
-    output: conv_63
-    Param {
-        out_channels: 112
-        kernel_h: 1
-        kernel_w: 1
-        stride_h: 1
-        stride_w: 1
-        padding_h: 0
-        padding_w: 0
-        dilation_h: 1
-        dilation_w: 1
-        bias_term: true
-    }
-}
-Slice {
-    input: conv_63
-    name: slice_1
-    output: "slice_1_0, slice_1_1"
+Concat {
+    name: concat_20
+    input: "upsample_2, conv_56"
+    output: concat_20
     Param {
         axis: 1
-        slice: "80, -1"
-    }
-}
-Sigmoid {
-    name: sigmoid_1
-    input: slice_1_0
-    output: sigmoid_1
-}
-Reshape {
-    name: reshape_1
-    input: sigmoid_1
-    output: reshape_1
-    Param {
-        reshape: "1, 1, 80, -1"
-    }
-}
-Reshape {
-    name: reshape_2
-    input: slice_1_1
-    output: reshape_2
-    Param {
-        reshape: "1, 1, 32, -1"
-    }
-}
-Convolution {
-    activation: LRelu
-    name: conv_64
-    input: shortcut_3
-    output: conv_64
-    Param {
-        out_channels: 128
-        kernel_h: 3
-        kernel_w: 3
-        stride_h: 1
-        stride_w: 1
-        padding_h: 1
-        padding_w: 1
-        dilation_h: 1
-        dilation_w: 1
-        bias_term: true
-        alpha: 0.100000
-        groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_65
-    input: lrelu_conv_64
+    input: concat_20
     output: conv_65
     Param {
-        out_channels: 128
+        out_channels: 64
         kernel_h: 1
         kernel_w: 1
         stride_h: 1
@@ -1834,17 +1865,18 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
     }
 }
 Convolution {
     activation: LRelu
     name: conv_66
-    input: lrelu_conv_65
+    input: conv_65
     output: conv_66
     Param {
-        out_channels: 128
+        out_channels: 64
         kernel_h: 3
         kernel_w: 3
         stride_h: 1
@@ -1853,18 +1885,26 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
-        groups: 128
+        activation_params: 0.100000
+        groups: 64
+    }
+}
+Concat {
+    name: concat_21
+    input: "conv_65, conv_66"
+    output: concat_21
+    Param {
+        axis: 1
     }
 }
 Convolution {
-    activation: LRelu
     name: conv_67
-    input: lrelu_conv_66
+    input: concat_21
     output: conv_67
     Param {
-        out_channels: 128
+        out_channels: 64
         kernel_h: 1
         kernel_w: 1
         stride_h: 1
@@ -1873,64 +1913,16 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
     }
 }
 Convolution {
     name: conv_68
-    input: lrelu_conv_67
+    input: conv_67
     output: conv_68
     Param {
-        out_channels: 112
-        kernel_h: 1
-        kernel_w: 1
-        stride_h: 1
-        stride_w: 1
-        padding_h: 0
-        padding_w: 0
-        dilation_h: 1
-        dilation_w: 1
-        bias_term: true
-    }
-}
-Slice {
-    input: conv_68
-    name: slice_2
-    output: "slice_2_0, slice_2_1"
-    Param {
-        axis: 1
-        slice: "80, -1"
-    }
-}
-Sigmoid {
-    name: sigmoid_2
-    input: slice_2_0
-    output: sigmoid_2
-}
-Reshape {
-    name: reshape_3
-    input: sigmoid_2
-    output: reshape_3
-    Param {
-        reshape: "1, 1, 80, -1"
-    }
-}
-Reshape {
-    name: reshape_4
-    input: slice_2_1
-    output: reshape_4
-    Param {
-        reshape: "1, 1, 32, -1"
-    }
-}
-Convolution {
-    activation: LRelu
-    name: conv_69
-    input: shortcut_4
-    output: conv_69
-    Param {
-        out_channels: 128
+        out_channels: 64
         kernel_h: 3
         kernel_w: 3
         stride_h: 1
@@ -1939,15 +1931,41 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
-        groups: 128
+        groups: 64
+    }
+}
+Concat {
+    name: concat_22
+    input: "conv_67, conv_68"
+    output: concat_22
+    Param {
+        axis: 1
     }
 }
 Convolution {
-    activation: LRelu
+    name: conv_69
+    input: concat_20
+    output: conv_69
+    Param {
+        out_channels: 256
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 1
+        stride_w: 1
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        groups: 256
+    }
+}
+Convolution {
     name: conv_70
-    input: lrelu_conv_69
+    input: conv_69
     output: conv_70
     Param {
         out_channels: 128
@@ -1959,34 +1977,40 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
     }
+}
+ShortCut {
+    name: shortcut_2
+    input: "concat_22, conv_70"
+    output: shortcut_2
 }
 Convolution {
     activation: LRelu
     name: conv_71
-    input: lrelu_conv_70
+    input: shortcut_2
     output: conv_71
     Param {
         out_channels: 128
-        kernel_h: 3
-        kernel_w: 3
-        stride_h: 1
-        stride_w: 1
-        padding_h: 1
-        padding_w: 1
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 2
+        stride_w: 2
+        padding_h: 2
+        padding_w: 2
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
         groups: 128
     }
 }
 Convolution {
     activation: LRelu
     name: conv_72
-    input: lrelu_conv_71
+    input: conv_71
     output: conv_72
     Param {
         out_channels: 128
@@ -1998,14 +2022,513 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
-        alpha: 0.100000
+        activation_params: 0.100000
+    }
+}
+Concat {
+    name: concat_23
+    input: "conv_72, shortcut_1"
+    output: concat_23
+    Param {
+        axis: 1
     }
 }
 Convolution {
+    activation: LRelu
     name: conv_73
-    input: lrelu_conv_72
+    input: concat_23
     output: conv_73
+    Param {
+        out_channels: 64
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_74
+    input: conv_73
+    output: conv_74
+    Param {
+        out_channels: 64
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 64
+    }
+}
+Concat {
+    name: concat_24
+    input: "conv_73, conv_74"
+    output: concat_24
+    Param {
+        axis: 1
+    }
+}
+Convolution {
+    name: conv_75
+    input: concat_24
+    output: conv_75
+    Param {
+        out_channels: 64
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+    }
+}
+Convolution {
+    name: conv_76
+    input: conv_75
+    output: conv_76
+    Param {
+        out_channels: 64
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        groups: 64
+    }
+}
+Concat {
+    name: concat_25
+    input: "conv_75, conv_76"
+    output: concat_25
+    Param {
+        axis: 1
+    }
+}
+Convolution {
+    name: conv_77
+    input: concat_23
+    output: conv_77
+    Param {
+        out_channels: 256
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 1
+        stride_w: 1
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        groups: 256
+    }
+}
+Convolution {
+    name: conv_78
+    input: conv_77
+    output: conv_78
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+    }
+}
+ShortCut {
+    name: shortcut_3
+    input: "concat_25, conv_78"
+    output: shortcut_3
+}
+Convolution {
+    activation: LRelu
+    name: conv_79
+    input: shortcut_3
+    output: conv_79
+    Param {
+        out_channels: 128
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 2
+        stride_w: 2
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 128
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_80
+    input: conv_79
+    output: conv_80
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+    }
+}
+Concat {
+    name: concat_26
+    input: "conv_80, conv_58"
+    output: concat_26
+    Param {
+        axis: 1
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_81
+    input: concat_26
+    output: conv_81
+    Param {
+        out_channels: 64
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_82
+    input: conv_81
+    output: conv_82
+    Param {
+        out_channels: 64
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 64
+    }
+}
+Concat {
+    name: concat_27
+    input: "conv_81, conv_82"
+    output: concat_27
+    Param {
+        axis: 1
+    }
+}
+Convolution {
+    name: conv_83
+    input: concat_27
+    output: conv_83
+    Param {
+        out_channels: 64
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+    }
+}
+Convolution {
+    name: conv_84
+    input: conv_83
+    output: conv_84
+    Param {
+        out_channels: 64
+        kernel_h: 3
+        kernel_w: 3
+        stride_h: 1
+        stride_w: 1
+        padding_h: 1
+        padding_w: 1
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        groups: 64
+    }
+}
+Concat {
+    name: concat_28
+    input: "conv_83, conv_84"
+    output: concat_28
+    Param {
+        axis: 1
+    }
+}
+Convolution {
+    name: conv_85
+    input: concat_26
+    output: conv_85
+    Param {
+        out_channels: 256
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 1
+        stride_w: 1
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        groups: 256
+    }
+}
+Convolution {
+    name: conv_86
+    input: conv_85
+    output: conv_86
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+    }
+}
+ShortCut {
+    name: shortcut_4
+    input: "concat_28, conv_86"
+    output: shortcut_4
+}
+Convolution {
+    activation: LRelu
+    name: conv_87
+    input: conv_58
+    output: conv_87
+    Param {
+        out_channels: 128
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 2
+        stride_w: 2
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 128
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_88
+    input: conv_87
+    output: conv_88
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_89
+    input: shortcut_4
+    output: conv_89
+    Param {
+        out_channels: 128
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 2
+        stride_w: 2
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 128
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_90
+    input: conv_89
+    output: conv_90
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+    }
+}
+ShortCut {
+    name: shortcut_5
+    input: "conv_88, conv_90"
+    output: shortcut_5
+}
+Convolution {
+    activation: LRelu
+    name: conv_91
+    input: shortcut_2
+    output: conv_91
+    Param {
+        out_channels: 128
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 1
+        stride_w: 1
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 128
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_92
+    input: conv_91
+    output: conv_92
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_93
+    input: conv_92
+    output: conv_93
+    Param {
+        out_channels: 128
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 1
+        stride_w: 1
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 128
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_94
+    input: conv_93
+    output: conv_94
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+    }
+}
+Convolution {
+    name: conv_95
+    input: conv_94
+    output: conv_95
     Param {
         out_channels: 112
         kernel_h: 1
@@ -2016,36 +2539,317 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
-Slice {
-    input: conv_73
-    name: slice_3
-    output: "slice_3_0, slice_3_1"
+Convolution {
+    activation: LRelu
+    name: conv_96
+    input: shortcut_3
+    output: conv_96
     Param {
-        axis: 1
-        slice: "80, -1"
+        out_channels: 128
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 1
+        stride_w: 1
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 128
     }
 }
-Sigmoid {
-    name: sigmoid_3
-    input: slice_3_0
-    output: sigmoid_3
-}
-Reshape {
-    name: reshape_5
-    input: sigmoid_3
-    output: reshape_5
+Convolution {
+    activation: LRelu
+    name: conv_97
+    input: conv_96
+    output: conv_97
     Param {
-        reshape: "1, 1, 80, -1"
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
     }
 }
-Reshape {
-    name: reshape_6
-    input: slice_3_1
-    output: reshape_6
+Convolution {
+    activation: LRelu
+    name: conv_98
+    input: conv_97
+    output: conv_98
     Param {
-        reshape: "1, 1, 32, -1"
+        out_channels: 128
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 1
+        stride_w: 1
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 128
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_99
+    input: conv_98
+    output: conv_99
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+    }
+}
+Convolution {
+    name: conv_100
+    input: conv_99
+    output: conv_100
+    Param {
+        out_channels: 112
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_101
+    input: shortcut_4
+    output: conv_101
+    Param {
+        out_channels: 128
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 1
+        stride_w: 1
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 128
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_102
+    input: conv_101
+    output: conv_102
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_103
+    input: conv_102
+    output: conv_103
+    Param {
+        out_channels: 128
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 1
+        stride_w: 1
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 128
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_104
+    input: conv_103
+    output: conv_104
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+    }
+}
+Convolution {
+    name: conv_105
+    input: conv_104
+    output: conv_105
+    Param {
+        out_channels: 112
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_106
+    input: shortcut_5
+    output: conv_106
+    Param {
+        out_channels: 128
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 1
+        stride_w: 1
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 128
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_107
+    input: conv_106
+    output: conv_107
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_108
+    input: conv_107
+    output: conv_108
+    Param {
+        out_channels: 128
+        kernel_h: 5
+        kernel_w: 5
+        stride_h: 1
+        stride_w: 1
+        padding_h: 2
+        padding_w: 2
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+        groups: 128
+    }
+}
+Convolution {
+    activation: LRelu
+    name: conv_109
+    input: conv_108
+    output: conv_109
+    Param {
+        out_channels: 128
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+        activation_params: 0.100000
+    }
+}
+Convolution {
+    name: conv_110
+    input: conv_109
+    output: conv_110
+    Param {
+        out_channels: 112
+        kernel_h: 1
+        kernel_w: 1
+        stride_h: 1
+        stride_w: 1
+        padding_h: 0
+        padding_w: 0
+        dilation_h: 1
+        dilation_w: 1
+        int8_scale_term: 0
+        bias_term: true
+    }
+}
+NanodetPlusDetectionOutput {
+    name: nanodet
+    input: "conv_95, conv_100, conv_105, conv_110"
+    output: nanodet
+    Param {
+        stride: "8, 16, 32, 64"
+        prob_threshold: 0.4
+        nms_threshold: 0.5
     }
 }

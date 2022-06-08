@@ -267,8 +267,10 @@ void Net::compile(CompileMode comopile_mode) {
         int load_state = layer->load_param(pd);
         OTTER_CHECK(load_state == 0, "Layer load ", i, " ", layer->name, " failed or undefined");
         
-        if (comopile_mode == CompileMode::Initial)
+        if (comopile_mode == CompileMode::Initial) {
             layer->init_model();
+            layer->create_pipeline();
+        }
         
         layers[i] = layer;
     }

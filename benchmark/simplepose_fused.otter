@@ -1,4 +1,4 @@
-name: "simplepose-opt.otter"
+name: "/Users/chenjunhao/Desktop/NTHUEE_Project/ncnn2otter/simplepose-opt.param"
 Input {
     name: data_1
     output: data_1
@@ -23,13 +23,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_2
-    input: relu6_conv_1
+    input: conv_1
     output: conv_2
     Param {
         out_channels: 16
@@ -41,13 +42,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 16
     }
 }
 Convolution {
     name: conv_3
-    input: relu6_conv_2
+    input: conv_2
     output: conv_3
     Param {
         out_channels: 8
@@ -59,6 +61,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -77,13 +80,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_5
-    input: relu6_conv_4
+    input: conv_4
     output: conv_5
     Param {
         out_channels: 48
@@ -95,13 +99,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 48
     }
 }
 Convolution {
     name: conv_6
-    input: relu6_conv_5
+    input: conv_5
     output: conv_6
     Param {
         out_channels: 12
@@ -113,6 +118,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -131,13 +137,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_8
-    input: relu6_conv_7
+    input: conv_7
     output: conv_8
     Param {
         out_channels: 72
@@ -149,13 +156,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 72
     }
 }
 Convolution {
     name: conv_9
-    input: relu6_conv_8
+    input: conv_8
     output: conv_9
     Param {
         out_channels: 12
@@ -167,6 +175,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -190,13 +199,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_11
-    input: relu6_conv_10
+    input: conv_10
     output: conv_11
     Param {
         out_channels: 72
@@ -208,13 +218,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 72
     }
 }
 Convolution {
     name: conv_12
-    input: relu6_conv_11
+    input: conv_11
     output: conv_12
     Param {
         out_channels: 16
@@ -226,6 +237,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -244,13 +256,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_14
-    input: relu6_conv_13
+    input: conv_13
     output: conv_14
     Param {
         out_channels: 96
@@ -262,13 +275,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 96
     }
 }
 Convolution {
     name: conv_15
-    input: relu6_conv_14
+    input: conv_14
     output: conv_15
     Param {
         out_channels: 16
@@ -280,6 +294,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -303,13 +318,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_17
-    input: relu6_conv_16
+    input: conv_16
     output: conv_17
     Param {
         out_channels: 96
@@ -321,13 +337,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 96
     }
 }
 Convolution {
     name: conv_18
-    input: relu6_conv_17
+    input: conv_17
     output: conv_18
     Param {
         out_channels: 16
@@ -339,6 +356,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -362,13 +380,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_20
-    input: relu6_conv_19
+    input: conv_19
     output: conv_20
     Param {
         out_channels: 96
@@ -380,13 +399,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 96
     }
 }
 Convolution {
     name: conv_21
-    input: relu6_conv_20
+    input: conv_20
     output: conv_21
     Param {
         out_channels: 32
@@ -398,6 +418,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -416,13 +437,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_23
-    input: relu6_conv_22
+    input: conv_22
     output: conv_23
     Param {
         out_channels: 192
@@ -434,13 +456,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 192
     }
 }
 Convolution {
     name: conv_24
-    input: relu6_conv_23
+    input: conv_23
     output: conv_24
     Param {
         out_channels: 32
@@ -452,6 +475,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -475,13 +499,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_26
-    input: relu6_conv_25
+    input: conv_25
     output: conv_26
     Param {
         out_channels: 192
@@ -493,13 +518,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 192
     }
 }
 Convolution {
     name: conv_27
-    input: relu6_conv_26
+    input: conv_26
     output: conv_27
     Param {
         out_channels: 32
@@ -511,6 +537,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -534,13 +561,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_29
-    input: relu6_conv_28
+    input: conv_28
     output: conv_29
     Param {
         out_channels: 192
@@ -552,13 +580,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 192
     }
 }
 Convolution {
     name: conv_30
-    input: relu6_conv_29
+    input: conv_29
     output: conv_30
     Param {
         out_channels: 32
@@ -570,6 +599,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -593,13 +623,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_32
-    input: relu6_conv_31
+    input: conv_31
     output: conv_32
     Param {
         out_channels: 192
@@ -611,13 +642,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 192
     }
 }
 Convolution {
     name: conv_33
-    input: relu6_conv_32
+    input: conv_32
     output: conv_33
     Param {
         out_channels: 48
@@ -629,6 +661,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -647,13 +680,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_35
-    input: relu6_conv_34
+    input: conv_34
     output: conv_35
     Param {
         out_channels: 288
@@ -665,13 +699,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 288
     }
 }
 Convolution {
     name: conv_36
-    input: relu6_conv_35
+    input: conv_35
     output: conv_36
     Param {
         out_channels: 48
@@ -683,6 +718,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -706,13 +742,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_38
-    input: relu6_conv_37
+    input: conv_37
     output: conv_38
     Param {
         out_channels: 288
@@ -724,13 +761,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 288
     }
 }
 Convolution {
     name: conv_39
-    input: relu6_conv_38
+    input: conv_38
     output: conv_39
     Param {
         out_channels: 48
@@ -742,6 +780,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -765,13 +804,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_41
-    input: relu6_conv_40
+    input: conv_40
     output: conv_41
     Param {
         out_channels: 288
@@ -783,13 +823,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 288
     }
 }
 Convolution {
     name: conv_42
-    input: relu6_conv_41
+    input: conv_41
     output: conv_42
     Param {
         out_channels: 80
@@ -801,6 +842,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -819,13 +861,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_44
-    input: relu6_conv_43
+    input: conv_43
     output: conv_44
     Param {
         out_channels: 480
@@ -837,13 +880,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 480
     }
 }
 Convolution {
     name: conv_45
-    input: relu6_conv_44
+    input: conv_44
     output: conv_45
     Param {
         out_channels: 80
@@ -855,6 +899,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -878,13 +923,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_47
-    input: relu6_conv_46
+    input: conv_46
     output: conv_47
     Param {
         out_channels: 480
@@ -896,13 +942,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 480
     }
 }
 Convolution {
     name: conv_48
-    input: relu6_conv_47
+    input: conv_47
     output: conv_48
     Param {
         out_channels: 80
@@ -914,6 +961,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -937,13 +985,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     activation: Relu6
     name: conv_50
-    input: relu6_conv_49
+    input: conv_49
     output: conv_50
     Param {
         out_channels: 480
@@ -955,13 +1004,14 @@ Convolution {
         padding_w: 1
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
         groups: 480
     }
 }
 Convolution {
     name: conv_51
-    input: relu6_conv_50
+    input: conv_50
     output: conv_51
     Param {
         out_channels: 160
@@ -973,6 +1023,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
@@ -991,13 +1042,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Deconvolution {
     activation: Relu
     name: deconv_1
-    input: relu_conv_52
+    input: conv_52
     output: deconv_1
     Param {
         out_channels: 128
@@ -1018,7 +1070,7 @@ Deconvolution {
 Convolution {
     activation: Relu
     name: conv_53
-    input: relu_deconv_1
+    input: deconv_1
     output: conv_53
     Param {
         out_channels: 128
@@ -1030,13 +1082,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Deconvolution {
     activation: Relu
     name: deconv_2
-    input: relu_conv_53
+    input: conv_53
     output: deconv_2
     Param {
         out_channels: 128
@@ -1057,7 +1110,7 @@ Deconvolution {
 Convolution {
     activation: Relu
     name: conv_54
-    input: relu_deconv_2
+    input: deconv_2
     output: conv_54
     Param {
         out_channels: 128
@@ -1069,13 +1122,14 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Deconvolution {
     activation: Relu
     name: deconv_3
-    input: relu_conv_54
+    input: conv_54
     output: deconv_3
     Param {
         out_channels: 128
@@ -1096,7 +1150,7 @@ Deconvolution {
 Convolution {
     activation: Relu
     name: conv_55
-    input: relu_deconv_3
+    input: deconv_3
     output: conv_55
     Param {
         out_channels: 128
@@ -1108,12 +1162,13 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: true
     }
 }
 Convolution {
     name: conv_56
-    input: relu_conv_55
+    input: conv_55
     output: conv_56
     Param {
         out_channels: 17
@@ -1125,6 +1180,7 @@ Convolution {
         padding_w: 0
         dilation_h: 1
         dilation_w: 1
+        int8_scale_term: 0
         bias_term: false
     }
 }

@@ -7,6 +7,9 @@
 
 using namespace std;
 
+std::string model[] = {"nanodet-plus-m-1.5x_416_fused.otter", "nanodet-plus-m-1.5x_416_int8_fused.otter", "nanodet-plus-m-1.5x_416_int8_mixed.otter"};
+std::string weight[] = {"nanodet-plus-m-1.5x_416_fused.bin", "nanodet-plus-m-1.5x_416_int8_fused.bin", "nanodet-plus-m-1.5x_416_int8_mixed.bin"};
+
 int main(int argc, const char * argv[]) {
     
     if (argc < 2) {
@@ -14,11 +17,18 @@ int main(int argc, const char * argv[]) {
         return -1;
     }
     
+   std::string model_name = model[0];
+   std::string weight_name = weight[0];
+    if (argc > 2) {
+        model_name = model[std::atoi(argv[2])];
+        weight_name = weight[std::atoi(argv[2])];
+    }
+    
     otter::Net net;
-    net.load_otter("nanodet-plus-m-1.5x_416.otter", otter::CompileMode::Inference);
+    net.load_otter(model_name.c_str(), otter::CompileMode::Inference);
     net.summary();
 
-    int ret = net.load_weight("nanodet-plus-m-1.5x_416-opt.bin", otter::Net::WeightType::Ncnn);
+    int ret = net.load_weight(weight_name.c_str(), otter::Net::WeightType::Ncnn);
     if (ret) {
         exit(-1);
     }
@@ -29,7 +39,7 @@ int main(int argc, const char * argv[]) {
 
     int width = img.size(3);
     int height = img.size(2);
-    const int target_size = (argc > 2) ? std::atoi(argv[2]) : 416;
+    const int target_size = (argc > 3) ? std::atoi(argv[3]) : 416;
 
     float scale;
     int wpad, hpad;
