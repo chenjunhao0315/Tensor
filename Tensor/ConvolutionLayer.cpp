@@ -13,6 +13,7 @@
 
 #include "ConvolutionMM2DNeon.hpp"
 #include "ConvolutionMM2DX86.hpp"
+#include "ConvolutionMM2dInt8X86.hpp"
 
 #include "Quantize.hpp"
  
@@ -349,6 +350,13 @@ int ConvolutionLayer::create_pipeline_int8(const NetOption& opt) {
         scale_in_data_a[p] = scale_in;
     }
     
+#if __SSE2__
+    if (in_channels == groups) {
+        return 0;
+    }
+    otter::convolution_im2col_sgemm_transform_kernel_int8_sse(weight_data, weight_sgemm_int8_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
+#endif
+    
     return 0;
 }
 
@@ -443,6 +451,12 @@ int ConvolutionLayer::forward_int8(const Tensor &bottom_blob, Tensor &top_blob, 
     params.transposed = false;
     params.benchmark = false;
     params.groups    = groups;
+    
+    if (params.use_cpu_x86(bottom_blob, weight_data)) {
+        if (weight_data.size(3) == 1 && weight_data.size(2) == 1 && params.stride[1] == 1 && params.stride[0] == 1) {
+            optimize_kernel = weight_sgemm_int8_data;
+        }
+    }
     
     auto top_blob_int32 = otter::convolution(
         bottom_blob, weight_data, optimize_kernel, bias_data,

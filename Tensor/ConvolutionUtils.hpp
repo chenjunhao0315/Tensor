@@ -53,6 +53,7 @@ enum class ConvBackend {
     Sgemm2dNeon_1x1s2,
     Sgemm2dX86,
     Sgemm2dInt8X86,
+    Sgemm2dInt8X86_1x1s1,
     SlideWin2dNeon_1x1s1,
     SlideWin2dNeon_3x3s1,
     WinogradNeon_3x3s1,

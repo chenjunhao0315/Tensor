@@ -122,9 +122,7 @@ bool ConvParams::use_cpu_depthwise3x3_winograd(const Tensor& input, const Tensor
 
 bool ConvParams::use_cpu_neon(const Tensor& input, const Tensor& weight) const {
 #if defined(__ARM_NEON__)
-    return (input.scalar_type() == ScalarType::Float) &&
-    (input.scalar_type() == ScalarType::Float) &&
-    (input.device() == Device::CPU) &&
+    return (input.device() == Device::CPU) &&
     (weight.device() == Device::CPU);
 #else
     (void)input;
@@ -135,9 +133,7 @@ bool ConvParams::use_cpu_neon(const Tensor& input, const Tensor& weight) const {
 
 bool ConvParams::use_cpu_x86(const Tensor& input, const Tensor& weight) const {
 #if __SSE2__
-    return (input.scalar_type() == ScalarType::Float) &&
-    (input.scalar_type() == ScalarType::Float) &&
-    (input.device() == Device::CPU) &&
+    return (input.device() == Device::CPU) &&
     (weight.device() == Device::CPU);
 #else
     return false;

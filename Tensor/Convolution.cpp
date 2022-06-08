@@ -119,107 +119,114 @@ ConvBackend select_proper_conv_backend(
     const int64_t num_output = weight.size(0);
     
     if (input.device() == Device::CPU) { // or input.is_cuda()
-        if (params.is_int8(input, weight)) {
-            return ConvBackend::Sgemm2dInt8X86;
+        if (params.transposed) {
+            if (input.dim() == 4) {
+                if (params.is_dilated()) {
+                    return ConvBackend::SlowTranspose2d;
+                } else {
+                    if (params.use_cpu_neon(input, weight)) {
+//                        if (params.is_transpose_depthwise(input, weight)) {
+//                            return ConvBackend::DepthwiseTransposeNeon;
+//                        }
+                        if (kernel_w == 4 && kernel_h == 4 && stride_w == 2 && stride_h == 2) {
+                            return ConvBackend::Transpose2dNeon_4x4s2;
+                        }
+                    }
+                    return ConvBackend::SlowTranspose2d;
+                }
+            }
         } else {
-            if (params.transposed) {
-                if (input.dim() == 4) {
-                    if (params.is_dilated()) {
-                        return ConvBackend::SlowTranspose2d;
-                    } else {
-                        if (params.use_cpu_neon(input, weight)) {
-    //                        if (params.is_transpose_depthwise(input, weight)) {
-    //                            return ConvBackend::DepthwiseTransposeNeon;
-    //                        }
-                            if (kernel_w == 4 && kernel_h == 4 && stride_w == 2 && stride_h == 2) {
-                                return ConvBackend::Transpose2dNeon_4x4s2;
+            if (input.dim() == 4) {
+                if (params.is_dilated()) {
+                    if (params.is_int8(input, weight)) {
+                        return ConvBackend::SlideWin2dInt8;
+                    }
+                    return ConvBackend::SlowDilated2d;
+                } else {
+                    if (params.is_int8(input, weight)) {
+                        if (params.use_cpu_x86(input, weight)) {
+                            if (kernel_w == 1 && kernel_h == 1 && stride_w == 1 && stride_h == 1) {
+                                return ConvBackend::Sgemm2dInt8X86_1x1s1;
+                            }
+                            return ConvBackend::Sgemm2dInt8X86;
+                        }
+                        return ConvBackend::SlideWin2dInt8;
+                    } else if (params.use_cpu_neon(input, weight)) {
+                        // Depthwise
+                        if (params.is_depthwise(input, weight)) {
+                            if (kernel_w == 3 && kernel_h == 3 && stride_w == 1 && stride_h == 1) {
+                                return ConvBackend::DepthwiseNeon_3x3s1;
+                            } else if (kernel_w == 3 && kernel_h == 3 && stride_w == 2 && stride_h == 2) {
+                                return ConvBackend::DepthwiseNeon_3x3s2;
+                            } else if (kernel_w == 5 && kernel_h == 5 && stride_w == 1 && stride_h == 1) {
+                                return ConvBackend::DepthwiseNeon_5x5s1;
+                            } else if (kernel_w == 5 && kernel_h == 5 && stride_w == 2 && stride_h == 2) {
+                                return ConvBackend::DepthwiseNeon_5x5s2;
                             }
                         }
-                        return ConvBackend::SlowTranspose2d;
+                        // General
+                        if (kernel_w == 1 && kernel_h == 1 && stride_w == 1 && stride_h == 1) {
+                            if (num_input >= 64 && num_output >= 64) {
+                                return ConvBackend::Sgemm2dNeon_1x1s1;
+                            } else {
+                                return ConvBackend::SlideWin2dNeon_1x1s1;
+                            }
+                        } else if (kernel_w == 1 && kernel_h == 1 && stride_w == 2 && stride_h == 2) {
+                            return ConvBackend::Sgemm2dNeon_1x1s2;
+                        } else if (kernel_w == 3 && kernel_h == 3 && stride_w == 1 && stride_h == 1) {
+                            if (num_input >= 16 && num_output >= 16 && w <= 120 && h <= 120) {
+                                return ConvBackend::WinogradNeon_3x3s1;
+                            } else {
+                                return ConvBackend::SlideWin2dNeon_3x3s1;
+                            }
+                            
+//                            if (!need_backward && params.use_cpu_depthwise3x3_winograd(input, weight)) {
+//                                return ConvBackend::Winograd3x3Depthwise;
+//                            }
+                        } else if (kernel_w == 3 && kernel_h == 3 && stride_w == 2 && stride_h == 2) {
+                            auto output_shape = otter::calculate_conv_output_size(input.sizes(), weight.sizes(), params.stride, params.padding);
+                            if (!(output_shape[2] >= 8 && output_shape[3] >= 8)) {
+                                return ConvBackend::Sgemm2dNeon;
+                            } else {
+                                return ConvBackend::Packed2DNeon_3x3s2;
+                            }
+                        } else {
+                            bool prefer_sgemm = true;
+                            if (num_output == 1) {
+                                if ((kernel_w == 3 && num_input >= 64) || (kernel_w == 4 && num_input >= 3) || kernel_w >= 5)
+                                    prefer_sgemm = false;
+                            }
+                            if (num_output == 2) {
+                                if ((kernel_w == 5 && num_input >= 64) || (kernel_w == 6 && num_input >= 32) || ((kernel_w == 7 || kernel_w == 8 || kernel_w == 9) && num_input >= 16) || (kernel_w >= 10 && num_input >= 8))
+                                        prefer_sgemm = false;
+                            }
+                            
+                            if (prefer_sgemm) {
+                                return ConvBackend::Sgemm2dNeon;
+                            } else {
+                                return ConvBackend::SlideWin2d;
+                            }
+                        }
+                    } else if (params.use_cpu_x86(input, weight)) {
+                        // Depthwise
+                        if (params.is_depthwise(input, weight)) {
+                            if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
+                                return ConvBackend::DepthwiseX86_3x3s1;
+                            } else if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
+                                return ConvBackend::DepthwiseX86_3x3s2;
+                            }
+                        }
+                        // General
+                        if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1 && input.size(1) >= 16 && weight.size(0) >= 16) {
+                            return ConvBackend::WinogradX86_3x3s1;
+                        }
+                        return ConvBackend::Sgemm2dX86;
+                    } else {
+                        return ConvBackend::Slow2d;
                     }
                 }
             } else {
-                if (input.dim() == 4) {
-                    if (params.is_dilated()) {
-                        return ConvBackend::SlowDilated2d;
-                    } else {
-                        if (params.use_cpu_neon(input, weight)) {
-                            // Depthwise
-                            if (params.is_depthwise(input, weight)) {
-                                if (kernel_w == 3 && kernel_h == 3 && stride_w == 1 && stride_h == 1) {
-                                    return ConvBackend::DepthwiseNeon_3x3s1;
-                                } else if (kernel_w == 3 && kernel_h == 3 && stride_w == 2 && stride_h == 2) {
-                                    return ConvBackend::DepthwiseNeon_3x3s2;
-                                } else if (kernel_w == 5 && kernel_h == 5 && stride_w == 1 && stride_h == 1) {
-                                    return ConvBackend::DepthwiseNeon_5x5s1;
-                                } else if (kernel_w == 5 && kernel_h == 5 && stride_w == 2 && stride_h == 2) {
-                                    return ConvBackend::DepthwiseNeon_5x5s2;
-                                }
-                            }
-                            // General
-                            if (kernel_w == 1 && kernel_h == 1 && stride_w == 1 && stride_h == 1) {
-                                if (num_input >= 64 && num_output >= 64) {
-                                    return ConvBackend::Sgemm2dNeon_1x1s1;
-                                } else {
-                                    return ConvBackend::SlideWin2dNeon_1x1s1;
-                                }
-                            } else if (kernel_w == 1 && kernel_h == 1 && stride_w == 2 && stride_h == 2) {
-                                return ConvBackend::Sgemm2dNeon_1x1s2;
-                            } else if (kernel_w == 3 && kernel_h == 3 && stride_w == 1 && stride_h == 1) {
-                                if (num_input >= 16 && num_output >= 16 && w <= 120 && h <= 120) {
-                                    return ConvBackend::WinogradNeon_3x3s1;
-                                } else {
-                                    return ConvBackend::SlideWin2dNeon_3x3s1;
-                                }
-                                
-    //                            if (!need_backward && params.use_cpu_depthwise3x3_winograd(input, weight)) {
-    //                                return ConvBackend::Winograd3x3Depthwise;
-    //                            }
-                            } else if (kernel_w == 3 && kernel_h == 3 && stride_w == 2 && stride_h == 2) {
-                                auto output_shape = otter::calculate_conv_output_size(input.sizes(), weight.sizes(), params.stride, params.padding);
-                                if (!(output_shape[2] >= 8 && output_shape[3] >= 8)) {
-                                    return ConvBackend::Sgemm2dNeon;
-                                } else {
-                                    return ConvBackend::Packed2DNeon_3x3s2;
-                                }
-                            } else {
-                                bool prefer_sgemm = true;
-                                if (num_output == 1) {
-                                    if ((kernel_w == 3 && num_input >= 64) || (kernel_w == 4 && num_input >= 3) || kernel_w >= 5)
-                                        prefer_sgemm = false;
-                                }
-                                if (num_output == 2) {
-                                    if ((kernel_w == 5 && num_input >= 64) || (kernel_w == 6 && num_input >= 32) || ((kernel_w == 7 || kernel_w == 8 || kernel_w == 9) && num_input >= 16) || (kernel_w >= 10 && num_input >= 8))
-                                            prefer_sgemm = false;
-                                }
-                                
-                                if (prefer_sgemm) {
-                                    return ConvBackend::Sgemm2dNeon;
-                                } else {
-                                    return ConvBackend::SlideWin2d;
-                                }
-                            }
-                        } else if (params.use_cpu_x86(input, weight)) {
-                            // Depthwise
-                            if (params.is_depthwise(input, weight)) {
-                                if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
-                                    return ConvBackend::DepthwiseX86_3x3s1;
-                                } else if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
-                                    return ConvBackend::DepthwiseX86_3x3s2;
-                                }
-                            }
-                            // General
-                            if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1 && input.size(1) >= 16 && weight.size(0) >= 16) {
-                                return ConvBackend::WinogradX86_3x3s1;
-                            }
-                            return ConvBackend::Sgemm2dX86;
-                        } else {
-                            return ConvBackend::Slow2d;
-                        }
-                    }
-                } else {
-                    // unsupported
-                }
+                // unsupported
             }
         }
     } else {
@@ -328,6 +335,7 @@ Tensor convolution(
         case ConvBackend::Sgemm2dNeon_1x1s2:
         case ConvBackend::Sgemm2dX86:
         case ConvBackend::Sgemm2dInt8X86:
+        case ConvBackend::Sgemm2dInt8X86_1x1s1:
         case ConvBackend::SlideWin2dNeon_1x1s1:
         case ConvBackend::SlideWin2d:
         case ConvBackend::SlideWin2dNeon_3x3s1:
@@ -400,6 +408,8 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
             return otter::slide_win_conv2d_int8(self, input_int8_scales, weight, weight_int8_scales, bias, kernel_size, params.stride, params.padding, params.dilation);
         case ConvBackend::Sgemm2dInt8X86:
             return otter::sgemm_conv2d_int8_x86(self, input_int8_scales, weight, weight_o, weight_int8_scales, bias, kernel_size, params.stride, params.padding);
+        case ConvBackend::Sgemm2dInt8X86_1x1s1:
+            return otter::sgemm_conv2d_1x1s1_int8_x86(self, input_int8_scales, weight, weight_o, weight_int8_scales, bias, kernel_size, params.stride, params.padding);
         default:
             OTTER_CHECK(false, "Unsupported nogroup conv backend");
     }

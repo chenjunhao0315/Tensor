@@ -73,6 +73,7 @@ public:
     Tensor bottom_blob_int8_scales;
     Tensor top_blob_int8_scales;
     Tensor scale_in_data;
+    Tensor weight_sgemm_int8_data;
 };
 
 enum class ConvParam : int {
