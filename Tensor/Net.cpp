@@ -269,7 +269,7 @@ void Net::compile(CompileMode comopile_mode) {
         
         if (comopile_mode == CompileMode::Initial) {
             layer->init_model();
-            layer->create_pipeline();
+            layer->create_pipeline(Net::option);
         }
         
         layers[i] = layer;
@@ -573,7 +573,7 @@ int Net::load_weight(const Initializer& initializer) {
     for (const auto i : otter::irange(layers.size())) {
         Layer* layer = layers[i];
         
-        layer->create_pipeline();
+        layer->create_pipeline(option);
     }
     
     return 0;

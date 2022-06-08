@@ -42,7 +42,7 @@ int Layer::load_model(const Initializer& /*initializer*/) {
     return 0;
 }
 
-int Layer::create_pipeline() {
+int Layer::create_pipeline(const NetOption& /*opt*/) {
     return 0;
 }
 

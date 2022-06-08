@@ -29,17 +29,21 @@ public:
     
     template <typename U>
     ArrayRef(const SmallVectorTemplateCommon<T, U>& Vec) : data_(Vec.data()), length_(Vec.size()) {
-        //        debugCheckNullptrInvariant();
+//        debugCheckNullptrInvariant();
     }
     
     template <typename A>
-    ArrayRef(const std::vector<T, A>& vec) : data_(vec.data()), length_(vec.size()) {}
+    ArrayRef(const std::vector<T, A>& vec) : data_(vec.data()), length_(vec.size()) {
+        static_assert(
+            !std::is_same<T, bool>::value,
+            "ArrayRef<bool> cannot be constructed from a std::vector<bool> bitfield.");
+    }
     
     constexpr ArrayRef(const std::initializer_list<T>& vec) : data_((std::begin(vec) == std::end(vec)) ? static_cast<T*>(nullptr) : std::begin(vec)), length_(vec.size()) {}
     
     template <typename Container, typename = std::enable_if_t<std::is_same<std::remove_const_t<decltype(std::declval<Container>().data())>, T*>::value>>
     ArrayRef(const Container& container) : data_(container.data()), length_(container.size()) {
-        //        debugCheckNullptrInvariant();
+//        debugCheckNullptrInvariant();
     }
     
     template <size_t N>

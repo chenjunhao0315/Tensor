@@ -28,13 +28,13 @@ public:
     
     virtual int load_model(const Initializer& initializer);
     
-    virtual int create_pipeline();
+    virtual int create_pipeline(const NetOption& opt);
     
     virtual int forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
     
     virtual std::string type() const { return "Convolution"; }
 private:
-    int create_pipeline_int8();
+    int create_pipeline_int8(const NetOption& opt);
     
     int forward_int8(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
 public:

@@ -194,7 +194,7 @@ int DeconvolutionLayer::load_model(const Initializer& initializer) {
     return 0;
 }
 
-int DeconvolutionLayer::create_pipeline() {
+int DeconvolutionLayer::create_pipeline(const NetOption& /*opt*/) {
     
     activation = create_activation_layer(activation_type, activation_params);
     

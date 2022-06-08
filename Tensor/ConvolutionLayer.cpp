@@ -272,12 +272,12 @@ int ConvolutionLayer::load_model(const Initializer& initializer) {
     return 0;
 }
 
-int ConvolutionLayer::create_pipeline() {
+int ConvolutionLayer::create_pipeline(const NetOption& opt) {
     
     activation = create_activation_layer(activation_type, activation_params);
     
     if (weight_data.scalar_type() == otter::ScalarType::Byte) {
-        return create_pipeline_int8();
+        return create_pipeline_int8(opt);
     }
     
     auto k = weight_data.dim();
@@ -334,7 +334,7 @@ int ConvolutionLayer::create_pipeline() {
     return 0;
 }
 
-int ConvolutionLayer::create_pipeline_int8() {
+int ConvolutionLayer::create_pipeline_int8(const NetOption& opt) {
     scale_in_data = otter::empty({out_channels}, otter::ScalarType::Float);
     auto scale_in_data_a = scale_in_data.accessor<float, 1>();
     auto input_int8_scales_a = bottom_blob_int8_scales.accessor<float, 1>();
