@@ -26,7 +26,7 @@ public:
     
     virtual std::string type() const { return "Permute"; }
 private:
-    std::vector<long long> permute;
+    std::vector<long int> permute;
 };
 
 enum class PermuteParam {

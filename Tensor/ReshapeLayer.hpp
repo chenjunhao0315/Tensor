@@ -26,7 +26,7 @@ public:
     
     virtual std::string type() const { return "Reshape"; }
 private:
-    std::vector<long long> shape;
+    std::vector<long int> shape;
 };
 
 enum class ReshapeParam {
