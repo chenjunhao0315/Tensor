@@ -372,6 +372,10 @@ private:
         is_wrapped_number_ = false;
     }
     
+    inline void cal_elempack() {
+        elempack_ = (data_type_.toScalarType() == ScalarType::Float4) ? 4 : 1;
+    }
+    
     bool is_contiguous_ : 1;
     bool is_channels_last_ : 1;
     bool is_channels_last_contiguous_ : 1;

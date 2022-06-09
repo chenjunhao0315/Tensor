@@ -396,13 +396,25 @@ private:
 template <class T>
 void TensorPrinter::print(const Tensor& tensor) {
     int max_length = static_cast<int>(std::min(tensor.numel(), int64_t(limit_)));
-    const T* tensor_data = tensor.data_ptr<T>();
+    int elempack = tensor.elempack();
+    const T* tensor_data = (const T*)tensor.raw_data();
     
-    for (int i = 0; i < max_length - 1; ++i) {
-        std::cout << tensor_data[i] << ",";
-    }
-    if (max_length) {
-        std::cout << tensor_data[max_length - 1];
+    for (int i = 0; i < max_length; ++i) {
+        if (i)
+            std::cout << ", ";
+        if (elempack > 1) {
+            std::cout << "[";
+            for (int j = 0; j < elempack; ++j) {
+                if (j)
+                    std::cout << ", ";
+                std::cout << *tensor_data;
+                tensor_data++;
+            }
+            std::cout << "]";
+        } else {
+            std::cout << *tensor_data;
+            tensor_data++;
+        }
     }
     std::cout << std::endl;
 }

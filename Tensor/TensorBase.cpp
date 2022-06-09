@@ -12,10 +12,12 @@ namespace otter {
 // TensorNucleus main constructor
 TensorNucleus::TensorNucleus(Memory&& memory, const TypeMeta data_type, Device device) : device_(device), memory_(std::move(memory)), memory_offset_(0), numel_(0), data_type_(data_type) {
     init_bitfields();
+    cal_elempack();
 }
 
 TensorNucleus::TensorNucleus(Memory&& memory, const TypeMeta data_type) : TensorNucleus(std::forward<Memory>(memory), data_type, memory.device()) {
     init_bitfields();
+    cal_elempack();
 }
 
 int64_t TensorNucleus::dim() const {

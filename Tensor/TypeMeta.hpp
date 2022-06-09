@@ -207,7 +207,7 @@ private:
     constexpr uint16_t TypeMeta::type2index<T>() noexcept {     \
         return static_cast<uint16_t>(ScalarType::name);         \
     }
-    OTTER_ALL_SCALAR_TYPES(DEFINE_SCALAR_METADATA_INSTANCE)
+    OTTER_ALL_SCALAR_TYPES_W_PACKED(DEFINE_SCALAR_METADATA_INSTANCE)
 #undef DEFINE_SCALAR_METADATA_INSTANCE
 
 template <>

@@ -14,7 +14,7 @@ namespace otter {
 std::string toString(ScalarType type) {
     switch(type) {
 #define DEFINE_STR(_1, n) case ScalarType::n: return std::string(#n); break;
-        OTTER_ALL_SCALAR_TYPES(DEFINE_STR)
+        OTTER_ALL_SCALAR_TYPES_W_PACKED(DEFINE_STR)
 #undef DEFINE_STR
         default:
             return std::string("Undefined");

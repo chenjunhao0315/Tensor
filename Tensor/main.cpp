@@ -6,6 +6,7 @@
 #include "TensorTransform.hpp"
 #include "PoseEstimation.hpp"
 #include "DrawDetection.hpp"
+#include "PackedData.hpp"
 
 using namespace std;
 
@@ -29,18 +30,18 @@ int main(int argc, const char * argv[]) {
     otter::Clock l;
     auto img = otter::cv::load_image_rgb("大合照.jpg");
     l.stop_and_show("ms (read image)");
-    
+
     int width = img.size(3);
     int height = img.size(2);
     const int target_size = (argc > 2) ? std::atoi(argv[2]) : 416;
-    
+
     float scale;
     int wpad, hpad;
     auto resize_pad = otter::nanodet_pre_process(img, target_size, scale, wpad, hpad);
     printf("Resize input (%d, %d) to (%d, %d)\n", width, height, (int)resize_pad.size(3), (int)resize_pad.size(2));
-    
+
     auto ex = net.create_extractor();
-    
+
     otter::Clock c;
     ex.input("data_1", resize_pad);
     otter::Tensor pred;

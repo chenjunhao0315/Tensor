@@ -20,7 +20,7 @@ TypeMetaData* TypeMeta::typeMetaDatas() {
         _PickCopy<T>(),                     \
         _PickPlacementDelete<T>(),          \
         _PickDelete<T>()),
-    OTTER_ALL_SCALAR_TYPES(SCALAR_TYPE_META)
+    OTTER_ALL_SCALAR_TYPES_W_PACKED(SCALAR_TYPE_META)
     #undef SCALAR_TYPE_META
   };
   return instances;

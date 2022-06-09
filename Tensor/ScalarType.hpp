@@ -15,6 +15,8 @@
 #include "Exception.hpp"
 #include "TypeCast.hpp"
 
+#include "PackedData.hpp"
+
 namespace otter {
 
 #define OTTER_ALL_SCALAR_TYPES_WO_BOOL(_) \
@@ -36,9 +38,23 @@ _(float, Float)       /* 5 */       \
 _(double, Double)     /* 6 */       \
 _(bool, Bool)         /* 7 */
 
+#define OTTER_ALL_SCALAR_TYPES_W_PACKED(_)       \
+_(uint8_t, Byte)      /* 0 */       \
+_(int8_t, Char)       /* 1 */       \
+_(int16_t, Short)     /* 2 */       \
+_(int, Int)           /* 3 */       \
+_(int64_t, Long)      /* 4 */       \
+_(float, Float)       /* 5 */       \
+_(double, Double)     /* 6 */       \
+_(bool, Bool)         /* 7 */       \
+_(elempack4<float>, Float4)         \
+_(elempack4<signed char>, Byte4)    \
+_(elempack8<float>, Float8)         \
+_(elempack8<signed char>, Byte8)
+
 enum class ScalarType : int8_t {
 #define DEFINE_ENUM(_1, n) n,
-    OTTER_ALL_SCALAR_TYPES(DEFINE_ENUM)
+    OTTER_ALL_SCALAR_TYPES_W_PACKED(DEFINE_ENUM)
 #undef DEFINE_ENUM
     Undefined,
     NumOptions
@@ -52,7 +68,7 @@ static inline size_t elementSize(ScalarType t) {
     return sizeof(ctype);
 
     switch (t) {
-        OTTER_ALL_SCALAR_TYPES(CASE_ELEMENTSIZE_CASE)
+        OTTER_ALL_SCALAR_TYPES_W_PACKED(CASE_ELEMENTSIZE_CASE)
     default:
         fprintf(stderr, "Undefined Scalar Type!\n");
     }
@@ -105,6 +121,30 @@ struct ScalarTypeToCPPType<ScalarType::scalar_type> {                 \
 OTTER_ALL_SCALAR_TYPES(SPECIALIZE_ScalarTypeToCPPType)
 
 #undef SPECIALIZE_ScalarTypeToCPPType
+
+template <>
+struct ScalarTypeToCPPType<ScalarType::Float4> {
+    using type = float;
+    static type t;
+};
+
+template <>
+struct ScalarTypeToCPPType<ScalarType::Float8> {
+    using type = float;
+    static type t;
+};
+
+template <>
+struct ScalarTypeToCPPType<ScalarType::Byte4> {
+    using type = signed char;
+    static type t;
+};
+
+template <>
+struct ScalarTypeToCPPType<ScalarType::Byte8> {
+    using type = signed char;
+    static type t;
+};
 
 template <typename T>
 struct CppTypeToScalarType;

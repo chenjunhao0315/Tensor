@@ -229,6 +229,7 @@
 		760A334027F7949F003F0542 /* SigmoidLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SigmoidLayer.hpp; sourceTree = "<group>"; };
 		761C9D002851647D00A272EF /* ConvolutionMM2DInt8Neon.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionMM2DInt8Neon.cpp; sourceTree = "<group>"; };
 		761C9D012851647D00A272EF /* ConvolutionMM2DInt8Neon.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConvolutionMM2DInt8Neon.hpp; sourceTree = "<group>"; };
+		761C9D03285215E500A272EF /* PackedData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PackedData.hpp; sourceTree = "<group>"; };
 		762047A628454A0700B8BEEF /* ParallelNative.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ParallelNative.cpp; sourceTree = "<group>"; };
 		762047A728454A0700B8BEEF /* ParallelNative.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ParallelNative.hpp; sourceTree = "<group>"; };
 		7620AF6C27B4060A0081C210 /* RangeFactory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RangeFactory.cpp; sourceTree = "<group>"; };
@@ -567,6 +568,7 @@
 				76E6C51E27A504C80036A26F /* ScalarType.hpp */,
 				760382BE27BF4AAB00CD599F /* DefaultDtype.cpp */,
 				760382BF27BF4AAB00CD599F /* DefaultDtype.hpp */,
+				761C9D03285215E500A272EF /* PackedData.hpp */,
 			);
 			name = Dtype;
 			sourceTree = "<group>";
@@ -1379,7 +1381,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = NO;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = /usr/local/opt/llvm/lib/clang/13.0.1/include;
 				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/llvm/13.0.1/lib;
 				OTHER_CFLAGS = (
@@ -1407,7 +1409,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = NO;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = /usr/local/opt/llvm/lib/clang/13.0.1/include;
 				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/llvm/13.0.1/lib;
 				OTHER_CFLAGS = (
