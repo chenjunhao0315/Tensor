@@ -13,7 +13,7 @@
 
 #include "ConvolutionMM2DNeon.hpp"
 #include "ConvolutionMM2DX86.hpp"
-#include "ConvolutionMM2dInt8X86.hpp"
+#include "ConvolutionMM2DInt8X86.hpp"
 
 #include "Quantize.hpp"
  
