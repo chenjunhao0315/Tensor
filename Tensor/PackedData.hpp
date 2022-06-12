@@ -21,7 +21,7 @@ template <typename T>
 struct alignas(sizeof(T) * 8) elempack8 {
     using value_type = T;
     
-    T values[4] = {0};
+    T values[8] = {0};
 };
 
 }   // end namespace otter

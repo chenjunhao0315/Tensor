@@ -373,7 +373,19 @@ private:
     }
     
     inline void cal_elempack() {
-        elempack_ = (data_type_.toScalarType() == ScalarType::Float4) ? 4 : 1;
+        auto data_type = data_type_.toScalarType();
+        switch (data_type) {
+            case ScalarType::Float8:
+            case ScalarType::Byte8:
+                elempack_ = 8;
+                break;
+            case ScalarType::Float4:
+            case ScalarType::Byte4:
+                elempack_ = 4;
+                break;
+            default:
+                elempack_ = 1;
+        }
     }
     
     bool is_contiguous_ : 1;
