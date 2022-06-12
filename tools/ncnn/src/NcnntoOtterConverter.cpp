@@ -26,6 +26,35 @@ fprintf(stderr, ##__VA_ARGS__); fprintf(stderr, "\n"); } while(0)
 
 #define WRITE_SPACE(file, n) for (int i = n; i--; ) fprintf(file, " ");
 
+#define SCAN_VALUE(fmt, v)              \
+if (dr.scan(fmt, &v) != 1) {            \
+    NCNN_LOGE("parse " #v " failed");   \
+    exit(-1);                           \
+}
+
+#define ADD_PARAM_STRING(str, value)    \
+    team.addParam({str, value});
+    
+#define ADD_PARAM(str, value)   \
+    sub_team.addParam({str, std::to_string(value)});
+    
+#define WRITE_LAYER_NAME(str, value)    \
+    team.addParam({"name", get_layer_name(str, value)})
+    
+#define ADD_TRANSFORM_MAP(origin, transform)    \
+{int count = std::count(origin.begin(), origin.end(), ',') + 1;  \
+    std::stringstream ss(origin);   \
+    for (int i = 0; i < count; ++i) {   \
+        std::string name;   \
+        getline(ss, name, ','); \
+        EARSE_SPACE(name);  \
+    printf("add \"%s\" with \"%s\"\n", name.c_str(), transform.c_str());    \
+    transform_map[name] = transform;    \
+}}
+    
+#define ACTIVATION(type) \
+    team.addParam({"activation", type});
+
 map<string, string> transform_map;
 
 namespace otter {
@@ -50,13 +79,6 @@ int reshape = 1;
 int permute = 1;
 
 OtterLeader ncnn2otter(const char *model_path) {
-#define SCAN_VALUE(fmt, v)                \
-if (dr.scan(fmt, &v) != 1)            \
-{                                     \
-NCNN_LOGE("parse " #v " failed"); \
-exit(-1);                        \
-}
-    
     OtterLeader new_model(model_path);
     
     FILE* fp = fopen(model_path, "rb");
@@ -135,8 +157,6 @@ exit(-1);                        \
     return new_model;
 }
 
-void activation(Otter& sub_team, int activation_type, std::vector<float> param);
-
 std::string get_layer_name(std::string str, int value) {
     std::string name(str);
     name += "_" + std::to_string(value);
@@ -145,25 +165,6 @@ std::string get_layer_name(std::string str, int value) {
 }
 
 void ncnn2team(Otter &team, ParamDict &pd, std::string input_name, std::string output_name) {
-#define ADD_PARAM_STRING(str, value)    \
-team.addParam({str, value});
-    
-#define ADD_PARAM(str, value)   \
-sub_team.addParam({str, std::to_string(value)});
-    
-#define WRITE_LAYER_NAME(str, value)    \
-team.addParam({"name", get_layer_name(str, value)})
-    
-#define ADD_TRANSFORM_MAP(origin, transform)    \
-{int count = std::count(origin.begin(), origin.end(), ',') + 1;  \
-    std::stringstream ss(origin);   \
-    for (int i = 0; i < count; ++i) {   \
-        std::string name;   \
-        getline(ss, name, ','); \
-        EARSE_SPACE(name);  \
-    printf("add \"%s\" with \"%s\"\n", name.c_str(), transform.c_str());    \
-    transform_map[name] = transform;    \
-}}
     
     std::string layer_name;
     std::string type = team.getName();
@@ -241,8 +242,6 @@ team.addParam({"name", get_layer_name(str, value)})
         
         std::string true_output;
         
-#define ACTIVATION(type) \
-team.addParam({"activation", type});
         if (activation_type == 1) {
             ACTIVATION("Relu");
             true_output = get_layer_name("relu_conv", conv);
@@ -321,8 +320,6 @@ team.addParam({"activation", type});
         
         std::string true_output;
         
-#define ACTIVATION(type) \
-team.addParam({"activation", type});
         if (activation_type == 1) {
             ACTIVATION("Relu");
             true_output = get_layer_name("relu_deconv", deconv);
@@ -683,22 +680,6 @@ team.addParam({"activation", type});
     
     if (!sub_team.idle()) {
         team.addPartner(sub_team);
-    }
-}
-
-void activation(Otter& sub_team, int activation_type, std::vector<float> param) {
-#define ACTIVATION(type) \
-sub_team.addParam({"activation", type});
-    
-    if (activation_type == 1) {
-        ACTIVATION("Relu");
-    } else if (activation_type == 2) {
-        ACTIVATION("LRelu");
-        sub_team.addParam({"alpha", std::to_string(param[0])});
-    } else if (activation_type == 3) {
-        
-    } else if (activation_type == 4) {
-        ACTIVATION("Sigmoid");
     }
 }
 
