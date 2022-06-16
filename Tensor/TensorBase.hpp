@@ -245,11 +245,12 @@ public:
         this->empty_tensor_restride(MemoryFormat::Contiguous);
     }
     
-    void set_sizes_contiguous_and_elempack(IntArrayRef newSizes, int64_t elempack) {
-        elempack_ = elempack;
+    void force_set_sizes_and_dtype(IntArrayRef newSizes, ScalarType dtype) {
         perspective_view_.set_sizes(newSizes);
         this->update_numel();
         this->empty_tensor_restride(MemoryFormat::Contiguous);
+        data_type_ = scalarTypeToTypeMeta(dtype);
+        this->cal_elempack();
     }
     
     void empty_tensor_restride(MemoryFormat memory_format) {

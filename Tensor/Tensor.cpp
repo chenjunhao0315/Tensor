@@ -20,9 +20,18 @@
 #include "TensorProperties.hpp"
 #include "TensorScalar.hpp"
 #include "TensorDistribution.hpp"
+#include "TensorPacking.hpp"
 #include "TypeMeta.hpp"
 
 namespace otter {
+
+Tensor Tensor::packing(int64_t elempack) const {
+    Tensor out;
+    
+    otter::convertPacking(*this, out, elempack);
+    
+    return out;
+}
 
 Tensor Tensor::select(int64_t dim, int64_t index) const {
     return otter::native::select(*this, dim, index);

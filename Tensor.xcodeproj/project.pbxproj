@@ -30,6 +30,7 @@
 		760A333B27F62800003F0542 /* CropLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333927F62800003F0542 /* CropLayer.cpp */; };
 		760A333E27F6585E003F0542 /* Otter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333C27F6585E003F0542 /* Otter.cpp */; };
 		760A334127F7949F003F0542 /* SigmoidLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333F27F7949F003F0542 /* SigmoidLayer.cpp */; };
+		760F7540285A9E5D005F72C0 /* TensorPacking.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760F753E285A9E5D005F72C0 /* TensorPacking.cpp */; };
 		761C9D022851647D00A272EF /* ConvolutionMM2DInt8Neon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 761C9D002851647D00A272EF /* ConvolutionMM2DInt8Neon.cpp */; };
 		762047A828454A0800B8BEEF /* ParallelNative.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762047A628454A0700B8BEEF /* ParallelNative.cpp */; };
 		7620AF6E27B4060A0081C210 /* RangeFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF6C27B4060A0081C210 /* RangeFactory.cpp */; };
@@ -227,6 +228,8 @@
 		760A333D27F6585E003F0542 /* Otter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Otter.hpp; sourceTree = "<group>"; };
 		760A333F27F7949F003F0542 /* SigmoidLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SigmoidLayer.cpp; sourceTree = "<group>"; };
 		760A334027F7949F003F0542 /* SigmoidLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SigmoidLayer.hpp; sourceTree = "<group>"; };
+		760F753E285A9E5D005F72C0 /* TensorPacking.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorPacking.cpp; sourceTree = "<group>"; };
+		760F753F285A9E5D005F72C0 /* TensorPacking.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorPacking.hpp; sourceTree = "<group>"; };
 		761C9D002851647D00A272EF /* ConvolutionMM2DInt8Neon.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionMM2DInt8Neon.cpp; sourceTree = "<group>"; };
 		761C9D012851647D00A272EF /* ConvolutionMM2DInt8Neon.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConvolutionMM2DInt8Neon.hpp; sourceTree = "<group>"; };
 		761C9D03285215E500A272EF /* PackedData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PackedData.hpp; sourceTree = "<group>"; };
@@ -746,6 +749,8 @@
 				76C19982283F6C0A00A5D737 /* TensorSoftmax.hpp */,
 				76C19984283F6C1D00A5D737 /* TensorSoftmaxKernel.cpp */,
 				76C19985283F6C1D00A5D737 /* TensorSoftmaxKernel.hpp */,
+				760F753E285A9E5D005F72C0 /* TensorPacking.cpp */,
+				760F753F285A9E5D005F72C0 /* TensorPacking.hpp */,
 			);
 			name = Ops;
 			sourceTree = "<group>";
@@ -1175,6 +1180,7 @@
 				760A333827F62553003F0542 /* ChannelShuffleLayer.cpp in Sources */,
 				76AA466627F8859300F0F3C6 /* DepthwiseConvKernelX86.cpp in Sources */,
 				76F336CD27A5D17E00E3AEF1 /* BinaryOps.cpp in Sources */,
+				760F7540285A9E5D005F72C0 /* TensorPacking.cpp in Sources */,
 				76CEF55A27FCAFA900AC46F6 /* TensorCompareKernel.cpp in Sources */,
 				76F0064927B6CCA9009D67F5 /* TensorBlasKernel.cpp in Sources */,
 				76E6C51F27A504C80036A26F /* ScalarType.cpp in Sources */,

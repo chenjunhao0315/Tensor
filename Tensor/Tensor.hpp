@@ -12,6 +12,15 @@
 
 #include "TensorBase.hpp"
 #include "TensorAccessor.hpp"
+#if __ARM_NEON
+#include <arm_neon.h>
+#endif
+#if __SSE2__
+#include <emmintrin.h>
+#if __AVX__
+#include <immintrin.h>
+#endif
+#endif
 
 namespace otter {
 
@@ -92,6 +101,8 @@ public:
     T item() const;
     
     Scalar item() const;
+    
+    Tensor packing(int64_t elempack) const;
     
     Tensor operator[](int64_t index) const;
     Tensor select(int64_t dim, int64_t index) const;
@@ -193,6 +204,23 @@ public:
     Tensor& zero_();
     Tensor& fill_(const Scalar& value);
     Tensor& fill_(const Tensor& value);
+    
+#if __ARM_NEON
+    Tensor& fill_(float32x4_t _v);
+    Tensor& fill_(uint16x4_t _v);
+    Tensor& fill_(int32x4_t _v);
+    Tensor& fill_(int32x4_t _v0, int32x4_t _v1);
+#endif // __ARM_NEON
+#if __SSE2__
+#if __AVX__
+    Tensor& fill_(__m256 _v);
+#endif // __AVX__
+    Tensor& fill_(__m128 _v);
+    Tensor& fill_(__m128i _v);
+#endif // __SSE2__
+    
+    template <typename scalar_t>
+    Tensor& type_fill_(scalar_t value);
     
     Tensor to(ScalarType dtype, bool non_blocking = false, bool copy = false, MemoryFormat memory_format = MemoryFormat::Preserve) const;
     Tensor to(TensorOptions options, bool non_blocking = false, bool copy = false, MemoryFormat memory_format = MemoryFormat::Preserve) const;
@@ -318,6 +346,100 @@ public:
 template <typename T, typename... Args>
 Tensor make_tensor(Args&&... args) {
     return Tensor(make_otterptr<T>(std::forward<Args>(args)...));
+}
+
+#if __ARM_NEON
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(float32x4_t _v) {
+    int size = (int)numel();
+    float* ptr = (float*)raw_data();
+    for (int i = 0; i < size; i++) {
+        vst1q_f32(ptr, _v);
+        ptr += 4;
+    }
+    
+    return *this;
+}
+
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(uint16x4_t _v) {
+    int size = (int)numel();
+    unsigned short* ptr = (unsigned short*)raw_data();
+    for (int i = 0; i < size; i++) {
+        vst1_u16(ptr, _v);
+        ptr += 4;
+    }
+    
+    return *this;
+}
+
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(int32x4_t _v) {
+    int size = (int)numel();
+    int* ptr = (int*)raw_data();
+    for (int i = 0; i < size; i++) {
+        vst1q_s32(ptr, _v);
+        ptr += 4;
+    }
+    
+    return *this;
+}
+
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(int32x4_t _v0, int32x4_t _v1) {
+    int size = (int)numel();
+    int* ptr = (int*)raw_data();
+    for (int i = 0; i < size; i++) {
+        vst1q_s32(ptr, _v0);
+        vst1q_s32(ptr + 4, _v1);
+        ptr += 8;
+    }
+    
+    return *this;
+}
+#endif // __ARM_NEON
+
+#if __SSE2__
+#if __AVX__
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(__m256 _v) {
+    int size = (int)numel();
+    float* ptr = (float*)raw_data();
+    for (int i = 0; i < size; i++) {
+        _mm256_storeu_ps(ptr, _v);
+        ptr += 8;
+    }
+    
+    return *this;
+}
+#endif // __AVX__
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(__m128 _v) {
+    int size = (int)numel();
+    float* ptr = (float*)raw_data();
+    for (int i = 0; i < size; i++) {
+        _mm_storeu_ps(ptr, _v);
+        ptr += 4;
+    }
+    
+    return *this;
+}
+
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(__m128i _v) {
+    int size = (int)numel();
+    unsigned short* ptr = (unsigned short*)raw_data();
+    for (int i = 0; i < size; i++) {
+        _mm_store_si128((__m128i*)ptr, _v);
+        ptr += 8;
+    }
+    
+    return *this;
+}
+#endif // __SSE2__
+
+template <typename scalar_t>
+Tensor& Tensor::type_fill_(scalar_t value) {
+    int size = (int)numel();
+    scalar_t* ptr = (scalar_t*)raw_data();
+    for (int i = 0; i < size; i++) {
+        ptr[i] = value;
+    }
+    
+    return *this;
 }
 
 template <>
