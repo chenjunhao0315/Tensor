@@ -671,6 +671,7 @@ Extractor Net::create_extractor() const {
 
 Extractor::Extractor(const Net* net, size_t blob_count) {
     net_ = net;
+    option = net->option;
     blob_tensors_.resize(blob_count);
 }
 
