@@ -681,7 +681,7 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
             auto dst_a = dst.accessor<float, 2, 4>();
             
             otter::parallel_for(0, h, 0, [&](int64_t begin, int64_t end) {
-                for (int i = 0; i < h; i++)
+                for (const auto i : otter::irange(begin, end))
                 {
                     const float* r0 = (const float*)src_a[i].data();
 

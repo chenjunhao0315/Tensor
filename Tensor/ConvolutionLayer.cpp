@@ -399,7 +399,7 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
     out_elempack = out_channels % 4 == 0 ? 4 : 1;
 #endif
 #elif __ARM_NEON__
-    out_elempack = num_output % 4 == 0 ? 4 : 1;
+    out_elempack = out_channels % 4 == 0 ? 4 : 1;
 #endif
     
     if (elempack == 1 && out_elempack == 1) {

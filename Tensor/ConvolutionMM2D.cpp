@@ -172,11 +172,11 @@ static Tensor compute_columns2d(
 
 template <typename scalar_t>
 static void slow_conv2d_update_output_frame(
-    TensorAccessor<scalar_t, 3> /*input*/,
-    TensorAccessor<scalar_t, 3> output,
-    TensorAccessor<scalar_t, 2> weight,
+    TensorAccessor<scalar_t, 3, 1> /*input*/,
+    TensorAccessor<scalar_t, 3, 1> output,
+    TensorAccessor<scalar_t, 2, 1> weight,
     bool has_bias,
-    TensorAccessor<scalar_t, 2> finput,
+    TensorAccessor<scalar_t, 2, 1> finput,
     int64_t kernel_height, int64_t kernel_width,
     int64_t /*stride_height*/, int64_t /*stride_width*/,
     int64_t /*pad_height*/, int64_t /*pad_width*/,

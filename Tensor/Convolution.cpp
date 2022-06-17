@@ -548,6 +548,7 @@ Tensor convolution_packed(
     auto kernel_size = weight.sizes().slice(2);
     Tensor output;
     switch (backend) {
+#if __SSE2__
         case ConvBackend::Sgemm2dX86Pack4:
             output = otter::sgemm_conv2d_pack4_x86(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
         case ConvBackend::Sgemm2dX86Pack4to1:
@@ -558,6 +559,7 @@ Tensor convolution_packed(
             output = otter::depthwise_conv2d_x86_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
         case ConvBackend::Sgemm2dX86Pack4_1x1s1:
             output = otter::conv2d_1x1s1_sgemm_pack4_x86(input, weight, weight_o, bias, padding); break;
+#endif  // __SSE2__
         default: {
             output = convolution(input.packing(1), weight, weight_o, bias, stride, padding, dilation, transposed, output_padding, groups, input_int8_scales, weight_int8_scales);
         }

@@ -17,9 +17,9 @@ void batchnorm_cpu_kernel(Tensor& output, const Tensor& input, const Tensor& wei
 void batchnorm_cpu_alpha_beta_kernel(Tensor& output, const Tensor& input, const Tensor& alpha, const Tensor& beta);
 
 template <typename scalar_t>
-static TensorAccessor<scalar_t, 1> conditional_accessor_1d(const Tensor& self) {
+static TensorAccessor<scalar_t, 1, 1> conditional_accessor_1d(const Tensor& self) {
     if (!self.defined()) {
-        return TensorAccessor<scalar_t, 1>(nullptr, nullptr, nullptr);
+        return TensorAccessor<scalar_t, 1, 1>(nullptr, nullptr, nullptr);
     }
     return self.accessor<scalar_t, 1>();
 }
