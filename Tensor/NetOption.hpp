@@ -18,6 +18,7 @@ public:
     bool lightmode;
     bool train;
     bool use_non_lib_optimize;
+    bool use_packing_layout;
     int openmp_blocktime;
 };
 

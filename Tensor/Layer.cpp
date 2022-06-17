@@ -12,6 +12,7 @@ namespace otter {
 Layer::Layer() {
     one_blob_only = false;
     support_inplace = false;
+    support_packing = false;
 }
 
 Layer::~Layer() {

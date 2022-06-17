@@ -51,6 +51,7 @@ public:
 public:
     bool support_inplace;
     bool one_blob_only;
+    bool support_packing;
     
 public:
     std::vector<int> bottoms;

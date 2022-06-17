@@ -31,6 +31,22 @@ Tensor convolution(
 
 Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, const Tensor& weight_o, const Tensor& bias, ConvBackend backend, ConvParams& params, const Tensor& input_int8_scales = Tensor(), const Tensor& weight_int8_scales = Tensor());
 
+Tensor convolution_packed(
+    const Tensor& input_r,
+    const Tensor& weight_r,
+    const Tensor& weight_o,
+    const Tensor& bias_r,
+    IntArrayRef stride_,
+    IntArrayRef padding_,
+    IntArrayRef dilation_,
+    bool transposed_,
+    IntArrayRef output_padding_,
+    int64_t groups_,
+    const Tensor& input_int8_scales = Tensor(),
+    const Tensor& weight_int8_scales = Tensor());
+
+Tensor convolution_packed_nogroup_backend(const Tensor& self, const Tensor& weight, const Tensor& weight_o, const Tensor& bias, ConvBackend backend, ConvParams& params, const Tensor& input_int8_scales = Tensor(), const Tensor& weight_int8_scales = Tensor());
+
 }
 
 #endif /* Convolution_hpp */
