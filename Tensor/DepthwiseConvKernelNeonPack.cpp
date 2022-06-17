@@ -81,7 +81,7 @@ Tensor& depthwise_conv2d_neon_pack4_out(
     otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
         for (const auto g : otter::irange(begin, end)) {
             float* outptr = output_a[g].data();
-            const float* kptr = (const float*)weight_data_pack4.raw_data() + maxk * g * 4;
+            const float* kptr = (const float*)weight_data_packed.raw_data() + maxk * g * 4;
             const auto m = input_a[g];
 
             for (int i = 0; i < outh; i++) {

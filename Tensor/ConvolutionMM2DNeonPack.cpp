@@ -185,7 +185,7 @@ void im2col_sgemm_conv2d_pack4_impl_neon(const Tensor& im2col, Tensor& output_, 
     #endif
 
                 for (int q = 0; q < inch; q++) {
-                    const float* img0 = (const float*)im2col[q].data() + i * 4;
+                    const float* img0 = (const float*)im2col_a[q].data() + i * 4;
 
                     for (int k = 0; k < maxk; k++) {
     #if __aarch64__
@@ -1348,7 +1348,7 @@ void im2col_sgemm_conv2d_pack4_impl_neon(const Tensor& im2col, Tensor& output_, 
             for (; i < size; i++)
             {
     #if __aarch64__
-                const float* tmpptr = tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + (i % 12 % 4) / 2 + i % 12 % 2].data(0);
+                const float* tmpptr = tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + (i % 12 % 4) / 2 + i % 12 % 2].data();
                 const float* kptr0 = kernel_a[p / 2 + p % 2].data();
     #else
                 const float* tmpptr = tmp_a[i / 8 + (i % 8) / 4 + (i % 4) / 2 + i % 2].data();
@@ -1463,6 +1463,8 @@ void im2col_sgemm_conv2d_pack4to1_impl_neon(const Tensor& im2col, Tensor& output
     else
         tmp = otter::empty({size, inch, maxk}, otter::ScalarType::Float4);
 #endif
+    
+    auto tmp_a = tmp.accessor<float, 3, 4>();
     {
 #if __aarch64__
         int nn_size = size / 12;
@@ -3513,7 +3515,7 @@ void convolution_im2col_sgemm_transform_kernel_pack4_neon(const Tensor& kernel_,
     // interleave
     // src = maxk-inch-outch
     // dst = 4b-4a-maxk-inch/4a-outch/4b
-    Mat kernel = kernel_.view({outch, inch, maxk});;
+    Tensor kernel = kernel_.view({outch, inch, maxk});;
 #if __aarch64__
     kernel_tf = otter::empty({outch / 8 + (outch % 8) / 4, inch / 4, 32 * maxk}, otter::ScalarType::Float);
 #else
@@ -3901,7 +3903,7 @@ Tensor& sgemm_conv2d_pack4_neon_out(
 
         otter::parallel_for(0, inch, 0, [&](int64_t begin, int64_t end) {
             for (const auto p : otter::irange(begin, end)) {
-                const auto img = input[p];
+                const auto img = input_a[p];
                 float* ptr = im2col_a[p].data();
 
                 for (int u = 0; u < kernel_h; u++) {
@@ -4131,42 +4133,48 @@ Tensor& sgemm_conv2d_pack1to4_neon_out(
     auto im2col_a = im2col.accessor<float, 3>();
     
     {
-        const auto img = input_a[p];
-        float* ptr = im2col_a[p].data();
+        const int gap = w * stride_h - outw * stride_w;
 
-        for (int u = 0; u < kernel_h; u++) {
-            for (int v = 0; v < kernel_w; v++) {
-                const float* sptr = img[dilation_h * u].data() + dilation_w * v;
+        otter::parallel_for(0, inch, 0, [&](int64_t begin, int64_t end) {
+            for (const auto p : otter::irange(begin, end)) {
+                const auto img = input_a[p];
+                float* ptr = im2col_a[p].data();
 
-                for (int i = 0; i < outh; i++) {
-                    int j = 0;
-                    for (; j + 3 < outw; j += 4) {
-                        ptr[0] = sptr[0];
-                        ptr[1] = sptr[stride_w];
-                        ptr[2] = sptr[stride_w * 2];
-                        ptr[3] = sptr[stride_w * 3];
+                for (int u = 0; u < kernel_h; u++) {
+                    for (int v = 0; v < kernel_w; v++) {
+                        const float* sptr = img[dilation_h * u].data() + dilation_w * v;
 
-                        sptr += stride_w * 4;
-                        ptr += 4;
+                        for (int i = 0; i < outh; i++) {
+                            int j = 0;
+                            for (; j + 3 < outw; j += 4) {
+                                ptr[0] = sptr[0];
+                                ptr[1] = sptr[stride_w];
+                                ptr[2] = sptr[stride_w * 2];
+                                ptr[3] = sptr[stride_w * 3];
+
+                                sptr += stride_w * 4;
+                                ptr += 4;
+                            }
+                            for (; j + 1 < outw; j += 2) {
+                                ptr[0] = sptr[0];
+                                ptr[1] = sptr[stride_w];
+
+                                sptr += stride_w * 2;
+                                ptr += 2;
+                            }
+                            for (; j < outw; j++) {
+                                ptr[0] = sptr[0];
+
+                                sptr += stride_w;
+                                ptr += 1;
+                            }
+
+                            sptr += gap;
+                        }
                     }
-                    for (; j + 1 < outw; j += 2) {
-                        ptr[0] = sptr[0];
-                        ptr[1] = sptr[stride_w];
-
-                        sptr += stride_w * 2;
-                        ptr += 2;
-                    }
-                    for (; j < outw; j++) {
-                        ptr[0] = sptr[0];
-
-                        sptr += stride_w;
-                        ptr += 1;
-                    }
-
-                    sptr += gap;
                 }
             }
-        }
+        });
     }
     
     im2col_sgemm_conv2d_pack1to4_impl_neon(im2col, output, kernel_tf, bias);
