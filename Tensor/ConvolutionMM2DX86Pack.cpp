@@ -25,7 +25,9 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
 
     const float* bias = (_bias.defined()) ? _bias.data_ptr<float>() : nullptr;
     
-    Tensor output = output_[0];
+    auto output_a = output_.accessor<float, 4, 4>()[0];
+    auto im2col_a = im2col.accessor<float, 3, 4>();
+    auto kernel_a = kernel.accessor<float, 3>();
 
     // permute
     Tensor tmp;
@@ -39,6 +41,8 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
         tmp = otter::empty({size / 2 + size % 2, inch, 2 * maxk}, otter::ScalarType::Float4);
     else
         tmp = otter::empty({size, inch, maxk}, otter::ScalarType::Float4);
+    
+    auto tmp_a = tmp.accessor<float, 3, 4>();
     {
         int remain_size_start = 0;
         int nn_size = size / 12;
@@ -47,10 +51,10 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
             for (const auto ii : otter::irange(begin, end)) {
                 int i = remain_size_start + ii * 12;
 
-                float* tmpptr = (float*)tmp[i / 12].raw_data();
+                float* tmpptr = (float*)tmp_a[i / 12].data();
 
                 for (int q = 0; q < inch; q++) {
-                    const float* img0 = (const float*)im2col[q].raw_data() + i * 4;
+                    const float* img0 = (const float*)im2col_a[q].data() + i * 4;
 
                     for (int k = 0; k < maxk; k++) {
                         // transpose 4x12
@@ -98,10 +102,10 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
             for (const auto ii : otter::irange(begin, end)) {
                 int i = remain_size_start + ii * 8;
 
-                float* tmpptr = (float*)tmp[i / 12 + (i % 12) / 8].raw_data();
+                float* tmpptr = (float*)tmp_a[i / 12 + (i % 12) / 8].data();
 
                 for (int q = 0; q < inch; q++) {
-                    const float* img0 = (const float*)im2col[q].raw_data() + i * 4;
+                    const float* img0 = (const float*)im2col_a[q].data() + i * 4;
 
                     for (int k = 0; k < maxk; k++) {
                         // transpose 4x8
@@ -140,10 +144,10 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
             for (const auto ii : otter::irange(begin, end)) {
                 int i = remain_size_start + ii * 4;
 
-                float* tmpptr = (float*)tmp[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4].raw_data();
+                float* tmpptr = (float*)tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4].data();
 
                 for (int q = 0; q < inch; q++) {
-                    const float* img0 = (const float*)im2col[q].raw_data() + i * 4;
+                    const float* img0 = (const float*)im2col_a[q].data() + i * 4;
 
                     for (int k = 0; k < maxk; k++) {
                         // transpose 4x4
@@ -173,14 +177,12 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
             for (const auto ii : otter::irange(begin, end)) {
                 int i = remain_size_start + ii * 2;
 
-                float* tmpptr = (float*)tmp[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + (i % 12 % 4) / 2].raw_data();
+                float* tmpptr = (float*)tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + (i % 12 % 4) / 2].data();
 
-                for (int q = 0; q < inch; q++)
-                {
-                    const float* img0 = (const float*)im2col[q].raw_data() + i * 4;
+                for (int q = 0; q < inch; q++) {
+                    const float* img0 = (const float*)im2col_a[q].data() + i * 4;
 
-                    for (int k = 0; k < maxk; k++)
-                    {
+                    for (int k = 0; k < maxk; k++) {
                         // transpose 4x2
                         __m128 _r0 = _mm_load_ps(img0);
                         __m128 _r1 = _mm_load_ps(img0 + 4);
@@ -202,13 +204,12 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
 
         otter::parallel_for(remain_size_start, size, 0, [&](int64_t begin, int64_t end) {
             for (const auto i : otter::irange(begin, end)) {
-                float* tmpptr = (float*)tmp[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + (i % 12 % 4) / 2 + i % 12 % 2].raw_data();
+                float* tmpptr = (float*)tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + (i % 12 % 4) / 2 + i % 12 % 2].data();
 
                 for (int q = 0; q < inch; q++) {
-                    const float* img0 = (const float*)im2col[q].raw_data() + i * 4;
+                    const float* img0 = (const float*)im2col_a[q].data() + i * 4;
 
-                    for (int k = 0; k < maxk; k++)
-                    {
+                    for (int k = 0; k < maxk; k++) {
                         __m128 _val = _mm_load_ps(img0);
                         _mm_store_ps(tmpptr, _val);
 
@@ -222,15 +223,15 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
 
     otter::parallel_for(0, outch, 0, [&](int64_t begin, int64_t end) {
         for (const auto p : otter::irange(begin, end)) {
-            float* outptr0 = (float*)output[p].raw_data();
+            float* outptr0 = (float*)output_a[p].data();
 
             const float zeros[4] = {0.f, 0.f, 0.f, 0.f};
             const float* biasptr = bias ? bias + p * 4 : zeros;
 
             int i = 0;
             for (; i + 11 < size; i += 12) {
-                const float* tmpptr = (const float*)tmp[i / 12].raw_data();
-                const float* kptr0 = (const float*)kernel[p].raw_data();
+                const float* tmpptr = (const float*)tmp_a[i / 12].data();
+                const float* kptr0 = (const float*)kernel_a[p].data();
 
                 int nn = inch * maxk * 4; // inch always > 0
 
@@ -247,8 +248,7 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
                 __m128 _suma = _sum0;
                 __m128 _sumb = _sum0;
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _w0 = _mm_load_ps(kptr0);
 
                     __m128 _val0 = _mm_load1_ps(tmpptr);
@@ -296,10 +296,9 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
 
                 outptr0 += 4 * 12;
             }
-            for (; i + 7 < size; i += 8)
-            {
-                const float* tmpptr = (const float*)tmp[i / 12 + (i % 12) / 8].raw_data();
-                const float* kptr0 = (const float*)kernel[p].raw_data();
+            for (; i + 7 < size; i += 8) {
+                const float* tmpptr = (const float*)tmp_a[i / 12 + (i % 12) / 8].data();
+                const float* kptr0 = (const float*)kernel_a[p].data();
 
                 int nn = inch * maxk * 4; // inch always > 0
 
@@ -312,8 +311,7 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
                 __m128 _sum6 = _sum0;
                 __m128 _sum7 = _sum0;
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _w0 = _mm_load_ps(kptr0);
 
                     __m128 _val0 = _mm_load1_ps(tmpptr);
@@ -349,10 +347,9 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
 
                 outptr0 += 4 * 8;
             }
-            for (; i + 3 < size; i += 4)
-            {
-                const float* tmpptr = (const float*)tmp[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4].raw_data();
-                const float* kptr0 = (const float*)kernel[p].raw_data();
+            for (; i + 3 < size; i += 4) {
+                const float* tmpptr = (const float*)tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4].data();
+                const float* kptr0 = (const float*)kernel_a[p].data();
 
                 int nn = inch * maxk * 4; // inch always > 0
 
@@ -361,8 +358,7 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
                 __m128 _sum2 = _sum0;
                 __m128 _sum3 = _sum0;
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _w0 = _mm_load_ps(kptr0);
 
                     __m128 _val0 = _mm_load1_ps(tmpptr);
@@ -386,18 +382,16 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
 
                 outptr0 += 4 * 4;
             }
-            for (; i + 1 < size; i += 2)
-            {
-                const float* tmpptr = (const float*)tmp[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + (i % 12 % 4) / 2].raw_data();
-                const float* kptr0 = (const float*)kernel[p].raw_data();
+            for (; i + 1 < size; i += 2) {
+                const float* tmpptr = (const float*)tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + (i % 12 % 4) / 2].data();
+                const float* kptr0 = (const float*)kernel_a[p].data();
 
                 int nn = inch * maxk * 4; // inch always > 0
 
                 __m128 _sum0 = _mm_loadu_ps(biasptr);
                 __m128 _sum1 = _sum0;
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _w0 = _mm_load_ps(kptr0);
 
                     __m128 _val0 = _mm_load1_ps(tmpptr);
@@ -415,17 +409,15 @@ void im2col_sgemm_conv2d_pack4_impl_x86(const Tensor& im2col, Tensor& output_, c
 
                 outptr0 += 4 * 2;
             }
-            for (; i < size; i++)
-            {
-                const float* tmpptr = (const float*)tmp[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + (i % 12 % 4) / 2 + i % 12 % 2].raw_data();
-                const float* kptr0 = (const float*)kernel[p].raw_data();
+            for (; i < size; i++) {
+                const float* tmpptr = (const float*)tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + (i % 12 % 4) / 2 + i % 12 % 2].data();
+                const float* kptr0 = (const float*)kernel_a[p].data();
 
                 int nn = inch * maxk * 4; // inch always > 0
 
                 __m128 _sum = _mm_loadu_ps(biasptr);
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _w0 = _mm_load_ps(kptr0);
                     __m128 _val0 = _mm_load1_ps(tmpptr);
                     _sum = _mm_comp_fmadd_ps(_val0, _w0, _sum);
@@ -451,7 +443,9 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
 
     const float* bias = (_bias.defined()) ? _bias.data_ptr<float>() : nullptr;
     
-    Tensor output = output_[0];
+    auto output_a = output_.accessor<float, 4>()[0];
+    auto im2col_a = im2col.accessor<float, 3, 4>();
+    auto kernel_a = kernel.accessor<float, 3>();
     
     Tensor tmp;
     if (size >= 12)
@@ -462,6 +456,8 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
         tmp = otter::empty({size / 4 + size % 4, inch, 4 * maxk}, otter::ScalarType::Float4);
     else
         tmp = otter::empty({size, inch, maxk}, otter::ScalarType::Float4);
+    
+    auto tmp_a = tmp.accessor<float, 3, 4>();
     {
         int remain_size_start = 0;
         int nn_size = size / 12;
@@ -470,10 +466,10 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
             for (const auto ii : otter::irange(begin, end)) {
                 int i = remain_size_start + ii * 12;
 
-                float* tmpptr = (float*)tmp[i / 12].raw_data();
+                float* tmpptr = (float*)tmp_a[i / 12].data();
 
                 for (int q = 0; q < inch; q++) {
-                    const float* img0 = (const float*)im2col[q].raw_data() + i * 4;
+                    const float* img0 = (const float*)im2col_a[q].data() + i * 4;
 
                     for (int k = 0; k < maxk; k++) {
                         // transpose 4x12
@@ -521,14 +517,12 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
             for (const auto ii : otter::irange(begin, end)) {
                 int i = remain_size_start + ii * 8;
 
-                float* tmpptr = (float*)tmp[i / 12 + (i % 12) / 8].raw_data();
+                float* tmpptr = (float*)tmp_a[i / 12 + (i % 12) / 8].data();
 
-                for (int q = 0; q < inch; q++)
-                {
-                    const float* img0 = (const float*)im2col[q].raw_data() + i * 4;
+                for (int q = 0; q < inch; q++) {
+                    const float* img0 = (const float*)im2col_a[q].data() + i * 4;
 
-                    for (int k = 0; k < maxk; k++)
-                    {
+                    for (int k = 0; k < maxk; k++) {
                         // transpose 4x8
                         __m128 _r0 = _mm_load_ps(img0);
                         __m128 _r1 = _mm_load_ps(img0 + 4);
@@ -565,13 +559,12 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
             for (const auto ii : otter::irange(begin, end)) {
                 int i = remain_size_start + ii * 4;
 
-                float* tmpptr = (float*)tmp[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4].raw_data();
+                float* tmpptr = (float*)tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4].data();
 
                 for (int q = 0; q < inch; q++) {
-                    const float* img0 = (const float*)im2col[q].raw_data() + i * 4;
+                    const float* img0 = (const float*)im2col_a[q].data() + i * 4;
 
-                    for (int k = 0; k < maxk; k++)
-                    {
+                    for (int k = 0; k < maxk; k++) {
                         // transpose 4x4
                         __m128 _r0 = _mm_load_ps(img0);
                         __m128 _r1 = _mm_load_ps(img0 + 4);
@@ -596,14 +589,12 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
 
         otter::parallel_for(remain_size_start, size, 0, [&](int64_t begin, int64_t end) {
             for (const auto i : otter::irange(begin, end)) {
-                float* tmpptr = (float*)tmp[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + i % 12 % 4].raw_data();
+                float* tmpptr = (float*)tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + i % 12 % 4].data();
 
-                for (int q = 0; q < inch; q++)
-                {
-                    const float* img0 = (const float*)im2col[q].raw_data() + i * 4;
+                for (int q = 0; q < inch; q++) {
+                    const float* img0 = (const float*)im2col_a[q].data() + i * 4;
 
-                    for (int k = 0; k < maxk; k++)
-                    {
+                    for (int k = 0; k < maxk; k++) {
                         __m128 _val = _mm_load_ps(img0);
                         _mm_store_ps(tmpptr, _val);
 
@@ -622,19 +613,18 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
         for (const auto pp : otter::irange(begin, end)) {
             int p = pp * 4;
 
-            float* outptr0 = (float*)output[p + 0].raw_data();
-            float* outptr1 = (float*)output[p + 1].raw_data();
-            float* outptr2 = (float*)output[p + 2].raw_data();
-            float* outptr3 = (float*)output[p + 3].raw_data();
+            float* outptr0 = (float*)output_a[p + 0].data();
+            float* outptr1 = (float*)output_a[p + 1].data();
+            float* outptr2 = (float*)output_a[p + 2].data();
+            float* outptr3 = (float*)output_a[p + 3].data();
 
             const float zeros[4] = {0.f};
             const float* biasptr = bias ? bias + p : zeros;
 
             int i = 0;
-            for (; i + 11 < size; i += 12)
-            {
-                const float* tmpptr = (const float*)tmp[i / 12].raw_data();
-                const float* kptr0 = (const float*)kernel[p / 4].raw_data();
+            for (; i + 11 < size; i += 12) {
+                const float* tmpptr = (const float*)tmp_a[i / 12].data();
+                const float* kptr0 = (const float*)kernel_a[p / 4].data();
 
                 int nn = inch * maxk * 4; // inch always > 0
 
@@ -651,8 +641,7 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
                 __m128 _suma = _mm_load1_ps(biasptr + 3);
                 __m128 _sumb = _mm_load1_ps(biasptr + 3);
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _val0 = _mm_load_ps(tmpptr);
                     __m128 _val1 = _mm_load_ps(tmpptr + 4);
                     __m128 _val2 = _mm_load_ps(tmpptr + 8);
@@ -697,10 +686,9 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
                 outptr2 += 12;
                 outptr3 += 12;
             }
-            for (; i + 7 < size; i += 8)
-            {
-                const float* tmpptr = (const float*)tmp[i / 12 + (i % 12) / 8].raw_data();
-                const float* kptr0 = (const float*)kernel[p / 4].raw_data();
+            for (; i + 7 < size; i += 8) {
+                const float* tmpptr = (const float*)tmp_a[i / 12 + (i % 12) / 8].data();
+                const float* kptr0 = (const float*)kernel_a[p / 4].data();
 
                 int nn = inch * maxk * 4; // inch always > 0
 
@@ -713,8 +701,7 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
                 __m128 _sum6 = _mm_load1_ps(biasptr + 3);
                 __m128 _sum7 = _mm_load1_ps(biasptr + 3);
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _val0 = _mm_load_ps(tmpptr);
                     __m128 _val1 = _mm_load_ps(tmpptr + 4);
 
@@ -750,10 +737,9 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
                 outptr2 += 8;
                 outptr3 += 8;
             }
-            for (; i + 3 < size; i += 4)
-            {
-                const float* tmpptr = (const float*)tmp[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4].raw_data();
-                const float* kptr0 = (const float*)kernel[p / 4].raw_data();
+            for (; i + 3 < size; i += 4) {
+                const float* tmpptr = (const float*)tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4].data();
+                const float* kptr0 = (const float*)kernel_a[p / 4].data();
 
                 int nn = inch * maxk * 4; // inch always > 0
 
@@ -762,8 +748,7 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
                 __m128 _sum2 = _mm_load1_ps(biasptr + 2);
                 __m128 _sum3 = _mm_load1_ps(biasptr + 3);
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _val0 = _mm_load_ps(tmpptr);
 
                     __m128 _w0 = _mm_load1_ps(kptr0);
@@ -790,10 +775,9 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
                 outptr2 += 4;
                 outptr3 += 4;
             }
-            for (; i < size; i++)
-            {
-                const float* tmpptr = (const float*)tmp[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + i % 12 % 4].raw_data();
-                const float* kptr0 = (const float*)kernel[p / 4].raw_data();
+            for (; i < size; i++) {
+                const float* tmpptr = (const float*)tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + i % 12 % 4].data();
+                const float* kptr0 = (const float*)kernel_a[p / 4].data();
 
                 int nn = inch * maxk * 4; // inch always > 0
 
@@ -826,16 +810,15 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
     });
 
     otter::parallel_for(remain_outch_start, outch, 0, [&](int64_t begin, int64_t end) {
-        for (const auto p : otter::irange(begin, end))
-        {
-            float* outptr0 = (float*)output[p].raw_data();
+        for (const auto p : otter::irange(begin, end)) {
+            float* outptr0 = (float*)output_a[p].data();
 
             const float bias0 = bias ? bias[p] : 0.f;
 
             int i = 0;
             for (; i + 11 < size; i += 12) {
-                const float* tmpptr = (const float*)tmp[i / 12].raw_data();
-                const float* kptr0 = (const float*)kernel[p / 4 + p % 4].raw_data();
+                const float* tmpptr = (const float*)tmp_a[i / 12].data();
+                const float* kptr0 = (const float*)kernel_a[p / 4 + p % 4].data();
 
                 int nn = inch * maxk * 4; // inch always > 0
 
@@ -843,8 +826,7 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
                 __m128 _sum1 = _mm_set1_ps(bias0);
                 __m128 _sum2 = _mm_set1_ps(bias0);
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _val0 = _mm_load_ps(tmpptr);
                     __m128 _val1 = _mm_load_ps(tmpptr + 4);
                     __m128 _val2 = _mm_load_ps(tmpptr + 8);
@@ -863,18 +845,16 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
 
                 outptr0 += 12;
             }
-            for (; i + 7 < size; i += 8)
-            {
-                const float* tmpptr = (const float*)tmp[i / 12 + (i % 12) / 8].raw_data();
-                const float* kptr0 = (const float*)kernel[p / 4 + p % 4].raw_data();
+            for (; i + 7 < size; i += 8) {
+                const float* tmpptr = (const float*)tmp_a[i / 12 + (i % 12) / 8].data();
+                const float* kptr0 = (const float*)kernel_a[p / 4 + p % 4].data();
 
                 int nn = inch * maxk * 4; // inch always > 0
 
                 __m128 _sum0 = _mm_set1_ps(bias0);
                 __m128 _sum1 = _mm_set1_ps(bias0);
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _val0 = _mm_load_ps(tmpptr);
                     __m128 _val1 = _mm_load_ps(tmpptr + 4);
                     __m128 _w0 = _mm_load1_ps(kptr0);
@@ -890,17 +870,15 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
 
                 outptr0 += 8;
             }
-            for (; i + 3 < size; i += 4)
-            {
-                const float* tmpptr = (const float*)tmp[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4].raw_data();
-                const float* kptr0 = (const float*)kernel[p / 4 + p % 4].raw_data();
+            for (; i + 3 < size; i += 4) {
+                const float* tmpptr = (const float*)tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4].data();
+                const float* kptr0 = (const float*)kernel_a[p / 4 + p % 4].data();
 
                 int nn = inch * maxk * 4; // inch always > 0
 
                 __m128 _sum0 = _mm_set1_ps(bias0);
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _val0 = _mm_load_ps(tmpptr);
                     __m128 _w0 = _mm_load1_ps(kptr0);
                     _sum0 = _mm_comp_fmadd_ps(_w0, _val0, _sum0);
@@ -913,10 +891,9 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
 
                 outptr0 += 4;
             }
-            for (; i < size; i++)
-            {
-                const float* tmpptr = (const float*)tmp[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + i % 12 % 4].raw_data();
-                const float* kptr0 = (const float*)kernel[p / 4 + p % 4].raw_data();
+            for (; i < size; i++) {
+                const float* tmpptr = (const float*)tmp_a[i / 12 + (i % 12) / 8 + (i % 12 % 8) / 4 + i % 12 % 4].data();
+                const float* kptr0 = (const float*)kernel_a[p / 4 + p % 4].data();
 
                 int nn = inch * maxk; // inch always > 0
 
@@ -924,8 +901,7 @@ void im2col_sgemm_conv2d_pack4to1_impl_x86(const Tensor& im2col, Tensor& output_
 
                 __m128 _sum0 = _mm_setzero_ps();
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _val0 = _mm_load_ps(tmpptr);
                     __m128 _w0 = _mm_load_ps(kptr0);
                     _sum0 = _mm_comp_fmadd_ps(_val0, _w0, _sum0);
@@ -953,7 +929,9 @@ void im2col_sgemm_conv2d_pack1to4_impl_x86(const Tensor& im2col, Tensor& output_
 
     const float* bias = (_bias.defined()) ? _bias.data_ptr<float>() : nullptr;
     
-    Tensor output = output_[0];
+    auto output_a = output_.accessor<float, 4, 4>()[0];
+    auto im2col_a = im2col.accessor<float, 3>();
+    auto kernel_a = kernel.accessor<float, 3>();
     
     Tensor tmp;
     if (size >= 8)
@@ -962,23 +940,22 @@ void im2col_sgemm_conv2d_pack1to4_impl_x86(const Tensor& im2col, Tensor& output_
         tmp = otter::empty({size / 4 + size % 4, inch, 4 * maxk}, otter::ScalarType::Float);
     else
         tmp = otter::empty({size, inch, maxk}, otter::ScalarType::Float);
+    
+    auto tmp_a = tmp.accessor<float, 3>();
     {
         int nn_size = size >> 3;
         int remain_size_start = 0;
 
         otter::parallel_for(0, nn_size, 0, [&](int64_t begin, int64_t end) {
-            for (const auto ii : otter::irange(begin, end))
-            {
+            for (const auto ii : otter::irange(begin, end)) {
                 int i = remain_size_start + ii * 8;
 
-                float* tmpptr = (float*)tmp[i / 8].raw_data();
+                float* tmpptr = (float*)tmp_a[i / 8].data();
 
-                for (int q = 0; q < inch; q++)
-                {
-                    const float* img0 = (const float*)im2col[q].raw_data() + i;
+                for (int q = 0; q < inch; q++) {
+                    const float* img0 = (const float*)im2col_a[q].data() + i;
 
-                    for (int k = 0; k < maxk; k++)
-                    {
+                    for (int k = 0; k < maxk; k++) {
                         __m128 _r0 = _mm_loadu_ps(img0);
                         __m128 _r1 = _mm_loadu_ps(img0 + 4);
                         _mm_store_ps(tmpptr, _r0);
@@ -998,10 +975,10 @@ void im2col_sgemm_conv2d_pack1to4_impl_x86(const Tensor& im2col, Tensor& output_
             for (const auto ii : otter::irange(begin, end)) {
                 int i = remain_size_start + ii * 4;
 
-                float* tmpptr = (float*)tmp[i / 8 + (i % 8) / 4].raw_data();
+                float* tmpptr = (float*)tmp_a[i / 8 + (i % 8) / 4].data();
 
                 for (int q = 0; q < inch; q++) {
-                    const float* img0 = (const float*)im2col[q].raw_data() + i;
+                    const float* img0 = (const float*)im2col_a[q].data() + i;
 
                     for (int k = 0; k < maxk; k++) {
                         __m128 _r0 = _mm_loadu_ps(img0);
@@ -1017,15 +994,13 @@ void im2col_sgemm_conv2d_pack1to4_impl_x86(const Tensor& im2col, Tensor& output_
         remain_size_start += nn_size << 2;
 
         otter::parallel_for(remain_size_start, size, 0, [&](int64_t begin, int64_t end) {
-            for (const auto i : otter::irange(begin, end))
-            {
-                float* tmpptr = (float*)tmp[i / 8 + (i % 8) / 4 + i % 4].raw_data();
+            for (const auto i : otter::irange(begin, end)) {
+                float* tmpptr = (float*)tmp_a[i / 8 + (i % 8) / 4 + i % 4].data();
 
                 for (int q = 0; q < inch; q++) {
-                    const float* img0 = (const float*)im2col[q].raw_data() + i;
+                    const float* img0 = (const float*)im2col_a[q].data() + i;
 
-                    for (int k = 0; k < maxk; k++)
-                    {
+                    for (int k = 0; k < maxk; k++) {
                         tmpptr[0] = img0[0];
                         img0 += size;
                         tmpptr += 1;
@@ -1037,15 +1012,15 @@ void im2col_sgemm_conv2d_pack1to4_impl_x86(const Tensor& im2col, Tensor& output_
 
     otter::parallel_for(0, outch, 0, [&](int64_t begin, int64_t end) {
         for (const auto p : otter::irange(begin, end)) {
-            float* outptr0 = (float*)output[p].raw_data();
+            float* outptr0 = (float*)output_a[p].data();
 
             const float zeros[4] = {0.f, 0.f, 0.f, 0.f};
             const float* biasptr = bias ? bias + p * 4 : zeros;
 
             int i = 0;
             for (; i + 7 < size; i += 8) {
-                const float* tmpptr = (const float*)tmp[i / 8].raw_data();
-                const float* kptr0 = (const float*)kernel[p].raw_data();
+                const float* tmpptr = (const float*)tmp_a[i / 8].data();
+                const float* kptr0 = (const float*)kernel_a[p].data();
 
                 int nn = inch * maxk; // inch always > 0
 
@@ -1058,8 +1033,7 @@ void im2col_sgemm_conv2d_pack1to4_impl_x86(const Tensor& im2col, Tensor& output_
                 __m128 _sum6 = _sum0;
                 __m128 _sum7 = _sum0;
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _w0 = _mm_load_ps(kptr0);
 
                     __m128 _val0 = _mm_load1_ps(tmpptr);
@@ -1094,10 +1068,9 @@ void im2col_sgemm_conv2d_pack1to4_impl_x86(const Tensor& im2col, Tensor& output_
                 _mm_store_ps(outptr0 + 28, _sum7);
                 outptr0 += 32;
             }
-            for (; i + 3 < size; i += 4)
-            {
-                const float* tmpptr = (const float*)tmp[i / 8 + (i % 8) / 4].raw_data();
-                const float* kptr0 =(const float*) kernel[p].raw_data();
+            for (; i + 3 < size; i += 4) {
+                const float* tmpptr = (const float*)tmp_a[i / 8 + (i % 8) / 4].data();
+                const float* kptr0 =(const float*) kernel_a[p].data();
 
                 int nn = inch * maxk; // inch always > 0
 
@@ -1106,8 +1079,7 @@ void im2col_sgemm_conv2d_pack1to4_impl_x86(const Tensor& im2col, Tensor& output_
                 __m128 _sum2 = _sum0;
                 __m128 _sum3 = _sum0;
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _w0 = _mm_load_ps(kptr0);
 
                     __m128 _val0 = _mm_load1_ps(tmpptr);
@@ -1130,17 +1102,15 @@ void im2col_sgemm_conv2d_pack1to4_impl_x86(const Tensor& im2col, Tensor& output_
                 _mm_store_ps(outptr0 + 12, _sum3);
                 outptr0 += 16;
             }
-            for (; i < size; i++)
-            {
-                const float* tmpptr = (const float*)tmp[i / 8 + (i % 8) / 4 + i % 4].raw_data();
-                const float* kptr0 = (const float*)kernel[p].raw_data();
+            for (; i < size; i++) {
+                const float* tmpptr = (const float*)tmp_a[i / 8 + (i % 8) / 4 + i % 4].data();
+                const float* kptr0 = (const float*)kernel_a[p].data();
 
                 int nn = inch * maxk; // inch always > 0
 
                 __m128 _sum = _mm_loadu_ps(biasptr);
 
-                for (int j = 0; j < nn; j++)
-                {
+                for (int j = 0; j < nn; j++) {
                     __m128 _w0 = _mm_load_ps(kptr0);
                     __m128 _val = _mm_load1_ps(tmpptr);
                     _sum = _mm_comp_fmadd_ps(_w0, _val, _sum);
@@ -1164,39 +1134,41 @@ void convolution_im2col_sgemm_transform_kernel_pack4_sse(const Tensor& kernel_, 
     // dst = 4b-4a-maxk-inch/4a-outch/4b
     Tensor kernel = kernel_.view({outch, inch, maxk});
     kernel_tf = otter::empty({outch / 4, inch / 4, 16 * maxk}, otter::ScalarType::Float);
+    
+    auto kernel_a = kernel.accessor<float, 3>();
+    auto kernel_tf_a = kernel_tf.accessor<float, 3>();
 
     int q = 0;
     for (; q + 3 < outch; q += 4) {
-        const Tensor k0 = kernel[q + 0];
-        const Tensor k1 = kernel[q + 1];
-        const Tensor k2 = kernel[q + 2];
-        const Tensor k3 = kernel[q + 3];
+        const auto k0 = kernel_a[q + 0];
+        const auto k1 = kernel_a[q + 1];
+        const auto k2 = kernel_a[q + 2];
+        const auto k3 = kernel_a[q + 3];
 
-        float* g00 = kernel_tf[q / 4].data_ptr<float>();
+        float* g00 = kernel_tf_a[q / 4].data();
 
         for (int p = 0; p + 3 < inch; p += 4) {
-            const float* k00 = k0[p + 0].data_ptr<float>();
-            const float* k01 = k0[p + 1].data_ptr<float>();
-            const float* k02 = k0[p + 2].data_ptr<float>();
-            const float* k03 = k0[p + 3].data_ptr<float>();
+            const float* k00 = k0[p + 0].data();
+            const float* k01 = k0[p + 1].data();
+            const float* k02 = k0[p + 2].data();
+            const float* k03 = k0[p + 3].data();
 
-            const float* k10 = k1[p + 0].data_ptr<float>();
-            const float* k11 = k1[p + 1].data_ptr<float>();
-            const float* k12 = k1[p + 2].data_ptr<float>();
-            const float* k13 = k1[p + 3].data_ptr<float>();
+            const float* k10 = k1[p + 0].data();
+            const float* k11 = k1[p + 1].data();
+            const float* k12 = k1[p + 2].data();
+            const float* k13 = k1[p + 3].data();
 
-            const float* k20 = k2[p + 0].data_ptr<float>();
-            const float* k21 = k2[p + 1].data_ptr<float>();
-            const float* k22 = k2[p + 2].data_ptr<float>();
-            const float* k23 = k2[p + 3].data_ptr<float>();
+            const float* k20 = k2[p + 0].data();
+            const float* k21 = k2[p + 1].data();
+            const float* k22 = k2[p + 2].data();
+            const float* k23 = k2[p + 3].data();
 
-            const float* k30 = k3[p + 0].data_ptr<float>();
-            const float* k31 = k3[p + 1].data_ptr<float>();
-            const float* k32 = k3[p + 2].data_ptr<float>();
-            const float* k33 = k3[p + 3].data_ptr<float>();
+            const float* k30 = k3[p + 0].data();
+            const float* k31 = k3[p + 1].data();
+            const float* k32 = k3[p + 2].data();
+            const float* k33 = k3[p + 3].data();
 
-            for (int k = 0; k < maxk; k++)
-            {
+            for (int k = 0; k < maxk; k++) {
                 g00[0] = k00[k];
                 g00[1] = k10[k];
                 g00[2] = k20[k];
@@ -1231,16 +1203,19 @@ void convolution_im2col_sgemm_transform_kernel_pack4to1_sse(const Tensor& kernel
     // dst = pb-pa-maxk-inch/pa-outch/pb
     Tensor kernel = kernel_.view({outch, inch, maxk});
     kernel_tf = otter::empty({outch / 4 + outch % 4, inch / 4, 4 * 4 * maxk}, otter::ScalarType::Float);
+    
+    auto kernel_a = kernel.accessor<float, 3>();
+    auto kernel_tf_a = kernel_tf.accessor<float, 3>();
 
     int q = 0;
     for (; q + 3 < outch; q += 4) {
-        float* g00 = (float*)kernel_tf[q / 4].raw_data();
+        float* g00 = (float*)kernel_tf_a[q / 4].data();
 
         for (int p = 0; p + 3 < inch; p += 4) {
             for (int k = 0; k < maxk; k++) {
                 for (int i = 0; i < 4; i++) {
                     for (int j = 0; j < 4; j++) {
-                        const float* k00 = (const float*)kernel[q + j][p + i].raw_data();
+                        const float* k00 = (const float*)kernel_a[q + j][p + i].data();
 
                         g00[0] = k00[k];
 
@@ -1251,14 +1226,14 @@ void convolution_im2col_sgemm_transform_kernel_pack4to1_sse(const Tensor& kernel
         }
     }
     for (; q < outch; q++) {
-        const Tensor k0 = kernel[q];
+        const auto k0 = kernel_a[q];
 
-        float* g00 = (float*)kernel_tf[q / 4 + q % 4].raw_data();
+        float* g00 = (float*)kernel_tf_a[q / 4 + q % 4].data();
 
         for (int p = 0; p + 3 < inch; p += 4) {
             for (int k = 0; k < maxk; k++) {
                 for (int j = 0; j < 4; j++) {
-                    const float* k00 = (const float*)k0[p + j].raw_data();
+                    const float* k00 = (const float*)k0[p + j].data();
 
                     g00[0] = k00[k];
 
@@ -1277,21 +1252,24 @@ void convolution_im2col_sgemm_transform_kernel_pack1to4_sse(const Tensor& kernel
     // dst = 4b-4a-maxk-inch/4a-outch/4b
     Tensor kernel = kernel_.view({outch, inch, maxk});
     kernel_tf = otter::empty({outch / 4, inch, 4 * maxk}, otter::ScalarType::Float);
+    
+    auto kernel_a = kernel.accessor<float, 3>();
+    auto kernel_tf_a = kernel_tf.accessor<float, 3>();
 
     int q = 0;
     for (; q + 3 < outch; q += 4) {
-        const Tensor k0 = kernel[q + 0];
-        const Tensor k1 = kernel[q + 1];
-        const Tensor k2 = kernel[q + 2];
-        const Tensor k3 = kernel[q + 3];
+        const auto k0 = kernel_a[q + 0];
+        const auto k1 = kernel_a[q + 1];
+        const auto k2 = kernel_a[q + 2];
+        const auto k3 = kernel_a[q + 3];
 
-        float* g00 = (float*)kernel_tf[q / 4].raw_data();
+        float* g00 = (float*)kernel_tf_a[q / 4].data();
 
         for (int p = 0; p < inch; p++) {
-            const float* k00 = (const float*)k0[p].raw_data();
-            const float* k10 = (const float*)k1[p].raw_data();
-            const float* k20 = (const float*)k2[p].raw_data();
-            const float* k30 = (const float*)k3[p].raw_data();
+            const float* k00 = (const float*)k0[p].data();
+            const float* k10 = (const float*)k1[p].data();
+            const float* k20 = (const float*)k2[p].data();
+            const float* k30 = (const float*)k3[p].data();
 
             for (int k = 0; k < maxk; k++) {
                 g00[0] = k00[k];

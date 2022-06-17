@@ -108,14 +108,17 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack) {
         dst = otter::empty({outh, w}, out_dtype);
 
         if (pack1to4) {
+            auto src_a = src.accessor<float, 2>();
+            auto dst_a = dst.accessor<float, 2, 4>();
+            
             otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
                 for (const auto i : otter::irange(begin, end)) {
-                    const float* r0 = (const float*)src[i * 4 + 0].raw_data();
-                    const float* r1 = (const float*)src[i * 4 + 1].raw_data();
-                    const float* r2 = (const float*)src[i * 4 + 2].raw_data();
-                    const float* r3 = (const float*)src[i * 4 + 3].raw_data();
+                    const float* r0 = (const float*)src_a[i * 4 + 0].data();
+                    const float* r1 = (const float*)src_a[i * 4 + 1].data();
+                    const float* r2 = (const float*)src_a[i * 4 + 2].data();
+                    const float* r3 = (const float*)src_a[i * 4 + 3].data();
 
-                    float* outptr = (float*)dst[i].raw_data();
+                    float* outptr = (float*)dst_a[i].data();
 
                     int j = 0;
     #if __ARM_NEON
@@ -134,8 +137,7 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack) {
                         outptr += 16;
                     }
     #endif
-                    for (; j < w; j++)
-                    {
+                    for (; j < w; j++) {
                         outptr[0] = *r0++;
                         outptr[1] = *r1++;
                         outptr[2] = *r2++;
@@ -146,20 +148,21 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack) {
                 }
             });
         } else if (pack4to1) {
+            auto src_a = src.accessor<float, 2, 4>();
+            auto dst_a = dst.accessor<float, 2>();
+            
             otter::parallel_for(0, h, 0, [&](int64_t begin, int64_t end) {
-                for (const auto i : otter::irange(begin, end))
-                {
-                    const float* r0 = (const float*)src[i].raw_data();
+                for (const auto i : otter::irange(begin, end)) {
+                    const float* r0 = (const float*)src_a[i].data();
 
-                    float* outptr0 = (float*)dst[i * 4 + 0].raw_data();
-                    float* outptr1 = (float*)dst[i * 4 + 1].raw_data();
-                    float* outptr2 = (float*)dst[i * 4 + 2].raw_data();
-                    float* outptr3 = (float*)dst[i * 4 + 3].raw_data();
+                    float* outptr0 = (float*)dst_a[i * 4 + 0].data();
+                    float* outptr1 = (float*)dst_a[i * 4 + 1].data();
+                    float* outptr2 = (float*)dst_a[i * 4 + 2].data();
+                    float* outptr3 = (float*)dst_a[i * 4 + 3].data();
 
                     int j = 0;
     #if __ARM_NEON
-                    for (; j + 3 < w; j += 4)
-                    {
+                    for (; j + 3 < w; j += 4) {
                         float32x4x4_t _p = vld4q_f32(r0);
                         vst1q_f32(outptr0, _p.val[0]);
                         vst1q_f32(outptr1, _p.val[1]);
@@ -173,8 +176,7 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack) {
                         outptr3 += 4;
                     }
     #endif
-                    for (; j < w; j++)
-                    {
+                    for (; j < w; j++) {
                         *outptr0++ = r0[0];
                         *outptr1++ = r0[1];
                         *outptr2++ = r0[2];
@@ -200,19 +202,21 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack) {
         dst = otter::empty({outc, h, w}, out_dtype);
         
         if (pack1to4) {
+            auto src_a = src.accessor<float, 3>();
+            auto dst_a = dst.accessor<float, 3, 4>();
+            
             otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
                 for (const auto q : otter::irange(begin, end)) {
-                    const float* r0 = (const float*)src[q * 4 + 0].raw_data();
-                    const float* r1 = (const float*)src[q * 4 + 1].raw_data();
-                    const float* r2 = (const float*)src[q * 4 + 2].raw_data();
-                    const float* r3 = (const float*)src[q * 4 + 3].raw_data();
+                    const float* r0 = (const float*)src_a[q * 4 + 0].data();
+                    const float* r1 = (const float*)src_a[q * 4 + 1].data();
+                    const float* r2 = (const float*)src_a[q * 4 + 2].data();
+                    const float* r3 = (const float*)src_a[q * 4 + 3].data();
 
-                    float* outptr = (float*)dst[q].raw_data();
+                    float* outptr = (float*)dst_a[q].data();
 
                     int i = 0;
     #if __ARM_NEON
-                    for (; i + 3 < size; i += 4)
-                    {
+                    for (; i + 3 < size; i += 4) {
                         float32x4x4_t _p;
                         _p.val[0] = vld1q_f32(r0);
                         _p.val[1] = vld1q_f32(r1);
@@ -227,8 +231,7 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack) {
                         outptr += 16;
                     }
     #endif
-                    for (; i < size; i++)
-                    {
+                    for (; i < size; i++) {
                         outptr[0] = *r0++;
                         outptr[1] = *r1++;
                         outptr[2] = *r2++;
@@ -239,19 +242,21 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack) {
                 }
             });
         } else if (pack4to1) {
+            auto src_a = src.accessor<float, 3, 4>();
+            auto dst_a = dst.accessor<float, 3>();
+            
             otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
                 for (const auto q : otter::irange(begin, end)) {
-                    const float* r0 = (const float*)src[q].raw_data();
+                    const float* r0 = (const float*)src_a[q].data();
 
-                    float* outptr0 = (float*)dst[q * 4 + 0].raw_data();
-                    float* outptr1 = (float*)dst[q * 4 + 1].raw_data();
-                    float* outptr2 = (float*)dst[q * 4 + 2].raw_data();
-                    float* outptr3 = (float*)dst[q * 4 + 3].raw_data();
+                    float* outptr0 = (float*)dst_a[q * 4 + 0].data();
+                    float* outptr1 = (float*)dst_a[q * 4 + 1].data();
+                    float* outptr2 = (float*)dst_a[q * 4 + 2].data();
+                    float* outptr3 = (float*)dst_a[q * 4 + 3].data();
 
                     int i = 0;
     #if __ARM_NEON
-                    for (; i + 3 < size; i += 4)
-                    {
+                    for (; i + 3 < size; i += 4) {
                         float32x4x4_t _p = vld4q_f32(r0);
                         vst1q_f32(outptr0, _p.val[0]);
                         vst1q_f32(outptr1, _p.val[1]);
@@ -265,8 +270,7 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack) {
                         outptr3 += 4;
                     }
     #endif
-                    for (; i < size; i++)
-                    {
+                    for (; i < size; i++) {
                         *outptr0++ = r0[0];
                         *outptr1++ = r0[1];
                         *outptr2++ = r0[2];
@@ -293,15 +297,18 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack) {
         dst = otter::empty({batchsize, outc, h, w}, out_dtype);
         
         if (pack1to4) {
+            auto src_a = src.accessor<float, 4>();
+            auto dst_a = dst.accessor<float, 4, 4>();
+            
             for (const auto b : otter::irange(0, batchsize)) {
                 otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
                     for (const auto q : otter::irange(begin, end)) {
-                        const float* r0 = (const float*)src[b][q * 4 + 0].raw_data();
-                        const float* r1 = (const float*)src[b][q * 4 + 1].raw_data();
-                        const float* r2 = (const float*)src[b][q * 4 + 2].raw_data();
-                        const float* r3 = (const float*)src[b][q * 4 + 3].raw_data();
+                        const float* r0 = (const float*)src_a[b][q * 4 + 0].data();
+                        const float* r1 = (const float*)src_a[b][q * 4 + 1].data();
+                        const float* r2 = (const float*)src_a[b][q * 4 + 2].data();
+                        const float* r3 = (const float*)src_a[b][q * 4 + 3].data();
 
-                        float* outptr = (float*)dst[b][q].raw_data();
+                        float* outptr = (float*)dst_a[b][q].data();
 
                         int i = 0;
         #if __ARM_NEON
@@ -334,20 +341,22 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack) {
                 });
             }
         } else if (pack4to1) {
+            auto src_a = src.accessor<float, 4, 4>();
+            auto dst_a = dst.accessor<float, 4>();
+            
             for (const auto b : otter::irange(0, batchsize)) {
                 otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
                     for (const auto q : otter::irange(begin, end)) {
-                        const float* r0 = (const float*)src[b][q].raw_data();
+                        const float* r0 = (const float*)src_a[b][q].data();
 
-                        float* outptr0 = (float*)dst[b][q * 4 + 0].raw_data();
-                        float* outptr1 = (float*)dst[b][q * 4 + 1].raw_data();
-                        float* outptr2 = (float*)dst[b][q * 4 + 2].raw_data();
-                        float* outptr3 = (float*)dst[b][q * 4 + 3].raw_data();
+                        float* outptr0 = (float*)dst_a[b][q * 4 + 0].data();
+                        float* outptr1 = (float*)dst_a[b][q * 4 + 1].data();
+                        float* outptr2 = (float*)dst_a[b][q * 4 + 2].data();
+                        float* outptr3 = (float*)dst_a[b][q * 4 + 3].data();
 
                         int i = 0;
         #if __ARM_NEON
-                        for (; i + 3 < size; i += 4)
-                        {
+                        for (; i + 3 < size; i += 4) {
                             float32x4x4_t _p = vld4q_f32(r0);
                             vst1q_f32(outptr0, _p.val[0]);
                             vst1q_f32(outptr1, _p.val[1]);
@@ -361,8 +370,7 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack) {
                             outptr3 += 4;
                         }
         #endif
-                        for (; i < size; i++)
-                        {
+                        for (; i < size; i++) {
                             *outptr0++ = r0[0];
                             *outptr1++ = r0[1];
                             *outptr2++ = r0[2];
@@ -423,14 +431,17 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
         dst = otter::empty({outh, w}, out_dtype);
         
         if (pack1to4) {
+            auto src_a = src.accessor<float, 2>();
+            auto dst_a = dst.accessor<float, 2, 4>();
+            
             otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
                 for (const auto i : otter::irange(begin, end)) {
-                    const float* r0 = (const float*)src[i * 4 + 0].raw_data();
-                    const float* r1 = (const float*)src[i * 4 + 1].raw_data();
-                    const float* r2 = (const float*)src[i * 4 + 2].raw_data();
-                    const float* r3 = (const float*)src[i * 4 + 3].raw_data();
+                    const float* r0 = (const float*)src_a[i * 4 + 0].data();
+                    const float* r1 = (const float*)src_a[i * 4 + 1].data();
+                    const float* r2 = (const float*)src_a[i * 4 + 2].data();
+                    const float* r3 = (const float*)src_a[i * 4 + 3].data();
 
-                    float* outptr = (float*)dst[i].raw_data();
+                    float* outptr = (float*)dst_a[i].data();
 
                     int j = 0;
     #if __SSE2__
@@ -466,14 +477,17 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 }
             });
         } else if (pack4to1) {
+            auto src_a = src.accessor<float, 2, 4>();
+            auto dst_a = dst.accessor<float, 2>();
+            
             otter::parallel_for(0, h, 0, [&](int64_t begin, int64_t end) {
                 for (const auto i : otter::irange(begin, end)) {
-                    const float* r0 = (const float*)src[i].raw_data();
+                    const float* r0 = (const float*)src_a[i].data();
 
-                    float* outptr0 = (float*)dst[i * 4 + 0].raw_data();
-                    float* outptr1 = (float*)dst[i * 4 + 1].raw_data();
-                    float* outptr2 = (float*)dst[i * 4 + 2].raw_data();
-                    float* outptr3 = (float*)dst[i * 4 + 3].raw_data();
+                    float* outptr0 = (float*)dst_a[i * 4 + 0].data();
+                    float* outptr1 = (float*)dst_a[i * 4 + 1].data();
+                    float* outptr2 = (float*)dst_a[i * 4 + 2].data();
+                    float* outptr3 = (float*)dst_a[i * 4 + 3].data();
 
                     int j = 0;
     #if __SSE2__
@@ -511,18 +525,21 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 }
             });
         } else if (pack1to8) {
+            auto src_a = src.accessor<float, 2>();
+            auto dst_a = dst.accessor<float, 2, 8>();
+            
             otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
                 for (const auto i : otter::irange(begin, end)) {
-                    const float* r0 = (const float*)src[i * 8 + 0].raw_data();
-                    const float* r1 = (const float*)src[i * 8 + 1].raw_data();
-                    const float* r2 = (const float*)src[i * 8 + 2].raw_data();
-                    const float* r3 = (const float*)src[i * 8 + 3].raw_data();
-                    const float* r4 = (const float*)src[i * 8 + 4].raw_data();
-                    const float* r5 = (const float*)src[i * 8 + 5].raw_data();
-                    const float* r6 = (const float*)src[i * 8 + 6].raw_data();
-                    const float* r7 = (const float*)src[i * 8 + 7].raw_data();
+                    const float* r0 = (const float*)src_a[i * 8 + 0].data();
+                    const float* r1 = (const float*)src_a[i * 8 + 1].data();
+                    const float* r2 = (const float*)src_a[i * 8 + 2].data();
+                    const float* r3 = (const float*)src_a[i * 8 + 3].data();
+                    const float* r4 = (const float*)src_a[i * 8 + 4].data();
+                    const float* r5 = (const float*)src_a[i * 8 + 5].data();
+                    const float* r6 = (const float*)src_a[i * 8 + 6].data();
+                    const float* r7 = (const float*)src_a[i * 8 + 7].data();
 
-                    float* outptr = (float*)dst[i].raw_data();
+                    float* outptr = (float*)dst_a[i].data();
 
                     int j = 0;
     #if __AVX__
@@ -570,18 +587,21 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 }
             });
         } else if (pack8to1) {
+            auto src_a = src.accessor<float, 2, 8>();
+            auto dst_a = dst.accessor<float, 2>();
+            
             otter::parallel_for(0, h, 0, [&](int64_t begin, int64_t end) {
                 for (const auto i : otter::irange(begin, end)) {
-                    const float* r0 = (const float*)src[i].raw_data();
+                    const float* r0 = (const float*)src_a[i].data();
 
-                    float* outptr0 = (float*)dst[i * 8 + 0].raw_data();
-                    float* outptr1 = (float*)dst[i * 8 + 1].raw_data();
-                    float* outptr2 = (float*)dst[i * 8 + 2].raw_data();
-                    float* outptr3 = (float*)dst[i * 8 + 3].raw_data();
-                    float* outptr4 = (float*)dst[i * 8 + 4].raw_data();
-                    float* outptr5 = (float*)dst[i * 8 + 5].raw_data();
-                    float* outptr6 = (float*)dst[i * 8 + 6].raw_data();
-                    float* outptr7 = (float*)dst[i * 8 + 7].raw_data();
+                    float* outptr0 = (float*)dst_a[i * 8 + 0].data();
+                    float* outptr1 = (float*)dst_a[i * 8 + 1].data();
+                    float* outptr2 = (float*)dst_a[i * 8 + 2].data();
+                    float* outptr3 = (float*)dst_a[i * 8 + 3].data();
+                    float* outptr4 = (float*)dst_a[i * 8 + 4].data();
+                    float* outptr5 = (float*)dst_a[i * 8 + 5].data();
+                    float* outptr6 = (float*)dst_a[i * 8 + 6].data();
+                    float* outptr7 = (float*)dst_a[i * 8 + 7].data();
 
                     int j = 0;
     #if __AVX__
@@ -630,12 +650,15 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 }
             });
         } else if (pack4to8) {
+            auto src_a = src.accessor<float, 2, 4>();
+            auto dst_a = dst.accessor<float, 2, 8>();
+            
             otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
                 for (const auto i : otter::irange(begin, end)) {
-                    const float* r0 = (const float*)src[i * 2 + 0].raw_data();
-                    const float* r1 = (const float*)src[i * 2 + 1].raw_data();
+                    const float* r0 = (const float*)src_a[i * 2 + 0].data();
+                    const float* r1 = (const float*)src_a[i * 2 + 1].data();
 
-                    float* outptr = (float*)dst[i].raw_data();
+                    float* outptr = (float*)dst_a[i].data();
 
                     for (int j = 0; j < w; j++) {
                         outptr[0] = r0[0];
@@ -654,16 +677,18 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 }
             });
         } else if (pack8to4) {
+            auto src_a = src.accessor<float, 2, 8>();
+            auto dst_a = dst.accessor<float, 2, 4>();
+            
             otter::parallel_for(0, h, 0, [&](int64_t begin, int64_t end) {
                 for (int i = 0; i < h; i++)
                 {
-                    const float* r0 = (const float*)src[i].raw_data();
+                    const float* r0 = (const float*)src_a[i].data();
 
-                    float* outptr0 = (float*)dst[i * 2 + 0].raw_data();
-                    float* outptr1 = (float*)dst[i * 2 + 1].raw_data();
+                    float* outptr0 = (float*)dst_a[i * 2 + 0].data();
+                    float* outptr1 = (float*)dst_a[i * 2 + 1].data();
 
-                    for (int j = 0; j < w; j++)
-                    {
+                    for (int j = 0; j < w; j++) {
                         outptr0[0] = r0[0];
                         outptr0[1] = r0[1];
                         outptr0[2] = r0[2];
@@ -695,14 +720,17 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
         dst = otter::empty({outc, h, w}, out_dtype);
         
         if (pack1to4) {
+            auto src_a = src.accessor<float, 3>();
+            auto dst_a = dst.accessor<float, 3, 4>();
+            
             otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
                 for (const auto q : otter::irange(begin, end)) {
-                    const float* r0 = (const float*)src[q * 4 + 0].raw_data();
-                    const float* r1 = (const float*)src[q * 4 + 1].raw_data();
-                    const float* r2 = (const float*)src[q * 4 + 2].raw_data();
-                    const float* r3 = (const float*)src[q * 4 + 3].raw_data();
+                    const float* r0 = (const float*)src_a[q * 4 + 0].data();
+                    const float* r1 = (const float*)src_a[q * 4 + 1].data();
+                    const float* r2 = (const float*)src_a[q * 4 + 2].data();
+                    const float* r3 = (const float*)src_a[q * 4 + 3].data();
 
-                    float* outptr = (float*)dst[q].raw_data();
+                    float* outptr = (float*)dst_a[q].data();
 
                     int i = 0;
     #if __SSE2__
@@ -738,14 +766,17 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 }
             });
         } else if (pack4to1) {
+            auto src_a = src.accessor<float, 3, 4>();
+            auto dst_a = dst.accessor<float, 3>();
+            
             otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
                 for (const auto q : otter::irange(begin, end)) {
-                    const float* r0 = (const float*)src[q].raw_data();
+                    const float* r0 = (const float*)src_a[q].data();
 
-                    float* outptr0 = (float*)dst[q * 4 + 0].raw_data();
-                    float* outptr1 = (float*)dst[q * 4 + 1].raw_data();
-                    float* outptr2 = (float*)dst[q * 4 + 2].raw_data();
-                    float* outptr3 = (float*)dst[q * 4 + 3].raw_data();
+                    float* outptr0 = (float*)dst_a[q * 4 + 0].data();
+                    float* outptr1 = (float*)dst_a[q * 4 + 1].data();
+                    float* outptr2 = (float*)dst_a[q * 4 + 2].data();
+                    float* outptr3 = (float*)dst_a[q * 4 + 3].data();
 
                     int i = 0;
     #if __SSE2__
@@ -770,8 +801,7 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                         outptr3 += 4;
                     }
     #endif // __SSE2__
-                    for (; i < size; i++)
-                    {
+                    for (; i < size; i++) {
                         *outptr0++ = r0[0];
                         *outptr1++ = r0[1];
                         *outptr2++ = r0[2];
@@ -782,19 +812,22 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 }
             });
         } else if (pack1to8) {
+            auto src_a = src.accessor<float, 3>();
+            auto dst_a = dst.accessor<float, 3, 8>();
+            
             otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
                 for (const auto q : otter::irange(begin, end))
                 {
-                    const float* r0 = (const float*)src[q * 8 + 0].raw_data();
-                    const float* r1 = (const float*)src[q * 8 + 1].raw_data();
-                    const float* r2 = (const float*)src[q * 8 + 2].raw_data();
-                    const float* r3 = (const float*)src[q * 8 + 3].raw_data();
-                    const float* r4 = (const float*)src[q * 8 + 4].raw_data();
-                    const float* r5 = (const float*)src[q * 8 + 5].raw_data();
-                    const float* r6 = (const float*)src[q * 8 + 6].raw_data();
-                    const float* r7 = (const float*)src[q * 8 + 7].raw_data();
+                    const float* r0 = (const float*)src_a[q * 8 + 0].data();
+                    const float* r1 = (const float*)src_a[q * 8 + 1].data();
+                    const float* r2 = (const float*)src_a[q * 8 + 2].data();
+                    const float* r3 = (const float*)src_a[q * 8 + 3].data();
+                    const float* r4 = (const float*)src_a[q * 8 + 4].data();
+                    const float* r5 = (const float*)src_a[q * 8 + 5].data();
+                    const float* r6 = (const float*)src_a[q * 8 + 6].data();
+                    const float* r7 = (const float*)src_a[q * 8 + 7].data();
 
-                    float* outptr = (float*)dst[q].raw_data();
+                    float* outptr = (float*)dst_a[q].data();
 
                     int i = 0;
     #if __AVX__
@@ -844,24 +877,26 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 }
             });
         } else if (pack8to1) {
+            auto src_a = src.accessor<float, 3, 8>();
+            auto dst_a = dst.accessor<float, 3>();
+            
             otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
                 for (const auto q : otter::irange(begin, end))
                 {
-                    const float* r0 = (const float*)src[q].raw_data();
+                    const float* r0 = (const float*)src_a[q].data();
 
-                    float* outptr0 = (float*)dst[q * 8 + 0].raw_data();
-                    float* outptr1 = (float*)dst[q * 8 + 1].raw_data();
-                    float* outptr2 = (float*)dst[q * 8 + 2].raw_data();
-                    float* outptr3 = (float*)dst[q * 8 + 3].raw_data();
-                    float* outptr4 = (float*)dst[q * 8 + 4].raw_data();
-                    float* outptr5 = (float*)dst[q * 8 + 5].raw_data();
-                    float* outptr6 = (float*)dst[q * 8 + 6].raw_data();
-                    float* outptr7 = (float*)dst[q * 8 + 7].raw_data();
+                    float* outptr0 = (float*)dst_a[q * 8 + 0].data();
+                    float* outptr1 = (float*)dst_a[q * 8 + 1].data();
+                    float* outptr2 = (float*)dst_a[q * 8 + 2].data();
+                    float* outptr3 = (float*)dst_a[q * 8 + 3].data();
+                    float* outptr4 = (float*)dst_a[q * 8 + 4].data();
+                    float* outptr5 = (float*)dst_a[q * 8 + 5].data();
+                    float* outptr6 = (float*)dst_a[q * 8 + 6].data();
+                    float* outptr7 = (float*)dst_a[q * 8 + 7].data();
 
                     int i = 0;
     #if __AVX__
-                    for (; i + 7 < size; i += 8)
-                    {
+                    for (; i + 7 < size; i += 8) {
                         __m256 _row0 = _mm256_loadu_ps(r0);
                         __m256 _row1 = _mm256_loadu_ps(r0 + 8);
                         __m256 _row2 = _mm256_loadu_ps(r0 + 16);
@@ -906,12 +941,15 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 }
             });
         } else if (pack4to8) {
+            auto src_a = src.accessor<float, 3, 4>();
+            auto dst_a = dst.accessor<float, 3, 8>();
+            
             otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
                 for (const auto q : otter::irange(begin, end)) {
-                    const float* r0 = (const float*)src[q * 2 + 0].raw_data();
-                    const float* r1 = (const float*)src[q * 2 + 1].raw_data();
+                    const float* r0 = (const float*)src_a[q * 2 + 0].data();
+                    const float* r1 = (const float*)src_a[q * 2 + 1].data();
 
-                    float* outptr = (float*)dst[q].raw_data();
+                    float* outptr = (float*)dst_a[q].data();
 
                     for (int i = 0; i < size; i++) {
                         outptr[0] = r0[0];
@@ -930,12 +968,15 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 }
             });
         } else if (pack8to4) {
+            auto src_a = src.accessor<float, 3, 8>();
+            auto dst_a = dst.accessor<float, 3, 4>();
+            
             otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
                 for (const auto q : otter::irange(begin, end)) {
-                    const float* r0 = (const float*)src[q].raw_data();
+                    const float* r0 = (const float*)src_a[q].data();
 
-                    float* outptr0 = (float*)dst[q * 2 + 0].raw_data();
-                    float* outptr1 = (float*)dst[q * 2 + 1].raw_data();
+                    float* outptr0 = (float*)dst_a[q * 2 + 0].data();
+                    float* outptr1 = (float*)dst_a[q * 2 + 1].data();
 
                     for (int i = 0; i < size; i++) {
                         outptr0[0] = r0[0];
@@ -970,15 +1011,18 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
         dst = otter::empty({batchsize, outc, h, w}, out_dtype);
         
         if (pack1to4) {
+            auto src_a = src.accessor<float, 4>();
+            auto dst_a = dst.accessor<float, 4, 4>();
+            
             for (const auto b : otter::irange(0, batchsize)) {
                 otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
                     for (const auto q : otter::irange(begin, end)) {
-                        const float* r0 = (const float*)src[b][q * 4 + 0].raw_data();
-                        const float* r1 = (const float*)src[b][q * 4 + 1].raw_data();
-                        const float* r2 = (const float*)src[b][q * 4 + 2].raw_data();
-                        const float* r3 = (const float*)src[b][q * 4 + 3].raw_data();
+                        const float* r0 = (const float*)src_a[b][q * 4 + 0].data();
+                        const float* r1 = (const float*)src_a[b][q * 4 + 1].data();
+                        const float* r2 = (const float*)src_a[b][q * 4 + 2].data();
+                        const float* r3 = (const float*)src_a[b][q * 4 + 3].data();
 
-                        float* outptr = (float*)dst[b][q].raw_data();
+                        float* outptr = (float*)dst_a[b][q].data();
 
                         int i = 0;
         #if __SSE2__
@@ -1015,15 +1059,18 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 });
             }
         } else if (pack4to1) {
+            auto src_a = src.accessor<float, 4, 4>();
+            auto dst_a = dst.accessor<float, 4>();
+            
             for (const auto b : otter::irange(0, batchsize)) {
                 otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
                     for (const auto q : otter::irange(begin, end)) {
-                        const float* r0 = (const float*)src[b][q].raw_data();
+                        const float* r0 = (const float*)src_a[b][q].data();
 
-                        float* outptr0 = (float*)dst[b][q * 4 + 0].raw_data();
-                        float* outptr1 = (float*)dst[b][q * 4 + 1].raw_data();
-                        float* outptr2 = (float*)dst[b][q * 4 + 2].raw_data();
-                        float* outptr3 = (float*)dst[b][q * 4 + 3].raw_data();
+                        float* outptr0 = (float*)dst_a[b][q * 4 + 0].data();
+                        float* outptr1 = (float*)dst_a[b][q * 4 + 1].data();
+                        float* outptr2 = (float*)dst_a[b][q * 4 + 2].data();
+                        float* outptr3 = (float*)dst_a[b][q * 4 + 3].data();
 
                         int i = 0;
         #if __SSE2__
@@ -1048,8 +1095,7 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                             outptr3 += 4;
                         }
         #endif // __SSE2__
-                        for (; i < size; i++)
-                        {
+                        for (; i < size; i++) {
                             *outptr0++ = r0[0];
                             *outptr1++ = r0[1];
                             *outptr2++ = r0[2];
@@ -1061,25 +1107,27 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 });
             }
         } else if (pack1to8) {
+            auto src_a = src.accessor<float, 4>();
+            auto dst_a = dst.accessor<float, 4, 8>();
+            
             for (const auto b : otter::irange(0, batchsize)) {
                 otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
                     for (const auto q : otter::irange(begin, end))
                     {
-                        const float* r0 = (const float*)src[b][q * 8 + 0].raw_data();
-                        const float* r1 = (const float*)src[b][q * 8 + 1].raw_data();
-                        const float* r2 = (const float*)src[b][q * 8 + 2].raw_data();
-                        const float* r3 = (const float*)src[b][q * 8 + 3].raw_data();
-                        const float* r4 = (const float*)src[b][q * 8 + 4].raw_data();
-                        const float* r5 = (const float*)src[b][q * 8 + 5].raw_data();
-                        const float* r6 = (const float*)src[b][q * 8 + 6].raw_data();
-                        const float* r7 = (const float*)src[b][q * 8 + 7].raw_data();
+                        const float* r0 = (const float*)src_a[b][q * 8 + 0].data();
+                        const float* r1 = (const float*)src_a[b][q * 8 + 1].data();
+                        const float* r2 = (const float*)src_a[b][q * 8 + 2].data();
+                        const float* r3 = (const float*)src_a[b][q * 8 + 3].data();
+                        const float* r4 = (const float*)src_a[b][q * 8 + 4].data();
+                        const float* r5 = (const float*)src_a[b][q * 8 + 5].data();
+                        const float* r6 = (const float*)src_a[b][q * 8 + 6].data();
+                        const float* r7 = (const float*)src_a[b][q * 8 + 7].data();
 
-                        float* outptr = (float*)dst[b][q].raw_data();
+                        float* outptr = (float*)dst_a[b][q].data();
 
                         int i = 0;
         #if __AVX__
-                        for (; i + 7 < size; i += 8)
-                        {
+                        for (; i + 7 < size; i += 8) {
                             __m256 _row0 = _mm256_loadu_ps(r0);
                             __m256 _row1 = _mm256_loadu_ps(r1);
                             __m256 _row2 = _mm256_loadu_ps(r2);
@@ -1108,8 +1156,7 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                             outptr += 64;
                         }
         #endif // __AVX__
-                        for (; i < size; i++)
-                        {
+                        for (; i < size; i++) {
                             outptr[0] = *r0++;
                             outptr[1] = *r1++;
                             outptr[2] = *r2++;
@@ -1125,25 +1172,27 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 });
             }
         } else if (pack8to1) {
+            auto src_a = src.accessor<float, 4, 8>();
+            auto dst_a = dst.accessor<float, 4>();
+            
             for (const auto b : otter::irange(0, batchsize)) {
                 otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
                     for (const auto q : otter::irange(begin, end))
                     {
-                        const float* r0 = (const float*)src[b][q].raw_data();
+                        const float* r0 = (const float*)src_a[b][q].data();
 
-                        float* outptr0 = (float*)dst[b][q * 8 + 0].raw_data();
-                        float* outptr1 = (float*)dst[b][q * 8 + 1].raw_data();
-                        float* outptr2 = (float*)dst[b][q * 8 + 2].raw_data();
-                        float* outptr3 = (float*)dst[b][q * 8 + 3].raw_data();
-                        float* outptr4 = (float*)dst[b][q * 8 + 4].raw_data();
-                        float* outptr5 = (float*)dst[b][q * 8 + 5].raw_data();
-                        float* outptr6 = (float*)dst[b][q * 8 + 6].raw_data();
-                        float* outptr7 = (float*)dst[b][q * 8 + 7].raw_data();
+                        float* outptr0 = (float*)dst_a[b][q * 8 + 0].data();
+                        float* outptr1 = (float*)dst_a[b][q * 8 + 1].data();
+                        float* outptr2 = (float*)dst_a[b][q * 8 + 2].data();
+                        float* outptr3 = (float*)dst_a[b][q * 8 + 3].data();
+                        float* outptr4 = (float*)dst_a[b][q * 8 + 4].data();
+                        float* outptr5 = (float*)dst_a[b][q * 8 + 5].data();
+                        float* outptr6 = (float*)dst_a[b][q * 8 + 6].data();
+                        float* outptr7 = (float*)dst_a[b][q * 8 + 7].data();
 
                         int i = 0;
         #if __AVX__
-                        for (; i + 7 < size; i += 8)
-                        {
+                        for (; i + 7 < size; i += 8) {
                             __m256 _row0 = _mm256_loadu_ps(r0);
                             __m256 _row1 = _mm256_loadu_ps(r0 + 8);
                             __m256 _row2 = _mm256_loadu_ps(r0 + 16);
@@ -1189,13 +1238,16 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 });
             }
         } else if (pack4to8) {
+            auto src_a = src.accessor<float, 4, 4>();
+            auto dst_a = dst.accessor<float, 4, 8>();
+            
             for (const auto b : otter::irange(0, batchsize)) {
                 otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
                     for (const auto q : otter::irange(begin, end)) {
-                        const float* r0 = (const float*)src[b][q * 2 + 0].raw_data();
-                        const float* r1 = (const float*)src[b][q * 2 + 1].raw_data();
+                        const float* r0 = (const float*)src_a[b][q * 2 + 0].data();
+                        const float* r1 = (const float*)src_a[b][q * 2 + 1].data();
 
-                        float* outptr = (float*)dst[b][q].raw_data();
+                        float* outptr = (float*)dst_a[b][q].data();
 
                         for (int i = 0; i < size; i++) {
                             outptr[0] = r0[0];
@@ -1215,13 +1267,16 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
                 });
             }
         } else if (pack8to4) {
+            auto src_a = src.accessor<float, 4, 8>();
+            auto dst_a = dst.accessor<float, 4, 4>();
+            
             for (const auto b : otter::irange(0, batchsize)) {
                 otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
                     for (const auto q : otter::irange(begin, end)) {
-                        const float* r0 = (const float*)src[b][q].raw_data();
+                        const float* r0 = (const float*)src_a[b][q].data();
 
-                        float* outptr0 = (float*)dst[b][q * 2 + 0].raw_data();
-                        float* outptr1 = (float*)dst[b][q * 2 + 1].raw_data();
+                        float* outptr0 = (float*)dst_a[b][q * 2 + 0].data();
+                        float* outptr1 = (float*)dst_a[b][q * 2 + 1].data();
 
                         for (int i = 0; i < size; i++) {
                             outptr0[0] = r0[0];

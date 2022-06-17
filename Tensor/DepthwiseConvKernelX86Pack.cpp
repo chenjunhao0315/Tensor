@@ -74,28 +74,27 @@ Tensor& depthwise_conv2d_x86_pack4_out(
             p2 += gap;
         }
     }
+    
+    auto input_a = input.accessor<float, 3, 4>();
+    auto output_a = output.accessor<float, 4, 4>()[0];
 
     otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
         for (const auto g : otter::irange(begin, end)) {
-            float* outptr = (float*)output[0][g].raw_data();
+            float* outptr = (float*)output_a[g].data();
             const float* kptr = (const float*)weight_data_packed.raw_data() + maxk * g * 4;
-            const Tensor m = input[g];
+            const auto m = input_a[g];
 
-            for (int i = 0; i < outh; i++)
-            {
-                for (int j = 0; j < outw; j++)
-                {
+            for (int i = 0; i < outh; i++) {
+                for (int j = 0; j < outw; j++) {
                     __m128 _sum = _mm_set1_ps(0.f);
 
-                    if (bias_term)
-                    {
+                    if (bias_term) {
                         _sum = _mm_loadu_ps(((const float*)bias_data) + g * 4);
                     }
 
-                    const float* sptr = (const float*)m[i * stride_h].raw_data() + j * stride_w * 4;
+                    const float* sptr = (const float*)m[i * stride_h].data() + j * stride_w * 4;
 
-                    for (int k = 0; k < maxk; k++)
-                    {
+                    for (int k = 0; k < maxk; k++) {
                         __m128 _val = _mm_loadu_ps(sptr + space_ofs[k] * 4);
                         __m128 _w = _mm_loadu_ps(kptr + k * 4);
                         _sum = _mm_add_ps(_mm_mul_ps(_val, _w), _sum);

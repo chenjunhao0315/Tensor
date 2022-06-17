@@ -47,19 +47,19 @@ protected:
     const index_t* strides_;
 };
 
-template<typename T, size_t N, int64_t E, template <typename U> class PtrTraits = DefaultPtrTraits, typename index_t = int64_t>
+template<typename T, size_t N, int64_t P, template <typename U> class PtrTraits = DefaultPtrTraits, typename index_t = int64_t>
 class TensorAccessor : public TensorAccessorBase<T, N, PtrTraits, index_t> {
 public:
     typedef typename PtrTraits<T>::PtrType PtrType;
     
     TensorAccessor(PtrType data_, const index_t* sizes_, const index_t* strides_) : TensorAccessorBase<T, N, PtrTraits, index_t>(data_, sizes_, strides_) {}
     
-    TensorAccessor<T, N - 1, E, PtrTraits, index_t> operator[](index_t i) {
-        return TensorAccessor<T, N - 1, E, PtrTraits, index_t>(this->data_ + this->strides_[0] * i * E, this->sizes_ + 1, this->strides_ + 1);
+    TensorAccessor<T, N - 1, P, PtrTraits, index_t> operator[](index_t i) {
+        return TensorAccessor<T, N - 1, P, PtrTraits, index_t>(this->data_ + this->strides_[0] * i * P, this->sizes_ + 1, this->strides_ + 1);
     }
     
-    const TensorAccessor<T, N - 1, E, PtrTraits, index_t> operator[](index_t i) const {
-        return TensorAccessor<T, N - 1, E, PtrTraits, index_t>(this->data_ + this->strides_[0] * i * E, this->sizes_ + 1, this->strides_ + 1);
+    const TensorAccessor<T, N - 1, P, PtrTraits, index_t> operator[](index_t i) const {
+        return TensorAccessor<T, N - 1, P, PtrTraits, index_t>(this->data_ + this->strides_[0] * i * P, this->sizes_ + 1, this->strides_ + 1);
     }
 };
 
