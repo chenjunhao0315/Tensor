@@ -23,6 +23,11 @@
 #include "DepthwiseConvKernelX86Pack.hpp"
 #endif
 
+#if __ARM_NEON__
+#include "ConvolutionMM2DNeonPack.hpp"
+#include "DepthwiseConvKernelNeonPack.hpp"
+#endif
+
 namespace otter {
 
 DEFINE_DISPATCH(convolution_depthwise3x3_winograd_stub);
@@ -503,6 +508,9 @@ ConvBackend select_proper_conv_packed_backend(
                     
                     // General
                     if (elempack == 4 && out_elempack == 4) {
+                        if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::Sgemm2dNeonPack4_1x1s1;
+                        }
                         return ConvBackend::Sgemm2dNeonPack4;
                     } else if (elempack == 1 && out_elempack == 4) {
                         return ConvBackend::Sgemm2dNeonPack1to4;
@@ -553,13 +561,25 @@ Tensor convolution_packed(
             output = otter::sgemm_conv2d_pack4_x86(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
         case ConvBackend::Sgemm2dX86Pack4to1:
             output = otter::sgemm_conv2d_pack4to1_x86(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
-        case ConvBackend::Sgemm2dNeonPack1to4:
+        case ConvBackend::Sgemm2dX86Pack1to4:
             output = otter::sgemm_conv2d_pack1to4_x86(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
         case ConvBackend::DepthwiseX86Pack4:
             output = otter::depthwise_conv2d_x86_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
         case ConvBackend::Sgemm2dX86Pack4_1x1s1:
             output = otter::conv2d_1x1s1_sgemm_pack4_x86(input, weight, weight_o, bias, padding); break;
 #endif  // __SSE2__
+#if __ARM_NEON__
+        case ConvBackend::Sgemm2dNeonPack4:
+            output = otter::sgemm_conv2d_pack4_neon(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dNeonPack4to1:
+            output = otter::sgemm_conv2d_pack4to1_neon(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dNeonPack1to4:
+            output = otter::sgemm_conv2d_pack1to4_neon(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::DepthwiseNeonPack4:
+            output = otter::depthwise_conv2d_neon_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dNeonPack4_1x1s1:
+            output = otter::conv2d_1x1s1_sgemm_pack4_neon(input, weight, weight_o, bias, padding); break;
+#endif  // __ARN_NEON__
         default: {
             output = convolution(input.packing(1), weight, weight_o, bias, stride, padding, dilation, transposed, output_padding, groups, input_int8_scales, weight_int8_scales);
         }

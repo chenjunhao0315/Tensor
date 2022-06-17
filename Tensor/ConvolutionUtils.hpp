@@ -70,14 +70,15 @@ enum class ConvBackend {
     DepthwiseTransposeNeon,
     Slow3d,
     Sgemm2dX86Pack4,
+    Sgemm2dX86Pack4_1x1s1,
     Sgemm2dX86Pack1to4,
     Sgemm2dX86Pack4to1,
     Sgemm2dNeonPack4,
+    Sgemm2dNeonPack4_1x1s1,
     Sgemm2dNeonPack1to4,
     Sgemm2dNeonPack4to1,
     DepthwiseX86Pack4,
     DepthwiseNeonPack4,
-    Sgemm2dX86Pack4_1x1s1,
     Overrideable
 };
 
