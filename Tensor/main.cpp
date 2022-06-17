@@ -6,13 +6,14 @@
 #include "TensorTransform.hpp"
 #include "PoseEstimation.hpp"
 #include "DrawDetection.hpp"
+#include "Padding.hpp"
 
 using namespace std;
 
 int main(int argc, const char * argv[]) {
     otter::Net net;
-    net.load_otter("nanodet-plus-m-1.5x_416_int8_mixed.otter", otter::CompileMode::Inference);
-    int ret = net.load_weight("nanodet-plus-m-1.5x_416_int8_mixed.bin", otter::Net::WeightType::Ncnn);
+    net.load_otter("nanodet-plus-m-1.5x_416_fused.otter", otter::CompileMode::Inference);
+    int ret = net.load_weight("nanodet-plus-m-1.5x_416_fused.bin", otter::Net::WeightType::Ncnn);
     if (ret) {
         exit(-1);
     }

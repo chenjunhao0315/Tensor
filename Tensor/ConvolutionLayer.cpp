@@ -23,6 +23,12 @@ ConvolutionLayer::ConvolutionLayer() {
     one_blob_only = true;
     support_inplace = false;
     
+#if __SSE2__
+    support_packing = true;
+#elif __ARM_NEON__
+    support_packing = true;
+#endif
+    
     activation = nullptr;
 }
 
@@ -383,37 +389,52 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
     if (k == 3)
         params.view_1d_as_2d();
     
-    if (params.use_cpu_neon(bottom_blob, weight_data)) {
-        // General
-        if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 1 && params.stride[1] == 1) {
-            if (bottom_blob.size(1) >= 64 && weight_data.size(0) >= 64) {
+    int64_t elempack = bottom_blob.elempack();
+    int64_t out_elempack = 1;
+    
+#if __SSE2__
+#if false
+    out_elempack = out_channels % 8 == 0 ? 8 : out_channels % 4 == 0 ? 4 : 1;
+#else
+    out_elempack = out_channels % 4 == 0 ? 4 : 1;
+#endif
+#elif __ARM_NEON__
+    out_elempack = num_output % 4 == 0 ? 4 : 1;
+#endif
+    
+    if (elempack == 1 && out_elempack == 1) {
+        if (params.use_cpu_neon(bottom_blob, weight_data)) {
+            // General
+            if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 1 && params.stride[1] == 1) {
+                if (bottom_blob.size(1) >= 64 && weight_data.size(0) >= 64) {
+                    optimize_kernel = weight_sgemm_data;
+                }
+            } else if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 2 && params.stride[1] == 2) {
                 optimize_kernel = weight_sgemm_data;
-            }
-        } else if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 2 && params.stride[1] == 2) {
-            optimize_kernel = weight_sgemm_data;
-        } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
-            if (bottom_blob.size(1) >= 16 && weight_data.size(0) >= 16 && bottom_blob.size(3) <= 120 && bottom_blob.size(2) <= 120) {
-                optimize_kernel = weight_3x3_winograd64_data;
-            }
-        } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
-            auto output_shape = otter::calculate_conv_output_size(bottom_blob.sizes(), weight_data.sizes(), params.stride, params.padding);
-            if (!(output_shape[2] >= 8 && output_shape[3] >= 8)) {
-                optimize_kernel = weight_sgemm_data;
+            } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
+                if (bottom_blob.size(1) >= 16 && weight_data.size(0) >= 16 && bottom_blob.size(3) <= 120 && bottom_blob.size(2) <= 120) {
+                    optimize_kernel = weight_3x3_winograd64_data;
+                }
+            } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
+                auto output_shape = otter::calculate_conv_output_size(bottom_blob.sizes(), weight_data.sizes(), params.stride, params.padding);
+                if (!(output_shape[2] >= 8 && output_shape[3] >= 8)) {
+                    optimize_kernel = weight_sgemm_data;
+                } else {
+                    optimize_kernel = weight_3x3s2_data;
+                }
             } else {
-                optimize_kernel = weight_3x3s2_data;
+                bool prefer_sgemm = (params.stride[0] == 1 && params.stride[1] == 1 && (bottom_blob.size(1) >= 12 || weight_data.size(0) >= 12)) || ((params.stride[0] >= 2 || params.stride[1] >= 2) && (bottom_blob.size(1) >= 16 || weight_data.size(0) >= 16));
+                
+                if (prefer_sgemm) {
+                    optimize_kernel = weight_sgemm_data;
+                }
             }
-        } else {
-            bool prefer_sgemm = (params.stride[0] == 1 && params.stride[1] == 1 && (bottom_blob.size(1) >= 12 || weight_data.size(0) >= 12)) || ((params.stride[0] >= 2 || params.stride[1] >= 2) && (bottom_blob.size(1) >= 16 || weight_data.size(0) >= 16));
-            
-            if (prefer_sgemm) {
+        } else if (params.use_cpu_x86(bottom_blob, weight_data)) {
+            if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1 && in_channels >= 16 && out_channels >= 16) {
+                optimize_kernel = weight_3x3_winograd23_data;
+            } else {
                 optimize_kernel = weight_sgemm_data;
             }
-        }
-    } else if (params.use_cpu_x86(bottom_blob, weight_data)) {
-        if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1 && in_channels >= 16 && out_channels >= 16) {
-            optimize_kernel = weight_3x3_winograd23_data;
-        } else {
-            optimize_kernel = weight_sgemm_data;
         }
     }
     

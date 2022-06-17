@@ -377,6 +377,39 @@ int Net::forward_layer(int layer_index, std::vector<Tensor>& blob_tensors, const
     return 0;
 }
 
+void Net::convert_layout(Tensor &bottom_blob, const Layer *layer, const NetOption &opt) const {
+    if (opt.use_packing_layout) {
+        int dst_elempack = 1;
+        int elemcount = 0;
+        if (bottom_blob.dim() <= 3) elemcount = bottom_blob.size(0) * bottom_blob.elempack();
+        if (bottom_blob.dim() == 4) elemcount = bottom_blob.size(1) * bottom_blob.elempack();
+        if (bottom_blob.dim() > 4) return;
+        
+        auto dtype = bottom_blob.scalar_type();
+        
+        if (layer->support_packing) {
+            if (dtype == ScalarType::Float || dtype == ScalarType::Float4 || dtype == ScalarType::Float8) {
+                #if false
+                    if (elemcount % 8 == 0)
+                        dst_elempack = 8;
+                    else if (elemcount % 4 == 0)
+                        dst_elempack = 4;
+                #else
+                    if (elemcount % 4 == 0)
+                        dst_elempack = 4;
+                #endif
+            } else if (dtype == ScalarType::Byte || dtype == ScalarType::Byte4 || dtype == ScalarType::Byte8) {
+                if (elemcount % 8 == 0)
+                    dst_elempack = 8;
+            }
+        }
+        
+        if (bottom_blob.elempack() != dst_elempack) {
+            bottom_blob = bottom_blob.packing(dst_elempack);
+        }
+    }
+}
+
 int Net::do_forward_layer(const Layer* layer, std::vector<Tensor>& blob_tensors, const NetOption& opt) const {
     if (layer->one_blob_only) {
         int bottom_blob_index = layer->bottoms[0];
@@ -394,8 +427,7 @@ int Net::do_forward_layer(const Layer* layer, std::vector<Tensor>& blob_tensors,
             bottom_blob = bottom_blob_ref;
         }
         
-        // TODO: Support quantinzation
-        // convert_layout(bottom_blob, layer, opt);
+        convert_layout(bottom_blob, layer, opt);
         
         if (opt.lightmode && layer->support_inplace) {
             Tensor& bottom_top_blob = bottom_blob;
@@ -433,8 +465,7 @@ int Net::do_forward_layer(const Layer* layer, std::vector<Tensor>& blob_tensors,
                 bottom_blobs[i] = bottom_blob_ref;
             }
             
-            // TODO: Support quantinzation
-            // convert_layout(bottom_blobs[i], layer, opt);
+             convert_layout(bottom_blobs[i], layer, opt);
         }
         
         if (opt.lightmode && layer->support_inplace) {
@@ -678,7 +709,7 @@ int Extractor::extract(std::string blob_name, Tensor &feat, int type) {
     return extract(blob_index, feat, type);
 }
 
-int Extractor::extract(int blob_index, Tensor &feat, int /*type*/) {
+int Extractor::extract(int blob_index, Tensor &feat, int type) {
     if (blob_index < 0 ||  blob_index >= (int)blob_tensors_.size())
         return -1;
     
@@ -693,6 +724,10 @@ int Extractor::extract(int blob_index, Tensor &feat, int /*type*/) {
     }
     
     feat = blob_tensors_[blob_index];
+    
+    if (option.use_packing_layout && (type == 0)) {
+        feat = feat.packing(1);
+    }
     
     set_kmp_blocktime(old_blocktime);
     

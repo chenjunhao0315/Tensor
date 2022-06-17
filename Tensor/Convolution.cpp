@@ -18,6 +18,11 @@
 #include "ConvolutionMM2DTransposeNeon.hpp"
 #include "DepthwiseConvTransposeKernelNeon.hpp"
 
+#if __SSE2__
+#include "ConvolutionMM2DX86Pack.hpp"
+#include "DepthwiseConvKernelX86Pack.hpp"
+#endif
+
 namespace otter {
 
 DEFINE_DISPATCH(convolution_depthwise3x3_winograd_stub);
@@ -268,6 +273,22 @@ Tensor convolution(
     const Tensor& input_int8_scales,
     const Tensor& weight_int8_scales) {
     
+    if (input_r.elempack() != 1) {
+        return convolution_packed(
+            input_r,
+            weight_r,
+            weight_o,
+            bias_r,
+            stride_,
+            padding_,
+            dilation_,
+            transposed_,
+            output_padding_,
+            groups_,
+            input_int8_scales,
+            weight_int8_scales);
+    }
+    
     auto input = input_r;
     auto weight = weight_r;
     auto bias = bias_r;
@@ -415,6 +436,134 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
     }
     
     return Tensor();
+}
+
+ConvBackend select_proper_conv_packed_backend(
+    const Tensor& input,
+    const Tensor& weight,
+    const Tensor& /*bias*/,
+    const bool /*need_backward*/,
+    const ConvParams& params) {
+    
+    const int64_t w = input.size(3);
+    const int64_t h = input.size(2);
+    const int64_t kernel_w = weight.size(3);
+    const int64_t kernel_h = weight.size(2);
+    const int64_t stride_w = params.stride[1];
+    const int64_t stride_h = params.stride[0];
+    const int64_t num_input = input.size(1);
+    const int64_t num_output = weight.size(0);
+    
+    int64_t elempack = input.elempack();
+    int64_t out_elempack = 1;
+    
+#if __SSE2__
+#if false
+    out_elempack = num_output % 8 == 0 ? 8 : num_output % 4 == 0 ? 4 : 1;
+#else
+    out_elempack = num_output % 4 == 0 ? 4 : 1;
+#endif
+#elif __ARM_NEON__
+    out_elempack = num_output % 4 == 0 ? 4 : 1;
+#endif
+    
+    if (input.device() == Device::CPU) {
+        if (params.transposed) {
+            if (input.dim() == 4) {
+                if (params.use_cpu_x86(input, weight)) {
+                    
+                } else if (params.use_cpu_neon(input, weight)) {
+                    
+                }
+            }
+        } else {
+            if (input.dim() == 4) {
+                if (params.use_cpu_x86(input, weight)) {
+                    // Depthwise
+                    if (params.is_depthwise(input, weight)) {
+                        return ConvBackend::DepthwiseX86Pack4;
+                    }
+                    
+                    // General
+                    if (elempack == 4 && out_elempack == 4) {
+                        if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::Sgemm2dX86Pack4_1x1s1;
+                        }
+                        return ConvBackend::Sgemm2dX86Pack4;
+                    } else if (elempack == 1 && out_elempack == 4) {
+                        return ConvBackend::Sgemm2dX86Pack1to4;
+                    } else if (elempack == 4 && out_elempack == 1) {
+                        return ConvBackend::Sgemm2dX86Pack4to1;
+                    }
+                } else if (params.use_cpu_neon(input, weight)) {
+                    // Depthwise
+                    if (params.is_depthwise(input, weight)) {
+                        return ConvBackend::DepthwiseNeonPack4;
+                    }
+                    
+                    // General
+                    if (elempack == 4 && out_elempack == 4) {
+                        return ConvBackend::Sgemm2dNeonPack4;
+                    } else if (elempack == 1 && out_elempack == 4) {
+                        return ConvBackend::Sgemm2dNeonPack1to4;
+                    } else if (elempack == 4 && out_elempack == 1) {
+                        return ConvBackend::Sgemm2dNeonPack4to1;
+                    }
+                }
+            }
+        }
+    }
+    OTTER_CHECK(false, "Unsupport conv");
+    return ConvBackend::Overrideable;
+}
+
+Tensor convolution_packed(
+    const Tensor& input,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation,
+    bool transposed,
+    IntArrayRef output_padding,
+    int64_t groups,
+    const Tensor& input_int8_scales,
+    const Tensor& weight_int8_scales) {
+    
+    auto k = weight.dim();
+    auto dim = k - 2;
+    
+    ConvParams params;
+    params.stride    = expand_param_if_needed(stride, "stride", dim);
+    params.padding   = expand_param_if_needed(padding, "padding", dim);
+    params.dilation  = expand_param_if_needed(dilation, "dilation", dim);
+    params.output_padding = expand_param_if_needed(output_padding, "output_padding", dim);
+    params.transposed = transposed;
+    params.groups    = groups;
+    
+    bool need_backward = false; // TODO: backward propogation
+    ConvBackend backend = select_proper_conv_packed_backend(input, weight, bias, need_backward, params);
+    
+    auto kernel_size = weight.sizes().slice(2);
+    Tensor output;
+    switch (backend) {
+        case ConvBackend::Sgemm2dX86Pack4:
+            output = otter::sgemm_conv2d_pack4_x86(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dX86Pack4to1:
+            output = otter::sgemm_conv2d_pack4to1_x86(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dNeonPack1to4:
+            output = otter::sgemm_conv2d_pack1to4_x86(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::DepthwiseX86Pack4:
+            output = otter::depthwise_conv2d_x86_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dX86Pack4_1x1s1:
+            output = otter::conv2d_1x1s1_sgemm_pack4_x86(input, weight, weight_o, bias, padding); break;
+        default: {
+            output = convolution(input.packing(1), weight, weight_o, bias, stride, padding, dilation, transposed, output_padding, groups, input_int8_scales, weight_int8_scales);
+        }
+    }
+    
+    return output;
 }
 
 }   // end namespace otter

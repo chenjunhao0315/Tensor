@@ -21,13 +21,13 @@ ReluLayer::ReluLayer() {
 }
 
 int ReluLayer::forward_inplace(Tensor& bottom_blob, const NetOption& opt) const {
-    if (opt.use_non_lib_optimize && bottom_blob.scalar_type() == ScalarType::Float) {
-        auto input_output_a = bottom_blob.accessor<float, 4>()[0];
-        int size = int(bottom_blob.size(2) * bottom_blob.size(3));
+    if ((opt.use_non_lib_optimize || opt.use_packing_layout) && (bottom_blob.scalar_type() == otter::ScalarType::Float || bottom_blob.scalar_type() == otter::ScalarType::Float4 || bottom_blob.scalar_type() == otter::ScalarType::Float8)) {
+        auto input_output = bottom_blob[0];
+        int size = int(bottom_blob.size(2) * bottom_blob.size(3) * bottom_blob.elempack());
         
         otter::parallel_for(0, bottom_blob.size(1), 0, [&](int64_t begin, int64_t end) {
             for (const auto q : otter::irange(begin, end)) {
-                float* ptr = input_output_a[q].data();
+                float* ptr = (float*)input_output[q].raw_data();
 
     #if __ARM_NEON
                 int nn = size >> 2;

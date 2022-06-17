@@ -58,6 +58,8 @@ public:
     NetOption option;
     
 private:
+    void convert_layout(Tensor& bottom_blob, const Layer* layer, const NetOption& opt) const;
+    
     int forward_layer(int layer_index, std::vector<Tensor>& blob_tensors, const NetOption& opt) const;
     int do_forward_layer(const Layer* layer, std::vector<Tensor>& blob_mats, const NetOption& opt) const;
     

@@ -73,7 +73,7 @@ bool ConvParams::is_int8(const Tensor& input, const Tensor& weight) const {
 
 bool ConvParams::is_depthwise(const Tensor& input, const Tensor& weight) const {
     return (input.dim() == 4) &&
-    (input.size(1) == groups) &&
+    (input.size(1) * input.elempack() == groups) &&
     (weight.dim() == 4) &&
     (weight.size(0) % input.size(1) == 0) &&
     (weight.size(1) == 1) &&
@@ -85,7 +85,7 @@ bool ConvParams::is_depthwise(const Tensor& input, const Tensor& weight) const {
 
 bool ConvParams::is_transpose_depthwise(const Tensor& input, const Tensor& weight) const {
     return (input.dim() == 4) &&
-    (input.size(1) == groups) &&
+    (input.size(1) * input.elempack() == groups) &&
     (weight.dim() == 4) &&
     (weight.size(0) % input.size(1) == 0) &&
     (weight.size(1) == 1) &&

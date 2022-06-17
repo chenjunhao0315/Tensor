@@ -34,10 +34,20 @@ static Tensor& copy_impl(Tensor & self, const Tensor & src, bool non_blocking) {
     return self;
 }
 
-Tensor& copy_(Tensor& self, const Tensor& src, bool non_blocking) {
-    copy_impl(self, src, non_blocking);
+static Tensor& copy_packed_impl(Tensor& self, const Tensor& src) {
+    assert(self.defined());
+    assert(src.defined());
+    
+    memcpy(self.raw_data(), src.raw_data(), src.numel() * src.itemsize());
     
     return self;
+}
+
+Tensor& copy_(Tensor& self, const Tensor& src, bool non_blocking) {
+    if (src.elempack() != 1)
+        return copy_packed_impl(self, src);
+    
+    return copy_impl(self, src, non_blocking);
 }
 
 DEFINE_DISPATCH(copy_stub);

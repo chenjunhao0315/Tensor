@@ -306,7 +306,7 @@ void constant_pad_float_packed_x86(const Tensor& self, Tensor& dst, IntArrayRef 
             
             int outw = w * elempack + left + right;
 
-#if __AVX__
+#if false
             int out_elempack = outw % 8 == 0 ? 8 : outw % 4 == 0 ? 4 : 1;
             ScalarType out_dtype = outw % 8 == 0 ? ScalarType::Float8 : outw % 4 == 0 ? ScalarType::Float4 : ScalarType::Float;
 #else
@@ -333,7 +333,7 @@ void constant_pad_float_packed_x86(const Tensor& self, Tensor& dst, IntArrayRef 
             int outw = w + left + right;
             int outh = h * elempack + top + bottom;
 
-#if __AVX__
+#if false
             int out_elempack = outh % 8 == 0 ? 8 : outh % 4 == 0 ? 4 : 1;
             ScalarType out_dtype = outh % 8 == 0 ? ScalarType::Float8 : outh % 4 == 0 ? ScalarType::Float4 : ScalarType::Float;
 #else
@@ -360,7 +360,7 @@ void constant_pad_float_packed_x86(const Tensor& self, Tensor& dst, IntArrayRef 
             int outh = h + top + bottom;
             int outc = channels * elempack + front + behind;
 
-#if __AVX__
+#if false
             int out_elempack = outc % 8 == 0 ? 8 : outc % 4 == 0 ? 4 : 1;
             ScalarType out_dtype = outc % 8 == 0 ? ScalarType::Float8 : outc % 4 == 0 ? ScalarType::Float4 : ScalarType::Float;
 #else

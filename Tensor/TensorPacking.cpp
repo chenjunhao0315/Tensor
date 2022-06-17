@@ -22,7 +22,7 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack);
 void check_convert_packing(const Tensor& src, int elempack) {
     OTTER_CHECK(src.scalar_type() == ScalarType::Float || src.scalar_type() == ScalarType::Float4 || src.scalar_type() == ScalarType::Float8 || src.scalar_type() == ScalarType::Byte || src.scalar_type() == ScalarType::Byte4 || src.scalar_type() == ScalarType::Byte8, "Only support Float and Byte!");
     OTTER_CHECK(elempack == 1 || elempack == 4 || elempack == 8, "Only support elempack = 1, 4, 8 but get ", elempack);
-    OTTER_CHECK(src.dim() <= 4 && src.dim() != 1, "Only support 1 < dim <= 4 but get ", src.dim());
+    OTTER_CHECK(src.dim() <= 4, "Only support dim <= 4 but get ", src.dim());
 }
 
 ScalarType get_update_scalarType(const ScalarType& src, int out_elempack) {
@@ -93,7 +93,7 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack) {
         int64_t w = src.size(0);
         int64_t outw = w * elempack / out_elempack;
         
-        dst = src;
+        dst = src.clone();
         dst.unsafeGetTensorNucleus()->force_set_sizes_and_dtype({outw}, out_dtype);
         
         return;
@@ -408,7 +408,7 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
         int64_t w = src.size(0);
         int64_t outw = w * elempack / out_elempack;
         
-        dst = src;
+        dst = src.clone();
         dst.unsafeGetTensorNucleus()->force_set_sizes_and_dtype({outw}, out_dtype);
         
         return;
