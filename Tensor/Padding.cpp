@@ -373,7 +373,7 @@ void constant_pad_float_packed_x86(const Tensor& self, Tensor& dst, IntArrayRef 
 
                 int front_ = front / elempack;
                 otter::parallel_for(0, outc / out_elempack, 0, [&](int64_t begin, int64_t end) {
-                    for (int q = 0; q < outc / out_elempack; q++) {
+                    for (const auto q : otter::irange(begin, end)) {
                         auto borderm = dst[q];
 
                         __m128 pad_value = _mm_set1_ps(value.toFloat());
@@ -829,7 +829,7 @@ void constant_pad_float_packed_neon(const Tensor& self, Tensor& dst, IntArrayRef
                     }
                 });
 
-                return 0;
+                return;
             }
         }
     }
@@ -1404,7 +1404,7 @@ void constant_pad_int8_packed_neon(const Tensor& self, Tensor& dst, IntArrayRef 
         if (dims == 3) {
             int w = self.size(2);
             int h = self.size(1);
-            int channel = self.size(0);
+            int channels = self.size(0);
             int type = 0;
             
             int outw = w + left + right;
