@@ -78,7 +78,7 @@ int main(int argc, const char * argv[]) {
     p.stop_and_show("ms (pose net total)");
 
     otter::cv::save_image(image_final, "simplepose");
-    
+
     return 0;
 }
 

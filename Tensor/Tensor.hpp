@@ -44,14 +44,15 @@ public:
     explicit Tensor(const TensorBase &base): TensorBase(base) {}
     Tensor(TensorBase &&base): TensorBase(std::move(base)) {}
     
-    template<typename T, size_t N>
-    TensorAccessor<T,N> accessor() const& {
-        static_assert(N > 0, "accessor is used for indexing tensor, for scalars use *data_ptr<T>()");
+    template<typename T, size_t N, int64_t E = 1>
+    TensorAccessor<T, N, E> accessor() const& {
+        OTTER_CHECK(N > 0, "accessor is used for indexing tensor, for scalars use *data_ptr<T>()");
         OTTER_CHECK(dim() == N, "TensorAccessor expected ", N, " dims but tensor has ", dim());
-        return TensorAccessor<T,N>(data_ptr<T>(), sizes().data(), strides().data());
+        OTTER_CHECK(elempack() == E, "Elempack should be same as tensor");
+        return TensorAccessor<T, N, E>((T*)raw_data(), sizes().data(), strides().data());
     }
-    template<typename T, size_t N>
-    TensorAccessor<T,N> accessor() && = delete;
+    template<typename T, size_t N, int64_t E>
+    TensorAccessor<T, N, E> accessor() && = delete;
     
     Tensor& operator=(const TensorBase& x) & {
         tensor_nucleus_ = x.getPtr();
