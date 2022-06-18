@@ -12,6 +12,7 @@ namespace otter {
 SplitLayer::SplitLayer() {
     one_blob_only = false;
     support_inplace = false;
+    support_packing = true;
 }
 
 int SplitLayer::compute_output_shape(ParamDict &pd) {

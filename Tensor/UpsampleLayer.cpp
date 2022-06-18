@@ -7,12 +7,19 @@
 
 #include "UpsampleLayer.hpp"
 #include "TensorFunction.hpp"
+#include "TensorInterpolation.hpp"
 
 namespace otter {
 
 UpsampleLayer::UpsampleLayer() {
     one_blob_only = true;
     support_inplace = false;
+    
+#if __SSE2__
+    support_packing = true;
+#elif __ARM_NEON__
+    support_packing = true;
+#endif
 }
 
 int UpsampleLayer::parse_param(LayerOption& option, ParamDict& pd) {
@@ -103,17 +110,21 @@ int UpsampleLayer::load_param(const ParamDict &pd) {
     return 0;
 }
 
-int UpsampleLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& /*opt*/) const {
+int UpsampleLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const {
     int input_height = (int)bottom_blob.size(2);
     int input_width = (int)bottom_blob.size(3);
     
     int output_height = input_height * scale_height;
     int output_width = input_width * scale_width;
     
-    if (mode == 1) {
-        top_blob = otter::native::upsample_nearest2d(bottom_blob, {output_height, output_width}, scale_height, scale_width);
-    } else if (mode == 2) {
-        top_blob = otter::native::upsample_bilinear2d(bottom_blob, {output_height, output_width}, align_corner, scale_height, scale_width);
+    if (opt.use_non_lib_optimize || bottom_blob.elempack() != 1) {
+        top_blob = otter::Interpolate(bottom_blob, {output_height, output_width}, {scale_height, scale_width}, (otter::InterpolateMode)mode);
+    } else {
+        if (mode == 1) {
+            top_blob = otter::native::upsample_nearest2d(bottom_blob, {output_height, output_width}, scale_height, scale_width);
+        } else if (mode == 2) {
+            top_blob = otter::native::upsample_bilinear2d(bottom_blob, {output_height, output_width}, align_corner, scale_height, scale_width);
+        }
     }
     
     return 0;

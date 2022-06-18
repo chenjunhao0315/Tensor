@@ -13,8 +13,8 @@
 namespace otter {
 
 enum InterpolateMode {
-    NEAREST,
-    BILINEAR
+    NEAREST = 1,
+    BILINEAR = 2
 };
 
 Tensor Interpolate(const Tensor& input, IntArrayRef size, ArrayRef<double> scale_factor, InterpolateMode mode, bool align_corners = false);
