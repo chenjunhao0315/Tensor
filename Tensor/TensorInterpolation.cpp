@@ -582,268 +582,8 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
 #endif  // __SSE2__
 
 #if __ARM_NEON__
-static void resize_bicubic_image_pack4(const Tensor& src, Tensor& dst, float* alpha, int* xofs, float* beta, int* yofs) {
-    int w = dst.size(1);
-    int h = dst.size(0);
-    
-    auto src_a = src.accessor<float, 2, 4>();
-    auto dst_a = dst.accessor<float, 2, 4>();
-
-    // loop body
-    Tensor rowsbuf0 = otter::empty({w}, otter::ScalarType::Float4);
-    Tensor rowsbuf1 = otter::empty({w}, otter::ScalarType::Float4);
-    Tensor rowsbuf2 = otter::empty({w}, otter::ScalarType::Float4);
-    Tensor rowsbuf3 = otter::empty({w}, otter::ScalarType::Float4);
-    float* rows0 = (float*)rowsbuf0.raw_data();
-    float* rows1 = (float*)rowsbuf1.raw_data();
-    float* rows2 = (float*)rowsbuf2.raw_data();
-    float* rows3 = (float*)rowsbuf3.raw_data();
-
-    int prev_sy1 = -3;
-
-    for (int dy = 0; dy < h; dy++)
-    {
-        int sy = yofs[dy];
-
-        if (sy == prev_sy1)
-        {
-            // reuse all rows
-        }
-        else if (sy == prev_sy1 + 1)
-        {
-            // hresize one row
-            float* rows0_old = rows0;
-            rows0 = rows1;
-            rows1 = rows2;
-            rows2 = rows3;
-            rows3 = rows0_old;
-            const float* S3 = src_a[sy + 2].data();
-
-            const float* alphap = alpha;
-            float* rows3p = rows3;
-            for (int dx = 0; dx < w; dx++)
-            {
-                int sx = xofs[dx] * 4;
-                const float* S3p = S3 + sx;
-
-                float32x4_t _a0123 = vld1q_f32(alphap);
-
-                float32x4_t _S30 = vld1q_f32(S3p - 4);
-                float32x4_t _S31 = vld1q_f32(S3p + 0);
-                float32x4_t _S32 = vld1q_f32(S3p + 4);
-                float32x4_t _S33 = vld1q_f32(S3p + 8);
-                float32x4_t _rows3 = vmulq_lane_f32(_S30, vget_low_f32(_a0123), 0);
-                _rows3 = vmlaq_lane_f32(_rows3, _S31, vget_low_f32(_a0123), 1);
-                _rows3 = vmlaq_lane_f32(_rows3, _S32, vget_high_f32(_a0123), 0);
-                _rows3 = vmlaq_lane_f32(_rows3, _S33, vget_high_f32(_a0123), 1);
-                vst1q_f32(rows3p + dx * 4, _rows3);
-
-                alphap += 4;
-            }
-        }
-        else if (sy == prev_sy1 + 2)
-        {
-            // hresize two rows
-            float* rows0_old = rows0;
-            float* rows1_old = rows1;
-            rows0 = rows2;
-            rows1 = rows3;
-            rows2 = rows0_old;
-            rows3 = rows1_old;
-            const float* S2 = src_a[sy + 1].data();
-            const float* S3 = src_a[sy + 2].data();
-
-            const float* alphap = alpha;
-            float* rows2p = rows2;
-            float* rows3p = rows3;
-            for (int dx = 0; dx < w; dx++)
-            {
-                int sx = xofs[dx] * 4;
-                const float* S2p = S2 + sx;
-                const float* S3p = S3 + sx;
-
-                float32x4_t _a0123 = vld1q_f32(alphap);
-
-                float32x4_t _S20 = vld1q_f32(S2p - 4);
-                float32x4_t _S21 = vld1q_f32(S2p + 0);
-                float32x4_t _S22 = vld1q_f32(S2p + 4);
-                float32x4_t _S23 = vld1q_f32(S2p + 8);
-                float32x4_t _S30 = vld1q_f32(S3p - 4);
-                float32x4_t _S31 = vld1q_f32(S3p + 0);
-                float32x4_t _S32 = vld1q_f32(S3p + 4);
-                float32x4_t _S33 = vld1q_f32(S3p + 8);
-                float32x4_t _rows2 = vmulq_lane_f32(_S20, vget_low_f32(_a0123), 0);
-                float32x4_t _rows3 = vmulq_lane_f32(_S30, vget_low_f32(_a0123), 0);
-                _rows2 = vmlaq_lane_f32(_rows2, _S21, vget_low_f32(_a0123), 1);
-                _rows3 = vmlaq_lane_f32(_rows3, _S31, vget_low_f32(_a0123), 1);
-                _rows2 = vmlaq_lane_f32(_rows2, _S22, vget_high_f32(_a0123), 0);
-                _rows3 = vmlaq_lane_f32(_rows3, _S32, vget_high_f32(_a0123), 0);
-                _rows2 = vmlaq_lane_f32(_rows2, _S23, vget_high_f32(_a0123), 1);
-                _rows3 = vmlaq_lane_f32(_rows3, _S33, vget_high_f32(_a0123), 1);
-                vst1q_f32(rows2p + dx * 4, _rows2);
-                vst1q_f32(rows3p + dx * 4, _rows3);
-
-                alphap += 4;
-            }
-        }
-        else if (sy == prev_sy1 + 3)
-        {
-            // hresize three rows
-            float* rows0_old = rows0;
-            float* rows1_old = rows1;
-            float* rows2_old = rows2;
-            rows0 = rows3;
-            rows1 = rows0_old;
-            rows2 = rows1_old;
-            rows3 = rows2_old;
-            const float* S1 = src[sy + 0].data();
-            const float* S2 = src[sy + 1].data();
-            const float* S3 = src[sy + 2].data();
-
-            const float* alphap = alpha;
-            float* rows1p = rows1;
-            float* rows2p = rows2;
-            float* rows3p = rows3;
-            for (int dx = 0; dx < w; dx++)
-            {
-                int sx = xofs[dx] * 4;
-                const float* S1p = S1 + sx;
-                const float* S2p = S2 + sx;
-                const float* S3p = S3 + sx;
-
-                float32x4_t _a0123 = vld1q_f32(alphap);
-
-                float32x4_t _S10 = vld1q_f32(S1p - 4);
-                float32x4_t _S11 = vld1q_f32(S1p + 0);
-                float32x4_t _S12 = vld1q_f32(S1p + 4);
-                float32x4_t _S13 = vld1q_f32(S1p + 8);
-                float32x4_t _S20 = vld1q_f32(S2p - 4);
-                float32x4_t _S21 = vld1q_f32(S2p + 0);
-                float32x4_t _S22 = vld1q_f32(S2p + 4);
-                float32x4_t _S23 = vld1q_f32(S2p + 8);
-                float32x4_t _S30 = vld1q_f32(S3p - 4);
-                float32x4_t _S31 = vld1q_f32(S3p + 0);
-                float32x4_t _S32 = vld1q_f32(S3p + 4);
-                float32x4_t _S33 = vld1q_f32(S3p + 8);
-                float32x4_t _rows1 = vmulq_lane_f32(_S10, vget_low_f32(_a0123), 0);
-                float32x4_t _rows2 = vmulq_lane_f32(_S20, vget_low_f32(_a0123), 0);
-                float32x4_t _rows3 = vmulq_lane_f32(_S30, vget_low_f32(_a0123), 0);
-                _rows1 = vmlaq_lane_f32(_rows1, _S11, vget_low_f32(_a0123), 1);
-                _rows2 = vmlaq_lane_f32(_rows2, _S21, vget_low_f32(_a0123), 1);
-                _rows3 = vmlaq_lane_f32(_rows3, _S31, vget_low_f32(_a0123), 1);
-                _rows1 = vmlaq_lane_f32(_rows1, _S12, vget_high_f32(_a0123), 0);
-                _rows2 = vmlaq_lane_f32(_rows2, _S22, vget_high_f32(_a0123), 0);
-                _rows3 = vmlaq_lane_f32(_rows3, _S32, vget_high_f32(_a0123), 0);
-                _rows1 = vmlaq_lane_f32(_rows1, _S13, vget_high_f32(_a0123), 1);
-                _rows2 = vmlaq_lane_f32(_rows2, _S23, vget_high_f32(_a0123), 1);
-                _rows3 = vmlaq_lane_f32(_rows3, _S33, vget_high_f32(_a0123), 1);
-                vst1q_f32(rows1p + dx * 4, _rows1);
-                vst1q_f32(rows2p + dx * 4, _rows2);
-                vst1q_f32(rows3p + dx * 4, _rows3);
-
-                alphap += 4;
-            }
-        }
-        else
-        {
-            // hresize four rows
-            const float* S0 = src_a[sy - 1].data();
-            const float* S1 = src_a[sy + 0].data();
-            const float* S2 = src_a[sy + 1].data();
-            const float* S3 = src_a[sy + 2].data();
-
-            const float* alphap = alpha;
-            float* rows0p = rows0;
-            float* rows1p = rows1;
-            float* rows2p = rows2;
-            float* rows3p = rows3;
-            for (int dx = 0; dx < w; dx++)
-            {
-                int sx = xofs[dx] * 4;
-                const float* S0p = S0 + sx;
-                const float* S1p = S1 + sx;
-                const float* S2p = S2 + sx;
-                const float* S3p = S3 + sx;
-
-                float32x4_t _a0123 = vld1q_f32(alphap);
-
-                // TODO check the generated assembly on armv7
-                float32x4_t _S00 = vld1q_f32(S0p - 4);
-                float32x4_t _S01 = vld1q_f32(S0p + 0);
-                float32x4_t _S02 = vld1q_f32(S0p + 4);
-                float32x4_t _S03 = vld1q_f32(S0p + 8);
-                float32x4_t _S10 = vld1q_f32(S1p - 4);
-                float32x4_t _S11 = vld1q_f32(S1p + 0);
-                float32x4_t _S12 = vld1q_f32(S1p + 4);
-                float32x4_t _S13 = vld1q_f32(S1p + 8);
-                float32x4_t _S20 = vld1q_f32(S2p - 4);
-                float32x4_t _S21 = vld1q_f32(S2p + 0);
-                float32x4_t _S22 = vld1q_f32(S2p + 4);
-                float32x4_t _S23 = vld1q_f32(S2p + 8);
-                float32x4_t _S30 = vld1q_f32(S3p - 4);
-                float32x4_t _S31 = vld1q_f32(S3p + 0);
-                float32x4_t _S32 = vld1q_f32(S3p + 4);
-                float32x4_t _S33 = vld1q_f32(S3p + 8);
-                float32x4_t _rows0 = vmulq_lane_f32(_S00, vget_low_f32(_a0123), 0);
-                float32x4_t _rows1 = vmulq_lane_f32(_S10, vget_low_f32(_a0123), 0);
-                float32x4_t _rows2 = vmulq_lane_f32(_S20, vget_low_f32(_a0123), 0);
-                float32x4_t _rows3 = vmulq_lane_f32(_S30, vget_low_f32(_a0123), 0);
-                _rows0 = vmlaq_lane_f32(_rows0, _S01, vget_low_f32(_a0123), 1);
-                _rows1 = vmlaq_lane_f32(_rows1, _S11, vget_low_f32(_a0123), 1);
-                _rows2 = vmlaq_lane_f32(_rows2, _S21, vget_low_f32(_a0123), 1);
-                _rows3 = vmlaq_lane_f32(_rows3, _S31, vget_low_f32(_a0123), 1);
-                _rows0 = vmlaq_lane_f32(_rows0, _S02, vget_high_f32(_a0123), 0);
-                _rows1 = vmlaq_lane_f32(_rows1, _S12, vget_high_f32(_a0123), 0);
-                _rows2 = vmlaq_lane_f32(_rows2, _S22, vget_high_f32(_a0123), 0);
-                _rows3 = vmlaq_lane_f32(_rows3, _S32, vget_high_f32(_a0123), 0);
-                _rows0 = vmlaq_lane_f32(_rows0, _S03, vget_high_f32(_a0123), 1);
-                _rows1 = vmlaq_lane_f32(_rows1, _S13, vget_high_f32(_a0123), 1);
-                _rows2 = vmlaq_lane_f32(_rows2, _S23, vget_high_f32(_a0123), 1);
-                _rows3 = vmlaq_lane_f32(_rows3, _S33, vget_high_f32(_a0123), 1);
-                vst1q_f32(rows0p + dx * 4, _rows0);
-                vst1q_f32(rows1p + dx * 4, _rows1);
-                vst1q_f32(rows2p + dx * 4, _rows2);
-                vst1q_f32(rows3p + dx * 4, _rows3);
-
-                alphap += 4;
-            }
-        }
-
-        prev_sy1 = sy;
-
-        // vresize
-        float32x4_t _b0123 = vld1q_f32(beta);
-
-        float* rows0p = rows0;
-        float* rows1p = rows1;
-        float* rows2p = rows2;
-        float* rows3p = rows3;
-        float* Dp = dst_a[dy].data();
-
-        for (int dx = 0; dx < w; dx++)
-        {
-            float32x4_t _rows0 = vld1q_f32(rows0p);
-            float32x4_t _rows1 = vld1q_f32(rows1p);
-            float32x4_t _rows2 = vld1q_f32(rows2p);
-            float32x4_t _rows3 = vld1q_f32(rows3p);
-            float32x4_t _D = vmulq_lane_f32(_rows0, vget_low_f32(_b0123), 0);
-            _D = vmlaq_lane_f32(_D, _rows1, vget_low_f32(_b0123), 1);
-            _D = vmlaq_lane_f32(_D, _rows2, vget_high_f32(_b0123), 0);
-            _D = vmlaq_lane_f32(_D, _rows3, vget_high_f32(_b0123), 1);
-            vst1q_f32(Dp, _D);
-
-            Dp += 4;
-            rows0p += 4;
-            rows1p += 4;
-            rows2p += 4;
-            rows3p += 4;
-        }
-
-        beta += 4;
-    }
-}
-
-static void resize_bilinear_image(const Tensor& src, Tensor& dst, float* alpha, int* xofs, float* beta, int* yofs) {
+static void resize_bilinear_image(const Tensor& src, Tensor& dst, float* alpha, int* xofs, float* beta, int* yofs)
+{
     int w = dst.size(1);
     int h = dst.size(0);
     
@@ -1017,6 +757,116 @@ static void resize_bilinear_image(const Tensor& src, Tensor& dst, float* alpha, 
     }
 }
 
+static void resize_bilinear_image_pack4(const Tensor& src, Tensor& dst, float* alpha, int* xofs, float* beta, int* yofs)
+{
+    int w = dst.size(1);
+    int h = dst.size(0);
+    
+    auto src_a = src.accessor<float, 2, 4>();
+    auto dst_a = dst.accessor<float, 2, 4>();
+
+    // loop body
+    Tensor rowsbuf0 = otter::empty({w}, otter::ScalarType::Float4);
+    Tensor rowsbuf1 = otter::empty({w}, otter::ScalarType::Float4);
+    float* rows0 = (float*)rowsbuf0.raw_data();
+    float* rows1 = (float*)rowsbuf1.raw_data();
+
+    int prev_sy1 = -2;
+
+    for (int dy = 0; dy < h; dy++)
+    {
+        int sy = yofs[dy];
+
+        if (sy == prev_sy1)
+        {
+            // reuse all rows
+        }
+        else if (sy == prev_sy1 + 1)
+        {
+            // hresize one row
+            float* rows0_old = rows0;
+            rows0 = rows1;
+            rows1 = rows0_old;
+            const float* S1 = src_a[sy + 1].data();
+
+            const float* alphap = alpha;
+            float* rows1p = rows1;
+            int dx = 0;
+            for (; dx < w; dx++)
+            {
+                int sx = xofs[dx] * 4;
+                const float* S1p = S1 + sx;
+
+                float32x2_t _a01 = vld1_f32(alphap);
+
+                float32x4_t _S10 = vld1q_f32(S1p);
+                float32x4_t _S11 = vld1q_f32(S1p + 4);
+                float32x4_t _rows1 = vmulq_lane_f32(_S10, _a01, 0);
+                _rows1 = vmlaq_lane_f32(_rows1, _S11, _a01, 1);
+                vst1q_f32(rows1p + dx * 4, _rows1);
+
+                alphap += 2;
+            }
+        }
+        else
+        {
+            // hresize two rows
+            const float* S0 = src_a[sy + 0].data();
+            const float* S1 = src_a[sy + 1].data();
+
+            const float* alphap = alpha;
+            float* rows0p = rows0;
+            float* rows1p = rows1;
+            int dx = 0;
+            for (; dx < w; dx++)
+            {
+                int sx = xofs[dx] * 4;
+                const float* S0p = S0 + sx;
+                const float* S1p = S1 + sx;
+
+                float32x2_t _a01 = vld1_f32(alphap);
+
+                float32x4_t _S00 = vld1q_f32(S0p);
+                float32x4_t _S01 = vld1q_f32(S0p + 4);
+                float32x4_t _S10 = vld1q_f32(S1p);
+                float32x4_t _S11 = vld1q_f32(S1p + 4);
+                float32x4_t _rows0 = vmulq_lane_f32(_S00, _a01, 0);
+                float32x4_t _rows1 = vmulq_lane_f32(_S10, _a01, 0);
+                _rows0 = vmlaq_lane_f32(_rows0, _S01, _a01, 1);
+                _rows1 = vmlaq_lane_f32(_rows1, _S11, _a01, 1);
+                vst1q_f32(rows0p + dx * 4, _rows0);
+                vst1q_f32(rows1p + dx * 4, _rows1);
+
+                alphap += 2;
+            }
+        }
+
+        prev_sy1 = sy;
+
+        // vresize
+        float32x2_t _b01 = vld1_f32(beta);
+
+        float* rows0p = rows0;
+        float* rows1p = rows1;
+        float* Dp = dst_a[dy].data();
+
+        for (int dx = 0; dx < w; dx++)
+        {
+            float32x4_t _rows0 = vld1q_f32(rows0p);
+            float32x4_t _rows1 = vld1q_f32(rows1p);
+            float32x4_t _D = vmulq_lane_f32(_rows0, _b01, 0);
+            _D = vmlaq_lane_f32(_D, _rows1, _b01, 1);
+            vst1q_f32(Dp, _D);
+
+            Dp += 4;
+            rows0p += 4;
+            rows1p += 4;
+        }
+
+        beta += 2;
+    }
+}
+
 Tensor interpolate_packed_neon(const Tensor& input, IntArrayRef size, InterpolateMode mode, bool align_corners) {
     
     Tensor output;
@@ -1039,7 +889,7 @@ Tensor interpolate_packed_neon(const Tensor& input, IntArrayRef size, Interpolat
                 for (const auto q : otter::irange(begin, end)) {
                     Tensor output_c = output[q];
                     float32x4_t _v = vld1q_f32((const float*)in + q * 4);
-                    output_c.fill(_v);
+                    output_c.fill_(_v);
                 }
             });
             
