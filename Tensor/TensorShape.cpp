@@ -466,9 +466,354 @@ Tensor& cat_out(TensorList tensors, int64_t dim, Tensor& out) {
     return out;
 }
 
+bool check_cat_packed(TensorList tensors) {
+    for (const auto& tensor : tensors) {
+        if (tensor.elempack() != 1) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool check_cat_type(TensorList tensors) {
+    for (const auto& tensor : tensors) {
+        if (!(tensor.scalar_type() == otter::ScalarType::Float || tensor.scalar_type() == otter::ScalarType::Float4 || tensor.scalar_type() == otter::ScalarType::Float8)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+ScalarType get_update_scalarType(const ScalarType& src, int out_elempack) {
+    if (src == ScalarType::Float) {
+        if (out_elempack == 4) return ScalarType::Float4;
+        else if (out_elempack == 8) return ScalarType::Float8;
+    } else if (src == ScalarType::Byte) {
+        if (out_elempack == 4) return ScalarType::Byte4;
+        else if (out_elempack == 8) return ScalarType::Byte8;
+    } else if (src == ScalarType::Float4) {
+        if (out_elempack == 1) return ScalarType::Float;
+        else if (out_elempack == 8) return ScalarType::Float8;
+    } else if (src == ScalarType::Float8) {
+        if (out_elempack == 1) return ScalarType::Float;
+        else if (out_elempack == 4) return ScalarType::Float4;
+    } else if (src == ScalarType::Byte4) {
+        if (out_elempack == 1) return ScalarType::Byte;
+        else if (out_elempack == 8) return ScalarType::Byte8;
+    } else if (src == ScalarType::Byte8) {
+        if (out_elempack == 1) return ScalarType::Byte;
+        else if (out_elempack == 4) return ScalarType::Byte4;
+    }
+    return src;
+}
+
+Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
+    int dims = tensors[0].dim();
+    otter::ScalarType dtype = tensors[0].scalar_type();
+    
+    if (dims == 1) {
+        int top_w = 0;
+        for (size_t b = 0; b < tensors.size(); b++) {
+            const Tensor& tensor = tensors[b];
+            top_w += tensor.size(0) * tensor.elempack();
+        }
+        
+        int out_elempack = 1;
+#if __SSE2__
+#if false
+        out_elempack = top_w % 8 == 0 ? 8 : top_w % 4 == 0 ? 4 : 1;
+#else
+        out_elempack = top_w % 4 == 0 ? 4 : 1;
+#endif
+#elif __ARM_NEON__
+        out_elempack = top_w % 4 == 0 ? 4 : 1;
+#endif
+        out = otter::empty({top_w / out_elempack}, get_update_scalarType(dtype, out_elempack));
+        
+        float* outptr = (float*)out.raw_data();
+        for (size_t b = 0; b < tensors.size(); b++) {
+            const Tensor& tensor = tensors[b];
+
+            const float* ptr = (const float*)tensor.raw_data();
+            memcpy(outptr, ptr, tensor.size(0) * tensor.itemsize());
+
+            outptr += tensor.size(0) * tensor.elempack();
+        }
+        
+        return out;
+    }
+    
+    if (dims == 2 && dim == 0) {
+        int w = tensors[0].size(1);
+        
+        auto elemsize = tensors[0].itemsize();
+        auto elempack = tensors[0].elempack();
+        
+        int top_h = 0;
+        for (size_t b = 0; b < tensors.size(); ++b) {
+            const Tensor& tensor = tensors[b];
+            elemsize = std::min(elemsize, tensor.itemsize());
+            elempack = std::min(elempack, tensor.elempack());
+            top_h += tensor.size(0) * tensor.elempack();
+        }
+        
+        int out_elempack = 1;
+#if __SSE2__
+#if false
+        out_elempack = top_h % 8 == 0 ? 8 : top_h % 4 == 0 ? 4 : 1;
+#else
+        out_elempack = top_h % 4 == 0 ? 4 : 1;
+#endif
+#elif __ARM_NEON__
+        out_elempack = top_h % 4 == 0 ? 4 : 1;
+#endif
+        out = otter::empty({top_h / out_elempack, w}, get_update_scalarType(dtype, out_elempack));
+        
+        Tensor out_unpacked = out;
+        if (elempack < out_elempack) {
+            out_unpacked = otter::empty({top_h / elempack, w}, get_update_scalarType(dtype, elempack));
+        }
+        
+        float* outptr = (float*)out_unpacked.raw_data();
+        for (size_t b = 0; b < tensors.size(); b++) {
+            const Tensor& tensor = tensors[b];
+
+            if (tensor.elempack() == 4 && elempack == 1) {
+                auto tensor_a = tensor.accessor<float, 2, 4>();
+                for (const auto i : otter::irange(0, tensor.size(0))) {
+                    const float* r0 = tensor_a[i].data();
+
+                    float* outptr0 = outptr;
+                    float* outptr1 = outptr + w;
+                    float* outptr2 = outptr + w * 2;
+                    float* outptr3 = outptr + w * 3;
+
+                    for (int j = 0; j < w; j++) {
+                        *outptr0++ = r0[0];
+                        *outptr1++ = r0[1];
+                        *outptr2++ = r0[2];
+                        *outptr3++ = r0[3];
+
+                        r0 += 4;
+                    }
+
+                    outptr += w * 4;
+                }
+            } else {
+                int size = w * tensor.size(0);
+
+                const float* ptr = (const float*)tensor.raw_data();
+                memcpy(outptr, ptr, size * tensor.itemsize());
+
+                outptr += size * tensor.elempack();
+            }
+        }
+        
+        if (elempack < out_elempack) {
+            out = out_unpacked.packing(out_elempack);
+        }
+        
+        return out;
+    }
+    
+    if (dims == 2 && dim == 1) {
+        int h = tensors[0].size(0);
+        
+        auto elemsize = tensors[0].itemsize();
+        auto elempack = tensors[0].elempack();
+        
+        int top_w = 0;
+        for (size_t b = 0; b < tensors.size(); b++) {
+            const Tensor& tensor = tensors[b];
+            top_w += tensor.size(1);
+        }
+        
+        out = otter::empty({h, top_w}, get_update_scalarType(dtype, elempack));
+        
+        otter::parallel_for(0, h, 0, [&](int64_t begin, int64_t end) {
+            for (int i = 0; i < h; i++) {
+                float* outptr = (float*)out[i].raw_data();
+                for (size_t b = 0; b < tensors.size(); b++) {
+                    const Tensor& tensor = tensors[b];
+
+                    const float* ptr = (const float*)tensor[i].raw_data();
+                    memcpy(outptr, ptr, tensor.size(1) * elemsize);
+
+                    outptr += tensor.size(1) * elempack;
+                }
+            }
+        });
+        
+        return out;
+    }
+    
+    if (dims == 3 && dim == 0) {
+        int w = tensors[0].size(2);
+        int h = tensors[0].size(1);
+        
+        auto elemsize = tensors[0].itemsize();
+        auto elempack = tensors[0].elempack();
+        
+        int top_channels = 0;
+        for (size_t b = 0; b < tensors.size(); b++) {
+            const Tensor& tensor = tensors[b];
+            elemsize = std::min(elemsize, tensor.itemsize());
+            elempack = std::min(elempack, tensor.elempack());
+            top_channels += tensor.size(0) * tensor.elempack();
+        }
+        
+        int out_elempack = 1;
+#if __SSE2__
+#if false
+        out_elempack = top_channels % 8 == 0 ? 8 : top_channels % 4 == 0 ? 4 : 1;
+#else
+        out_elempack = top_channels % 4 == 0 ? 4 : 1;
+#endif
+#elif __ARM_NEON__
+        out_elempack = top_channels % 4 == 0 ? 4 : 1;
+#endif
+        out = otter::empty({top_channels / out_elempack, h, w}, get_update_scalarType(dtype, out_elempack));
+        
+        Tensor out_unpacked = out;
+        if (elempack < out_elempack) {
+            out_unpacked = otter::empty({top_channels / elempack, h, w}, get_update_scalarType(dtype, elempack));
+        }
+        
+        int p = 0;
+        for (size_t b = 0; b < tensors.size(); b++) {
+            const Tensor& tensor = tensors[b];
+
+            if (tensor.elempack() == 4 && elempack == 1) {
+                int size = tensor.size(1) * tensor.size(2);
+                
+                auto tensor_a = tensor.accessor<float, 3, 4>();
+
+                for (const auto q : otter::irange(0, tensor.size(0))) {
+                    const float* r0 = tensor_a[q].data();
+
+                    float* outptr0 = (float*)out_unpacked[p + 0].raw_data();
+                    float* outptr1 = (float*)out_unpacked[p + 1].raw_data();
+                    float* outptr2 = (float*)out_unpacked[p + 2].raw_data();
+                    float* outptr3 = (float*)out_unpacked[p + 3].raw_data();
+
+                    for (int i = 0; i < size; i++) {
+                        *outptr0++ = r0[0];
+                        *outptr1++ = r0[1];
+                        *outptr2++ = r0[2];
+                        *outptr3++ = r0[3];
+
+                        r0 += 4;
+                    }
+
+                    p += 4;
+                }
+            } else {
+                int size = tensor.numel();
+
+                const float* ptr = (const float*)tensor.raw_data();
+                float* outptr = (float*)out_unpacked[p].raw_data();
+                memcpy(outptr, ptr, size * tensor.itemsize());
+
+                p += tensor.size(0);
+            }
+        }
+        
+        if (elempack < out_elempack) {
+            out = out_unpacked.packing(out_elempack);
+        }
+        
+        return out;
+    }
+    
+    if (dims == 3 && dim == 1) {
+        int w = tensors[0].size(2);
+        int channels = tensors[0].size(0);
+        
+        auto elemsize = tensors[0].itemsize();
+        auto elempack = tensors[0].elempack();
+        
+        int top_h = 0;
+        for (size_t b = 0; b < tensors.size(); b++) {
+            const Tensor& tensor = tensors[b];
+            top_h += tensor.size(1);
+        }
+        
+        out = otter::empty({channels, top_h, w}, get_update_scalarType(dtype, elempack));
+        
+        otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
+            for (const auto q : otter::irange(begin, end)) {
+                float* outptr = (float*)out[q].raw_data();
+
+                for (size_t b = 0; b < tensors.size(); b++) {
+                    const Tensor& tensor = tensors[b];
+
+                    int size = tensor.size(1) * tensor.size(2);
+
+                    const float* ptr = (const float*)tensor[q].raw_data();
+                    memcpy(outptr, ptr, size * elemsize);
+
+                    outptr += size * elempack;
+                }
+            }
+        });
+        
+        return out;
+    }
+    
+    if (dims == 3 && dim == 2) {
+        int h = tensors[0].size(1);
+        int channels = tensors[0].size(0);
+        
+        auto elemsize = tensors[0].itemsize();
+        auto elempack = tensors[0].elempack();
+        
+        int top_w = 0;
+        for (size_t b = 0; b < tensors.size(); b++) {
+            const Tensor& tensor = tensors[b];
+            top_w += tensor.size(2);
+        }
+        
+        out = otter::empty({channels, h, top_w}, get_update_scalarType(dtype, elempack));
+        
+        otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
+            for (const auto q : otter::irange(begin, end)) {
+                float* outptr = (float*)out[q].raw_data();
+
+                for (int i = 0; i < h; i++) {
+                    for (size_t b = 0; b < tensors.size(); b++) {
+                        const Tensor& tensor = tensors[b];
+
+                        const float* ptr = (const float*)tensor[q][i].raw_data();
+                        memcpy(outptr, ptr, tensor.size(2) * elemsize);
+
+                        outptr += tensor.size(2) * elempack;
+                    }
+                }
+            }
+        });
+        
+        return out;
+    }
+    
+    return out;
+}
+
 Tensor cat(TensorList tensors, int64_t dim) {
     Tensor out = otter::empty({0}, tensors[0].options());
-    otter::native::cat_out(tensors, dim, out);
+    
+    if (check_cat_packed(tensors)) {
+        if (tensors[0].dim() <= 4 && check_cat_type(tensors)) {
+            otter::native::cat_packed_out(tensors, dim, out);
+        } else {
+            out = tensors[0].packing(1);
+            for (int i = 1; i < tensors.size(); ++i) {
+                out = otter::native::cat({out, tensors[i].packing(1)}, dim);
+            }
+            out = out.packing(tensors[0].elempack());
+        }
+    } else {
+        otter::native::cat_out(tensors, dim, out);
+    }
     return out;
 }
 

@@ -13,6 +13,12 @@ namespace otter {
 ConcatLayer::ConcatLayer() {
     one_blob_only = false;
     support_inplace = false;
+    
+//#if __SSE2__
+//    support_packing = true;
+//#elif __ARM_NEON__
+//    support_packing = true;
+//#endif
 }
 
 int ConcatLayer::parse_param(LayerOption& option, ParamDict& pd) {
