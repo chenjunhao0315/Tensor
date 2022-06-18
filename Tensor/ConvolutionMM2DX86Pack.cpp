@@ -1629,6 +1629,171 @@ Tensor conv2d_1x1s1_sgemm_pack4_x86(
     return conv2d_1x1s1_sgemm_pack4_x86_out(self, weight, weight_o, bias, padding, output);
 }
 
+Tensor conv2d_1x1s2_sgemm_pack4_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output) {
+    
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {1, 1}, padding);
+    output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
+    
+    int inch = self.size(1);
+    int outch = output.size(1);
+    
+    Tensor kernel_tf;
+    if (weight_o.defined())
+        kernel_tf = weight_o;
+    else
+        convolution_im2col_sgemm_transform_kernel_pack4_sse(weight, kernel_tf, inch * 4, outch * 4, 1, 1);
+    
+    auto input = otter::constant_pad(self, padding, 0)[0];
+    
+    int w = input.size(2);
+    int channels = input.size(0);
+    
+    int outw = output_size[3];
+    int outh = output_size[2];
+    
+    const int tailstep = (w - 2 * outw + w) * 4;
+    
+    Tensor shrinked = otter::empty({channels, outh, outw}, otter::ScalarType::Float4);
+    
+    auto input_a = input.accessor<float, 3, 4>();
+    auto shrinked_a = shrinked.accessor<float, 3, 4>();
+    
+    otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
+        for (const auto p : otter::irange(begin, end)) {
+            const float* r0 = input_a[p].data();
+            float* outptr = shrinked_a[p].data();
+
+            for (int i = 0; i < outh; i++) {
+                for (int j = 0; j < outw; j++) {
+                    __m128 _v = _mm_load_ps(r0);
+                    _mm_store_ps(outptr, _v);
+
+                    r0 += 8;
+                    outptr += 4;
+                }
+
+                r0 += tailstep;
+            }
+        }
+    });
+    
+    const int size = outw * outh;
+    
+    Tensor im2col = input.view({-1, 1, size});
+    
+    im2col_sgemm_conv2d_pack4_impl_x86(im2col, output, kernel_tf, bias);
+    
+    return output;
+}
+
+Tensor conv2d_1x1s2_sgemm_pack4_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding) {
+    
+    auto output = otter::empty({}, otter::ScalarType::Float4);
+    
+    return conv2d_1x1s2_sgemm_pack4_x86_out(self, weight, weight_o, bias, padding, output);
+}
+
+Tensor conv2d_1x1s1_sgemm_pack1to4_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output) {
+    
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {1, 1}, padding);
+    output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
+    
+    int inch = self.size(1);
+    int outch = output.size(1);
+    
+    Tensor kernel_tf;
+    if (weight_o.defined())
+        kernel_tf = weight_o;
+    else
+        convolution_im2col_sgemm_transform_kernel_pack4_sse(weight, kernel_tf, inch, outch * 4, 1, 1);
+    
+    auto input = otter::constant_pad(self, padding, 0)[0];
+    
+    int w = input.size(2);
+    int h = input.size(1);
+    const int size = w * h;
+    
+    Tensor im2col = input.view({-1, 1, size});
+    
+    im2col_sgemm_conv2d_pack1to4_impl_x86(im2col, output, kernel_tf, bias);
+    
+    return output;
+}
+
+Tensor conv2d_1x1s1_sgemm_pack1to4_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding) {
+    
+    auto output = otter::empty({}, otter::ScalarType::Float4);
+    
+    return conv2d_1x1s1_sgemm_pack1to4_x86_out(self, weight, weight_o, bias, padding, output);
+}
+
+Tensor conv2d_1x1s1_sgemm_pack4to1_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output) {
+    
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {1, 1}, padding);
+    output.resize_(output_size);
+    
+    int inch = self.size(1);
+    int outch = output.size(1);
+    
+    Tensor kernel_tf;
+    if (weight_o.defined())
+        kernel_tf = weight_o;
+    else
+        convolution_im2col_sgemm_transform_kernel_pack4_sse(weight, kernel_tf, inch * 4, outch, 1, 1);
+    
+    auto input = otter::constant_pad(self, padding, 0)[0];
+    
+    int w = input.size(2);
+    int h = input.size(1);
+    const int size = w * h;
+    
+    Tensor im2col = input.view({-1, 1, size});
+    
+    im2col_sgemm_conv2d_pack4to1_impl_x86(im2col, output, kernel_tf, bias);
+    
+    return output;
+}
+
+Tensor conv2d_1x1s1_sgemm_pack4to1_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding) {
+    
+    auto output = otter::empty({}, otter::ScalarType::Float);
+    
+    return conv2d_1x1s1_sgemm_pack4to1_x86_out(self, weight, weight_o, bias, padding, output);
+}
+
 #endif  // __SSE2__
 
 }   // end namespace otter

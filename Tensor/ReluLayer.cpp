@@ -18,6 +18,12 @@ namespace otter {
 ReluLayer::ReluLayer() {
     one_blob_only = true;
     support_inplace = true;
+    
+#if __SSE2__
+    support_packing = true;
+#elif __ARM_NEON__
+    support_packing = true;
+#endif
 }
 
 int ReluLayer::forward_inplace(Tensor& bottom_blob, const NetOption& opt) const {

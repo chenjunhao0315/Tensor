@@ -486,6 +486,15 @@ ConvBackend select_proper_conv_packed_backend(
                 if (params.use_cpu_x86(input, weight)) {
                     // Depthwise
                     if (params.is_depthwise(input, weight)) {
+                        if (kernel_h == 3 && kernel_w == 3 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::DepthwiseX86Pack4_3x3s1;
+                        } else if (kernel_h == 3 && kernel_w == 3 && stride_h == 2 && stride_w == 2) {
+                            return ConvBackend::DepthwiseX86Pack4_3x3s2;
+                        } else if (kernel_h == 5 && kernel_w == 5 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::DepthwiseX86Pack4_5x5s1;
+                        } else if (kernel_h == 5 && kernel_w == 5 && stride_h == 2 && stride_w == 2) {
+                            return ConvBackend::DepthwiseX86Pack4_5x5s2;
+                        }
                         return ConvBackend::DepthwiseX86Pack4;
                     }
                     
@@ -493,16 +502,33 @@ ConvBackend select_proper_conv_packed_backend(
                     if (elempack == 4 && out_elempack == 4) {
                         if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
                             return ConvBackend::Sgemm2dX86Pack4_1x1s1;
+                        } else if (kernel_h == 1 && kernel_w == 1 && stride_h == 2 && stride_w == 2) {
+                            return ConvBackend::Sgemm2dX86Pack4_1x1s2;
                         }
                         return ConvBackend::Sgemm2dX86Pack4;
                     } else if (elempack == 1 && out_elempack == 4) {
+                        if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::Sgemm2dX86Pack1to4_1x1s1;
+                        }
                         return ConvBackend::Sgemm2dX86Pack1to4;
                     } else if (elempack == 4 && out_elempack == 1) {
+                        if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::Sgemm2dX86Pack4to1_1x1s1;
+                        }
                         return ConvBackend::Sgemm2dX86Pack4to1;
                     }
                 } else if (params.use_cpu_neon(input, weight)) {
                     // Depthwise
                     if (params.is_depthwise(input, weight)) {
+                        if (kernel_h == 3 && kernel_w == 3 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::DepthwiseNeonPack4_3x3s1;
+                        } else if (kernel_h == 3 && kernel_w == 3 && stride_h == 2 && stride_w == 2) {
+                            return ConvBackend::DepthwiseNeonPack4_3x3s2;
+                        } else if (kernel_h == 5 && kernel_w == 5 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::DepthwiseNeonPack4_5x5s1;
+                        } else if (kernel_h == 5 && kernel_w == 5 && stride_h == 2 && stride_w == 2) {
+                            return ConvBackend::DepthwiseNeonPack4_5x5s2;
+                        }
                         return ConvBackend::DepthwiseNeonPack4;
                     }
                     
@@ -513,8 +539,14 @@ ConvBackend select_proper_conv_packed_backend(
                         }
                         return ConvBackend::Sgemm2dNeonPack4;
                     } else if (elempack == 1 && out_elempack == 4) {
+                        if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::Sgemm2dNeonPack1to4_1x1s1;
+                        }
                         return ConvBackend::Sgemm2dNeonPack1to4;
                     } else if (elempack == 4 && out_elempack == 1) {
+                        if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::Sgemm2dNeonPack4to1_1x1s1;
+                        }
                         return ConvBackend::Sgemm2dNeonPack4to1;
                     }
                 }
@@ -567,6 +599,20 @@ Tensor convolution_packed(
             output = otter::depthwise_conv2d_x86_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
         case ConvBackend::Sgemm2dX86Pack4_1x1s1:
             output = otter::conv2d_1x1s1_sgemm_pack4_x86(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Sgemm2dX86Pack4_1x1s2:
+            output = otter::conv2d_1x1s2_sgemm_pack4_x86(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Sgemm2dX86Pack4to1_1x1s1:
+            output = otter::conv2d_1x1s1_sgemm_pack4to1_x86(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Sgemm2dX86Pack1to4_1x1s1:
+            output = otter::conv2d_1x1s1_sgemm_pack1to4_x86(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::DepthwiseX86Pack4_3x3s1:
+            output = otter::depthwise_conv2d_3x3s1_x86_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::DepthwiseX86Pack4_3x3s2:
+            output = otter::depthwise_conv2d_3x3s2_x86_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::DepthwiseX86Pack4_5x5s1:
+            output = otter::depthwise_conv2d_5x5s1_x86_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::DepthwiseX86Pack4_5x5s2:
+            output = otter::depthwise_conv2d_5x5s2_x86_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
 #endif  // __SSE2__
 #if __ARM_NEON__
         case ConvBackend::Sgemm2dNeonPack4:
@@ -579,6 +625,18 @@ Tensor convolution_packed(
             output = otter::depthwise_conv2d_neon_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
         case ConvBackend::Sgemm2dNeonPack4_1x1s1:
             output = otter::conv2d_1x1s1_sgemm_pack4_neon(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Sgemm2dNeonPack4to1_1x1s1:
+            output = otter::conv2d_1x1s1_sgemm_pack4to1_neon(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Sgemm2dNeonPack1to4_1x1s1:
+            output = otter::conv2d_1x1s1_sgemm_pack1to4_neon(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::DepthwiseNeonPack4_3x3s1:
+            output = otter::depthwise_conv2d_3x3s1_neon_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::DepthwiseNeonPack4_3x3s2:
+            output = otter::depthwise_conv2d_3x3s2_neon_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::DepthwiseNeonPack4_5x5s1:
+            output = otter::depthwise_conv2d_5x5s1_neon_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::DepthwiseNeonPack4_5x5s2:
+            output = otter::depthwise_conv2d_5x5s2_neon_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
 #endif  // __ARN_NEON__
         default: {
             output = convolution(input.packing(1), weight, weight_o, bias, stride, padding, dilation, transposed, output_padding, groups, input_int8_scales, weight_int8_scales);

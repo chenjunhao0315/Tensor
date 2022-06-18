@@ -18,6 +18,12 @@ namespace otter {
 LReluLayer::LReluLayer() {
     one_blob_only = true;
     support_inplace = true;
+    
+#if __SSE2__
+    support_packing = true;
+#elif __ARM_NEON__
+    support_packing = true;
+#endif
 }
 
 int LReluLayer::parse_param(LayerOption& option, ParamDict &pd) {
