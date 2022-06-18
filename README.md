@@ -1,9 +1,9 @@
 # Tensor
 
 ## About
-This is a project to implement the tensor calcuation library and (inference) neural netowrk in c++, can see it as a revision of [PyTorch][9] and [ncnn][10], the differnece is that I remove all codes that not relate to CPU, maybe will support GPU after but not now.
+This is a project to implement the tensor calculation library and (inference) neural network in c++, can see it as a revision of [PyTorch][9] and [ncnn][10], the difference is that I remove all codes that not relate to CPU, maybe will support GPU after but not now.
 
-The netowrk structure is same as [Neural Network][11] with some enhancement and is inspired by [ConvNetJS][1], [Darknet][2], [Caffe][4] and [ncnn][10].
+The network structure is same as [Neural Network][11] with some enhancement and is inspired by [ConvNetJS][1], [Darknet][2], [Caffe][4] and [ncnn][10].
 
 It aims to enhance the performance on mobile phone platform.
 
@@ -18,7 +18,7 @@ Add some drawing for image, which is powered by [OpenCV][5].
 * C++17
 * No dependencies
 * Multi-thread support with OpenMp
-* Symobolic operation
+* Symbolic operation
 * Arm optimization
 
 ## Documentation
