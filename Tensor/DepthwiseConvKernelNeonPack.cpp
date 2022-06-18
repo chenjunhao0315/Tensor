@@ -1005,7 +1005,7 @@ Tensor& depthwise_conv2d_3x3s2_neon_pack4_out(
 
             float* outptr0 = out.data();
 
-            const Mat img0 = input_a[g].data();
+            const auto img0 = input_a[g];
 
             const float* r0 = img0[0].data();
             const float* r1 = img0[1].data();
@@ -1547,7 +1547,7 @@ Tensor& depthwise_conv2d_5x5s1_neon_pack4_out(
 
     #if __aarch64__
             float* outptr1 = out[1].data();
-            const float* r5 = img0[5].data(0);
+            const float* r5 = img0[5].data();
 
             for (; i + 1 < outh; i += 2)
             {

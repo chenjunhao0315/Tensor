@@ -3165,7 +3165,7 @@ void im2col_sgemm_conv2d_pack1to4_impl_neon(const Tensor& im2col, Tensor& output
         nn_size = (size - remain_size_start) >> 2;
 
         otter::parallel_for(0, nn_size, 0, [&](int64_t begin, int64_t end) {
-            for (int ii = 0; ii < nn_size; ii++)
+            for (const auto ii : otter::irange(begin, end))
             {
                 int i = remain_size_start + ii * 4;
 
