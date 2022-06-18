@@ -98,6 +98,36 @@ Tensor conv2d_1x1s1_sgemm_pack4_neon(
     const Tensor& bias,
     IntArrayRef padding);
 
+Tensor conv2d_1x1s1_sgemm_pack4to1_neon_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_1x1s1_sgemm_pack4to1_neon(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor conv2d_1x1s1_sgemm_pack1to4_neon_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_1x1s1_sgemm_pack1to4_neon(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
 #endif  // __ARM_NEON__
 
 }   // end namespace otter
