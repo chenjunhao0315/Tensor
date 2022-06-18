@@ -14,11 +14,11 @@ ConcatLayer::ConcatLayer() {
     one_blob_only = false;
     support_inplace = false;
     
-//#if __SSE2__
-//    support_packing = true;
-//#elif __ARM_NEON__
-//    support_packing = true;
-//#endif
+#if __SSE2__
+    support_packing = true;
+#elif __ARM_NEON__
+    support_packing = true;
+#endif
 }
 
 int ConcatLayer::parse_param(LayerOption& option, ParamDict& pd) {
@@ -52,7 +52,17 @@ int ConcatLayer::load_param(const ParamDict &pd) {
 }
 
 int ConcatLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& /*opt*/) const {
-    top_blobs[0] = otter::native::cat(bottom_blobs, axis);
+    
+    // assume that the first axis is batchsize
+    if (bottom_blobs[0].dim() == 4 && bottom_blobs[0].size(0) == 1) {
+        top_blobs[0] = bottom_blobs[0].squeeze(0);
+        for (int i = 1; i < bottom_blobs.size(); ++i) {
+            top_blobs[0] = otter::native::cat({top_blobs[0], bottom_blobs[i].squeeze(0)}, axis - 1);
+        }
+        top_blobs[0].unsqueeze_(0);
+    } else {
+        top_blobs[0] = otter::native::cat(bottom_blobs, axis);
+    }
         
     return 0;
 }
