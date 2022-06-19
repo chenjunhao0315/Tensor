@@ -288,6 +288,16 @@ public:
     void set_storage_and_dtype(Memory memory, const TypeMeta data_type) {
         set_storage_keep_dtype(memory);
         data_type_ = data_type;
+        cal_elempack();
+    }
+    
+    void set_storage_and_dtype(Memory memory, const ScalarType dtype) {
+        set_storage_and_dtype(memory, scalarTypeToTypeMeta(dtype));
+    }
+    
+    void set_dtype(const ScalarType dtype) {
+        data_type_ = scalarTypeToTypeMeta(dtype);
+        cal_elempack();
     }
     
     template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>

@@ -15,6 +15,7 @@ namespace otter {
 CropLayer::CropLayer() {
     one_blob_only = true;
     support_inplace = false;
+    support_packing = true;
 }
 
 int CropLayer::parse_param(LayerOption& option, ParamDict& pd) {

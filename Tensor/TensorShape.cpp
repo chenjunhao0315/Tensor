@@ -24,6 +24,8 @@ namespace otter {
 
 namespace native {
 
+ScalarType get_update_scalarType(const ScalarType& src, int out_elempack);
+
 Tensor select(const Tensor& self, int64_t dim, int64_t index) {
     int64_t ndim = self.dim();
     
@@ -192,21 +194,53 @@ Tensor slice(const Tensor& self, int64_t dim, int64_t start, int64_t end, int64_
     if (start < 0) start += sizes[dim];
     if (end < 0)   end   += sizes[dim];
     
+    int elempack = self.elempack();
+    
     if (start < 0) {
         start = 0;
-    } else if (start >= sizes[dim]) {
-        start = sizes[dim];
+    } else if (start >= sizes[dim] * elempack) {
+        start = sizes[dim] * elempack;
     }
     
     if (end < start) {
         end = start;
-    } else if (end >= sizes[dim]) {
-        end = sizes[dim];
+    } else if (end >= sizes[dim] * elempack) {
+        end = sizes[dim] * elempack;
+    }
+    
+    auto len = end - start;
+    auto size = (len + step - 1) / step; // round-up
+    
+    int out_elempack = 1;
+    
+#if __SSE2__
+#if false
+    out_elempack = size % 8 == 0 ? 8 : size % 4 == 0 ? 4 : 1;
+#else
+    out_elempack = size % 4 == 0 ? 4 : 1;
+#endif
+#elif __ARM_NEON__
+    out_elempack = size % 4 == 0 ? 4 : 1;
+#endif
+    
+    if (elempack == 4) {
+        if (start % 4 == 0 && out_elempack == 4) {
+            auto memory_offset = self.memory_offset() + (start / elempack) * strides[dim];
+            sizes[dim] = size / elempack;
+            strides[dim] *= step;
+            
+            Tensor result;
+            result = self.as_strided(sizes, strides, memory_offset);
+            result.unsafeGetTensorNucleus()->set_dtype(get_update_scalarType(self.scalar_type(), out_elempack));
+            
+            return result;
+        } else {
+            return slice(self.packing(1), dim, start, end, step);
+        }
     }
     
     auto memory_offset = self.memory_offset() + start * strides[dim];
-    auto len = end - start;
-    sizes[dim] = (len + step - 1) / step; // round-up
+    sizes[dim] = size;
     strides[dim] *= step;
     
     Tensor result;
