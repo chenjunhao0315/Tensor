@@ -287,7 +287,7 @@ Tensor max_pool2d_3x3s2_pack4_neon(const Tensor& self, IntArrayRef padding) {
     
     int64_t inch = input.size(1);
     
-    Tensor output = otter::empty({1, inch, outh, outw}, otter::ScalarType::Float);
+    Tensor output = otter::empty({1, inch, outh, outw}, otter::ScalarType::Float4);
     
     const int64_t tailstep = (w - 2 * outw + w) * 4;
     
@@ -617,7 +617,7 @@ Tensor max_pool2d_2x2s2_pack4_neon(const Tensor& self, IntArrayRef padding) {
     
     int64_t inch = input.size(1);
     
-    Tensor output = otter::empty({1, inch, outh, outw}, otter::ScalarType::Float);
+    Tensor output = otter::empty({1, inch, outh, outw}, otter::ScalarType::Float4);
     
     const int64_t tailstep = (w - 2 * outw + w) * 4;
     

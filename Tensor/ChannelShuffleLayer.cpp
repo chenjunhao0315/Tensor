@@ -13,6 +13,9 @@ namespace otter {
 ChannelShuffleLayer::ChannelShuffleLayer() {
     one_blob_only = true;
     support_inplace = false;
+#if __ARM_NEON__
+    support_packing = true;
+#endif
 }
 
 int ChannelShuffleLayer::parse_param(LayerOption& option, ParamDict& pd) {
