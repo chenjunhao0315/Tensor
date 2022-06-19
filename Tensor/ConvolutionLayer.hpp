@@ -63,6 +63,7 @@ public:
     Tensor activation_params;
     
     Tensor weight_data;
+    Tensor weight_data_tf;
     Tensor weight_sgemm_data;
     Tensor weight_3x3s2_data;
     Tensor weight_3x3_winograd23_data;

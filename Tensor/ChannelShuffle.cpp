@@ -37,6 +37,8 @@ Tensor channel_shuffle(const Tensor& input, int64_t groups) {
     return channel_shuffle_out(output, input, groups);
 }
 
+#if __ARM_NEON__
+#include <arm_neon.h>
 Tensor& channel_shuffle_pack4_neon_out(Tensor& output, const Tensor& input, int64_t groups) {
     if (groups == 1) {
         output = input;
@@ -233,5 +235,6 @@ Tensor& channel_shuffle_pack4_neon_out(Tensor& output, const Tensor& input, int6
     
     return output;
 }
+#endif  // __ARM_NEON__
 
 }   // end namespace otter

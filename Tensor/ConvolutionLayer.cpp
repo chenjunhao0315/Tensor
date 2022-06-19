@@ -15,6 +15,16 @@
 #include "ConvolutionMM2DX86.hpp"
 #include "ConvolutionMM2DInt8X86.hpp"
 
+#if __SSE2__
+#include "ConvolutionMM2DX86Pack.hpp"
+#include "DepthwiseConvKernelX86Pack.hpp"
+#endif
+
+#if __ARM_NEON__
+#include "ConvolutionMM2DNeonPack.hpp"
+#include "DepthwiseConvKernelNeonPack.hpp"
+#endif
+
 #include "Quantize.hpp"
  
 namespace otter {
@@ -287,55 +297,146 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
         return create_pipeline_int8(opt);
     }
     
-    auto k = weight_data.dim();
-    auto dim = k - 2;
-    
-    ConvParams params;
-    params.stride    = expand_param_if_needed({stride_height, stride_width}, "stride", dim);
-    params.padding   = expand_param_if_needed({padding_height, padding_width}, "padding", dim);
-    params.dilation  = expand_param_if_needed({dilation_height, dilation_width}, "dilation", dim);
-    params.output_padding = expand_param_if_needed({output_padding_height, output_padding_width}, "output_padding", dim);
-    params.transposed = false;
-    params.benchmark = false;
-    params.groups    = groups;
-    
-    if (k == 3)
-        params.view_1d_as_2d();
+    int elempack = 1;
+    int out_elempack = 1;
     
 #if defined(__ARM_NEON__)
-    if (in_channels == groups) {
-        return 0;
+    if (opt.use_packing_layout) {
+        elempack = in_channels % 4 == 0 ? 4 : 1;
+        out_elempack = out_channels % 4 == 0 ? 4 : 1;
     }
-    if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 1 && params.stride[1] == 1) {
-        if (in_channels >= 64 && out_channels >= 64) {
-            otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
+    
+    if (elempack == 4 && out_elempack == 4) {
+        if (in_channels == groups) {
+            int maxk = kernel_width * kernel_height;
+            
+            weight_data_tf = weight_data.view({groups, maxk}).packing(4);
         }
-    } else if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 2 && params.stride[1] == 2) {
-        otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
-    } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
-        if (in_channels >= 16 && weight_data.size(0) >= 16) {
-            otter::conv3x3s1_winograd64_transform_kernel_neon5(weight_data, weight_3x3_winograd64_data, in_channels, out_channels);
-        }
-    } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
-        otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
-        otter::conv3x3s2_transform_kernel_neon(weight_data, weight_3x3s2_data, in_channels, out_channels);
-    } else {
-        bool prefer_sgemm = (params.stride[0] == 1 && params.stride[1] == 1 && (in_channels >= 12 || weight_data.size(0) >= 12)) || ((params.stride[0] >= 2 || params.stride[1] >= 2) && (in_channels >= 16 || weight_data.size(0) >= 16));
         
-        if (prefer_sgemm) {
-            otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
+        if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        }
+    }
+    
+    if (elempack == 4 && out_elempack == 1) {
+        if (in_channels == groups) {
+            int maxk = kernel_width * kernel_height;
+            
+            weight_data_tf = weight_data.view({groups * 4, maxk}).packing(4);
+        }
+        
+        if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        }
+    }
+    
+    if (elempack == 1 && out_elempack == 4) {
+        if (in_channels == groups) {
+            int maxk = kernel_width * kernel_height;
+            
+            weight_data_tf = weight_data.view({groups * 4, maxk}).packing(4);
+        }
+        
+        if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        }
+    }
+    
+    if (elempack == 1 && out_elempack == 1) {
+        if (in_channels == groups) {
+            return 0;
+        }
+        if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            if (in_channels >= 64 && out_channels >= 64) {
+                otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+            }
+        } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
+            otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else if (kernel_width == 3 && kernel_height == 3 && stride_width == 1 && stride_height == 1) {
+            if (in_channels >= 16 && weight_data.size(0) >= 16) {
+                otter::conv3x3s1_winograd64_transform_kernel_neon5(weight_data, weight_3x3_winograd64_data, in_channels, out_channels);
+            }
+        } else if (kernel_width == 3 && kernel_height == 3 && stride_width == 2 && stride_height == 2) {
+            otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+            otter::conv3x3s2_transform_kernel_neon(weight_data, weight_3x3s2_data, in_channels, out_channels);
+        } else {
+            bool prefer_sgemm = (stride_width == 1 && stride_height == 1 && (in_channels >= 12 || out_channels >= 12)) || ((stride_width >= 2 || stride_height >= 2) && (in_channels >= 16 || out_channels >= 16));
+            
+            if (prefer_sgemm) {
+                otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+            }
         }
     }
 #endif
     
 #if __SSE2__
-    if (in_channels == groups) {
-        return 0;
+    if (opt.use_packing_layout) {
+#if false
+        elempack = in_channels % 8 == 0 ? 8 : in_channels % 4 == 0 ? 4 : 1;
+        out_elempack = out_channels % 8 == 0 ? 8 : out_channels % 4 == 0 ? 4 : 1;
+#else
+        elempack = in_channels % 4 == 0 ? 4 : 1;
+        out_elempack = out_channels % 4 == 0 ? 4 : 1;
+#endif
     }
-    if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
-        otter::conv3x3s1_winograd23_transform_kernel_x86(weight_data, weight_3x3_winograd23_data, in_channels, out_channels);
+    
+    if (elempack == 4 && out_elempack == 4) {
+        if (in_channels == groups) {
+            int maxk = kernel_width * kernel_height;
+            
+            weight_data_tf = weight_data.view({groups, maxk}).packing(4);
+        }
+        
+        if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4_sse(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4_sse(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        }
     }
-    otter::convolution_im2col_sgemm_transform_kernel_x86(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
+    
+    if (elempack == 4 && out_elempack == 1) {
+        if (in_channels == groups) {
+            int maxk = kernel_width * kernel_height;
+            
+            weight_data_tf = weight_data.view({groups * 4, maxk}).packing(4);
+        }
+        
+        if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4_sse(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4_sse(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        }
+    }
+    
+    if (elempack == 1 && out_elempack == 4) {
+        if (in_channels == groups) {
+            int maxk = kernel_width * kernel_height;
+            
+            weight_data_tf = weight_data.view({groups * 4, maxk}).packing(4);
+        }
+        
+        if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4_sse(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4_sse(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        }
+    }
+    
+    if (elempack == 1 && out_elempack == 1) {
+        if (in_channels == groups) {
+            return 0;
+        }
+        if (kernel_width == 3 && kernel_height == 3 && stride_width == 1 && stride_height == 1) {
+            otter::conv3x3s1_winograd23_transform_kernel_x86(weight_data, weight_3x3_winograd23_data, in_channels, out_channels);
+        }
+        otter::convolution_im2col_sgemm_transform_kernel_x86(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
+    }
 #endif
     
     return 0;
@@ -374,48 +475,63 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
     
     Tensor optimize_kernel;
     
-    auto k = weight_data.dim();
-    auto dim = k - 2;
-    
-    ConvParams params;
-    params.stride    = expand_param_if_needed({stride_height, stride_width}, "stride", dim);
-    params.padding   = expand_param_if_needed({padding_height, padding_width}, "padding", dim);
-    params.dilation  = expand_param_if_needed({dilation_height, dilation_width}, "dilation", dim);
-    params.output_padding = expand_param_if_needed({output_padding_height, output_padding_width}, "output_padding", dim);
-    params.transposed = false;
-    params.benchmark = false;
-    params.groups    = groups;
-    
-    if (k == 3)
-        params.view_1d_as_2d();
-    
     int64_t elempack = bottom_blob.elempack();
     int64_t out_elempack = 1;
     
+    if (opt.use_packing_layout) {
 #if __SSE2__
 #if false
-    out_elempack = out_channels % 8 == 0 ? 8 : out_channels % 4 == 0 ? 4 : 1;
+        out_elempack = out_channels % 8 == 0 ? 8 : out_channels % 4 == 0 ? 4 : 1;
 #else
-    out_elempack = out_channels % 4 == 0 ? 4 : 1;
+        out_elempack = out_channels % 4 == 0 ? 4 : 1;
 #endif
 #elif __ARM_NEON__
-    out_elempack = out_channels % 4 == 0 ? 4 : 1;
+        out_elempack = out_channels % 4 == 0 ? 4 : 1;
 #endif
+    }
+    
+    if (elempack == 4 && out_elempack == 4) {
+        if (in_channels == groups) {
+            optimize_kernel = weight_data_tf;
+        } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            optimize_kernel = weight_sgemm_data;
+        }
+    }
+    
+    if (elempack == 1 && out_elempack == 4) {
+        if (in_channels == groups) {
+            optimize_kernel = weight_data_tf;
+        } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            optimize_kernel = weight_sgemm_data;
+        } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
+#if __SSE2__
+            optimize_kernel = weight_sgemm_data;
+#endif
+        }
+    }
+    
+    if (elempack == 4 && out_elempack == 4) {
+        if (in_channels == groups) {
+            optimize_kernel = weight_data_tf;
+        } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            optimize_kernel = weight_sgemm_data;
+        }
+    }
     
     if (elempack == 1 && out_elempack == 1) {
-        if (params.use_cpu_neon(bottom_blob, weight_data)) {
             // General
-            if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 1 && params.stride[1] == 1) {
-                if (bottom_blob.size(1) >= 64 && weight_data.size(0) >= 64) {
+#if __ARM_NEON__
+            if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+                if (in_channels >= 64 && out_channels >= 64) {
                     optimize_kernel = weight_sgemm_data;
                 }
-            } else if (weight_data.size(2) == 1 && weight_data.size(3) == 1 && params.stride[0] == 2 && params.stride[1] == 2) {
+            } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
                 optimize_kernel = weight_sgemm_data;
-            } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1) {
-                if (bottom_blob.size(1) >= 16 && weight_data.size(0) >= 16 && bottom_blob.size(3) <= 120 && bottom_blob.size(2) <= 120) {
+            } else if (kernel_height == 3 && kernel_width == 3 && stride_width == 1 && stride_height == 1) {
+                if (in_channels >= 16 && out_channels >= 16 && bottom_blob.size(3) <= 120 && bottom_blob.size(2) <= 120) {
                     optimize_kernel = weight_3x3_winograd64_data;
                 }
-            } else if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 2 && params.stride[1] == 2) {
+            } else if (kernel_width == 3 && kernel_height == 3 && stride_width == 2 && stride_height == 2) {
                 auto output_shape = otter::calculate_conv_output_size(bottom_blob.sizes(), weight_data.sizes(), params.stride, params.padding);
                 if (!(output_shape[2] >= 8 && output_shape[3] >= 8)) {
                     optimize_kernel = weight_sgemm_data;
@@ -423,28 +539,28 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
                     optimize_kernel = weight_3x3s2_data;
                 }
             } else {
-                bool prefer_sgemm = (params.stride[0] == 1 && params.stride[1] == 1 && (bottom_blob.size(1) >= 12 || weight_data.size(0) >= 12)) || ((params.stride[0] >= 2 || params.stride[1] >= 2) && (bottom_blob.size(1) >= 16 || weight_data.size(0) >= 16));
+                bool prefer_sgemm = (stride_width == 1 && stride_height == 1 && (in_channels >= 12 || out_channels >= 12)) || ((stride_width >= 2 || stride_height >= 2) && (in_channels >= 16 || out_channels >= 16));
                 
                 if (prefer_sgemm) {
                     optimize_kernel = weight_sgemm_data;
                 }
             }
-        } else if (params.use_cpu_x86(bottom_blob, weight_data)) {
-            if (weight_data.size(2) == 3 && weight_data.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1 && in_channels >= 16 && out_channels >= 16) {
+#elif __SSE2__
+            if (kernel_width == 3 && kernel_height == 3 && stride_width == 1 && stride_height == 1 && in_channels >= 16 && out_channels >= 16) {
                 optimize_kernel = weight_3x3_winograd23_data;
             } else {
                 optimize_kernel = weight_sgemm_data;
             }
-        }
+#endif
     }
     
     top_blob = otter::convolution(
         bottom_blob, weight_data, optimize_kernel, bias_data,
-        params.stride,
-        params.padding,
-        params.dilation,
+        {stride_height, stride_width},
+        {padding_height, padding_width},
+        {dilation_height, dilation_width},
         false,      // transpose
-        params.output_padding,
+        {output_padding_height, output_padding_width},
         groups,
         Tensor(),   // bottom_blob_int8_scales
         Tensor()    // weight_data_int8_scales
