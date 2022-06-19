@@ -532,7 +532,7 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
                     optimize_kernel = weight_3x3_winograd64_data;
                 }
             } else if (kernel_width == 3 && kernel_height == 3 && stride_width == 2 && stride_height == 2) {
-                auto output_shape = otter::calculate_conv_output_size(bottom_blob.sizes(), weight_data.sizes(), params.stride, params.padding);
+                auto output_shape = otter::calculate_conv_output_size(bottom_blob.sizes(), weight_data.sizes(), {stride_height, stride_width}, {padding_height, padding_width});
                 if (!(output_shape[2] >= 8 && output_shape[3] >= 8)) {
                     optimize_kernel = weight_sgemm_data;
                 } else {

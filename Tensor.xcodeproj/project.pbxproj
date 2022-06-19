@@ -125,6 +125,7 @@
 		76CF3F3F27FC92A8009BF242 /* EltwiseLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CF3F3D27FC92A8009BF242 /* EltwiseLayer.cpp */; };
 		76CFA2C22808B7D800205034 /* ReluLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CFA2C02808B7D800205034 /* ReluLayer.cpp */; };
 		76D1285127EC2C3C00A54E6F /* TypeProperties.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76D1284F27EC2C3C00A54E6F /* TypeProperties.cpp */; };
+		76D409DC285FB415000C7754 /* TensorEltwise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76D409DA285FB415000C7754 /* TensorEltwise.cpp */; };
 		76E5EC7B27C4A6D800A2B38A /* BatchNormalizationLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E5EC7927C4A6D800A2B38A /* BatchNormalizationLayer.cpp */; };
 		76E6C51327A502A30036A26F /* Tensor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51127A502A30036A26F /* Tensor.cpp */; };
 		76E6C51627A502F60036A26F /* Memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51427A502F60036A26F /* Memory.cpp */; };
@@ -443,6 +444,8 @@
 		76CFA2C12808B7D800205034 /* ReluLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ReluLayer.hpp; sourceTree = "<group>"; };
 		76D1284F27EC2C3C00A54E6F /* TypeProperties.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TypeProperties.cpp; sourceTree = "<group>"; };
 		76D1285027EC2C3C00A54E6F /* TypeProperties.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TypeProperties.hpp; sourceTree = "<group>"; };
+		76D409DA285FB415000C7754 /* TensorEltwise.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorEltwise.cpp; sourceTree = "<group>"; };
+		76D409DB285FB415000C7754 /* TensorEltwise.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorEltwise.hpp; sourceTree = "<group>"; };
 		76E5EC7927C4A6D800A2B38A /* BatchNormalizationLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BatchNormalizationLayer.cpp; sourceTree = "<group>"; };
 		76E5EC7A27C4A6D800A2B38A /* BatchNormalizationLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BatchNormalizationLayer.hpp; sourceTree = "<group>"; };
 		76E6C50727A502680036A26F /* Tensor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Tensor; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -771,6 +774,8 @@
 				76C19985283F6C1D00A5D737 /* TensorSoftmaxKernel.hpp */,
 				760F753E285A9E5D005F72C0 /* TensorPacking.cpp */,
 				760F753F285A9E5D005F72C0 /* TensorPacking.hpp */,
+				76D409DA285FB415000C7754 /* TensorEltwise.cpp */,
+				76D409DB285FB415000C7754 /* TensorEltwise.hpp */,
 			);
 			name = Ops;
 			sourceTree = "<group>";
@@ -1172,6 +1177,7 @@
 				7687218127C2DDC7006640CF /* Normalization.cpp in Sources */,
 				7628E02C27CF1C5B00B136FA /* MaxPoolLayer.cpp in Sources */,
 				7604745727D68F3F00FCB785 /* Initializer.cpp in Sources */,
+				76D409DC285FB415000C7754 /* TensorEltwise.cpp in Sources */,
 				7620AF8927B593C00081C210 /* TensorUtils.cpp in Sources */,
 				76E6C53E27A511B50036A26F /* ParallelOpenMP.cpp in Sources */,
 				76F336E927AED61200E3AEF1 /* ScalarOps.cpp in Sources */,
