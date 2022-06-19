@@ -16,6 +16,10 @@ namespace otter {
 MaxPoolLayer::MaxPoolLayer() {
     one_blob_only = true;
     support_inplace = false;
+    
+#if __SSE2__
+    support_packing = true;
+#endif
 }
 
 int MaxPoolLayer::parse_param(LayerOption& option, ParamDict& pd) {
