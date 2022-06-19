@@ -79,6 +79,11 @@ struct ObserveMethod {
     std::string align;
 };
 
+struct Movement {
+    otter::cv::Vec2f vec;
+    int pitch;
+};
+
 class Observer {
 public:
     Observer();
@@ -99,9 +104,9 @@ public:
     
     ObserveMethod getMethod(const otter::Tensor& target, otter::Tensor& objs, otter::Tensor& keypoints);
     
-    otter::cv::Vec2f observe(int index, otter::Tensor& target, otter::Tensor& keypoints);
+    Movement observe(int index, otter::Tensor& target, otter::Tensor& keypoints);
     
-    otter::cv::Vec2f getVec(ObserveMethod& method, otter::cv::Rect2f& obj, otter::Tensor& keypoints);
+    Movement getVec(ObserveMethod& method, otter::cv::Rect2f& obj, otter::Tensor& keypoints);
     
     otter::cv::Point2f getAlignPoint(Anchor& anchor, otter::cv::Point2f& obj);
     

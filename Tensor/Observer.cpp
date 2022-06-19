@@ -41,8 +41,8 @@ void Observer::getTable(std::string name) {
     interpreter.getTable(name);
 }
 
-otter::cv::Vec2f Observer::observe(int target_index, otter::Tensor& objects, otter::Tensor& keypoints) {
-    otter::cv::Vec2f vec;
+Movement Observer::observe(int target_index, otter::Tensor& objects, otter::Tensor& keypoints) {
+    Movement move;
     
     if (objects.defined()) {
         otter::cv::Rect2f obj;
@@ -56,10 +56,10 @@ otter::cv::Vec2f Observer::observe(int target_index, otter::Tensor& objects, ott
         
         auto method = getMethod(objects[target_index], objects, keypoints);
         
-        vec = getVec(method, obj, keypoints);
+        move = getVec(method, obj, keypoints);
     }
     
-    return vec;
+    return move;
 }
 
 int Observer::getTarget(otter::Tensor &objects) {
@@ -101,6 +101,7 @@ ObserveMethod Observer::getMethod(const otter::Tensor& target, otter::Tensor& ob
     interpreter.addTable("center_y", target_data[3] + h / 2);
     interpreter.addTable("method_index", 0);
     interpreter.addTable("success", 0);
+    interpreter.addTable("pitch", 90);
     
     if (keypoints.defined()) {
         auto keypoints_data = keypoints.accessor<float, 2>();
@@ -114,9 +115,10 @@ ObserveMethod Observer::getMethod(const otter::Tensor& target, otter::Tensor& ob
     }
     
     int success = interpreter.doCommand();
-    if (success)
+    if (success) {
         method_index = interpreter.getTable("method_index");
-    
+    }
+
     printf("Area: %g Method index: %d\n", area, method_index);
     
     auto method = methods[method_index];
@@ -124,8 +126,9 @@ ObserveMethod Observer::getMethod(const otter::Tensor& target, otter::Tensor& ob
     return method;
 }
 
-otter::cv::Vec2f Observer::getVec(ObserveMethod& method, otter::cv::Rect2f& obj, otter::Tensor& keypoints) {
+Movement Observer::getVec(ObserveMethod& method, otter::cv::Rect2f& obj, otter::Tensor& keypoints) {
     Anchor& anchor = anchors[method.align];
+    Movement move;
     
     auto obj_ref = getRefPoint(method.ref, obj, keypoints);
     auto view_align = getAlignPoint(anchor, obj_ref);
@@ -134,10 +137,14 @@ otter::cv::Vec2f Observer::getVec(ObserveMethod& method, otter::cv::Rect2f& obj,
         obj_ref.x = view_align.x;
         obj_ref.y = view_align.y;
     }
+
+    move.pitch = interpreter.getTable("pitch");
     
     std::cout << "view_align: " << view_align << " obj_ref: " << obj_ref << std::endl;
+
+    move.vec = {obj_ref.x - view_align.x,  obj_ref.y - view_align.y};
     
-    return {obj_ref.x - view_align.x, obj_ref.y - view_align.y};
+    return move;
 }
 
 otter::cv::Point2f Observer::getRefPoint(ObservePosition& position, otter::cv::Rect2f& obj, otter::Tensor& keypoints) {
