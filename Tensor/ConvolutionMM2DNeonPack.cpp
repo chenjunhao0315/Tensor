@@ -3890,7 +3890,7 @@ Tensor& sgemm_conv2d_pack4_neon_out(
     else
         convolution_im2col_sgemm_transform_kernel_pack4_neon(weight, kernel_tf, inch * 4, outch * 4, kernel_w, kernel_h);
     
-    Tensor input = otter::constant_pad(self, padding, 0)[0];
+    Tensor input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
     
     Tensor im2col = otter::empty({inch, maxk, size}, ScalarType::Float4);
     
@@ -4008,7 +4008,7 @@ Tensor& sgemm_conv2d_pack4to1_neon_out(
     else
         convolution_im2col_sgemm_transform_kernel_pack4to1_neon(weight, kernel_tf, inch * 4, outch, kernel_w, kernel_h);
     
-    Tensor input = otter::constant_pad(self, padding, 0)[0];
+    Tensor input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
     
     Tensor im2col = otter::empty({inch, maxk, size}, ScalarType::Float4);
     
@@ -4125,7 +4125,7 @@ Tensor& sgemm_conv2d_pack1to4_neon_out(
     else
         convolution_im2col_sgemm_transform_kernel_pack1to4_neon(weight, kernel_tf, inch, outch * 4, kernel_w, kernel_h);
     
-    Tensor input = otter::constant_pad(self, padding, 0)[0];
+    Tensor input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
     
     Tensor im2col = otter::empty({inch, maxk, size}, ScalarType::Float);
     
@@ -4218,7 +4218,7 @@ Tensor conv2d_1x1s1_sgemm_pack4_neon_out(
     else
         convolution_im2col_sgemm_transform_kernel_pack4_neon(weight, kernel_tf, inch * 4, outch * 4, 1, 1);
     
-    auto input = otter::constant_pad(self, padding, 0)[0];
+    auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
     
     int w = input.size(2);
     int h = input.size(1);
@@ -4263,7 +4263,7 @@ Tensor conv2d_1x1s1_sgemm_pack4to1_neon_out(
     else
         convolution_im2col_sgemm_transform_kernel_pack4_neon(weight, kernel_tf, inch * 4, outch, 1, 1);
     
-    auto input = otter::constant_pad(self, padding, 0)[0];
+    auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
     
     int w = input.size(2);
     int h = input.size(1);
@@ -4308,7 +4308,7 @@ Tensor conv2d_1x1s1_sgemm_pack1to4_neon_out(
     else
         convolution_im2col_sgemm_transform_kernel_pack4_neon(weight, kernel_tf, inch, outch * 4, 1, 1);
     
-    auto input = otter::constant_pad(self, padding, 0)[0];
+    auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
     
     int w = input.size(2);
     int h = input.size(1);
