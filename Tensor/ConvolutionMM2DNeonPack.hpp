@@ -20,6 +20,8 @@ void convolution_im2col_sgemm_transform_kernel_pack4to1_neon(const Tensor& kerne
 
 void convolution_im2col_sgemm_transform_kernel_pack1to4_neon(const Tensor& kernel, Tensor& kernel_tf, int inch, int outch, int kernel_w, int kernel_h);
 
+void convolution_transform_kernel_pack1to4_neon(const Tensor& weight_data, Tensor& weight_data_pack1to4, int num_input, int num_output, int kernel_w, int kernel_h);
+
 Tensor& sgemm_conv2d_pack4_neon_out(
     const Tensor& self,
     const Tensor& weight,
@@ -122,6 +124,21 @@ Tensor conv2d_1x1s1_sgemm_pack1to4_neon_out(
     Tensor& output);
 
 Tensor conv2d_1x1s1_sgemm_pack1to4_neon(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor conv2d_3x3s2_pack1to4_neon_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_3x3s2_pack1to4_neon(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& weight_o,

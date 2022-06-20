@@ -345,6 +345,8 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
             otter::convolution_im2col_sgemm_transform_kernel_pack4_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
         } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
             otter::convolution_im2col_sgemm_transform_kernel_pack4_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else if (kernel_width == 3 && kernel_height == 3 && stride_width == 2 && stride_height == 2) {
+            otter::convolution_transform_kernel_pack1to4_neon(weight_data, weight_data_tf, in_channels, out_channels, kernel_width, kernel_height);
         }
     }
     
@@ -506,6 +508,10 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
         } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
 #if __SSE2__
             optimize_kernel = weight_sgemm_data;
+#endif
+        } else if (kernel_width == 3 && kernel_height == 3 && stride_width == 2 && stride_height == 2) {
+#if __ARM_NEON__
+            optimize_kernel = weight_data_tf;
 #endif
         }
     }

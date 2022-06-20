@@ -3854,6 +3854,47 @@ void convolution_im2col_sgemm_transform_kernel_pack1to4_neon(const Tensor& kerne
     }
 }
 
+void convolution_transform_kernel_pack1to4_neon(const Tensor& weight_data, Tensor& weight_data_pack1to4, int num_input, int num_output, int kernel_w, int kernel_h) {
+    const int maxk = kernel_w * kernel_h;
+
+    // src = kw-kh-inch-outch
+    // dst = 4b-kw-kh-inch-outch/4b
+    Tensor weight_data_r2 = weight_data.view({num_output, num_input, maxk});
+
+    weight_data_pack1to4 = otter::empty({num_output, num_input, maxk}, otter::ScalarType::Float4);
+    
+    auto weight_data_r2_a = weight_data_r2.accessor<float, 3>();
+    auto weight_data_pack1to4_a = weight_data_pack1to4.accessor<float, 3, 4>();
+
+    for (int q = 0; q + 3 < num_output; q += 4)
+    {
+        const auto k0 = weight_data_r2_a[q];
+        const auto k1 = weight_data_r2_a[q + 1];
+        const auto k2 = weight_data_r2_a[q + 2];
+        const auto k3 = weight_data_r2_a[q + 3];
+
+        float* g00 = weight_data_pack1to4_a[q / 4].data();
+
+        for (int p = 0; p < num_input; p++)
+        {
+            const float* k00 = k0[p].data();
+            const float* k10 = k1[p].data();
+            const float* k20 = k2[p].data();
+            const float* k30 = k3[p].data();
+
+            for (int k = 0; k < maxk; k++)
+            {
+                g00[0] = k00[k];
+                g00[1] = k10[k];
+                g00[2] = k20[k];
+                g00[3] = k30[k];
+
+                g00 += 4;
+            }
+        }
+    }
+}
+
 Tensor& sgemm_conv2d_pack4_neon_out(
     const Tensor& self,
     const Tensor& weight,
@@ -4284,6 +4325,595 @@ Tensor conv2d_1x1s1_sgemm_pack1to4_neon(
     auto output = otter::empty({}, otter::ScalarType::Float4);
     
     return conv2d_1x1s1_sgemm_pack1to4_neon_out(self, weight, weight_o, bias, padding, output);
+}
+
+Tensor conv2d_3x3s2_pack1to4_neon_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias_,
+    IntArrayRef padding,
+    Tensor& output) {
+    
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {2, 2}, padding);
+    output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
+    
+    int inch = self.size(1);
+    int outch = output.size(1);
+    
+    Tensor kernel_tf;
+    if (weight_o.defined())
+        kernel_tf = weight_o;
+    else
+        convolution_transform_kernel_pack1to4_neon(weight, kernel_tf, inch, outch * 4, 3, 3);
+    
+    auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
+    
+    int w = input.size(2);
+    int outw = output.size(3);
+    int outh = output.size(2);
+    
+    const int tailstep = w - 2 * outw + w;
+    
+    const float* bias = bias_.defined() ? bias_.data_ptr<float>() : nullptr;
+    
+    int remain_outch_start = 0;
+    
+    auto input_a = input.accessor<float, 3>();
+    auto output_t = output[0];
+    auto kernel_a = kernel_tf.accessor<float, 3, 4>();
+    
+#if __ARM_NEON && __aarch64__
+    int nn_outch = 0;
+    nn_outch = outch >> 1;
+    remain_outch_start = nn_outch << 1;
+
+    otter::parallel_for(0, nn_outch, 0, [&](int64_t begin, int64_t end) {
+        for (const auto pp : otter::irange(begin, end)) {
+            int p = pp * 2;
+
+            auto out0 = output_t[p];
+            auto out1 = output_t[p + 1];
+
+            float32x4_t _bias0 = bias ? vld1q_f32((const float*)bias + p * 4) : vdupq_n_f32(0.f);
+            float32x4_t _bias1 = bias ? vld1q_f32((const float*)bias + (p + 1) * 4) : vdupq_n_f32(0.f);
+            out0.fill_(_bias0);
+            out1.fill_(_bias1);
+
+            const float* k0 = kernel_a[p].data();
+            const float* k1 = kernel_a[p + 1].data();
+
+            for (int q = 0; q < inch; q++)
+            {
+                float* outptr0 = (float*)out0.raw_data();
+                float* outptr1 = (float*)out1.raw_data();
+
+                const auto img0 = input_a[q];
+
+                const float* r0 = img0[0].data();
+                const float* r1 = img0[1].data();
+                const float* r2 = img0[2].data();
+
+                float32x4_t _k00_0 = vld1q_f32(k0);
+                float32x4_t _k01_0 = vld1q_f32(k0 + 4);
+                float32x4_t _k02_0 = vld1q_f32(k0 + 8);
+                float32x4_t _k10_0 = vld1q_f32(k0 + 12);
+                float32x4_t _k11_0 = vld1q_f32(k0 + 16);
+                float32x4_t _k12_0 = vld1q_f32(k0 + 20);
+                float32x4_t _k20_0 = vld1q_f32(k0 + 24);
+                float32x4_t _k21_0 = vld1q_f32(k0 + 28);
+                float32x4_t _k22_0 = vld1q_f32(k0 + 32);
+
+                float32x4_t _k00_1 = vld1q_f32(k1);
+                float32x4_t _k01_1 = vld1q_f32(k1 + 4);
+                float32x4_t _k02_1 = vld1q_f32(k1 + 8);
+                float32x4_t _k10_1 = vld1q_f32(k1 + 12);
+                float32x4_t _k11_1 = vld1q_f32(k1 + 16);
+                float32x4_t _k12_1 = vld1q_f32(k1 + 20);
+                float32x4_t _k20_1 = vld1q_f32(k1 + 24);
+                float32x4_t _k21_1 = vld1q_f32(k1 + 28);
+                float32x4_t _k22_1 = vld1q_f32(k1 + 32);
+
+                int i = 0;
+
+                for (; i < outh; i++)
+                {
+                    int nn = outw >> 2;
+                    int remain = outw & 3;
+
+                    if (nn > 0)
+                    {
+                        asm volatile(
+                            "0:                                 \n"
+
+                            "prfm   pldl1keep, [%1, #512]       \n"
+                            "ld1    {v6.4s, v7.4s, v8.4s, v9.4s}, [%1] \n" // sum0
+
+                            // r0
+                            "prfm   pldl1keep, [%3, #256]       \n"
+                            "ld1    {v0.4s, v1.4s}, [%3], #32   \n"
+                            "ld1r   {v4.4s}, [%3]               \n"
+
+                            "fmla   v6.4s, %12.4s, v0.s[0]      \n"
+                            "fmla   v7.4s, %12.4s, v0.s[2]      \n"
+
+                            "prfm   pldl1keep, [%2, #512]       \n"
+                            "ld1    {v10.4s, v11.4s, v12.4s, v13.4s}, [%2] \n" // sum1
+
+                            "fmla   v8.4s, %12.4s, v1.s[0]      \n"
+                            "fmla   v9.4s, %12.4s, v1.s[2]      \n"
+
+                            "fmla   v10.4s, %21.4s, v0.s[0]     \n"
+                            "fmla   v11.4s, %21.4s, v0.s[2]     \n"
+                            "fmla   v12.4s, %21.4s, v1.s[0]     \n"
+                            "fmla   v13.4s, %21.4s, v1.s[2]     \n"
+
+                            "fmla   v6.4s, %13.4s, v0.s[1]      \n"
+                            "fmla   v7.4s, %13.4s, v0.s[3]      \n"
+                            "fmla   v8.4s, %13.4s, v1.s[1]      \n"
+                            "fmla   v9.4s, %13.4s, v1.s[3]      \n"
+                            "fmla   v10.4s, %22.4s, v0.s[1]     \n"
+                            "fmla   v11.4s, %22.4s, v0.s[3]     \n"
+                            "fmla   v12.4s, %22.4s, v1.s[1]     \n"
+                            "fmla   v13.4s, %22.4s, v1.s[3]     \n"
+
+                            // r1
+                            "prfm   pldl1keep, [%4, #256]       \n"
+                            "ld1    {v2.4s, v3.4s}, [%4], #32   \n"
+                            "ld1r   {v5.4s}, [%4]               \n"
+
+                            "fmla   v6.4s, %14.4s, v0.s[2]      \n"
+                            "fmla   v7.4s, %14.4s, v1.s[0]      \n"
+                            "fmla   v8.4s, %14.4s, v1.s[2]      \n"
+                            "fmla   v9.4s, %14.4s, v4.s[0]      \n"
+                            "fmla   v10.4s, %23.4s, v0.s[2]     \n"
+                            "fmla   v11.4s, %23.4s, v1.s[0]     \n"
+                            "fmla   v12.4s, %23.4s, v1.s[2]     \n"
+                            "fmla   v13.4s, %23.4s, v4.s[0]     \n"
+
+                            "fmla   v6.4s, %15.4s, v2.s[0]      \n"
+                            "fmla   v7.4s, %15.4s, v2.s[2]      \n"
+                            "fmla   v8.4s, %15.4s, v3.s[0]      \n"
+                            "fmla   v9.4s, %15.4s, v3.s[2]      \n"
+                            "fmla   v10.4s, %24.4s, v2.s[0]     \n"
+                            "fmla   v11.4s, %24.4s, v2.s[2]     \n"
+                            "fmla   v12.4s, %24.4s, v3.s[0]     \n"
+                            "fmla   v13.4s, %24.4s, v3.s[2]     \n"
+
+                            "fmla   v6.4s, %16.4s, v2.s[1]      \n"
+                            "fmla   v7.4s, %16.4s, v2.s[3]      \n"
+                            "fmla   v8.4s, %16.4s, v3.s[1]      \n"
+                            "fmla   v9.4s, %16.4s, v3.s[3]      \n"
+                            "fmla   v10.4s, %25.4s, v2.s[1]     \n"
+                            "fmla   v11.4s, %25.4s, v2.s[3]     \n"
+                            "fmla   v12.4s, %25.4s, v3.s[1]     \n"
+                            "fmla   v13.4s, %25.4s, v3.s[3]     \n"
+
+                            // r2
+                            "prfm   pldl1keep, [%5, #256]       \n"
+                            "ld1    {v0.4s, v1.4s}, [%5], #32   \n"
+                            "ld1r   {v4.4s}, [%5]               \n"
+
+                            "fmla   v6.4s, %17.4s, v2.s[2]      \n"
+                            "fmla   v7.4s, %17.4s, v3.s[0]      \n"
+                            "fmla   v8.4s, %17.4s, v3.s[2]      \n"
+                            "fmla   v9.4s, %17.4s, v5.s[0]      \n"
+                            "fmla   v10.4s, %26.4s, v2.s[2]     \n"
+                            "fmla   v11.4s, %26.4s, v3.s[0]     \n"
+                            "fmla   v12.4s, %26.4s, v3.s[2]     \n"
+                            "fmla   v13.4s, %26.4s, v5.s[0]     \n"
+
+                            "fmla   v6.4s, %18.4s, v0.s[0]      \n"
+                            "fmla   v7.4s, %18.4s, v0.s[2]      \n"
+                            "fmla   v8.4s, %18.4s, v1.s[0]      \n"
+                            "fmla   v9.4s, %18.4s, v1.s[2]      \n"
+                            "fmla   v10.4s, %27.4s, v0.s[0]     \n"
+                            "fmla   v11.4s, %27.4s, v0.s[2]     \n"
+                            "fmla   v12.4s, %27.4s, v1.s[0]     \n"
+                            "fmla   v13.4s, %27.4s, v1.s[2]     \n"
+
+                            "fmla   v6.4s, %19.4s, v0.s[1]      \n"
+                            "fmla   v7.4s, %19.4s, v0.s[3]      \n"
+                            "fmla   v8.4s, %19.4s, v1.s[1]      \n"
+                            "fmla   v9.4s, %19.4s, v1.s[3]      \n"
+                            "fmla   v10.4s, %28.4s, v0.s[1]     \n"
+                            "fmla   v11.4s, %28.4s, v0.s[3]     \n"
+                            "fmla   v12.4s, %28.4s, v1.s[1]     \n"
+                            "fmla   v13.4s, %28.4s, v1.s[3]     \n"
+
+                            "fmla   v6.4s, %20.4s, v0.s[2]      \n"
+                            "fmla   v7.4s, %20.4s, v1.s[0]      \n"
+                            "fmla   v8.4s, %20.4s, v1.s[2]      \n"
+                            "fmla   v9.4s, %20.4s, v4.s[0]      \n"
+                            "fmla   v10.4s, %29.4s, v0.s[2]     \n"
+                            "fmla   v11.4s, %29.4s, v1.s[0]     \n"
+                            "fmla   v12.4s, %29.4s, v1.s[2]     \n"
+                            "fmla   v13.4s, %29.4s, v4.s[0]     \n"
+
+                            "subs   %w0, %w0, #1                \n"
+
+                            "st1    {v6.4s, v7.4s, v8.4s, v9.4s}, [%1], #64 \n"
+                            "st1    {v10.4s, v11.4s, v12.4s, v13.4s}, [%2], #64 \n"
+
+                            "bne    0b                          \n"
+
+                            : "=r"(nn),      // %0
+                            "=r"(outptr0), // %1
+                            "=r"(outptr1), // %2
+                            "=r"(r0),      // %3
+                            "=r"(r1),      // %4
+                            "=r"(r2)       // %5
+                            : "0"(nn),
+                            "1"(outptr0),
+                            "2"(outptr1),
+                            "3"(r0),
+                            "4"(r1),
+                            "5"(r2),
+                            "w"(_k00_0), // %12
+                            "w"(_k01_0), // %13
+                            "w"(_k02_0), // %14
+                            "w"(_k10_0), // %15
+                            "w"(_k11_0), // %16
+                            "w"(_k12_0), // %17
+                            "w"(_k20_0), // %18
+                            "w"(_k21_0), // %19
+                            "w"(_k22_0), // %20
+                            "w"(_k00_1), // %21
+                            "w"(_k01_1), // %22
+                            "w"(_k02_1), // %23
+                            "w"(_k10_1), // %24
+                            "w"(_k11_1), // %25
+                            "w"(_k12_1), // %26
+                            "w"(_k20_1), // %27
+                            "w"(_k21_1), // %28
+                            "w"(_k22_1)  // %29
+                            : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13");
+                    }
+
+                    for (; remain > 0; remain--)
+                    {
+                        float32x4_t _sum0 = vld1q_f32(outptr0);
+                        float32x4_t _sum1 = vld1q_f32(outptr1);
+
+                        float32x4_t _r0 = vld1q_f32(r0);
+                        float32x4_t _r1 = vld1q_f32(r1);
+                        float32x4_t _r2 = vld1q_f32(r2);
+
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k00_0, _r0, 0);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k01_0, _r0, 1);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k02_0, _r0, 2);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k10_0, _r1, 0);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k11_0, _r1, 1);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k12_0, _r1, 2);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k20_0, _r2, 0);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k21_0, _r2, 1);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k22_0, _r2, 2);
+
+                        _sum1 = vfmaq_laneq_f32(_sum1, _k00_1, _r0, 0);
+                        _sum1 = vfmaq_laneq_f32(_sum1, _k01_1, _r0, 1);
+                        _sum1 = vfmaq_laneq_f32(_sum1, _k02_1, _r0, 2);
+                        _sum1 = vfmaq_laneq_f32(_sum1, _k10_1, _r1, 0);
+                        _sum1 = vfmaq_laneq_f32(_sum1, _k11_1, _r1, 1);
+                        _sum1 = vfmaq_laneq_f32(_sum1, _k12_1, _r1, 2);
+                        _sum1 = vfmaq_laneq_f32(_sum1, _k20_1, _r2, 0);
+                        _sum1 = vfmaq_laneq_f32(_sum1, _k21_1, _r2, 1);
+                        _sum1 = vfmaq_laneq_f32(_sum1, _k22_1, _r2, 2);
+
+                        vst1q_f32(outptr0, _sum0);
+                        vst1q_f32(outptr1, _sum1);
+
+                        r0 += 2;
+                        r1 += 2;
+                        r2 += 2;
+                        outptr0 += 4;
+                        outptr1 += 4;
+                    }
+
+                    r0 += tailstep;
+                    r1 += tailstep;
+                    r2 += tailstep;
+                }
+
+                k0 += 9 * 4;
+                k1 += 9 * 4;
+            }
+        }
+    });
+#endif // __ARM_NEON && __aarch64__
+
+    otter::parallel_for(remain_outch_start, outch, 0, [&](int64_t begin, int64_t end) {
+        for (const auto p : otter::irange(begin, end)) {
+            auto out0 = output_t[p];
+
+            float32x4_t _bias0 = bias ? vld1q_f32((const float*)bias + p * 4) : vdupq_n_f32(0.f);
+            out0.fill_(_bias0);
+
+            const float* k0 = kernel_a[p].data();
+
+            for (int q = 0; q < inch; q++)
+            {
+                float* outptr0 = (float*)out0.raw_data();
+
+                const auto img0 = input_a[q];
+
+                const float* r0 = img0[0].data();
+                const float* r1 = img0[1].data();
+                const float* r2 = img0[2].data();
+
+                float32x4_t _k00 = vld1q_f32(k0);
+                float32x4_t _k01 = vld1q_f32(k0 + 4);
+                float32x4_t _k02 = vld1q_f32(k0 + 8);
+                float32x4_t _k10 = vld1q_f32(k0 + 12);
+                float32x4_t _k11 = vld1q_f32(k0 + 16);
+                float32x4_t _k12 = vld1q_f32(k0 + 20);
+                float32x4_t _k20 = vld1q_f32(k0 + 24);
+                float32x4_t _k21 = vld1q_f32(k0 + 28);
+                float32x4_t _k22 = vld1q_f32(k0 + 32);
+
+                int i = 0;
+
+                for (; i < outh; i++)
+                {
+                    int nn = outw >> 2;
+                    int remain = outw & 3;
+
+    #if __aarch64__
+                    if (nn > 0)
+                    {
+                        asm volatile(
+                            "0:                                 \n"
+
+                            "prfm   pldl1keep, [%1, #512]       \n"
+                            "ld1    {v6.4s, v7.4s, v8.4s, v9.4s}, [%1] \n" // sum0
+
+                            // r0
+                            "prfm   pldl1keep, [%2, #256]       \n"
+                            "ld1    {v0.4s, v1.4s}, [%2], #32   \n"
+                            "ld1r   {v4.4s}, [%2]               \n"
+
+                            "fmla   v6.4s, %10.4s, v0.s[0]      \n"
+                            "fmla   v7.4s, %10.4s, v0.s[2]      \n"
+                            "fmla   v8.4s, %10.4s, v1.s[0]      \n"
+                            "fmla   v9.4s, %10.4s, v1.s[2]      \n"
+
+                            "fmla   v6.4s, %11.4s, v0.s[1]      \n"
+                            "fmla   v7.4s, %11.4s, v0.s[3]      \n"
+                            "fmla   v8.4s, %11.4s, v1.s[1]      \n"
+                            "fmla   v9.4s, %11.4s, v1.s[3]      \n"
+
+                            // r1
+                            "prfm   pldl1keep, [%3, #256]       \n"
+                            "ld1    {v2.4s, v3.4s}, [%3], #32   \n"
+                            "ld1r   {v5.4s}, [%3]               \n"
+
+                            "fmla   v6.4s, %12.4s, v0.s[2]      \n"
+                            "fmla   v7.4s, %12.4s, v1.s[0]      \n"
+                            "fmla   v8.4s, %12.4s, v1.s[2]      \n"
+                            "fmla   v9.4s, %12.4s, v4.s[0]      \n"
+
+                            "fmla   v6.4s, %13.4s, v2.s[0]      \n"
+                            "fmla   v7.4s, %13.4s, v2.s[2]      \n"
+                            "fmla   v8.4s, %13.4s, v3.s[0]      \n"
+                            "fmla   v9.4s, %13.4s, v3.s[2]      \n"
+
+                            "fmla   v6.4s, %14.4s, v2.s[1]      \n"
+                            "fmla   v7.4s, %14.4s, v2.s[3]      \n"
+                            "fmla   v8.4s, %14.4s, v3.s[1]      \n"
+                            "fmla   v9.4s, %14.4s, v3.s[3]      \n"
+
+                            // r2
+                            "prfm   pldl1keep, [%4, #256]       \n"
+                            "ld1    {v0.4s, v1.4s}, [%4], #32   \n"
+                            "ld1r   {v4.4s}, [%4]               \n"
+
+                            "fmla   v6.4s, %15.4s, v2.s[2]      \n"
+                            "fmla   v7.4s, %15.4s, v3.s[0]      \n"
+                            "fmla   v8.4s, %15.4s, v3.s[2]      \n"
+                            "fmla   v9.4s, %15.4s, v5.s[0]      \n"
+
+                            "fmla   v6.4s, %16.4s, v0.s[0]      \n"
+                            "fmla   v7.4s, %16.4s, v0.s[2]      \n"
+                            "fmla   v8.4s, %16.4s, v1.s[0]      \n"
+                            "fmla   v9.4s, %16.4s, v1.s[2]      \n"
+
+                            "fmla   v6.4s, %17.4s, v0.s[1]      \n"
+                            "fmla   v7.4s, %17.4s, v0.s[3]      \n"
+                            "fmla   v8.4s, %17.4s, v1.s[1]      \n"
+                            "fmla   v9.4s, %17.4s, v1.s[3]      \n"
+
+                            "fmla   v6.4s, %18.4s, v0.s[2]      \n"
+                            "fmla   v7.4s, %18.4s, v1.s[0]      \n"
+                            "fmla   v8.4s, %18.4s, v1.s[2]      \n"
+                            "fmla   v9.4s, %18.4s, v4.s[0]      \n"
+
+                            "subs   %w0, %w0, #1                \n"
+
+                            "st1    {v6.4s, v7.4s, v8.4s, v9.4s}, [%1], #64 \n"
+
+                            "bne    0b                          \n"
+
+                            : "=r"(nn),      // %0
+                            "=r"(outptr0), // %1
+                            "=r"(r0),      // %2
+                            "=r"(r1),      // %3
+                            "=r"(r2)       // %4
+                            : "0"(nn),
+                            "1"(outptr0),
+                            "2"(r0),
+                            "3"(r1),
+                            "4"(r2),
+                            "w"(_k00), // %10
+                            "w"(_k01), // %11
+                            "w"(_k02), // %12
+                            "w"(_k10), // %13
+                            "w"(_k11), // %14
+                            "w"(_k12), // %15
+                            "w"(_k20), // %16
+                            "w"(_k21), // %17
+                            "w"(_k22)  // %18
+                            : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9");
+                    }
+    #else  // __aarch64__
+                    if (nn > 0)
+                    {
+                        asm volatile(
+                            "0:                             \n"
+
+                            "pld        [%1, #512]          \n"
+                            "vldm       %1, {d0-d7}         \n" // sum0
+
+                            // r0
+                            "pld        [%2, #256]          \n"
+                            "vld1.f32   {d8-d11}, [%2]!     \n"
+                            "vld1.f32   {d12[]}, [%2]       \n"
+
+                            "vmla.f32   q0, %q10, d8[0]     \n"
+                            "vmla.f32   q1, %q10, d9[0]     \n"
+                            "vmla.f32   q2, %q10, d10[0]    \n"
+                            "vmla.f32   q3, %q10, d11[0]    \n"
+
+                            "vmla.f32   q0, %q11, d8[1]     \n"
+                            "vmla.f32   q1, %q11, d9[1]     \n"
+                            "vmla.f32   q2, %q11, d10[1]    \n"
+                            "vmla.f32   q3, %q11, d11[1]    \n"
+
+                            "vmla.f32   q0, %q12, d9[0]     \n"
+                            "vmla.f32   q1, %q12, d10[0]    \n"
+                            "vmla.f32   q2, %q12, d11[0]    \n"
+
+                            // r1
+                            "pld        [%3, #256]          \n"
+                            "vld1.f32   {d8-d11}, [%3]!     \n"
+                            "vld1.f32   {d13[]}, [%3]       \n"
+
+                            "vmla.f32   q3, %q12, d12[0]    \n"
+
+                            "vmla.f32   q0, %q13, d8[0]     \n"
+                            "vmla.f32   q1, %q13, d9[0]     \n"
+                            "vmla.f32   q2, %q13, d10[0]    \n"
+                            "vmla.f32   q3, %q13, d11[0]    \n"
+
+                            "vmla.f32   q0, %q14, d8[1]     \n"
+                            "vmla.f32   q1, %q14, d9[1]     \n"
+                            "vmla.f32   q2, %q14, d10[1]    \n"
+                            "vmla.f32   q3, %q14, d11[1]    \n"
+
+                            "vmla.f32   q0, %q15, d9[0]     \n"
+                            "vmla.f32   q1, %q15, d10[0]    \n"
+                            "vmla.f32   q2, %q15, d11[0]    \n"
+
+                            // r2
+                            "pld        [%4, #256]          \n"
+                            "vld1.f32   {d8-d11}, [%4]!     \n"
+                            "vld1.f32   {d12[]}, [%4]       \n"
+
+                            "vmla.f32   q3, %q15, d13[0]    \n"
+
+                            "vmla.f32   q0, %q16, d8[0]     \n"
+                            "vmla.f32   q1, %q16, d9[0]     \n"
+                            "vmla.f32   q2, %q16, d10[0]    \n"
+                            "vmla.f32   q3, %q16, d11[0]    \n"
+
+                            "vmla.f32   q0, %q17, d8[1]     \n"
+                            "vmla.f32   q1, %q17, d9[1]     \n"
+                            "vmla.f32   q2, %q17, d10[1]    \n"
+                            "vmla.f32   q3, %q17, d11[1]    \n"
+
+                            "vmla.f32   q0, %q18, d9[0]     \n"
+                            "vmla.f32   q1, %q18, d10[0]    \n"
+                            "vmla.f32   q2, %q18, d11[0]    \n"
+                            "vmla.f32   q3, %q18, d12[0]    \n"
+
+                            "subs       %0, %0, #1          \n"
+
+                            "vstm       %1!, {d0-d7}        \n"
+
+                            "bne        0b                  \n"
+
+                            : "=r"(nn),      // %0
+                            "=r"(outptr0), // %1
+                            "=r"(r0),      // %2
+                            "=r"(r1),      // %3
+                            "=r"(r2)       // %4
+                            : "0"(nn),
+                            "1"(outptr0),
+                            "2"(r0),
+                            "3"(r1),
+                            "4"(r2),
+                            "w"(_k00), // %10
+                            "w"(_k01), // %11
+                            "w"(_k02), // %12
+                            "w"(_k10), // %13
+                            "w"(_k11), // %14
+                            "w"(_k12), // %15
+                            "w"(_k20), // %16
+                            "w"(_k21), // %17
+                            "w"(_k22)  // %18
+                            : "cc", "memory", "q0", "q1", "q2", "q3", "q4", "q5", "q6");
+                    }
+    #endif // __aarch64__
+
+                    for (; remain > 0; remain--)
+                    {
+                        float32x4_t _sum0 = vld1q_f32(outptr0);
+
+                        float32x4_t _r0 = vld1q_f32(r0);
+                        float32x4_t _r1 = vld1q_f32(r1);
+                        float32x4_t _r2 = vld1q_f32(r2);
+
+    #if __aarch64__
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k00, _r0, 0);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k01, _r0, 1);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k02, _r0, 2);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k10, _r1, 0);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k11, _r1, 1);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k12, _r1, 2);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k20, _r2, 0);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k21, _r2, 1);
+                        _sum0 = vfmaq_laneq_f32(_sum0, _k22, _r2, 2);
+    #else
+                        _sum0 = vmlaq_lane_f32(_sum0, _k00, vget_low_f32(_r0), 0);
+                        _sum0 = vmlaq_lane_f32(_sum0, _k01, vget_low_f32(_r0), 1);
+                        _sum0 = vmlaq_lane_f32(_sum0, _k02, vget_high_f32(_r0), 0);
+                        _sum0 = vmlaq_lane_f32(_sum0, _k10, vget_low_f32(_r1), 0);
+                        _sum0 = vmlaq_lane_f32(_sum0, _k11, vget_low_f32(_r1), 1);
+                        _sum0 = vmlaq_lane_f32(_sum0, _k12, vget_high_f32(_r1), 0);
+                        _sum0 = vmlaq_lane_f32(_sum0, _k20, vget_low_f32(_r2), 0);
+                        _sum0 = vmlaq_lane_f32(_sum0, _k21, vget_low_f32(_r2), 1);
+                        _sum0 = vmlaq_lane_f32(_sum0, _k22, vget_high_f32(_r2), 0);
+    #endif
+
+                        vst1q_f32(outptr0, _sum0);
+
+                        r0 += 2;
+                        r1 += 2;
+                        r2 += 2;
+                        outptr0 += 4;
+                    }
+
+                    r0 += tailstep;
+                    r1 += tailstep;
+                    r2 += tailstep;
+                }
+
+                k0 += 9 * 4;
+            }
+        }
+    });
+    
+    return output;
+}
+
+Tensor conv2d_3x3s2_pack1to4_neon(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding) {
+    
+    auto output = otter::empty({}, otter::ScalarType::Float4);
+    
+    return conv2d_3x3s2_pack1to4_neon_out(self, weight, weight_o, bias, padding, output);
 }
 
 #endif  // __ARM_NEON

@@ -541,6 +541,8 @@ ConvBackend select_proper_conv_packed_backend(
                     } else if (elempack == 1 && out_elempack == 4) {
                         if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
                             return ConvBackend::Sgemm2dNeonPack1to4_1x1s1;
+                        } else if (kernel_h == 3 && kernel_w == 3 && stride_h == 2 && stride_w == 2) {
+                            return ConvBackend::Conv2dNeonPack1to4_3x3s2;
                         }
                         return ConvBackend::Sgemm2dNeonPack1to4;
                     } else if (elempack == 4 && out_elempack == 1) {
@@ -637,6 +639,8 @@ Tensor convolution_packed(
             output = otter::depthwise_conv2d_5x5s1_neon_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
         case ConvBackend::DepthwiseNeonPack4_5x5s2:
             output = otter::depthwise_conv2d_5x5s2_neon_pack4(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Conv2dNeonPack1to4_3x3s2:
+            output = otter::conv2d_3x3s2_pack1to4_neon(input, weight, weight_o, bias, padding); break;
 #endif  // __ARN_NEON__
         default: {
             output = convolution(input.packing(1), weight, weight_o, bias, stride, padding, dilation, transposed, output_padding, groups, input_int8_scales, weight_int8_scales);

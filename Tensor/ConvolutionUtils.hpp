@@ -92,6 +92,7 @@ enum class ConvBackend {
     DepthwiseNeonPack4_3x3s2,
     DepthwiseNeonPack4_5x5s1,
     DepthwiseNeonPack4_5x5s2,
+    Conv2dNeonPack1to4_3x3s2,
     Overrideable
 };
 
