@@ -278,7 +278,7 @@ Tensor convolution(
     const Tensor& input_int8_scales,
     const Tensor& weight_int8_scales) {
     
-    if (input_r.elempack() != 1) {
+    if (!transposed_ && ((input_r.elempack() != 1) || (weight_r.size(0) % 4 == 0))) {
         return convolution_packed(
             input_r,
             weight_r,
@@ -485,7 +485,7 @@ ConvBackend select_proper_conv_packed_backend(
             if (input.dim() == 4) {
                 if (params.use_cpu_x86(input, weight)) {
                     // Depthwise
-                    if (params.is_depthwise(input, weight)) {
+                    if (params.is_depthwise(input, weight) && elempack == 4) {
                         if (kernel_h == 3 && kernel_w == 3 && stride_h == 1 && stride_w == 1) {
                             return ConvBackend::DepthwiseX86Pack4_3x3s1;
                         } else if (kernel_h == 3 && kernel_w == 3 && stride_h == 2 && stride_w == 2) {
@@ -519,7 +519,7 @@ ConvBackend select_proper_conv_packed_backend(
                     }
                 } else if (params.use_cpu_neon(input, weight)) {
                     // Depthwise
-                    if (params.is_depthwise(input, weight)) {
+                    if (params.is_depthwise(input, weight) && elempack == 4) {
                         if (kernel_h == 3 && kernel_w == 3 && stride_h == 1 && stride_w == 1) {
                             return ConvBackend::DepthwiseNeonPack4_3x3s1;
                         } else if (kernel_h == 3 && kernel_w == 3 && stride_h == 2 && stride_w == 2) {
