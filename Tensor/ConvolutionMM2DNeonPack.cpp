@@ -11,6 +11,7 @@
 #include "VecIntrinsic.hpp"
 #include "ConvolutionUtils.hpp"
 #include "Padding.hpp"
+#include "im2col.hpp"
 
 namespace otter {
 
@@ -4125,59 +4126,11 @@ Tensor& sgemm_conv2d_pack1to4_neon_out(
     else
         convolution_im2col_sgemm_transform_kernel_pack1to4_neon(weight, kernel_tf, inch, outch * 4, kernel_w, kernel_h);
     
-    Tensor input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
-    
-    Tensor im2col = otter::empty({inch, maxk, size}, ScalarType::Float);
-    
-    auto input_a = input.accessor<float, 3>();
-    auto im2col_a = im2col.accessor<float, 3>();
-    
-    {
-        const int gap = w * stride_h - outw * stride_w;
-
-        otter::parallel_for(0, inch, 0, [&](int64_t begin, int64_t end) {
-            for (const auto p : otter::irange(begin, end)) {
-                const auto img = input_a[p];
-                float* ptr = im2col_a[p].data();
-
-                for (int u = 0; u < kernel_h; u++) {
-                    for (int v = 0; v < kernel_w; v++) {
-                        const float* sptr = img[dilation_h * u].data() + dilation_w * v;
-
-                        for (int i = 0; i < outh; i++) {
-                            int j = 0;
-                            for (; j + 3 < outw; j += 4) {
-                                ptr[0] = sptr[0];
-                                ptr[1] = sptr[stride_w];
-                                ptr[2] = sptr[stride_w * 2];
-                                ptr[3] = sptr[stride_w * 3];
-
-                                sptr += stride_w * 4;
-                                ptr += 4;
-                            }
-                            for (; j + 1 < outw; j += 2) {
-                                ptr[0] = sptr[0];
-                                ptr[1] = sptr[stride_w];
-
-                                sptr += stride_w * 2;
-                                ptr += 2;
-                            }
-                            for (; j < outw; j++) {
-                                ptr[0] = sptr[0];
-
-                                sptr += stride_w;
-                                ptr += 1;
-                            }
-
-                            sptr += gap;
-                        }
-                    }
-                }
-            }
-        });
-    }
+    Tensor im2col = otter::im2col_cpu(self, kernel_size, stride, padding, {1, 1}).view({inch, maxk, size});
     
     im2col_sgemm_conv2d_pack1to4_impl_neon(im2col, output, kernel_tf, bias);
+    
+    return output;
     
     return output;
 }
