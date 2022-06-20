@@ -1298,7 +1298,6 @@ Tensor& sgemm_conv2d_pack4_x86_out(
     auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
     output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
     
-    int w = self.size(3);
     int inch = self.size(1);
     
     const int kernel_h = kernel_size[0];
@@ -1322,6 +1321,8 @@ Tensor& sgemm_conv2d_pack4_x86_out(
         convolution_im2col_sgemm_transform_kernel_pack4_sse(weight, kernel_tf, inch * 4, outch * 4, kernel_w, kernel_h);
     
     Tensor input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
+    
+    int w = input.size(2);
     
     Tensor im2col = otter::empty({inch, maxk, size}, ScalarType::Float4);
     
@@ -1393,7 +1394,6 @@ Tensor& sgemm_conv2d_pack4to1_x86_out(
     auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
     output.resize_(output_size);
     
-    int w = self.size(3);
     int inch = self.size(1);
     
     const int kernel_h = kernel_size[0];
@@ -1417,6 +1417,8 @@ Tensor& sgemm_conv2d_pack4to1_x86_out(
         convolution_im2col_sgemm_transform_kernel_pack4to1_sse(weight, kernel_tf, inch * 4, outch, kernel_w, kernel_h);
     
     Tensor input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
+    
+    int w = input.size(2);
     
     Tensor im2col = otter::empty({inch, maxk, size}, ScalarType::Float4);
     
@@ -1489,15 +1491,10 @@ Tensor& sgemm_conv2d_pack1to4_x86_out(
     auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
     output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
     
-    int w = self.size(3);
     int inch = self.size(1);
     
     const int kernel_h = kernel_size[0];
     const int kernel_w = kernel_size[1];
-    const int stride_h = stride[0];
-    const int stride_w = stride[1];
-    const int dilation_h = dilation[0];
-    const int dilation_w = dilation[1];
     
     int outw = output.size(3);
     int outh = output.size(2);
@@ -1530,6 +1527,7 @@ Tensor sgemm_conv2d_pack1to4_x86(
     IntArrayRef dilation) {
     
     Tensor output = otter::empty({}, otter::ScalarType::Float4);
+    
     sgemm_conv2d_pack1to4_x86_out(self, weight, weight_o, bias, kernel_size, stride, padding, dilation, output);
     
     return output;
