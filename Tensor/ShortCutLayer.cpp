@@ -18,7 +18,7 @@ ShortCutLayer::ShortCutLayer() {
 #if __SSE2__
     support_packing = true;
 #elif __ARM_NEON__
-    
+    support_packing = true;
 #endif
 }
 
