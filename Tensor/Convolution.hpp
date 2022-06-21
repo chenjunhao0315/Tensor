@@ -26,6 +26,7 @@ Tensor convolution(
     bool transposed_,
     IntArrayRef output_padding_,
     int64_t groups_,
+    bool packed_ = true,
     const Tensor& input_int8_scales = Tensor(),
     const Tensor& weight_int8_scales = Tensor());
 

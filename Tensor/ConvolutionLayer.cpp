@@ -568,6 +568,7 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
         false,      // transpose
         {output_padding_height, output_padding_width},
         groups,
+        opt.use_packing_layout,
         Tensor(),   // bottom_blob_int8_scales
         Tensor()    // weight_data_int8_scales
     );
@@ -609,6 +610,7 @@ int ConvolutionLayer::forward_int8(const Tensor &bottom_blob, Tensor &top_blob, 
         false,      // transpose
         params.output_padding,
         groups,
+        false,
         bottom_blob_int8_scales,
         weight_data_int8_scales
     );

@@ -275,10 +275,11 @@ Tensor convolution(
     bool transposed_,
     IntArrayRef output_padding_,
     int64_t groups_,
+    bool packed_,
     const Tensor& input_int8_scales,
     const Tensor& weight_int8_scales) {
     
-    if ((!transposed_) && ((input_r.elempack() != 1) || (weight_r.size(0) % 4 == 0)) && (!input_int8_scales.defined() || !weight_int8_scales.defined())) {
+    if ((packed_) && (!transposed_)) {
         return convolution_packed(
             input_r,
             weight_r,
@@ -643,7 +644,7 @@ Tensor convolution_packed(
             output = otter::conv2d_3x3s2_pack1to4_neon(input, weight, weight_o, bias, padding); break;
 #endif  // __ARN_NEON__
         default: {
-            output = convolution(input.packing(1), weight, weight_o, bias, stride, padding, dilation, transposed, output_padding, groups, input_int8_scales, weight_int8_scales);
+            output = convolution(input.packing(1), weight, weight_o, bias, stride, padding, dilation, transposed, output_padding, groups, false, input_int8_scales, weight_int8_scales);
         }
     }
     
