@@ -295,7 +295,7 @@ Tensor convolution(
             weight_int8_scales);
     }
     
-    auto input = input_r;
+    auto input = input_r.packing(1);
     auto weight = weight_r;
     auto bias = bias_r;
     auto k = weight.dim();
