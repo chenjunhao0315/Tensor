@@ -721,14 +721,15 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
                 int size = tensor.size(1) * tensor.size(2);
                 
                 auto tensor_a = tensor.accessor<float, 3, 4>();
+                auto out_unpacked_a = out_unpacked.accessor<float, 3>();
 
                 for (const auto q : otter::irange(0, tensor.size(0))) {
                     const float* r0 = tensor_a[q].data();
 
-                    float* outptr0 = (float*)out_unpacked[p + 0].raw_data();
-                    float* outptr1 = (float*)out_unpacked[p + 1].raw_data();
-                    float* outptr2 = (float*)out_unpacked[p + 2].raw_data();
-                    float* outptr3 = (float*)out_unpacked[p + 3].raw_data();
+                    float* outptr0 = (float*)out_unpacked_a[p + 0].data();
+                    float* outptr1 = (float*)out_unpacked_a[p + 1].data();
+                    float* outptr2 = (float*)out_unpacked_a[p + 2].data();
+                    float* outptr3 = (float*)out_unpacked_a[p + 3].data();
 
                     for (int i = 0; i < size; i++) {
                         *outptr0++ = r0[0];
