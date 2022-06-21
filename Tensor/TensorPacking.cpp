@@ -1337,10 +1337,12 @@ void convertPackingNative(const Tensor& src, Tensor& dst, int out_elempack) {
         size_t lane_size = out_elemsize / out_elempack;
         
         dst = otter::empty({outh, w}, out_dtype);
+        unsigned char* src_ptr = (unsigned char*)src.raw_data();
+        unsigned char* dst_ptr = (unsigned char*)dst.raw_data();
         
         otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
             for (const auto i : otter::irange(begin, end)) {
-                unsigned char* outptr = (unsigned char*)dst.raw_data() + (size_t)i * w * out_elemsize;
+                unsigned char* outptr = dst_ptr + (size_t)i * w * out_elemsize;
 
                 for (int j = 0; j < w; j++) {
                     unsigned char* out_elem_ptr = outptr + j * out_elemsize;
@@ -1352,7 +1354,7 @@ void convertPackingNative(const Tensor& src, Tensor& dst, int out_elempack) {
 
                         int srck = (i * out_elempack + k) % elempack;
 
-                        const unsigned char* ptr = (const unsigned char*)src.raw_data() + (size_t)srcy * w * elemsize;
+                        const unsigned char* ptr = (const unsigned char*)src_ptr + (size_t)srcy * w * elemsize;
                         const unsigned char* elem_ptr = ptr + j * elemsize;
 
                         memcpy(out_elem_ptr + k * lane_size, elem_ptr + srck * lane_size, lane_size);
@@ -1375,12 +1377,15 @@ void convertPackingNative(const Tensor& src, Tensor& dst, int out_elempack) {
         
         dst = otter::empty({outc, h, w}, out_dtype);
         
+        auto src_ra = src.raw_accessor<unsigned char, 3>();
+        auto dst_ra = dst.raw_accessor<unsigned char, 3>();
+        
         otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
             for (const auto q : otter::irange(begin, end)) {
-                auto out = dst[q];
+                auto out = dst_ra[q];
 
                 for (int i = 0; i < h; i++) {
-                    unsigned char* outptr = (unsigned char*)out.raw_data() + (size_t)i * w * out_elemsize;
+                    unsigned char* outptr = (unsigned char*)out.data() + (size_t)i * w * out_elemsize;
 
                     for (int j = 0; j < w; j++) {
                         unsigned char* out_elem_ptr = outptr + j * out_elemsize;
@@ -1392,8 +1397,8 @@ void convertPackingNative(const Tensor& src, Tensor& dst, int out_elempack) {
 
                             int srck = (q * out_elempack + k) % elempack;
 
-                            const auto m = src[srcq];
-                            const unsigned char* ptr = (const unsigned char*)m.raw_data() + (size_t)i * w * elemsize;
+                            const auto m = src_ra[srcq];
+                            const unsigned char* ptr = (const unsigned char*)m.data() + (size_t)i * w * elemsize;
                             const unsigned char* elem_ptr = ptr + j * elemsize;
 
                             memcpy(out_elem_ptr + k * lane_size, elem_ptr + srck * lane_size, lane_size);
@@ -1417,13 +1422,16 @@ void convertPackingNative(const Tensor& src, Tensor& dst, int out_elempack) {
         
         dst = otter::empty({src.size(0), outc, h, w}, out_dtype);
         
+        auto src_ra = src.raw_accessor<unsigned char, 4>();
+        auto dst_ra = dst.raw_accessor<unsigned char, 4>();
+        
         for (const auto b : otter::irange(0, src.size(0))) {
             otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
                 for (const auto q : otter::irange(begin, end)) {
-                    auto out = dst[b][q];
+                    auto out = dst_ra[b][q];
 
                     for (int i = 0; i < h; i++) {
-                        unsigned char* outptr = (unsigned char*)out.raw_data() + (size_t)i * w * out_elemsize;
+                        unsigned char* outptr = (unsigned char*)out.data() + (size_t)i * w * out_elemsize;
 
                         for (int j = 0; j < w; j++) {
                             unsigned char* out_elem_ptr = outptr + j * out_elemsize;
@@ -1435,8 +1443,8 @@ void convertPackingNative(const Tensor& src, Tensor& dst, int out_elempack) {
 
                                 int srck = (q * out_elempack + k) % elempack;
 
-                                const auto m = src[b][srcq];
-                                const unsigned char* ptr = (const unsigned char*)m.raw_data() + (size_t)i * w * elemsize;
+                                const auto m = src_ra[b][srcq];
+                                const unsigned char* ptr = (const unsigned char*)m.data() + (size_t)i * w * elemsize;
                                 const unsigned char* elem_ptr = ptr + j * elemsize;
 
                                 memcpy(out_elem_ptr + k * lane_size, elem_ptr + srck * lane_size, lane_size);

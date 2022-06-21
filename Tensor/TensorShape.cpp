@@ -663,10 +663,11 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
         }
         
         out = otter::empty({h, top_w}, get_update_scalarType(dtype, elempack));
+        auto out_ra = out.raw_accessor<float, 2>();
         
         otter::parallel_for(0, h, 0, [&](int64_t begin, int64_t end) {
             for (int i = 0; i < h; i++) {
-                float* outptr = (float*)out[i].raw_data();
+                float* outptr = (float*)out_ra[i].data();
                 for (size_t b = 0; b < tensors.size(); b++) {
                     const Tensor& tensor = tensors[b];
 
@@ -713,6 +714,8 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
             out_unpacked = otter::empty({top_channels / elempack, h, w}, get_update_scalarType(dtype, elempack));
         }
         
+        auto out_unpacked_ra = out_unpacked.raw_accessor<float, 3>();
+        
         int p = 0;
         for (size_t b = 0; b < tensors.size(); b++) {
             const Tensor& tensor = tensors[b];
@@ -721,15 +724,14 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
                 int size = tensor.size(1) * tensor.size(2);
                 
                 auto tensor_a = tensor.accessor<float, 3, 4>();
-                auto out_unpacked_a = out_unpacked.accessor<float, 3>();
 
                 for (const auto q : otter::irange(0, tensor.size(0))) {
                     const float* r0 = tensor_a[q].data();
 
-                    float* outptr0 = (float*)out_unpacked_a[p + 0].data();
-                    float* outptr1 = (float*)out_unpacked_a[p + 1].data();
-                    float* outptr2 = (float*)out_unpacked_a[p + 2].data();
-                    float* outptr3 = (float*)out_unpacked_a[p + 3].data();
+                    float* outptr0 = (float*)out_unpacked_ra[p + 0].data();
+                    float* outptr1 = (float*)out_unpacked_ra[p + 1].data();
+                    float* outptr2 = (float*)out_unpacked_ra[p + 2].data();
+                    float* outptr3 = (float*)out_unpacked_ra[p + 3].data();
 
                     for (int i = 0; i < size; i++) {
                         *outptr0++ = r0[0];
@@ -746,7 +748,7 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
                 int size = tensor.numel();
 
                 const float* ptr = (const float*)tensor.raw_data();
-                float* outptr = (float*)out_unpacked[p].raw_data();
+                float* outptr = (float*)out_unpacked_ra[p].data();
                 memcpy(outptr, ptr, size * tensor.itemsize());
 
                 p += tensor.size(0);
@@ -774,10 +776,11 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
         }
         
         out = otter::empty({channels, top_h, w}, get_update_scalarType(dtype, elempack));
+        auto out_ra = out.raw_accessor<float, 3>();
         
         otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
             for (const auto q : otter::irange(begin, end)) {
-                float* outptr = (float*)out[q].raw_data();
+                float* outptr = (float*)out_ra[q].data();
 
                 for (size_t b = 0; b < tensors.size(); b++) {
                     const Tensor& tensor = tensors[b];
@@ -809,10 +812,11 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
         }
         
         out = otter::empty({channels, h, top_w}, get_update_scalarType(dtype, elempack));
+        auto out_ra = out.raw_accessor<float, 3>();
         
         otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
             for (const auto q : otter::irange(begin, end)) {
-                float* outptr = (float*)out[q].raw_data();
+                float* outptr = (float*)out_ra[q].data();
 
                 for (int i = 0; i < h; i++) {
                     for (size_t b = 0; b < tensors.size(); b++) {

@@ -278,7 +278,7 @@ Tensor convolution(
     const Tensor& input_int8_scales,
     const Tensor& weight_int8_scales) {
     
-    if (!transposed_ && ((input_r.elempack() != 1) || (weight_r.size(0) % 4 == 0))) {
+    if ((!transposed_) && ((input_r.elempack() != 1) || (weight_r.size(0) % 4 == 0)) && (!input_int8_scales.defined() || !weight_int8_scales.defined())) {
         return convolution_packed(
             input_r,
             weight_r,

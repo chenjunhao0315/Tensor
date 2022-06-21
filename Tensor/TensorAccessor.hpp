@@ -108,6 +108,62 @@ public:
     }
 };
 
+template<typename T, size_t N, typename index_t = int64_t>
+class TensorRawAccessorBase {
+public:
+    TensorRawAccessorBase(void* data_, const index_t* sizes_, const index_t* strides_, const index_t elemsize_) : data_((char*)data_), sizes_(sizes_), strides_(strides_), elemsize_(elemsize_) {}
+    IntArrayRef sizes() const {
+        return IntArrayRef(sizes_, N);
+    }
+    IntArrayRef strides() const {
+        return IntArrayRef(strides_, N);
+    }
+    index_t stride(index_t i) const {
+        return strides_[i];
+    }
+    index_t size(index_t i) const {
+        return sizes_[i];
+    }
+    T* data() {
+        return (T*)data_;
+    }
+    const T* data() const {
+        return (T*)data_;
+    }
+protected:
+    char* data_;
+    const index_t* sizes_;
+    const index_t* strides_;
+    const index_t elemsize_;
+};
+
+template<typename T, size_t N, typename index_t = int64_t>
+class TensorRawAccessor : public TensorRawAccessorBase<T, N, index_t> {
+public:
+    TensorRawAccessor(void* data_, const index_t* sizes_, const index_t* strides_, const index_t elemsize_) : TensorRawAccessorBase<T, N, index_t>(data_, sizes_, strides_, elemsize_) {}
+    
+    TensorRawAccessor<T, N - 1, index_t> operator[](index_t i) {
+        return TensorRawAccessor<T, N - 1, index_t>(this->data_ + this->strides_[0] * i * this->elemsize_, this->sizes_ + 1, this->strides_ + 1, this->elemsize_);
+    }
+    
+    const TensorRawAccessor<T, N - 1, index_t> operator[](index_t i) const {
+        return TensorRawAccessor<T, N - 1, index_t>(this->data_ + this->strides_[0] * i * this->elemsize_, this->sizes_ + 1, this->strides_ + 1, this->elemsize_);
+    }
+};
+
+template<typename T, typename index_t>
+class TensorRawAccessor<T, 1, index_t> : public TensorRawAccessorBase<T, 1, index_t> {
+public:
+    TensorRawAccessor(void* data_, const index_t* sizes_, const index_t* strides_, const index_t elemsize_) : TensorRawAccessorBase<T, 1, index_t>(data_, sizes_, strides_, elemsize_) {}
+    T* operator[](index_t i) {
+        // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
+        return (T*)this->data_[this->strides_[0] * i * this->elemsize_];
+    }
+    const T* operator[](index_t i) const {
+        return (T*)this->data_[this->strides_[0] * i * this->elemsize_];
+    }
+};
+
 }
 
 #endif /* TensorAccessor_hpp */

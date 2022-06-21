@@ -54,6 +54,15 @@ public:
     template<typename T, size_t N, int64_t P>
     TensorAccessor<T, N, P> accessor() && = delete;
     
+    template<typename T, size_t N>
+    TensorRawAccessor<T, N> raw_accessor() const& {
+        OTTER_CHECK(N > 0, "accessor is used for indexing tensor, for scalars use *data_ptr<T>()");
+        OTTER_CHECK(dim() == N, "TensorAccessor expected ", N, " dims but tensor has ", dim());
+        return TensorRawAccessor<T, N>(raw_data(), sizes().data(), strides().data(), itemsize());
+    }
+    template<typename T, size_t N>
+    TensorRawAccessor<T, N> raw_accessor() && = delete;
+    
     Tensor& operator=(const TensorBase& x) & {
         tensor_nucleus_ = x.getPtr();
         return *this;

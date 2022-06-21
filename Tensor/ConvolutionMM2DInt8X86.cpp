@@ -171,6 +171,7 @@ void im2col_sgemm_conv2d_int8_impl_x86(
 #endif
     }
     
+    auto tmp_ra = tmp.raw_accessor<signed char, 3>();
     auto output_a = output.accessor<int, 4>()[0];
     auto im2col_a = im2col.accessor<unsigned char, 3>();
     auto kernel_tf_a = kernel_tf.accessor<unsigned char, 3>();
@@ -181,11 +182,10 @@ void im2col_sgemm_conv2d_int8_impl_x86(
         int nn_size = size >> 2;
 
         otter::parallel_for(0, nn_size, 0, [&](int64_t begin, int64_t end) {
-            for (const auto ii : otter::irange(begin, end))
-            {
+            for (const auto ii : otter::irange(begin, end)) {
                 int i = remain_size_start + ii * 4;
 
-                signed char* tmpptr = (signed char*)tmp[i / 4].raw_data();
+                signed char* tmpptr = (signed char*)tmp_ra[i / 4].data();
 
                 int q = 0;
                 for (; q + 3 < inch; q += 4)
@@ -253,9 +253,9 @@ void im2col_sgemm_conv2d_int8_impl_x86(
                 int i = remain_size_start + ii * 2;
 
     #if __AVX2__
-                signed char* tmpptr = (signed char*)tmp[i / 4 + (i % 4) / 2].raw_data();
+                signed char* tmpptr = (signed char*)tmp_ra[i / 4 + (i % 4) / 2].data();
     #else
-                signed char* tmpptr = (signed char*)tmp[i / 2].raw_data();
+                signed char* tmpptr = (signed char*)tmp_ra[i / 2].data();
     #endif
 
                 int q = 0;
@@ -307,9 +307,9 @@ void im2col_sgemm_conv2d_int8_impl_x86(
             for (const auto i : otter::irange(begin, end))
             {
     #if __AVX2__
-                signed char* tmpptr = (signed char*)tmp[i / 4 + (i % 4) / 2 + i % 2].raw_data();
+                signed char* tmpptr = (signed char*)tmp_ra[i / 4 + (i % 4) / 2 + i % 2].data();
     #else
-                signed char* tmpptr = (signed char*)tmp[i / 2 + i % 2].raw_data();
+                signed char* tmpptr = (signed char*)tmp_ra[i / 2 + i % 2].data();
     #endif
 
                 int q = 0;
@@ -352,11 +352,11 @@ void im2col_sgemm_conv2d_int8_impl_x86(
     }
 #else // __SSE2__
     tmp = otter::empty({size, inch, maxk}, otter::ScalarType::Byte);
+    auto tmp_ra = tmp.raw_accessor<signed char, 3>();
     {
         otter::parallel_for(0, size, 0, [&](int64_t begin, int64_t end) {
-            for (const auto i : otter::irange(begin, end))
-            {
-                signed char* tmpptr = (signed char*)tmp[i].raw_data();
+            for (const auto i : otter::irange(begin, end)) {
+                signed char* tmpptr = (signed char*)tmp_ra[i].data();
 
                 int q = 0;
                 for (; q < inch; q++)
@@ -383,8 +383,8 @@ void im2col_sgemm_conv2d_int8_impl_x86(
 #if __SSE2__
     nn_outch = outch >> 2;
 
-//    otter::parallel_for(0, nn_outch, 0, [&](int64_t begin, int64_t end) {
-        for (const auto pp : otter::irange(0, nn_outch))
+    otter::parallel_for(0, nn_outch, 0, [&](int64_t begin, int64_t end) {
+        for (const auto pp : otter::irange(begin, end))
         {
             int p = pp * 4;
 
@@ -397,7 +397,7 @@ void im2col_sgemm_conv2d_int8_impl_x86(
     #if __AVX2__
             for (; i + 3 < size; i += 4)
             {
-                const signed char* tmpptr = (const signed char*)tmp[i / 4].raw_data();
+                const signed char* tmpptr = (const signed char*)tmp_ra[i / 4].data();
                 const signed char* kptr0 = (const signed char*)kernel_tf_a[p / 4].data();
 
                 int nn4 = (inch / 4) * maxk;
@@ -583,9 +583,9 @@ void im2col_sgemm_conv2d_int8_impl_x86(
             for (; i + 1 < size; i += 2)
             {
     #if __AVX2__
-                const signed char* tmpptr = (const signed char*)tmp[i / 4 + (i % 4) / 2].raw_data();
+                const signed char* tmpptr = (const signed char*)tmp_ra[i / 4 + (i % 4) / 2].data();
     #else
-                const signed char* tmpptr = (const signed char*)tmp[i / 2].raw_data();
+                const signed char* tmpptr = (const signed char*)tmp_ra[i / 2].data();
     #endif
                 const signed char* kptr0 = (const signed char*)kernel_tf_a[p / 4].data();
 
@@ -819,9 +819,9 @@ void im2col_sgemm_conv2d_int8_impl_x86(
             for (; i < size; i++)
             {
     #if __AVX2__
-                const signed char* tmpptr = (const signed char*)tmp[i / 4 + (i % 4) / 2 + i % 2].raw_data();
+                const signed char* tmpptr = (const signed char*)tmp_ra[i / 4 + (i % 4) / 2 + i % 2].data();
     #else
-                const signed char* tmpptr = (const signed char*)tmp[i / 2 + i % 2].raw_data();
+                const signed char* tmpptr = (const signed char*)tmp_ra[i / 2 + i % 2].data();
     #endif
                 const signed char* kptr0 = (const signed char*)kernel_tf_a[p / 4].data();
 
@@ -921,7 +921,7 @@ void im2col_sgemm_conv2d_int8_impl_x86(
                 outptr3 += 1;
             }
         }
-//    });
+    });
 
     remain_outch_start += nn_outch << 2;
 #endif // __SSE2__
@@ -936,7 +936,7 @@ void im2col_sgemm_conv2d_int8_impl_x86(
     #if __AVX2__
             for (; i + 3 < size; i += 4)
             {
-                const signed char* tmpptr = (const signed char*)tmp[i / 4].raw_data();
+                const signed char* tmpptr = (const signed char*)tmp_ra[i / 4].data();
                 const signed char* kptr0 = (const signed char*)kernel_tf_a[p / 4 + p % 4].data();
 
                 int nn4 = (inch / 4) * maxk;
@@ -1012,9 +1012,9 @@ void im2col_sgemm_conv2d_int8_impl_x86(
             for (; i + 1 < size; i += 2)
             {
     #if __AVX2__
-                const signed char* tmpptr = (const signed char*)tmp[i / 4 + (i % 4) / 2].raw_data();
+                const signed char* tmpptr = (const signed char*)tmp_ra[i / 4 + (i % 4) / 2].data();
     #else
-                const signed char* tmpptr = (const signed char*)tmp[i / 2].raw_data();
+                const signed char* tmpptr = (const signed char*)tmp_ra[i / 2].data();
     #endif
                 const signed char* kptr0 = (const signed char*)kernel_tf_a[p / 4 + p % 4].data();
 
@@ -1080,9 +1080,9 @@ void im2col_sgemm_conv2d_int8_impl_x86(
             for (; i < size; i++)
             {
     #if __AVX2__
-                const signed char* tmpptr = (const signed char*)tmp[i / 4 + (i % 4) / 2 + i % 2].raw_data();
+                const signed char* tmpptr = (const signed char*)tmp_ra[i / 4 + (i % 4) / 2 + i % 2].data();
     #else
-                const signed char* tmpptr = (const signed char*)tmp[i / 2 + i % 2].raw_data();
+                const signed char* tmpptr = (const signed char*)tmp_ra[i / 2 + i % 2].data();
     #endif
                 const signed char* kptr0 = (const signed char*)kernel_tf_a[p / 4 + p % 4].data();
 
@@ -1144,7 +1144,7 @@ void im2col_sgemm_conv2d_int8_impl_x86(
     #else  // __SSE2__
             for (; i < size; i++)
             {
-                const signed char* tmpptr = (const signed char*)tmp[i].raw_data();
+                const signed char* tmpptr = (const signed char*)tmp_a[i].data();
                 const signed char* kptr0 = (const signed char*)kernel_tf_a[p].data();
 
                 int nn1 = inch * maxk;

@@ -46,10 +46,11 @@ int LReluLayer::forward_inplace(Tensor &bottom_blob, const NetOption &opt) const
     if ((opt.use_non_lib_optimize || opt.use_packing_layout) && (bottom_blob.scalar_type() == otter::ScalarType::Float || bottom_blob.scalar_type() == otter::ScalarType::Float4 || bottom_blob.scalar_type() == otter::ScalarType::Float8)) {
         auto input_output = bottom_blob[0];
         int64_t size = bottom_blob.size(2) * bottom_blob.size(3) * bottom_blob.elempack();
+        auto input_output_ra = input_output.raw_accessor<float, 3>();
             
         otter::parallel_for(0, bottom_blob.size(1), 0, [&](int64_t begin, int64_t end) {
             for (const auto q : otter::irange(begin, end)) {
-                float* ptr = (float*)input_output[q].raw_data();
+                float* ptr = (float*)input_output_ra[q].data();
 
             #if __ARM_NEON
                 int nn = size >> 2;
