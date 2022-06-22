@@ -282,7 +282,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                     });
                 } else {
                     otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
-                        for (int q = 0; q < outc; q++) {
+                        for (const auto q : otter::irange(begin, end)) {
                             const float* ptr0 = src_a[q * 2].data();
                             const float* ptr1 = src_a[q * 2 + 1].data();
                             signed char* outptr = dst_ra[q].data();
@@ -326,7 +326,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                     const float scale = scale_data_a[0];
 
                     otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
-                        for (int q = 0; q < channels; q++) {
+                        for (const auto q : otter::irange(begin, end)) {
                             const float* ptr0 = src_a[q].data();
                             signed char* outptr0 = dst_ra[q * 4].data();
                             signed char* outptr1 = dst_ra[q * 4 + 1].data();
@@ -436,7 +436,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                         });
                     } else {
                         otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
-                            for (int q = 0; q < outc; q++) {
+                            for (const auto q : otter::irange(begin, end)) {
                                 const float* ptr0 = src_a[q * 2].data();
                                 const float* ptr1 = src_a[q * 2 + 1].data();
                                 signed char* outptr = dst_ra[q].data();
@@ -480,7 +480,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                         const float scale = scale_data_a[0];
 
                         otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
-                            for (int q = 0; q < channels; q++) {
+                            for (const auto q : otter::irange(begin, end)) {
                                 const float* ptr0 = src_a[q].data();
                                 signed char* outptr0 = dst_ra[q * 4].data();
                                 signed char* outptr1 = dst_ra[q * 4 + 1].data();
