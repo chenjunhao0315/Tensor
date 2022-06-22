@@ -20,35 +20,35 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack);
 void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack);
 
 ScalarType get_update_scalarType(const ScalarType& src, int out_elempack) {
-    if (src == ScalarType::Float) {
-        if (out_elempack == 4) return ScalarType::Float4;
-        else if (out_elempack == 8) return ScalarType::Float8;
-    } else if (src == ScalarType::Byte) {
-        if (out_elempack == 4) return ScalarType::Byte4;
-        else if (out_elempack == 8) return ScalarType::Byte8;
-    } else if (src == ScalarType::Int) {
-        if (out_elempack == 4) return ScalarType::Int4;
-        else if (out_elempack == 8) return ScalarType::Int8;
-    } else if (src == ScalarType::Float4) {
-        if (out_elempack == 1) return ScalarType::Float;
-        else if (out_elempack == 8) return ScalarType::Float8;
-    } else if (src == ScalarType::Float8) {
-        if (out_elempack == 1) return ScalarType::Float;
-        else if (out_elempack == 4) return ScalarType::Float4;
-    } else if (src == ScalarType::Byte4) {
-        if (out_elempack == 1) return ScalarType::Byte;
-        else if (out_elempack == 8) return ScalarType::Byte8;
-    } else if (src == ScalarType::Byte8) {
-        if (out_elempack == 1) return ScalarType::Byte;
-        else if (out_elempack == 4) return ScalarType::Byte4;
-    } else if (src == ScalarType::Int4) {
-        if (out_elempack == 1) return ScalarType::Int;
-        else if (out_elempack == 8) return ScalarType::Int8;
-    } else if (src == ScalarType::Int8) {
-        if (out_elempack == 1) return ScalarType::Int;
-        else if (out_elempack == 4) return ScalarType::Int4;
+    constexpr auto sp1 = ScalarType::Byte;
+    constexpr auto sp4 = ScalarType::Byte4;
+    constexpr auto sp8 = ScalarType::Byte8;
+    constexpr auto ip1 = ScalarType::Int;
+    constexpr auto ip4 = ScalarType::Int4;
+    constexpr auto ip8 = ScalarType::Int8;
+    constexpr auto fp1 = ScalarType::Float;
+    constexpr auto fp4 = ScalarType::Float4;
+    constexpr auto fp8 = ScalarType::Float8;
+    constexpr auto udf = ScalarType::Undefined;
+    
+    if (out_elempack != 1 && out_elempack != 4 && out_elempack != 8) {
+      return src;
     }
-    return src;
+
+    static constexpr ScalarType _promoteTypesLookup[static_cast<int>(
+        ScalarType::NumOptions)][static_cast<int>(ScalarType::NumOptions)] = {
+        /*       sp1  xxx  xxx  ip1  xxx  fp1  xxx  xxx  sp4  ip4  fp4  sp8  ip8  fp8 */
+        /* 0 */ {udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf},
+        /* 1 */ {sp1, udf, udf, ip1, udf, fp1, udf, udf, sp1, ip1, fp1, sp1, ip1, fp1},
+        /* 2 */ {udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf},
+        /* 3 */ {udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf},
+        /* 4 */ {sp4, udf, udf, ip4, udf, fp4, udf, udf, sp4, ip4, fp4, sp4, ip4, fp4},
+        /* 5 */ {udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf},
+        /* 6 */ {udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf},
+        /* 7 */ {udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf},
+        /* 8 */ {sp8, udf, udf, ip8, udf, fp8, udf, udf, sp8, ip8, fp8, sp8, ip8, fp8},
+    };
+    return _promoteTypesLookup[static_cast<int>(out_elempack)][static_cast<int>(src)];
 }
 
 void check_convert_packing(const Tensor& src, int elempack) {
