@@ -680,10 +680,6 @@
 				76BA779327C6CCB700AA896B /* im2col.cpp */,
 				76BA779427C6CCB700AA896B /* im2col.hpp */,
 				76BA779727C6CD2300AA896B /* vol2col.hpp */,
-				765D27102847CB0800996934 /* Quantize.cpp */,
-				765D27112847CB0800996934 /* Quantize.hpp */,
-				767D3504284D2DFD00087A7F /* QuantizeX86.cpp */,
-				767D3505284D2DFD00087A7F /* QuantizeX86.hpp */,
 			);
 			name = Convolution;
 			sourceTree = "<group>";
@@ -772,6 +768,10 @@
 				76C19982283F6C0A00A5D737 /* TensorSoftmax.hpp */,
 				76C19984283F6C1D00A5D737 /* TensorSoftmaxKernel.cpp */,
 				76C19985283F6C1D00A5D737 /* TensorSoftmaxKernel.hpp */,
+				765D27102847CB0800996934 /* Quantize.cpp */,
+				765D27112847CB0800996934 /* Quantize.hpp */,
+				767D3504284D2DFD00087A7F /* QuantizeX86.cpp */,
+				767D3505284D2DFD00087A7F /* QuantizeX86.hpp */,
 				760F753E285A9E5D005F72C0 /* TensorPacking.cpp */,
 				760F753F285A9E5D005F72C0 /* TensorPacking.hpp */,
 				76D409DA285FB415000C7754 /* TensorEltwise.cpp */,

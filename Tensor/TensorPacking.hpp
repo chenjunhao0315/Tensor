@@ -12,6 +12,8 @@
 
 namespace otter {
 
+ScalarType get_update_scalarType(const ScalarType& src, int out_elempack);
+
 void convertPacking(const Tensor& src, Tensor& dst, int out_elempack);
 
 }   // end namespace otter

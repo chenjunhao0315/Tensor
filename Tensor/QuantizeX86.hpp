@@ -8,12 +8,11 @@
 #ifndef QuantizeX86_hpp
 #define QuantizeX86_hpp
 
-#if CPU_CAPABILITY_AVX2
+#if __SSE2__
 #include "VecIntrinsic.hpp"
 #include "Avx_Math.hpp"
 #include "Tensor.hpp"
 
-#if __SSE2__
 #include "sse_mathfun.hpp"
 static OTTER_ALWAYS_INLINE __m128 sigmoid_sse(__m128 inputs)
 {
@@ -201,15 +200,19 @@ static OTTER_ALWAYS_INLINE __m256 activation_avx(__m256 _v, int activation_type,
 }
 
 #endif // __AVX__
-#endif // __SSE2__
 
 namespace otter {
+
+Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pack);
+
+Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, const Tensor& bias_data, bool pack = false);
 
 Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_in_data, const Tensor& scale_out_data, const Tensor& bias_data, int activation_type, const Tensor& activation_params);
 
 
 
 }   // end namespace otter
-#endif
+
+#endif  // __SSE2__
 
 #endif /* QuantizeX86_hpp */

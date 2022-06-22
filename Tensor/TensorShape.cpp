@@ -19,12 +19,11 @@
 #include "TensorCopy.hpp"
 #include "TensorCat.hpp"
 #include "TensorFactory.hpp"
+#include "TensorPacking.hpp"
 
 namespace otter {
 
 namespace native {
-
-ScalarType get_update_scalarType(const ScalarType& src, int out_elempack);
 
 Tensor select(const Tensor& self, int64_t dim, int64_t index) {
     int64_t ndim = self.dim();
@@ -516,29 +515,6 @@ bool check_cat_type(TensorList tensors) {
         }
     }
     return true;
-}
-
-ScalarType get_update_scalarType(const ScalarType& src, int out_elempack) {
-    if (src == ScalarType::Float) {
-        if (out_elempack == 4) return ScalarType::Float4;
-        else if (out_elempack == 8) return ScalarType::Float8;
-    } else if (src == ScalarType::Byte) {
-        if (out_elempack == 4) return ScalarType::Byte4;
-        else if (out_elempack == 8) return ScalarType::Byte8;
-    } else if (src == ScalarType::Float4) {
-        if (out_elempack == 1) return ScalarType::Float;
-        else if (out_elempack == 8) return ScalarType::Float8;
-    } else if (src == ScalarType::Float8) {
-        if (out_elempack == 1) return ScalarType::Float;
-        else if (out_elempack == 4) return ScalarType::Float4;
-    } else if (src == ScalarType::Byte4) {
-        if (out_elempack == 1) return ScalarType::Byte;
-        else if (out_elempack == 8) return ScalarType::Byte8;
-    } else if (src == ScalarType::Byte8) {
-        if (out_elempack == 1) return ScalarType::Byte;
-        else if (out_elempack == 4) return ScalarType::Byte4;
-    }
-    return src;
 }
 
 Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {

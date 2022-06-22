@@ -19,12 +19,6 @@ void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack);
 
 void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack);
 
-void check_convert_packing(const Tensor& src, int elempack) {
-    OTTER_CHECK(src.scalar_type() == ScalarType::Float || src.scalar_type() == ScalarType::Float4 || src.scalar_type() == ScalarType::Float8 || src.scalar_type() == ScalarType::Byte || src.scalar_type() == ScalarType::Byte4 || src.scalar_type() == ScalarType::Byte8, "Only support Float and Byte!");
-    OTTER_CHECK(elempack == 1 || elempack == 4 || elempack == 8, "Only support elempack = 1, 4, 8 but get ", elempack);
-    OTTER_CHECK(src.dim() <= 4, "Only support dim <= 4 but get ", src.dim());
-}
-
 ScalarType get_update_scalarType(const ScalarType& src, int out_elempack) {
     if (src == ScalarType::Float) {
         if (out_elempack == 4) return ScalarType::Float4;
@@ -32,6 +26,9 @@ ScalarType get_update_scalarType(const ScalarType& src, int out_elempack) {
     } else if (src == ScalarType::Byte) {
         if (out_elempack == 4) return ScalarType::Byte4;
         else if (out_elempack == 8) return ScalarType::Byte8;
+    } else if (src == ScalarType::Int) {
+        if (out_elempack == 4) return ScalarType::Int4;
+        else if (out_elempack == 8) return ScalarType::Int8;
     } else if (src == ScalarType::Float4) {
         if (out_elempack == 1) return ScalarType::Float;
         else if (out_elempack == 8) return ScalarType::Float8;
@@ -44,8 +41,21 @@ ScalarType get_update_scalarType(const ScalarType& src, int out_elempack) {
     } else if (src == ScalarType::Byte8) {
         if (out_elempack == 1) return ScalarType::Byte;
         else if (out_elempack == 4) return ScalarType::Byte4;
+    } else if (src == ScalarType::Int4) {
+        if (out_elempack == 1) return ScalarType::Int;
+        else if (out_elempack == 8) return ScalarType::Int8;
+    } else if (src == ScalarType::Int8) {
+        if (out_elempack == 1) return ScalarType::Int;
+        else if (out_elempack == 4) return ScalarType::Int4;
     }
     return src;
+}
+
+void check_convert_packing(const Tensor& src, int elempack) {
+    auto dtype = src.scalar_type();
+    OTTER_CHECK(dtype == ScalarType::Float || dtype == ScalarType::Float4 || dtype == ScalarType::Float8 || dtype == ScalarType::Byte || dtype == ScalarType::Byte4 || dtype == ScalarType::Byte8 || dtype == ScalarType::Int || dtype == ScalarType::Int4 || dtype == ScalarType::Int8, "Only support Float and Byte!");
+    OTTER_CHECK(elempack == 1 || elempack == 4 || elempack == 8, "Only support elempack = 1, 4, 8 but get ", elempack);
+    OTTER_CHECK(src.dim() <= 4, "Only support dim <= 4 but get ", src.dim());
 }
 
 void convertPacking(const Tensor& src, Tensor& dst, int out_elempack) {
@@ -60,12 +70,12 @@ void convertPacking(const Tensor& src, Tensor& dst, int out_elempack) {
     check_convert_packing(src, out_elempack);
     
 #if __SSE2__
-    convertPackingX86(src.contiguous(), dst, out_elempack);
+    return convertPackingX86(src.contiguous(), dst, out_elempack);
 #elif __ARM_NEON__
-    convertPackingNeon(src.contiguous(), dst, out_elempack);
-#else
-    convertPackingNative(src.contiguous(), dst, out_elempack);
+    return convertPackingNeon(src.contiguous(), dst, out_elempack);
 #endif
+    return convertPackingNative(src.contiguous(), dst, out_elempack);
+
 }
 
 void convertPackingNeon(const Tensor& src, Tensor& dst, int out_elempack) {
@@ -393,7 +403,7 @@ void convertPackingX86(const Tensor& src, Tensor& dst, int out_elempack) {
         
     ScalarType out_dtype = get_update_scalarType(src.scalar_type(), out_elempack);
     
-    if (out_dtype == ScalarType::Byte || out_dtype == ScalarType::Byte4 || out_dtype == ScalarType::Byte8) {
+    if (out_dtype == ScalarType::Byte || out_dtype == ScalarType::Byte4 || out_dtype == ScalarType::Byte8 || out_dtype == ScalarType::Int || out_dtype == ScalarType::Int4 || out_dtype == ScalarType::Int8) {
         convertPackingNative(src, dst, out_elempack);
         
         return;
