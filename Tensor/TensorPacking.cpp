@@ -29,24 +29,25 @@ ScalarType get_update_scalarType(const ScalarType& src, int out_elempack) {
     constexpr auto fp1 = ScalarType::Float;
     constexpr auto fp4 = ScalarType::Float4;
     constexpr auto fp8 = ScalarType::Float8;
-    constexpr auto udf = ScalarType::Undefined;
     
-    if (out_elempack != 1 && out_elempack != 4 && out_elempack != 8) {
-      return src;
-    }
+    constexpr auto iu1 = ScalarType::Char;
+    constexpr auto iu2 = ScalarType::Short;
+    constexpr auto iu8 = ScalarType::Long;
+    constexpr auto fu8 = ScalarType::Double;
+    constexpr auto bu1 = ScalarType::Bool;
 
     static constexpr ScalarType _promoteTypesLookup[static_cast<int>(
         ScalarType::NumOptions)][static_cast<int>(ScalarType::NumOptions)] = {
-        /*       sp1  xxx  xxx  ip1  xxx  fp1  xxx  xxx  sp4  ip4  fp4  sp8  ip8  fp8 */
-        /* 0 */ {udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf},
-        /* 1 */ {sp1, udf, udf, ip1, udf, fp1, udf, udf, sp1, ip1, fp1, sp1, ip1, fp1},
-        /* 2 */ {udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf},
-        /* 3 */ {udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf},
-        /* 4 */ {sp4, udf, udf, ip4, udf, fp4, udf, udf, sp4, ip4, fp4, sp4, ip4, fp4},
-        /* 5 */ {udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf},
-        /* 6 */ {udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf},
-        /* 7 */ {udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf, udf},
-        /* 8 */ {sp8, udf, udf, ip8, udf, fp8, udf, udf, sp8, ip8, fp8, sp8, ip8, fp8},
+        /*       sp1  iu1  iu2  ip1  iu8  fp1  fu8  bu1  sp4  ip4  fp4  sp8  ip8  fp8 */
+        /* 0 */ {sp1, iu1, iu2, ip1, iu8, fp1, fu8, bu1, sp4, ip4, fp4, sp8, ip8, fp8},
+        /* 1 */ {sp1, iu1, iu2, ip1, iu8, fp1, fu8, bu1, sp1, ip1, fp1, sp1, ip1, fp1},
+        /* 2 */ {sp1, iu1, iu2, ip1, iu8, fp1, fu8, bu1, sp4, ip4, fp4, sp8, ip8, fp8},
+        /* 3 */ {sp1, iu1, iu2, ip1, iu8, fp1, fu8, bu1, sp4, ip4, fp4, sp8, ip8, fp8},
+        /* 4 */ {sp4, iu1, iu2, ip4, iu8, fp4, fu8, bu1, sp4, ip4, fp4, sp4, ip4, fp4},
+        /* 5 */ {sp1, iu1, iu2, ip1, iu8, fp1, fu8, bu1, sp4, ip4, fp4, sp8, ip8, fp8},
+        /* 6 */ {sp1, iu1, iu2, ip1, iu8, fp1, fu8, bu1, sp4, ip4, fp4, sp8, ip8, fp8},
+        /* 7 */ {sp1, iu1, iu2, ip1, iu8, fp1, fu8, bu1, sp4, ip4, fp4, sp8, ip8, fp8},
+        /* 8 */ {sp8, iu1, iu2, ip8, iu8, fp8, fu8, bu1, sp8, ip8, fp8, sp8, ip8, fp8},
     };
     return _promoteTypesLookup[static_cast<int>(out_elempack)][static_cast<int>(src)];
 }
