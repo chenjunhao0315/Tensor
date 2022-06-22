@@ -383,21 +383,7 @@ private:
         is_wrapped_number_ = false;
     }
     
-    inline void cal_elempack() {
-        auto data_type = data_type_.toScalarType();
-        switch (data_type) {
-            case ScalarType::Float8:
-            case ScalarType::Byte8:
-                elempack_ = 8;
-                break;
-            case ScalarType::Float4:
-            case ScalarType::Byte4:
-                elempack_ = 4;
-                break;
-            default:
-                elempack_ = 1;
-        }
-    }
+    void cal_elempack();
     
     bool is_contiguous_ : 1;
     bool is_channels_last_ : 1;

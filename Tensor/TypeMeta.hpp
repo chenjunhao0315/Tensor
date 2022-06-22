@@ -189,6 +189,10 @@ public:
     inline ScalarType toScalarType() const {
         return static_cast<ScalarType>(index_);
     }
+    
+    inline uint16_t index() const {
+        return index_;
+    }
 private:
     explicit TypeMeta(const uint16_t index) noexcept : index_(index) {}
     
