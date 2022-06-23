@@ -111,7 +111,7 @@ public:
 template<typename T, size_t N, typename index_t = int64_t>
 class TensorRawAccessorBase {
 public:
-    TensorRawAccessorBase(void* data_, const index_t* sizes_, const index_t* strides_, const index_t elemsize_) : data_((char*)data_), sizes_(sizes_), strides_(strides_), elemsize_(elemsize_) {}
+    TensorRawAccessorBase(void* data_, const index_t* sizes_, const index_t* strides_, const index_t elemsize_) : data_(data_), sizes_(sizes_), strides_(strides_), elemsize_(elemsize_) {}
     IntArrayRef sizes() const {
         return IntArrayRef(sizes_, N);
     }
@@ -131,7 +131,7 @@ public:
         return (T*)data_;
     }
 protected:
-    char* data_;
+    void* data_;
     const index_t* sizes_;
     const index_t* strides_;
     const index_t elemsize_;
@@ -143,11 +143,11 @@ public:
     TensorRawAccessor(void* data_, const index_t* sizes_, const index_t* strides_, const index_t elemsize_) : TensorRawAccessorBase<T, N, index_t>(data_, sizes_, strides_, elemsize_) {}
     
     TensorRawAccessor<T, N - 1, index_t> operator[](index_t i) {
-        return TensorRawAccessor<T, N - 1, index_t>(this->data_ + this->strides_[0] * i * this->elemsize_, this->sizes_ + 1, this->strides_ + 1, this->elemsize_);
+        return TensorRawAccessor<T, N - 1, index_t>((unsigned char*)this->data_ + this->strides_[0] * i * this->elemsize_, this->sizes_ + 1, this->strides_ + 1, this->elemsize_);
     }
     
     const TensorRawAccessor<T, N - 1, index_t> operator[](index_t i) const {
-        return TensorRawAccessor<T, N - 1, index_t>(this->data_ + this->strides_[0] * i * this->elemsize_, this->sizes_ + 1, this->strides_ + 1, this->elemsize_);
+        return TensorRawAccessor<T, N - 1, index_t>((unsigned char*)this->data_ + this->strides_[0] * i * this->elemsize_, this->sizes_ + 1, this->strides_ + 1, this->elemsize_);
     }
 };
 

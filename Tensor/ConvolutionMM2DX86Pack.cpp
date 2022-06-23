@@ -1671,7 +1671,7 @@ Tensor conv2d_1x1s1_sgemm_pack1to4_x86_out(
     if (weight_o.defined())
         kernel_tf = weight_o;
     else
-        convolution_im2col_sgemm_transform_kernel_pack4_sse(weight, kernel_tf, inch, outch * 4, 1, 1);
+        convolution_im2col_sgemm_transform_kernel_pack1to4_sse(weight, kernel_tf, inch, outch * 4, 1, 1);
     
     auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
     
@@ -1716,7 +1716,7 @@ Tensor conv2d_1x1s1_sgemm_pack4to1_x86_out(
     if (weight_o.defined())
         kernel_tf = weight_o;
     else
-        convolution_im2col_sgemm_transform_kernel_pack4_sse(weight, kernel_tf, inch * 4, outch, 1, 1);
+        convolution_im2col_sgemm_transform_kernel_pack4to1_sse(weight, kernel_tf, inch * 4, outch, 1, 1);
     
     auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
     
