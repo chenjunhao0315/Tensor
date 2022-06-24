@@ -36,8 +36,7 @@ ScalarType get_update_scalarType(const ScalarType& src, int out_elempack) {
     constexpr auto fu8 = ScalarType::Double;
     constexpr auto bu1 = ScalarType::Bool;
 
-    static constexpr ScalarType _promoteTypesLookup[static_cast<int>(
-        ScalarType::NumOptions)][static_cast<int>(ScalarType::NumOptions)] = {
+    static constexpr ScalarType _promoteTypesLookup[8 + 1][static_cast<int>(ScalarType::NumOptions)] = {
         /*       sp1  iu1  iu2  ip1  iu8  fp1  fu8  bu1  sp4  ip4  fp4  sp8  ip8  fp8 */
         /* 0 */ {sp1, iu1, iu2, ip1, iu8, fp1, fu8, bu1, sp4, ip4, fp4, sp8, ip8, fp8},
         /* 1 */ {sp1, iu1, iu2, ip1, iu8, fp1, fu8, bu1, sp1, ip1, fp1, sp1, ip1, fp1},

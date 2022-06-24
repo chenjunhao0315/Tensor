@@ -205,9 +205,9 @@ namespace otter {
 
 Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pack);
 
-Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, const Tensor& bias_data, bool pack = false);
+Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, const Tensor& bias_data, bool pack);
 
-Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_in_data, const Tensor& scale_out_data, const Tensor& bias_data, int activation_type, const Tensor& activation_params);
+Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_in_data, const Tensor& scale_out_data, const Tensor& bias_data, int activation_type, const Tensor& activation_params, bool pack);
 
 
 
