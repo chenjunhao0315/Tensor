@@ -21,6 +21,8 @@
 #if __SSE2__
 #include "ConvolutionMM2DX86Pack.hpp"
 #include "DepthwiseConvKernelX86Pack.hpp"
+
+#include "ConvolutionMM2DInt8X86Pack.hpp"
 #endif
 
 #if __ARM_NEON__
@@ -484,7 +486,21 @@ ConvBackend select_proper_conv_packed_backend(
             }
         } else {
             if (input.dim() == 4) {
-                if (params.use_cpu_x86(input, weight)) {
+                if (params.is_int8(input, weight)) {
+                    int out_elempack_int32 = 1;
+#if __SSE2__
+                    out_elempack_int32 = num_output % 4 == 0 ? 4 : 1;
+#endif
+                    if (params.use_cpu_x86(input, weight)) {
+                        if (elempack == 8 && out_elempack_int32 == 4) {
+                            return ConvBackend::Sgemm2dInt8X86Pack8to4;
+                        } else if (elempack == 8 && out_elempack_int32 == 1) {
+                            return ConvBackend::Sgemm2dInt8X86Pack8to1;
+                        } else if (elempack == 1 && out_elempack_int32 == 4) {
+                            return ConvBackend::Sgemm2dInt8X86Pack1to4;
+                        }
+                    }
+                } else if (params.use_cpu_x86(input, weight)) {
                     // Depthwise
                     if (params.is_depthwise(input, weight) && elempack == 4) {
                         if (kernel_h == 3 && kernel_w == 3 && stride_h == 1 && stride_w == 1) {

@@ -611,7 +611,7 @@ int ConvolutionLayer::forward_int8(const Tensor &bottom_blob, Tensor &top_blob, 
     }
     
     auto top_blob_int32 = otter::convolution(
-        bottom_blob.packing(1), weight_data, optimize_kernel, bias_data,
+        bottom_blob, weight_data, optimize_kernel, bias_data,
         params.stride,
         params.padding,
         params.dilation,

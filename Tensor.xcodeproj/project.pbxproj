@@ -35,6 +35,8 @@
 		760F7546285BC561005F72C0 /* ConvolutionMM2DNeonPack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760F7544285BC561005F72C0 /* ConvolutionMM2DNeonPack.cpp */; };
 		760F7549285C07E8005F72C0 /* DepthwiseConvKernelX86Pack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760F7547285C07E8005F72C0 /* DepthwiseConvKernelX86Pack.cpp */; };
 		760F754C285C07FF005F72C0 /* DepthwiseConvKernelNeonPack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760F754A285C07FF005F72C0 /* DepthwiseConvKernelNeonPack.cpp */; };
+		761955CB2867129100321AE8 /* ConvolutionMM2DInt8X86Pack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 761955C92867129100321AE8 /* ConvolutionMM2DInt8X86Pack.cpp */; };
+		761955CE28674FB300321AE8 /* DepthwiseConvKernelInt8X86Pack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 761955CC28674FB300321AE8 /* DepthwiseConvKernelInt8X86Pack.cpp */; };
 		761C9D022851647D00A272EF /* ConvolutionMM2DInt8Neon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 761C9D002851647D00A272EF /* ConvolutionMM2DInt8Neon.cpp */; };
 		762047A828454A0800B8BEEF /* ParallelNative.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 762047A628454A0700B8BEEF /* ParallelNative.cpp */; };
 		7620AF6E27B4060A0081C210 /* RangeFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7620AF6C27B4060A0081C210 /* RangeFactory.cpp */; };
@@ -243,6 +245,10 @@
 		760F7548285C07E8005F72C0 /* DepthwiseConvKernelX86Pack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DepthwiseConvKernelX86Pack.hpp; sourceTree = "<group>"; };
 		760F754A285C07FF005F72C0 /* DepthwiseConvKernelNeonPack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DepthwiseConvKernelNeonPack.cpp; sourceTree = "<group>"; };
 		760F754B285C07FF005F72C0 /* DepthwiseConvKernelNeonPack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DepthwiseConvKernelNeonPack.hpp; sourceTree = "<group>"; };
+		761955C92867129100321AE8 /* ConvolutionMM2DInt8X86Pack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionMM2DInt8X86Pack.cpp; sourceTree = "<group>"; };
+		761955CA2867129100321AE8 /* ConvolutionMM2DInt8X86Pack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConvolutionMM2DInt8X86Pack.hpp; sourceTree = "<group>"; };
+		761955CC28674FB300321AE8 /* DepthwiseConvKernelInt8X86Pack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DepthwiseConvKernelInt8X86Pack.cpp; sourceTree = "<group>"; };
+		761955CD28674FB300321AE8 /* DepthwiseConvKernelInt8X86Pack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DepthwiseConvKernelInt8X86Pack.hpp; sourceTree = "<group>"; };
 		761C9D002851647D00A272EF /* ConvolutionMM2DInt8Neon.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionMM2DInt8Neon.cpp; sourceTree = "<group>"; };
 		761C9D012851647D00A272EF /* ConvolutionMM2DInt8Neon.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConvolutionMM2DInt8Neon.hpp; sourceTree = "<group>"; };
 		761C9D03285215E500A272EF /* PackedData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PackedData.hpp; sourceTree = "<group>"; };
@@ -659,6 +665,8 @@
 				760F7542285BC546005F72C0 /* ConvolutionMM2DX86Pack.hpp */,
 				767D3500284C8C4200087A7F /* ConvolutionMM2DInt8X86.cpp */,
 				767D3501284C8C4200087A7F /* ConvolutionMM2DInt8X86.hpp */,
+				761955C92867129100321AE8 /* ConvolutionMM2DInt8X86Pack.cpp */,
+				761955CA2867129100321AE8 /* ConvolutionMM2DInt8X86Pack.hpp */,
 				76AA483027F988D200F0F3C6 /* ConvolutionMM2DTranspose.cpp */,
 				76AA483127F988D200F0F3C6 /* ConvolutionMM2DTranspose.hpp */,
 				76B4B5BB282D6B9200BE0949 /* ConvolutionMM2DTransposeNeon.cpp */,
@@ -671,6 +679,8 @@
 				76AA466527F8859300F0F3C6 /* DepthwiseConvKernelX86.hpp */,
 				760F7547285C07E8005F72C0 /* DepthwiseConvKernelX86Pack.cpp */,
 				760F7548285C07E8005F72C0 /* DepthwiseConvKernelX86Pack.hpp */,
+				761955CC28674FB300321AE8 /* DepthwiseConvKernelInt8X86Pack.cpp */,
+				761955CD28674FB300321AE8 /* DepthwiseConvKernelInt8X86Pack.hpp */,
 				76B4B7BA282D848800BE0949 /* DepthwiseConvTransposeKernelNeon.cpp */,
 				76B4B7BB282D848800BE0949 /* DepthwiseConvTransposeKernelNeon.hpp */,
 				76BA778A27C66DC000AA896B /* DilatedConvolution.cpp */,
@@ -1128,6 +1138,7 @@
 				76927B3527D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp in Sources */,
 				7651B6C62805CA77006710F5 /* LineDetection.cpp in Sources */,
 				7687217E27C2A850006640CF /* ConvolutionLayer.cpp in Sources */,
+				761955CB2867129100321AE8 /* ConvolutionMM2DInt8X86Pack.cpp in Sources */,
 				76E6C54E27A53AAA0036A26F /* TensorResize.cpp in Sources */,
 				76CF3F3F27FC92A8009BF242 /* EltwiseLayer.cpp in Sources */,
 				76F336F227AF133300E3AEF1 /* TensorConversion.cpp in Sources */,
@@ -1145,6 +1156,7 @@
 				767B826C284681A800969C9F /* Relu6Layer.cpp in Sources */,
 				762E3B3327BB79950075F983 /* Unfold2D.cpp in Sources */,
 				7603BA2527E1DB9C00EA42F1 /* hershey_fonts.cpp in Sources */,
+				761955CE28674FB300321AE8 /* DepthwiseConvKernelInt8X86Pack.cpp in Sources */,
 				760382CA27BFFD7600CD599F /* Exception.cpp in Sources */,
 				76AA4A0527FB35FB00F0F3C6 /* TensorTransform.cpp in Sources */,
 				7620AF7E27B550200081C210 /* TensorShape.cpp in Sources */,
