@@ -307,7 +307,7 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
     }
     
     if (elempack == 4 && out_elempack == 4) {
-        if (in_channels == groups) {
+        if (in_channels == groups && groups == out_channels) {
             int maxk = kernel_width * kernel_height;
             
             weight_data_tf = weight_data.view({groups, maxk}).packing(4);
@@ -321,7 +321,7 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
     }
     
     if (elempack == 4 && out_elempack == 1) {
-        if (in_channels == groups) {
+        if (in_channels == groups && groups == out_channels) {
             int maxk = kernel_width * kernel_height;
             
             weight_data_tf = weight_data.view({groups * 4, maxk}).packing(4);
@@ -335,7 +335,7 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
     }
     
     if (elempack == 1 && out_elempack == 4) {
-        if (in_channels == groups) {
+        if (in_channels == groups && groups == out_channels) {
             int maxk = kernel_width * kernel_height;
             
             weight_data_tf = weight_data.view({groups * 4, maxk}).packing(4);
@@ -351,7 +351,7 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
     }
     
     if (elempack == 1 && out_elempack == 1) {
-        if (in_channels == groups) {
+        if (in_channels == groups && groups == out_channels) {
             return 0;
         }
         if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
@@ -389,7 +389,7 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
     }
     
     if (elempack == 4 && out_elempack == 4) {
-        if (in_channels == groups) {
+        if (in_channels == groups && groups == out_channels) {
             int maxk = kernel_width * kernel_height;
             
             weight_data_tf = weight_data.view({groups, maxk}).packing(4);
@@ -403,7 +403,7 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
     }
     
     if (elempack == 4 && out_elempack == 1) {
-        if (in_channels == groups) {
+        if (in_channels == groups && groups == out_channels) {
             int maxk = kernel_width * kernel_height;
             
             weight_data_tf = weight_data.view({groups * 4, maxk}).packing(4);
@@ -417,7 +417,7 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
     }
     
     if (elempack == 1 && out_elempack == 4) {
-        if (in_channels == groups) {
+        if (in_channels == groups && groups == out_channels) {
             int maxk = kernel_width * kernel_height;
             
             weight_data_tf = weight_data.view({groups * 4, maxk}).packing(4);
@@ -431,7 +431,7 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
     }
     
     if (elempack == 1 && out_elempack == 1) {
-        if (in_channels == groups) {
+        if (in_channels == groups && groups == out_channels) {
             return 0;
         }
         if (kernel_width == 3 && kernel_height == 3 && stride_width == 1 && stride_height == 1) {
@@ -439,31 +439,6 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
         }
         otter::convolution_im2col_sgemm_transform_kernel_x86(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
     }
-#endif
-    
-    return 0;
-}
-
-int ConvolutionLayer::create_pipeline_int8(const NetOption& opt) {
-    scale_in_data = otter::empty({out_channels}, otter::ScalarType::Float);
-    auto scale_in_data_a = scale_in_data.accessor<float, 1>();
-    auto input_int8_scales_a = bottom_blob_int8_scales.accessor<float, 1>();
-    auto weight_data_int8_scales_a = weight_data_int8_scales.accessor<float, 1>();
-    for (const auto p : otter::irange(0, out_channels)) {
-        float scale_in;
-        if (weight_data_int8_scales_a[p] == 0)
-            scale_in = 0;
-        else
-            scale_in = 1.f / (input_int8_scales_a[0] * weight_data_int8_scales_a[p]);
-
-        scale_in_data_a[p] = scale_in;
-    }
-    
-#if __SSE2__
-    if (in_channels == groups) {
-        return 0;
-    }
-    otter::convolution_im2col_sgemm_transform_kernel_int8_sse(weight_data, weight_sgemm_int8_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
 #endif
     
     return 0;
@@ -493,7 +468,7 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
     }
     
     if (elempack == 4 && out_elempack == 4) {
-        if (in_channels == groups) {
+        if (in_channels == groups && groups == out_channels) {
             optimize_kernel = weight_data_tf;
         } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
             optimize_kernel = weight_sgemm_data;
@@ -501,7 +476,7 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
     }
     
     if (elempack == 1 && out_elempack == 4) {
-        if (in_channels == groups) {
+        if (in_channels == groups && groups == out_channels) {
             optimize_kernel = weight_data_tf;
         } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
             optimize_kernel = weight_sgemm_data;
@@ -517,7 +492,7 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
     }
     
     if (elempack == 4 && out_elempack == 1) {
-        if (in_channels == groups) {
+        if (in_channels == groups && groups == out_channels) {
             optimize_kernel = weight_data_tf;
         } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
             optimize_kernel = weight_sgemm_data;
@@ -588,6 +563,43 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
     return 0;
 }
 
+int ConvolutionLayer::create_pipeline_int8(const NetOption& opt) {
+    scale_in_data = otter::empty({out_channels}, otter::ScalarType::Float);
+    auto scale_in_data_a = scale_in_data.accessor<float, 1>();
+    auto input_int8_scales_a = bottom_blob_int8_scales.accessor<float, 1>();
+    auto weight_data_int8_scales_a = weight_data_int8_scales.accessor<float, 1>();
+    for (const auto p : otter::irange(0, out_channels)) {
+        float scale_in;
+        if (weight_data_int8_scales_a[p] == 0)
+            scale_in = 0;
+        else
+            scale_in = 1.f / (input_int8_scales_a[0] * weight_data_int8_scales_a[p]);
+
+        scale_in_data_a[p] = scale_in;
+    }
+    
+#if __SSE2__
+    if (in_channels == groups && groups == out_channels) {
+        int elempack = 1;
+        if (opt.use_packing_layout) {
+            elempack = in_channels % 8 == 0 ? 8 : 1;
+        }
+        
+        if (elempack == 8) {
+            int maxk = kernel_width * kernel_height;
+            weight_data_tf = weight_data.view({groups, maxk}).packing(8);
+        } else if (elempack == 1) {
+            weight_data_tf = weight_data;
+        }
+        
+        return 0;
+    }
+    otter::convolution_im2col_sgemm_transform_kernel_int8_sse(weight_data, weight_sgemm_int8_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
+#endif
+    
+    return 0;
+}
+
 int ConvolutionLayer::forward_int8(const Tensor &bottom_blob, Tensor &top_blob, const NetOption &opt) const {
     
     Tensor optimize_kernel;
@@ -603,19 +615,26 @@ int ConvolutionLayer::forward_int8(const Tensor &bottom_blob, Tensor &top_blob, 
     params.transposed = false;
     params.benchmark = false;
     params.groups    = groups;
-    
-    if (params.use_cpu_x86(bottom_blob, weight_data) && false) {
-        if (weight_data.size(3) == 1 && weight_data.size(2) == 1 && params.stride[1] == 1 && params.stride[0] == 1) {
-            optimize_kernel = weight_sgemm_int8_data;
-        }
-    }
-    
+        
     auto dtype = bottom_blob.scalar_type();
     Tensor bottom_blob_int8;
     if (dtype != ScalarType::Byte && dtype != ScalarType::Byte4 && dtype != ScalarType::Byte8)
         bottom_blob_int8 = otter::quantize_to_int8(bottom_blob, bottom_blob_int8_scales, opt.use_packing_layout);
     else
         bottom_blob_int8 = bottom_blob;
+    
+    int elempack = bottom_blob_int8.elempack();
+    
+    if (params.use_cpu_x86(bottom_blob, weight_data)) {
+        // depthwise
+        if (params.is_depthwise(bottom_blob, weight_data)) {
+            optimize_kernel = weight_data_tf;
+        } else if (elempack == 1) { // general
+            if (weight_data.size(3) == 1 && weight_data.size(2) == 1 && params.stride[1] == 1 && params.stride[0] == 1) {
+                optimize_kernel = weight_sgemm_int8_data;
+            }
+        }
+    }
     
     auto top_blob_int32 = otter::convolution(
         bottom_blob_int8, weight_data, optimize_kernel, bias_data,
