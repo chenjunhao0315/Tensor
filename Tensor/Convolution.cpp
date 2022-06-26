@@ -502,10 +502,19 @@ ConvBackend select_proper_conv_packed_backend(
                     
                     if (params.use_cpu_x86(input, weight)) {
                         if (elempack == 8 && out_elempack_int32 == 4) {
+                            if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                                return ConvBackend::Sgemm2dInt8X86Pack8to4;
+                            }
                             return ConvBackend::Sgemm2dInt8X86Pack8to4;
                         } else if (elempack == 8 && out_elempack_int32 == 1) {
+                            if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                                return ConvBackend::Sgemm2dInt8X86Pack8to1;
+                            }
                             return ConvBackend::Sgemm2dInt8X86Pack8to1;
                         } else if (elempack == 1 && out_elempack_int32 == 4) {
+                            if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                                return ConvBackend::Sgemm2dInt8X86Pack1to4;
+                            }
                             return ConvBackend::Sgemm2dInt8X86Pack1to4;
                         }
                     }
@@ -671,11 +680,17 @@ Tensor convolution_packed(
             
 #if __SSE2__
         case ConvBackend::Sgemm2dInt8X86Pack1to4:
-            output = otter::sgemm_conv2d_int8_pack1to4_x86(input, input_int8_scales, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+            output = otter::sgemm_conv2d_int8_pack1to4_x86(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
         case ConvBackend::Sgemm2dInt8X86Pack8to4:
-            output = otter::sgemm_conv2d_int8_pack8to4_x86(input, input_int8_scales, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+            output = otter::sgemm_conv2d_int8_pack8to4_x86(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
         case ConvBackend::Sgemm2dInt8X86Pack8to1:
-            output = otter::sgemm_conv2d_int8_pack8to1_x86(input, input_int8_scales, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+            output = otter::sgemm_conv2d_int8_pack8to1_x86(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dInt8X86Pack1to4_1x1s1:
+            output = otter::sgemm_conv2d_1x1s1_int8_pack1to4_x86(input, weight, weight_o, weight_int8_scales, bias, padding); break;
+        case ConvBackend::Sgemm2dInt8X86Pack8to4_1x1s1:
+            output = otter::sgemm_conv2d_1x1s1_int8_pack8to4_x86(input, weight, weight_o, weight_int8_scales, bias, padding); break;
+        case ConvBackend::Sgemm2dInt8X86Pack8to1_1x1s1:
+            output = otter::sgemm_conv2d_1x1s1_int8_pack8to1_x86(input, weight, weight_o, weight_int8_scales, bias, padding); break;
         case ConvBackend::DepthwiseInt8X86Pack8:
             output = otter::depthwise_conv2d_int8_x86_pack8(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
         case ConvBackend::DepthwiseInt8X86Pack1:

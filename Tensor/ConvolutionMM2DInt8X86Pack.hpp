@@ -46,7 +46,6 @@ void im2col_sgemm_conv2d_int8_pack8to4_impl_x86(
 
 Tensor& sgemm_conv2d_int8_pack1to4_x86_out(
     const Tensor& self,
-    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& weight_int8_scales,
@@ -59,7 +58,6 @@ Tensor& sgemm_conv2d_int8_pack1to4_x86_out(
     
 Tensor sgemm_conv2d_int8_pack1to4_x86(
     const Tensor& self,
-    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& weight_int8_scales,
@@ -71,7 +69,6 @@ Tensor sgemm_conv2d_int8_pack1to4_x86(
 
 Tensor& sgemm_conv2d_int8_pack8to1_x86_out(
     const Tensor& self,
-    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& weight_int8_scales,
@@ -84,7 +81,6 @@ Tensor& sgemm_conv2d_int8_pack8to1_x86_out(
     
 Tensor sgemm_conv2d_int8_pack8to1_x86(
     const Tensor& self,
-    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& weight_int8_scales,
@@ -96,7 +92,6 @@ Tensor sgemm_conv2d_int8_pack8to1_x86(
 
 Tensor& sgemm_conv2d_int8_pack8to4_x86_out(
     const Tensor& self,
-    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& weight_int8_scales,
@@ -109,7 +104,6 @@ Tensor& sgemm_conv2d_int8_pack8to4_x86_out(
     
 Tensor sgemm_conv2d_int8_pack8to4_x86(
     const Tensor& self,
-    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& weight_int8_scales,
@@ -118,6 +112,57 @@ Tensor sgemm_conv2d_int8_pack8to4_x86(
     IntArrayRef stride,
     IntArrayRef padding,
     IntArrayRef dilation);
+
+Tensor& sgemm_conv2d_1x1s1_int8_pack1to4_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+    
+Tensor sgemm_conv2d_1x1s1_int8_pack1to4_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor& sgemm_conv2d_1x1s1_int8_pack8to1_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+    
+Tensor sgemm_conv2d_1x1s1_int8_pack8to1_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor& sgemm_conv2d_1x1s1_int8_pack8to4_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+    
+Tensor sgemm_conv2d_1x1s1_int8_pack8to4_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    IntArrayRef padding);
 
 #endif  // __SSE2__
 

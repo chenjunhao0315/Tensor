@@ -18,6 +18,8 @@
 #if __SSE2__
 #include "ConvolutionMM2DX86Pack.hpp"
 #include "DepthwiseConvKernelX86Pack.hpp"
+
+#include "ConvolutionMM2DInt8X86Pack.hpp"
 #endif
 
 #if __ARM_NEON__
@@ -579,12 +581,14 @@ int ConvolutionLayer::create_pipeline_int8(const NetOption& opt) {
     }
     
 #if __SSE2__
+    int elempack = 1;
+    int out_elempack = 1;
+    if (opt.use_packing_layout) {
+        elempack = in_channels % 8 == 0 ? 8 : 1;
+        out_elempack = out_channels % 4 == 0 ? 4 : 1;
+    }
+    
     if (in_channels == groups && groups == out_channels) {
-        int elempack = 1;
-        if (opt.use_packing_layout) {
-            elempack = in_channels % 8 == 0 ? 8 : 1;
-        }
-        
         if (elempack == 8) {
             int maxk = kernel_width * kernel_height;
             weight_data_tf = weight_data.view({groups, maxk}).packing(8);
@@ -594,7 +598,22 @@ int ConvolutionLayer::create_pipeline_int8(const NetOption& opt) {
         
         return 0;
     }
-    otter::convolution_im2col_sgemm_transform_kernel_int8_sse(weight_data, weight_sgemm_int8_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
+    
+    if (elempack == 8 && out_elempack == 4) {
+        otter::convolution_im2col_sgemm_transform_kernel_pack8to4_int8_x86(weight_data, weight_sgemm_int8_data, in_channels, out_channels, kernel_width, kernel_height);
+    }
+    
+    if (elempack == 8 && out_elempack == 1) {
+        otter::convolution_im2col_sgemm_transform_kernel_pack8to1_int8_x86(weight_data, weight_sgemm_int8_data, in_channels, out_channels, kernel_width, kernel_height);
+    }
+    
+    if (elempack == 1 && out_elempack == 4) {
+        otter::convolution_im2col_sgemm_transform_kernel_pack1to4_int8_x86(weight_data, weight_sgemm_int8_data, in_channels, out_channels, kernel_width, kernel_height);
+    }
+    
+    if (elempack == 1 && out_elempack == 1) {
+        otter::convolution_im2col_sgemm_transform_kernel_int8_sse(weight_data, weight_sgemm_int8_data, in_channels, out_channels, kernel_width, kernel_height);
+    }
 #endif
     
     return 0;
@@ -624,13 +643,28 @@ int ConvolutionLayer::forward_int8(const Tensor &bottom_blob, Tensor &top_blob, 
         bottom_blob_int8 = bottom_blob;
     
     int elempack = bottom_blob_int8.elempack();
+    int out_elempack_int32 = 1;
+    
+#if __SSE2__
+    if (opt.use_packing_layout) {
+        out_elempack_int32 = out_channels % 4 == 0 ? 4 : 1;
+    }
+#elif __ARM_NEON__
+    
+#endif
     
     if (params.use_cpu_x86(bottom_blob, weight_data)) {
         // depthwise
         if (params.is_depthwise(bottom_blob, weight_data)) {
             optimize_kernel = weight_data_tf;
-        } else if (elempack == 1) { // general
-            if (weight_data.size(3) == 1 && weight_data.size(2) == 1 && params.stride[1] == 1 && params.stride[0] == 1) {
+        } else {
+            if (elempack == 8 && out_elempack_int32 == 4) {
+                optimize_kernel = weight_sgemm_int8_data;
+            } else if (elempack == 8 && out_elempack_int32 == 1) {
+                optimize_kernel = weight_sgemm_int8_data;
+            } else if (elempack == 1 && out_elempack_int32 == 4) {
+                optimize_kernel = weight_sgemm_int8_data;
+            } else if (elempack == 1 && out_elempack_int32 == 1) { // general
                 optimize_kernel = weight_sgemm_int8_data;
             }
         }
