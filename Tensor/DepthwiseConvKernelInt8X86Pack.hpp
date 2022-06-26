@@ -37,6 +37,29 @@ Tensor depthwise_conv2d_int8_x86_pack8(
     IntArrayRef padding,
     IntArrayRef dilation);
 
+Tensor& depthwise_conv2d_int8_x86_pack1_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation,
+    Tensor& output);
+
+Tensor depthwise_conv2d_int8_x86_pack1(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation);
+
 #endif
 
 }   // end namespace otter

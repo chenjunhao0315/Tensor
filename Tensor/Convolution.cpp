@@ -23,6 +23,7 @@
 #include "DepthwiseConvKernelX86Pack.hpp"
 
 #include "ConvolutionMM2DInt8X86Pack.hpp"
+#include "DepthwiseConvKernelInt8X86Pack.hpp"
 #endif
 
 #if __ARM_NEON__
@@ -491,6 +492,14 @@ ConvBackend select_proper_conv_packed_backend(
 #if __SSE2__
                     out_elempack_int32 = num_output % 4 == 0 ? 4 : 1;
 #endif
+                    if (params.is_depthwise(input, weight)) {
+                        if (elempack == 8) {
+                            return ConvBackend::DepthwiseInt8X86Pack8;
+                        } else if (elempack == 1) {
+                            return ConvBackend::DepthwiseInt8X86Pack1;
+                        }
+                    }
+                    
                     if (params.use_cpu_x86(input, weight)) {
                         if (elempack == 8 && out_elempack_int32 == 4) {
                             return ConvBackend::Sgemm2dInt8X86Pack8to4;
@@ -659,6 +668,19 @@ Tensor convolution_packed(
         case ConvBackend::Conv2dNeonPack1to4_3x3s2:
             output = otter::conv2d_3x3s2_pack1to4_neon(input, weight, weight_o, bias, padding); break;
 #endif  // __ARN_NEON__
+            
+#if __SSE2__
+        case ConvBackend::Sgemm2dInt8X86Pack1to4:
+            output = otter::sgemm_conv2d_int8_pack1to4_x86(input, input_int8_scales, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dInt8X86Pack8to4:
+            output = otter::sgemm_conv2d_int8_pack8to4_x86(input, input_int8_scales, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dInt8X86Pack8to1:
+            output = otter::sgemm_conv2d_int8_pack8to1_x86(input, input_int8_scales, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::DepthwiseInt8X86Pack8:
+            output = otter::depthwise_conv2d_int8_x86_pack8(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::DepthwiseInt8X86Pack1:
+            output = otter::depthwise_conv2d_int8_x86_pack1(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+#endif
         default: {
             output = convolution(input.packing(1), weight, weight_o, bias, stride, padding, dilation, transposed, output_padding, groups, false, input_int8_scales, weight_int8_scales);
         }

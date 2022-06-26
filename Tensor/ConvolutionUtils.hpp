@@ -96,7 +96,8 @@ enum class ConvBackend {
     Sgemm2dInt8X86Pack8to4,
     Sgemm2dInt8X86Pack8to1,
     Sgemm2dInt8X86Pack1to4,
-    DepthwiseInt8X86Pack4,
+    DepthwiseInt8X86Pack8,
+    DepthwiseInt8X86Pack1,
     Overrideable
 };
 

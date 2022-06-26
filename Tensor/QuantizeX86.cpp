@@ -1444,7 +1444,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
             
             dst = otter::empty({outh, w}, get_update_scalarType(otter::ScalarType::Byte, out_elempack));
             
-            auto src_a = src.accessor<int, 2>();
+            auto src_a = src.accessor<int, 2, 4>();
             auto dst_ra = dst.raw_accessor<signed char, 2>();
             
             if (out_elempack == 8) {
@@ -1589,7 +1589,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
             
             dst = otter::empty({outc, h, w}, get_update_scalarType(otter::ScalarType::Byte, out_elempack));
             
-            auto src_a = src.accessor<int, 3>();
+            auto src_a = src.accessor<int, 3, 4>();
             auto dst_ra = dst.raw_accessor<signed char, 3>();
             
             if (out_elempack == 8) {
@@ -1735,7 +1735,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
             dst = otter::empty({batchsize, outc, h, w}, get_update_scalarType(otter::ScalarType::Byte, out_elempack));
             
             for (const auto b : otter::irange(0, batchsize)) {
-                auto src_a = src.accessor<int, 4>()[b];
+                auto src_a = src.accessor<int, 4, 4>()[b];
                 auto dst_ra = dst.raw_accessor<signed char, 4>()[b];
                 
                 if (out_elempack == 8) {
@@ -1871,6 +1871,8 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                 }
             }
         }
+        
+        return dst;
     }
     
     if (dims == 1) {

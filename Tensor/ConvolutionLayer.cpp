@@ -604,21 +604,28 @@ int ConvolutionLayer::forward_int8(const Tensor &bottom_blob, Tensor &top_blob, 
     params.benchmark = false;
     params.groups    = groups;
     
-    if (params.use_cpu_x86(bottom_blob, weight_data)) {
+    if (params.use_cpu_x86(bottom_blob, weight_data) && false) {
         if (weight_data.size(3) == 1 && weight_data.size(2) == 1 && params.stride[1] == 1 && params.stride[0] == 1) {
             optimize_kernel = weight_sgemm_int8_data;
         }
     }
     
+    auto dtype = bottom_blob.scalar_type();
+    Tensor bottom_blob_int8;
+    if (dtype != ScalarType::Byte && dtype != ScalarType::Byte4 && dtype != ScalarType::Byte8)
+        bottom_blob_int8 = otter::quantize_to_int8(bottom_blob, bottom_blob_int8_scales, opt.use_packing_layout);
+    else
+        bottom_blob_int8 = bottom_blob;
+    
     auto top_blob_int32 = otter::convolution(
-        bottom_blob, weight_data, optimize_kernel, bias_data,
+        bottom_blob_int8, weight_data, optimize_kernel, bias_data,
         params.stride,
         params.padding,
         params.dilation,
         false,      // transpose
         params.output_padding,
         groups,
-        false,
+        opt.use_packing_layout,
         bottom_blob_int8_scales,
         weight_data_int8_scales
     );
@@ -626,9 +633,9 @@ int ConvolutionLayer::forward_int8(const Tensor &bottom_blob, Tensor &top_blob, 
     bool use_int8_requantize = int8_scale_term > 100;
     
     if (use_int8_requantize) {
-        top_blob = requantize_from_int32_to_int8(top_blob_int32, scale_in_data, top_blob_int8_scales, bias_data, activation_type, activation_params);
+        top_blob = requantize_from_int32_to_int8(top_blob_int32, scale_in_data, top_blob_int8_scales, bias_data, activation_type, activation_params, opt.use_packing_layout);
     } else {
-        top_blob = dequantize_from_int32(top_blob_int32, scale_in_data, bias_data);
+        top_blob = dequantize_from_int32(top_blob_int32, scale_in_data, bias_data, opt.use_packing_layout);
 
         if (activation) {
             activation->forward_inplace(top_blob, opt);
