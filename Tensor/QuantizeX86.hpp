@@ -82,7 +82,7 @@ static OTTER_ALWAYS_INLINE __m128 activation_sse(__m128 _v, int activation_type,
     case 2:
     {
         // Leaky relu
-        return lrelu_sse(_v, activation_params.item().toFloat());
+        return lrelu_sse(_v, activation_params.data_ptr<float>()[0]);
     }
     case 3:
     {

@@ -49,7 +49,6 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
     int elempack = src.elempack();
     
     int scale_data_size = scale_data.size(0);
-    auto scale_data_a = scale_data.accessor<float, 1>();
     const float* scale_data_ptr = (const float*)scale_data.data_ptr();
     
     Tensor dst;
@@ -70,7 +69,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
             signed char* dst_ptr = (signed char*)dst.data_ptr();
             
             if (scale_data_size == 1) {
-                const float scale = scale_data_a[0];
+                const float scale = scale_data_ptr[0];
                 
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
@@ -89,10 +88,10 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                         const float* ptr0 = (const float*)src_ptr + i * 4;
                         signed char* outptr = (signed char*)dst_ptr + i * 4;
                         
-                        outptr[0] = float2int8(ptr0[0] * scale_data_a[i * 4]);
-                        outptr[1] = float2int8(ptr0[1] * scale_data_a[i * 4 + 1]);
-                        outptr[2] = float2int8(ptr0[2] * scale_data_a[i * 4 + 2]);
-                        outptr[3] = float2int8(ptr0[3] * scale_data_a[i * 4 + 3]);
+                        outptr[0] = float2int8(ptr0[0] * scale_data_ptr[i * 4]);
+                        outptr[1] = float2int8(ptr0[1] * scale_data_ptr[i * 4 + 1]);
+                        outptr[2] = float2int8(ptr0[2] * scale_data_ptr[i * 4 + 2]);
+                        outptr[3] = float2int8(ptr0[3] * scale_data_ptr[i * 4 + 3]);
                     }
                 });
             }
@@ -109,7 +108,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
             
             if (out_elempack == 8) {
                 if (scale_data_size == 1) {
-                    __m128 _scale = _mm_set1_ps(scale_data_a[0]);
+                    __m128 _scale = _mm_set1_ps(scale_data_ptr[0]);
                     
                     otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
                         for (const auto i : otter::irange(begin, end)) {
@@ -190,7 +189,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                 }
             } else if (out_elempack == 1) {
                 if (scale_data_size == 1) {
-                    const float scale = scale_data_a[0];
+                    const float scale = scale_data_ptr[0];
                     
                     otter::parallel_for(0, h, 0, [&](int64_t begin, int64_t end) {
                         for (const auto i : otter::irange(begin, end)) {
@@ -223,10 +222,10 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                             signed char* outptr2 = dst_ra[i * 4 + 2].data();
                             signed char* outptr3 = dst_ra[i * 4 + 3].data();
                             
-                            const float s0 = scale_data_a[i * 4];
-                            const float s1 = scale_data_a[i * 4 + 1];
-                            const float s2 = scale_data_a[i * 4 + 2];
-                            const float s3 = scale_data_a[i * 4 + 3];
+                            const float s0 = scale_data_ptr[i * 4];
+                            const float s1 = scale_data_ptr[i * 4 + 1];
+                            const float s2 = scale_data_ptr[i * 4 + 2];
+                            const float s3 = scale_data_ptr[i * 4 + 3];
                             
                             for (int j = 0; j < w; j++) {
                                 outptr0[0] = float2int8(ptr0[0] * s0);
@@ -259,7 +258,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
             
             if (out_elempack == 8) {
                 if (scale_data_size == 1) {
-                    __m128 _scale = _mm_set1_ps(scale_data_a[0]);
+                    __m128 _scale = _mm_set1_ps(scale_data_ptr[0]);
 
                     otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
                         for (const auto q : otter::irange(begin, end)) {
@@ -340,7 +339,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                 }
             } else if (out_elempack == 1) {
                 if (scale_data_size == 1) {
-                    const float scale = scale_data_a[0];
+                    const float scale = scale_data_ptr[0];
 
                     otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
                         for (const auto q : otter::irange(begin, end)) {
@@ -373,10 +372,10 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                             signed char* outptr2 = dst_ra[q * 4 + 2].data();
                             signed char* outptr3 = dst_ra[q * 4 + 3].data();
 
-                            const float s0 = scale_data_a[q * 4];
-                            const float s1 = scale_data_a[q * 4 + 1];
-                            const float s2 = scale_data_a[q * 4 + 2];
-                            const float s3 = scale_data_a[q * 4 + 3];
+                            const float s0 = scale_data_ptr[q * 4];
+                            const float s1 = scale_data_ptr[q * 4 + 1];
+                            const float s2 = scale_data_ptr[q * 4 + 2];
+                            const float s3 = scale_data_ptr[q * 4 + 3];
 
                             for (int i = 0; i < size; i++) {
                                 outptr0[0] = float2int8(ptr0[0] * s0);
@@ -411,7 +410,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                 
                 if (out_elempack == 8) {
                     if (scale_data_size == 1) {
-                        __m128 _scale = _mm_set1_ps(scale_data_a[0]);
+                        __m128 _scale = _mm_set1_ps(scale_data_ptr[0]);
 
                         otter::parallel_for(0, outc, 0, [&](int64_t begin, int64_t end) {
                             for (const auto q : otter::irange(begin, end)) {
@@ -492,7 +491,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                     }
                 } else if (out_elempack == 1) {
                     if (scale_data_size == 1) {
-                        const float scale = scale_data_a[0];
+                        const float scale = scale_data_ptr[0];
 
                         otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
                             for (const auto q : otter::irange(begin, end)) {
@@ -525,10 +524,10 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                                 signed char* outptr2 = dst_ra[q * 4 + 2].data();
                                 signed char* outptr3 = dst_ra[q * 4 + 3].data();
 
-                                const float s0 = scale_data_a[q * 4];
-                                const float s1 = scale_data_a[q * 4 + 1];
-                                const float s2 = scale_data_a[q * 4 + 2];
-                                const float s3 = scale_data_a[q * 4 + 3];
+                                const float s0 = scale_data_ptr[q * 4];
+                                const float s1 = scale_data_ptr[q * 4 + 1];
+                                const float s2 = scale_data_ptr[q * 4 + 2];
+                                const float s3 = scale_data_ptr[q * 4 + 3];
 
                                 for (int i = 0; i < size; i++) {
                                     outptr0[0] = float2int8(ptr0[0] * s0);
@@ -561,7 +560,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
         signed char* outptr = (signed char*)dst.data_ptr();
         
         if (scale_data_size == 1) {
-            const float scale = scale_data_a[0];
+            const float scale = scale_data_ptr[0];
 
             otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                 for (const auto i : otter::irange(begin, end)) {
@@ -571,7 +570,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
         } else {
             otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                 for (const auto i : otter::irange(begin, end)) {
-                    outptr[i] = float2int8(ptr[i] * scale_data_a[i]);
+                    outptr[i] = float2int8(ptr[i] * scale_data_ptr[i]);
                 }
             });
         }
@@ -587,7 +586,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                 const float* ptr0 = src_a[i].data();
                 signed char* outptr0 = (signed char*)dst_a[i].data();
 
-                const float scale = scale_data_size == 1 ? scale_data_a[0] : scale_data_a[i];
+                const float scale = scale_data_size == 1 ? scale_data_ptr[0] : scale_data_ptr[i];
 
                 for (int j = 0; j < w; j++) {
                     *outptr0++ = float2int8(*ptr0++ * scale);
@@ -608,7 +607,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                 const float* ptr = src_a[q].data();
                 signed char* outptr = (signed char*)dst_a[q].data();
 
-                const float scale = scale_data_size == 1 ? scale_data_a[0] : scale_data_a[q];
+                const float scale = scale_data_size == 1 ? scale_data_ptr[0] : scale_data_ptr[q];
 
                 for (int i = 0; i < size; i++) {
                     outptr[i] = float2int8(ptr[i] * scale);
@@ -631,7 +630,7 @@ Tensor quantize_to_int8_x86(const Tensor& src, const Tensor& scale_data, bool pa
                     const float* ptr = src_a[q].data();
                     signed char* outptr = (signed char*)dst_a[q].data();
 
-                    const float scale = scale_data_size == 1 ? scale_data_a[0] : scale_data_a[q];
+                    const float scale = scale_data_size == 1 ? scale_data_ptr[0] : scale_data_ptr[q];
 
                     for (int i = 0; i < size; i++) {
                         outptr[i] = float2int8(ptr[i] * scale);
@@ -656,11 +655,9 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
     Tensor dst;
     
     int scale_data_size = scale_data.size(0);
-    auto scale_data_a = scale_data.accessor<float, 1>();
     const float* scale_data_ptr = (const float*)scale_data.data_ptr();
     
     int bias_data_size = bias_data.size(0);
-    auto bias_data_a = bias_data.accessor<float, 1>();
     const float* bias_data_ptr = (const float*)bias_data.data_ptr();
     
     if (elempack == 4) {
@@ -673,7 +670,7 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
             float* dstptr = (float*)dst.data_ptr();
             
             if (scale_data_size == 1) {
-                __m128 _scale = _mm_set1_ps(scale_data_a[0]);
+                __m128 _scale = _mm_set1_ps(scale_data_ptr[0]);
 
                 if (bias_data_size == 0) {
                     otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
@@ -687,7 +684,7 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                         }
                     });
                 } else if (bias_data_size == 1) {
-                    __m128 _bias = _mm_set1_ps(bias_data_a[0]);
+                    __m128 _bias = _mm_set1_ps(bias_data_ptr[0]);
 
                     otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                         for (const auto i : otter::irange(begin, end)) {
@@ -726,7 +723,7 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                         }
                     });
                 } else if (bias_data_size == 1) {
-                    __m128 _bias = _mm_set1_ps(bias_data_a[0]);
+                    __m128 _bias = _mm_set1_ps(bias_data_ptr[0]);
 
                     otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                         for (const auto i : otter::irange(begin, end)) {
@@ -769,7 +766,7 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                         const int* intptr = src_a[i].data();
                         float* ptr = dst_a[i].data();
 
-                        __m128 _scale = scale_data_size == 1 ? _mm_set1_ps(scale_data_a[0]) : _mm_loadu_ps((const float*)scale_data_ptr + i * 4);
+                        __m128 _scale = scale_data_size == 1 ? _mm_set1_ps(scale_data_ptr[0]) : _mm_loadu_ps((const float*)scale_data_ptr + i * 4);
 
                         for (int j = 0; j < w; j++) {
                             __m128 _v = _mm_cvtepi32_ps(_mm_loadu_si128((const __m128i*)intptr));
@@ -787,8 +784,8 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                         const int* intptr = src_a[i].data();
                         float* ptr = dst_a[i].data();
 
-                        __m128 _scale = scale_data_size == 1 ? _mm_set1_ps(scale_data_a[0]) : _mm_loadu_ps((const float*)scale_data_ptr + i * 4);
-                        __m128 _bias = bias_data_size == 1 ? _mm_set1_ps(bias_data_a[0]) : _mm_loadu_ps((const float*)bias_data_ptr + i * 4);
+                        __m128 _scale = scale_data_size == 1 ? _mm_set1_ps(scale_data_ptr[0]) : _mm_loadu_ps((const float*)scale_data_ptr + i * 4);
+                        __m128 _bias = bias_data_size == 1 ? _mm_set1_ps(bias_data_ptr[0]) : _mm_loadu_ps((const float*)bias_data_ptr + i * 4);
 
                         for (int j = 0; j < w; j++) {
                             __m128 _v = _mm_cvtepi32_ps(_mm_loadu_si128((const __m128i*)intptr));
@@ -818,7 +815,7 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                         const int* intptr = src_a[q].data();
                         float* ptr = dst_a[q].data();
 
-                        __m128 _scale = scale_data_size == 1 ? _mm_set1_ps(scale_data_a[0]) : _mm_loadu_ps((const float*)scale_data_ptr + q * 4);
+                        __m128 _scale = scale_data_size == 1 ? _mm_set1_ps(scale_data_ptr[0]) : _mm_loadu_ps((const float*)scale_data_ptr + q * 4);
 
                         for (int i = 0; i < size; i++)
                         {
@@ -837,8 +834,8 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                         const int* intptr = src_a[q].data();
                         float* ptr = dst_a[q].data();
 
-                        __m128 _scale = scale_data_size == 1 ? _mm_set1_ps(scale_data_a[0]) : _mm_loadu_ps((const float*)scale_data_ptr + q * 4);
-                        __m128 _bias = bias_data_size == 1 ? _mm_set1_ps(bias_data_a[0]) : _mm_loadu_ps((const float*)bias_data_ptr + q * 4);
+                        __m128 _scale = scale_data_size == 1 ? _mm_set1_ps(scale_data_ptr[0]) : _mm_loadu_ps((const float*)scale_data_ptr + q * 4);
+                        __m128 _bias = bias_data_size == 1 ? _mm_set1_ps(bias_data_ptr[0]) : _mm_loadu_ps((const float*)bias_data_ptr + q * 4);
 
                         for (int i = 0; i < size; i++) {
                             __m128 _v = _mm_cvtepi32_ps(_mm_loadu_si128((const __m128i*)intptr));
@@ -870,7 +867,7 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                             const int* intptr = src_a[q].data();
                             float* ptr = dst_a[q].data();
 
-                            __m128 _scale = scale_data_size == 1 ? _mm_set1_ps(scale_data_a[0]) : _mm_loadu_ps((const float*)scale_data_ptr + q * 4);
+                            __m128 _scale = scale_data_size == 1 ? _mm_set1_ps(scale_data_ptr[0]) : _mm_loadu_ps((const float*)scale_data_ptr + q * 4);
 
                             for (int i = 0; i < size; i++) {
                                 __m128 _v = _mm_cvtepi32_ps(_mm_loadu_si128((const __m128i*)intptr));
@@ -888,8 +885,8 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                             const int* intptr = src_a[q].data();
                             float* ptr = dst_a[q].data();
 
-                            __m128 _scale = scale_data_size == 1 ? _mm_set1_ps(scale_data_a[0]) : _mm_loadu_ps((const float*)scale_data_ptr + q * 4);
-                            __m128 _bias = bias_data_size == 1 ? _mm_set1_ps(bias_data_a[0]) : _mm_loadu_ps((const float*)bias_data_ptr + q * 4);
+                            __m128 _scale = scale_data_size == 1 ? _mm_set1_ps(scale_data_ptr[0]) : _mm_loadu_ps((const float*)scale_data_ptr + q * 4);
+                            __m128 _bias = bias_data_size == 1 ? _mm_set1_ps(bias_data_ptr[0]) : _mm_loadu_ps((const float*)bias_data_ptr + q * 4);
 
                             for (int i = 0; i < size; i++) {
                                 __m128 _v = _mm_cvtepi32_ps(_mm_loadu_si128((const __m128i*)intptr));
@@ -917,7 +914,7 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
         float* ptr = (float*)dst.data_ptr();
         
         if (scale_data_size == 1) {
-            const float scale = scale_data_a[0];
+            const float scale = scale_data_ptr[0];
 
             if (bias_data_size == 0) {
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
@@ -926,7 +923,7 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                     }
                 });
             } else if (bias_data_size == 1) {
-                const float bias = bias_data_a[0];
+                const float bias = bias_data_ptr[0];
 
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
@@ -936,7 +933,7 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
             } else {
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
-                        ptr[i] = intptr[i] * scale + bias_data_a[i];
+                        ptr[i] = intptr[i] * scale + bias_data_ptr[i];
                     }
                 });
             }
@@ -944,21 +941,21 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
             if (bias_data_size == 0) {
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
-                        ptr[i] = intptr[i] * scale_data_a[i];
+                        ptr[i] = intptr[i] * scale_data_ptr[i];
                     }
                 });
             } else if (bias_data_size == 1) {
-                const float bias = bias_data_a[0];
+                const float bias = bias_data_ptr[0];
 
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
-                        ptr[i] = intptr[i] * scale_data_a[i] + bias;
+                        ptr[i] = intptr[i] * scale_data_ptr[i] + bias;
                     }
                 });
             } else {
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
-                        ptr[i] = intptr[i] * scale_data_a[i] + bias_data_a[i];
+                        ptr[i] = intptr[i] * scale_data_ptr[i] + bias_data_ptr[i];
                     }
                 });
             }
@@ -976,7 +973,7 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                     const int* intptr = src_a[i].data();
                     float* ptr = dst_a[i].data();
 
-                    const float scale = scale_data_size == 1 ? scale_data_a[0] : scale_data_a[i];
+                    const float scale = scale_data_size == 1 ? scale_data_ptr[0] : scale_data_ptr[i];
 
                     int j = 0;
     #if __SSE2__
@@ -1003,8 +1000,8 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                     const int* intptr = src_a[i].data();
                     float* ptr = dst_a[i].data();
 
-                    const float scale = scale_data_size == 1 ? scale_data_a[0] : scale_data_a[i];
-                    const float bias = bias_data_size == 1 ? bias_data_a[0] : bias_data_a[i];
+                    const float scale = scale_data_size == 1 ? scale_data_ptr[0] : scale_data_ptr[i];
+                    const float bias = bias_data_size == 1 ? bias_data_ptr[0] : bias_data_ptr[i];
 
                     int j = 0;
     #if __SSE2__
@@ -1042,7 +1039,7 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                     const int* intptr = src_a[q].data();
                     float* ptr = dst_a[q].data();
 
-                    const float scale = scale_data_size == 1 ? scale_data_a[0] : scale_data_a[q];
+                    const float scale = scale_data_size == 1 ? scale_data_ptr[0] : scale_data_ptr[q];
 
                     int i = 0;
 #if __SSE2__
@@ -1067,8 +1064,8 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                     const int* intptr = src_a[q].data();
                     float* ptr = dst_a[q].data();
 
-                    const float scale = scale_data_size == 1 ? scale_data_a[0] : scale_data_a[q];
-                    const float bias = bias_data_size == 1 ? bias_data_a[0] : bias_data_a[q];
+                    const float scale = scale_data_size == 1 ? scale_data_ptr[0] : scale_data_ptr[q];
+                    const float bias = bias_data_size == 1 ? bias_data_ptr[0] : bias_data_ptr[q];
 
                     int i = 0;
 #if __SSE2__
@@ -1107,7 +1104,7 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                         const int* intptr = src_a[q].data();
                         float* ptr = dst_a[q].data();
 
-                        const float scale = scale_data_size == 1 ? scale_data_a[0] : scale_data_a[q];
+                        const float scale = scale_data_size == 1 ? scale_data_ptr[0] : scale_data_ptr[q];
                         
                         int i = 0;
 #if __SSE2__
@@ -1133,8 +1130,8 @@ Tensor dequantize_from_int32_x86(const Tensor& src, const Tensor& scale_data, co
                         const int* intptr = src_a[q].data();
                         float* ptr = dst_a[q].data();
 
-                        const float scale = scale_data_size == 1 ? scale_data_a[0] : scale_data_a[q];
-                        const float bias = bias_data_size == 1 ? bias_data_a[0] : bias_data_a[q];
+                        const float scale = scale_data_size == 1 ? scale_data_ptr[0] : scale_data_ptr[q];
+                        const float bias = bias_data_size == 1 ? bias_data_ptr[0] : bias_data_ptr[q];
 
                         int i = 0;
 #if __SSE2__
@@ -1173,7 +1170,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
     int scale_out_data_size = scale_out_data.size(0);
     const float* scale_out_data_ptr = (const float*)scale_out_data.data_ptr();
     int bias_data_size = (bias_data.defined()) ? bias_data.size(0) : 0;
-    const float* bias_data_a = (bias_data.defined()) ? bias_data.data_ptr<float>() : nullptr;
+    const float* bias_data_ptr = (bias_data.defined()) ? bias_data.data_ptr<float>() : nullptr;
     
     Tensor dst;
     
@@ -1214,7 +1211,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                         }
                     });
                 } else if (bias_data_size == 1) {
-                    __m128 _bias = _mm_set1_ps(bias_data_a[0]);
+                    __m128 _bias = _mm_set1_ps(bias_data_ptr[0]);
 
                     otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                         for (const auto i : otter::irange(begin, end)) {
@@ -1238,7 +1235,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                             const int* intptr = (const int*)srcptr + i * 4;
                             signed char* ptr = (signed char*)dstptr + i * 4;
 
-                            __m128 _bias = _mm_loadu_ps((const float*)bias_data_a + i * 4);
+                            __m128 _bias = _mm_loadu_ps((const float*)bias_data_ptr + i * 4);
                             __m128 _v = _mm_cvtepi32_ps(_mm_loadu_si128((const __m128i*)intptr));
                             _v = _mm_add_ps(_bias, _mm_mul_ps(_v, _scale_in));
                             _v = activation_sse(_v, activation_type, activation_params);
@@ -1273,7 +1270,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                         }
                     });
                 } else if (bias_data_size == 1) {
-                    __m128 _bias = _mm_set1_ps(bias_data_a[0]);
+                    __m128 _bias = _mm_set1_ps(bias_data_ptr[0]);
 
                     otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                         for (const auto i : otter::irange(begin, end)) {
@@ -1299,7 +1296,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                             signed char* ptr = (signed char*)dstptr + i * 4;
 
                             __m128 _scale_out = _mm_loadu_ps((const float*)scale_out_data_ptr + i * 4);
-                            __m128 _bias = _mm_loadu_ps((const float*)bias_data_a + i * 4);
+                            __m128 _bias = _mm_loadu_ps((const float*)bias_data_ptr + i * 4);
                             __m128 _v = _mm_cvtepi32_ps(_mm_loadu_si128((const __m128i*)intptr));
                             _v = _mm_add_ps(_bias, _mm_mul_ps(_v, _scale_in));
                             _v = activation_sse(_v, activation_type, activation_params);
@@ -1334,7 +1331,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                         }
                     });
                 } else if (bias_data_size == 1) {
-                    __m128 _bias = _mm_set1_ps(bias_data_a[0]);
+                    __m128 _bias = _mm_set1_ps(bias_data_ptr[0]);
 
                     otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                         for (const auto i : otter::irange(begin, end)) {
@@ -1360,7 +1357,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                             signed char* ptr = (signed char*)dstptr + i * 4;
 
                             __m128 _scale_in = _mm_loadu_ps((const float*)scale_in_data_ptr + i * 4);
-                            __m128 _bias = _mm_loadu_ps((const float*)bias_data_a + i * 4);
+                            __m128 _bias = _mm_loadu_ps((const float*)bias_data_ptr + i * 4);
                             __m128 _v = _mm_cvtepi32_ps(_mm_loadu_si128((const __m128i*)intptr));
                             _v = _mm_add_ps(_bias, _mm_mul_ps(_v, _scale_in));
                             _v = activation_sse(_v, activation_type, activation_params);
@@ -1394,7 +1391,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                         }
                     });
                 } else if (bias_data_size == 1) {
-                    __m128 _bias = _mm_set1_ps(bias_data_a[0]);
+                    __m128 _bias = _mm_set1_ps(bias_data_ptr[0]);
 
                     otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                         for (const auto i : otter::irange(begin, end)) {
@@ -1422,7 +1419,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
 
                             __m128 _scale_in = _mm_loadu_ps((const float*)scale_in_data_ptr + i * 4);
                             __m128 _scale_out = _mm_loadu_ps((const float*)scale_out_data_ptr + i * 4);
-                            __m128 _bias = _mm_loadu_ps((const float*)bias_data_a + i * 4);
+                            __m128 _bias = _mm_loadu_ps((const float*)bias_data_ptr + i * 4);
                             __m128 _v = _mm_cvtepi32_ps(_mm_loadu_si128((const __m128i*)intptr));
                             _v = _mm_add_ps(_bias, _mm_mul_ps(_v, _scale_in));
                             _v = activation_sse(_v, activation_type, activation_params);
@@ -1488,8 +1485,8 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                             __m128 _scale_in1 = scale_in_data_size == 1 ? _mm_set1_ps(scale_in_data_ptr[0]) : _mm_loadu_ps((const float*)scale_in_data_ptr + i * 8 + 4);
                             __m128 _scale_out0 = scale_out_data_size == 1 ? _mm_set1_ps(scale_out_data_ptr[0]) : _mm_loadu_ps((const float*)scale_out_data_ptr + i * 8);
                             __m128 _scale_out1 = scale_out_data_size == 1 ? _mm_set1_ps(scale_out_data_ptr[0]) : _mm_loadu_ps((const float*)scale_out_data_ptr + i * 8 + 4);
-                            __m128 _bias0 = bias_data_size == 1 ? _mm_set1_ps(bias_data_a[0]) : _mm_loadu_ps((const float*)bias_data_a + i * 8);
-                            __m128 _bias1 = bias_data_size == 1 ? _mm_set1_ps(bias_data_a[0]) : _mm_loadu_ps((const float*)bias_data_a + i * 8 + 4);
+                            __m128 _bias0 = bias_data_size == 1 ? _mm_set1_ps(bias_data_ptr[0]) : _mm_loadu_ps((const float*)bias_data_ptr + i * 8);
+                            __m128 _bias1 = bias_data_size == 1 ? _mm_set1_ps(bias_data_ptr[0]) : _mm_loadu_ps((const float*)bias_data_ptr + i * 8 + 4);
 
                             for (int j = 0; j < w; j++)
                             {
@@ -1554,7 +1551,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
 
                             __m128 _scale_in = scale_in_data_size == 1 ? _mm_set1_ps(scale_in_data_ptr[0]) : _mm_loadu_ps((const float*)scale_in_data_ptr + i * 4);
                             __m128 _scale_out = scale_out_data_size == 1 ? _mm_set1_ps(scale_out_data_ptr[0]) : _mm_loadu_ps((const float*)scale_out_data_ptr + i * 4);
-                            __m128 _bias = bias_data_size == 1 ? _mm_set1_ps(bias_data_a[0]) : _mm_loadu_ps((const float*)bias_data_a + i * 4);
+                            __m128 _bias = bias_data_size == 1 ? _mm_set1_ps(bias_data_ptr[0]) : _mm_loadu_ps((const float*)bias_data_ptr + i * 4);
 
                             for (int j = 0; j < w; j++)
                             {
@@ -1634,8 +1631,8 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                             __m128 _scale_in1 = scale_in_data_size == 1 ? _mm_set1_ps(scale_in_data_ptr[0]) : _mm_loadu_ps((const float*)scale_in_data_ptr + q * 8 + 4);
                             __m128 _scale_out0 = scale_out_data_size == 1 ? _mm_set1_ps(scale_out_data_ptr[0]) : _mm_loadu_ps((const float*)scale_out_data_ptr + q * 8);
                             __m128 _scale_out1 = scale_out_data_size == 1 ? _mm_set1_ps(scale_out_data_ptr[0]) : _mm_loadu_ps((const float*)scale_out_data_ptr + q * 8 + 4);
-                            __m128 _bias0 = bias_data_size == 1 ? _mm_set1_ps(bias_data_a[0]) : _mm_loadu_ps((const float*)bias_data_a + q * 8);
-                            __m128 _bias1 = bias_data_size == 1 ? _mm_set1_ps(bias_data_a[0]) : _mm_loadu_ps((const float*)bias_data_a + q * 8 + 4);
+                            __m128 _bias0 = bias_data_size == 1 ? _mm_set1_ps(bias_data_ptr[0]) : _mm_loadu_ps((const float*)bias_data_ptr + q * 8);
+                            __m128 _bias1 = bias_data_size == 1 ? _mm_set1_ps(bias_data_ptr[0]) : _mm_loadu_ps((const float*)bias_data_ptr + q * 8 + 4);
 
                             for (int i = 0; i < size; i++) {
                                 __m128 _v0 = _mm_cvtepi32_ps(_mm_loadu_si128((const __m128i*)intptr0));
@@ -1699,7 +1696,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
 
                             __m128 _scale_in = scale_in_data_size == 1 ? _mm_set1_ps(scale_in_data_ptr[0]) : _mm_loadu_ps((const float*)scale_in_data_ptr + q * 4);
                             __m128 _scale_out = scale_out_data_size == 1 ? _mm_set1_ps(scale_out_data_ptr[0]) : _mm_loadu_ps((const float*)scale_out_data_ptr + q * 4);
-                            __m128 _bias = bias_data_size == 1 ? _mm_set1_ps(bias_data_a[0]) : _mm_loadu_ps((const float*)bias_data_a + q * 4);
+                            __m128 _bias = bias_data_size == 1 ? _mm_set1_ps(bias_data_ptr[0]) : _mm_loadu_ps((const float*)bias_data_ptr + q * 4);
 
                             for (int i = 0; i < size; i++)
                             {
@@ -1780,8 +1777,8 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                                 __m128 _scale_in1 = scale_in_data_size == 1 ? _mm_set1_ps(scale_in_data_ptr[0]) : _mm_loadu_ps((const float*)scale_in_data_ptr + q * 8 + 4);
                                 __m128 _scale_out0 = scale_out_data_size == 1 ? _mm_set1_ps(scale_out_data_ptr[0]) : _mm_loadu_ps((const float*)scale_out_data_ptr + q * 8);
                                 __m128 _scale_out1 = scale_out_data_size == 1 ? _mm_set1_ps(scale_out_data_ptr[0]) : _mm_loadu_ps((const float*)scale_out_data_ptr + q * 8 + 4);
-                                __m128 _bias0 = bias_data_size == 1 ? _mm_set1_ps(bias_data_a[0]) : _mm_loadu_ps((const float*)bias_data_a + q * 8);
-                                __m128 _bias1 = bias_data_size == 1 ? _mm_set1_ps(bias_data_a[0]) : _mm_loadu_ps((const float*)bias_data_a + q * 8 + 4);
+                                __m128 _bias0 = bias_data_size == 1 ? _mm_set1_ps(bias_data_ptr[0]) : _mm_loadu_ps((const float*)bias_data_ptr + q * 8);
+                                __m128 _bias1 = bias_data_size == 1 ? _mm_set1_ps(bias_data_ptr[0]) : _mm_loadu_ps((const float*)bias_data_ptr + q * 8 + 4);
 
                                 for (int i = 0; i < size; i++) {
                                     __m128 _v0 = _mm_cvtepi32_ps(_mm_loadu_si128((const __m128i*)intptr0));
@@ -1845,7 +1842,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
 
                                 __m128 _scale_in = scale_in_data_size == 1 ? _mm_set1_ps(scale_in_data_ptr[0]) : _mm_loadu_ps((const float*)scale_in_data_ptr + q * 4);
                                 __m128 _scale_out = scale_out_data_size == 1 ? _mm_set1_ps(scale_out_data_ptr[0]) : _mm_loadu_ps((const float*)scale_out_data_ptr + q * 4);
-                                __m128 _bias = bias_data_size == 1 ? _mm_set1_ps(bias_data_a[0]) : _mm_loadu_ps((const float*)bias_data_a + q * 4);
+                                __m128 _bias = bias_data_size == 1 ? _mm_set1_ps(bias_data_ptr[0]) : _mm_loadu_ps((const float*)bias_data_ptr + q * 4);
 
                                 for (int i = 0; i < size; i++)
                                 {
@@ -1895,7 +1892,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                     }
                 });
             } else if (bias_data_size == 1) {
-                const float bias = bias_data_a[0];
+                const float bias = bias_data_ptr[0];
 
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
@@ -1906,7 +1903,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
             } else {
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
-                        float v = intptr[i] * scale_in + bias_data_a[i];
+                        float v = intptr[i] * scale_in + bias_data_ptr[i];
                         ptr[i] = float2int8(activation_ss(v, activation_type, activation_params) * scale_out);
                     }
                 });
@@ -1922,7 +1919,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                     }
                 });
             } else if (bias_data_size == 1) {
-                const float bias = bias_data_a[0];
+                const float bias = bias_data_ptr[0];
 
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
@@ -1933,7 +1930,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
             } else {
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
-                        float v = intptr[i] * scale_in + bias_data_a[i];
+                        float v = intptr[i] * scale_in + bias_data_ptr[i];
                         ptr[i] = float2int8(activation_ss(v, activation_type, activation_params) * scale_out_data_ptr[i]);
                     }
                 });
@@ -1949,7 +1946,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                     }
                 });
             } else if (bias_data_size == 1) {
-                const float bias = bias_data_a[0];
+                const float bias = bias_data_ptr[0];
 
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
@@ -1960,7 +1957,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
             } else {
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
-                        float v = intptr[i] * scale_in_data_ptr[i] + bias_data_a[i];
+                        float v = intptr[i] * scale_in_data_ptr[i] + bias_data_ptr[i];
                         ptr[i] = float2int8(activation_ss(v, activation_type, activation_params) * scale_out);
                     }
                 });
@@ -1974,7 +1971,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
                     }
                 });
             } else if (bias_data_size == 1) {
-                const float bias = bias_data_a[0];
+                const float bias = bias_data_ptr[0];
 
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
@@ -1985,7 +1982,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
             } else {
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                     for (const auto i : otter::irange(begin, end)) {
-                        float v = intptr[i] * scale_in_data_ptr[i] + bias_data_a[i];
+                        float v = intptr[i] * scale_in_data_ptr[i] + bias_data_ptr[i];
                         ptr[i] = float2int8(activation_ss(v, activation_type, activation_params) * scale_out_data_ptr[i]);
                     }
                 });
@@ -2023,7 +2020,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
 
                     const float scale_in = scale_in_data_size == 1 ? scale_in_data_ptr[0] : scale_in_data_ptr[i];
                     const float scale_out = scale_out_data_size == 1 ? scale_out_data_ptr[0] : scale_out_data_ptr[i];
-                    const float bias = bias_data_size == 1 ? bias_data_a[0] : bias_data_a[i];
+                    const float bias = bias_data_size == 1 ? bias_data_ptr[0] : bias_data_ptr[i];
 
                     for (int j = 0; j < w; j++) {
                         float v = intptr[j] * scale_in + bias;
@@ -2066,7 +2063,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
 
                     const float scale_in = scale_in_data_size == 1 ? scale_in_data_ptr[0] : scale_in_data_ptr[q];
                     const float scale_out = scale_out_data_size == 1 ? scale_out_data_ptr[0] : scale_out_data_ptr[q];
-                    const float bias = bias_data_size == 1 ? bias_data_a[0] : bias_data_a[q];
+                    const float bias = bias_data_size == 1 ? bias_data_ptr[0] : bias_data_ptr[q];
 
                     for (int i = 0; i < size; i++) {
                         float v = intptr[i] * scale_in + bias;
@@ -2112,7 +2109,7 @@ Tensor requantize_from_int32_to_int8_x86(const Tensor& src, const Tensor& scale_
 
                         const float scale_in = scale_in_data_size == 1 ? scale_in_data_ptr[0] : scale_in_data_ptr[q];
                         const float scale_out = scale_out_data_size == 1 ? scale_out_data_ptr[0] : scale_out_data_ptr[q];
-                        const float bias = bias_data_size == 1 ? bias_data_a[0] : bias_data_a[q];
+                        const float bias = bias_data_size == 1 ? bias_data_ptr[0] : bias_data_ptr[q];
 
                         for (int i = 0; i < size; i++) {
                             float v = intptr[i] * scale_in + bias;

@@ -129,6 +129,7 @@
 		76D1285127EC2C3C00A54E6F /* TypeProperties.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76D1284F27EC2C3C00A54E6F /* TypeProperties.cpp */; };
 		76D409DC285FB415000C7754 /* TensorEltwise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76D409DA285FB415000C7754 /* TensorEltwise.cpp */; };
 		76E5EC7B27C4A6D800A2B38A /* BatchNormalizationLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E5EC7927C4A6D800A2B38A /* BatchNormalizationLayer.cpp */; };
+		76E69EC0286A063200CA0316 /* QuantizeNeon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E69EBE286A063200CA0316 /* QuantizeNeon.cpp */; };
 		76E6C51327A502A30036A26F /* Tensor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51127A502A30036A26F /* Tensor.cpp */; };
 		76E6C51627A502F60036A26F /* Memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51427A502F60036A26F /* Memory.cpp */; };
 		76E6C51927A5038F0036A26F /* Allocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51727A5038F0036A26F /* Allocator.cpp */; };
@@ -454,6 +455,8 @@
 		76D409DB285FB415000C7754 /* TensorEltwise.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorEltwise.hpp; sourceTree = "<group>"; };
 		76E5EC7927C4A6D800A2B38A /* BatchNormalizationLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BatchNormalizationLayer.cpp; sourceTree = "<group>"; };
 		76E5EC7A27C4A6D800A2B38A /* BatchNormalizationLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BatchNormalizationLayer.hpp; sourceTree = "<group>"; };
+		76E69EBE286A063200CA0316 /* QuantizeNeon.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = QuantizeNeon.cpp; sourceTree = "<group>"; };
+		76E69EBF286A063200CA0316 /* QuantizeNeon.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = QuantizeNeon.hpp; sourceTree = "<group>"; };
 		76E6C50727A502680036A26F /* Tensor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Tensor; sourceTree = BUILT_PRODUCTS_DIR; };
 		76E6C51127A502A30036A26F /* Tensor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Tensor.cpp; sourceTree = "<group>"; };
 		76E6C51227A502A30036A26F /* Tensor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Tensor.hpp; sourceTree = "<group>"; };
@@ -782,6 +785,8 @@
 				765D27112847CB0800996934 /* Quantize.hpp */,
 				767D3504284D2DFD00087A7F /* QuantizeX86.cpp */,
 				767D3505284D2DFD00087A7F /* QuantizeX86.hpp */,
+				76E69EBE286A063200CA0316 /* QuantizeNeon.cpp */,
+				76E69EBF286A063200CA0316 /* QuantizeNeon.hpp */,
 				760F753E285A9E5D005F72C0 /* TensorPacking.cpp */,
 				760F753F285A9E5D005F72C0 /* TensorPacking.hpp */,
 				76D409DA285FB415000C7754 /* TensorEltwise.cpp */,
@@ -1167,6 +1172,7 @@
 				760382D027C0096300CD599F /* TensorCatKernel.cpp in Sources */,
 				76BA778F27C674DA00AA896B /* DilatedConvolutionUtils.cpp in Sources */,
 				7628E2D427D10CDA00B136FA /* UpSample.cpp in Sources */,
+				76E69EC0286A063200CA0316 /* QuantizeNeon.cpp in Sources */,
 				760384B527C0492200CD599F /* TensorPixel.cpp in Sources */,
 				760704D427E4FE6A00D5E00D /* TensorDistributionKernel.cpp in Sources */,
 				7687216127C0E31C006640CF /* Module.cpp in Sources */,
