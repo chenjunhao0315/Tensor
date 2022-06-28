@@ -3906,7 +3906,7 @@ Tensor& sgemm_conv2d_pack4_neon_out(
     IntArrayRef dilation,
     Tensor& output) {
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding, dilation);
     output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
     
     int inch = self.size(1);
@@ -4025,7 +4025,7 @@ Tensor& sgemm_conv2d_pack4to1_neon_out(
     IntArrayRef dilation,
     Tensor& output) {
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding, dilation);
     output.resize_(output_size);
     
     int inch = self.size(1);
@@ -4143,18 +4143,13 @@ Tensor& sgemm_conv2d_pack1to4_neon_out(
     IntArrayRef dilation,
     Tensor& output) {
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding, dilation);
     output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
     
-    int w = self.size(3);
     int inch = self.size(1);
     
     const int kernel_h = kernel_size[0];
     const int kernel_w = kernel_size[1];
-    const int stride_h = stride[0];
-    const int stride_w = stride[1];
-    const int dilation_h = dilation[0];
-    const int dilation_w = dilation[1];
     
     int outw = output.size(3);
     int outh = output.size(2);
@@ -4169,7 +4164,7 @@ Tensor& sgemm_conv2d_pack1to4_neon_out(
     else
         convolution_im2col_sgemm_transform_kernel_pack1to4_neon(weight, kernel_tf, inch, outch * 4, kernel_w, kernel_h);
     
-    Tensor im2col = otter::im2col_cpu(self, kernel_size, stride, padding, {1, 1}).view({inch, maxk, size});
+    Tensor im2col = otter::im2col_cpu(self, kernel_size, stride, padding, dilation).view({inch, maxk, size});
     
     im2col_sgemm_conv2d_pack1to4_impl_neon(im2col, output, kernel_tf, bias);
     

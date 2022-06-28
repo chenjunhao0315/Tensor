@@ -21,8 +21,6 @@ Tensor& depthwise_conv2d_int8_neon_pack8_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -116,8 +114,6 @@ Tensor depthwise_conv2d_int8_neon_pack8(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -125,15 +121,13 @@ Tensor depthwise_conv2d_int8_neon_pack8(
     
     auto output = otter::empty({}, otter::ScalarType::Int8);
     
-    return depthwise_conv2d_int8_neon_pack8_out(self, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation, output);
+    return depthwise_conv2d_int8_neon_pack8_out(self, weight, weight_o, kernel_size, stride, padding, dilation, output);
 }
 
 Tensor& depthwise_conv2d_int8_neon_pack1_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -221,8 +215,6 @@ Tensor depthwise_conv2d_int8_neon_pack1(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -230,15 +222,13 @@ Tensor depthwise_conv2d_int8_neon_pack1(
     
     auto output = otter::empty({}, otter::ScalarType::Int);
     
-    return depthwise_conv2d_int8_neon_pack1_out(self, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation, output);
+    return depthwise_conv2d_int8_neon_pack1_out(self, weight, weight_o, kernel_size, stride, padding, dilation, output);
 }
 
 Tensor& depthwise_conv2d_3x3s1_int8_neon_pack8_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef padding,
     Tensor& output) {
     
@@ -579,21 +569,17 @@ Tensor depthwise_conv2d_3x3s1_int8_neon_pack8(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef padding) {
     
     Tensor output;
     
-    return depthwise_conv2d_3x3s1_int8_neon_pack8_out(self, weight, weight_o, weight_int8_scales, bias, padding, output);
+    return depthwise_conv2d_3x3s1_int8_neon_pack8_out(self, weight, weight_o, padding, output);
 }
 
 Tensor& depthwise_conv2d_3x3s2_int8_neon_pack8_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef padding,
     Tensor& output) {
     
@@ -767,13 +753,11 @@ Tensor depthwise_conv2d_3x3s2_int8_neon_pack8(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef padding) {
     
     Tensor output;
     
-    return depthwise_conv2d_3x3s2_int8_neon_pack8_out(self, weight, weight_o, weight_int8_scales, bias, padding, output);
+    return depthwise_conv2d_3x3s2_int8_neon_pack8_out(self, weight, weight_o, padding, output);
 }
 
 #endif

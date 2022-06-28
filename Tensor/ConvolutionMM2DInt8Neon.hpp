@@ -16,11 +16,8 @@ void convolution_im2col_sgemm_transform_kernel_int8_neon(const Tensor& _kernel, 
 
 Tensor& sgemm_conv2d_int8_neon_out(
     const Tensor& self,
-    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -29,11 +26,8 @@ Tensor& sgemm_conv2d_int8_neon_out(
     
 Tensor sgemm_conv2d_int8_neon(
     const Tensor& self,
-    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,

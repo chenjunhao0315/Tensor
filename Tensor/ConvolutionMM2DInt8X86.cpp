@@ -123,7 +123,6 @@ void convolution_im2col_sgemm_transform_kernel_int8_sse(const Tensor& /*_kernel*
 void im2col_sgemm_conv2d_int8_impl_x86(
     const Tensor& im2col_,
     const Tensor& kernel_tf,
-    const Tensor& /*bias_*/,
     int64_t input_channels,
     int64_t output_channels,
     Tensor& output) {
@@ -1173,7 +1172,6 @@ void im2col_sgemm_conv2d_int8_impl_x86(
 void im2col_sgemm_conv2d_int8_impl_x86(
     const Tensor& /*im2col_*/,
     const Tensor& /*kernel_tf_*/,
-    const Tensor& /*bias_*/,
     int64_t /*input_channels*/,
     int64_t /*output_channels*/,
     Tensor& /*output*/) {}
@@ -1181,17 +1179,15 @@ void im2col_sgemm_conv2d_int8_impl_x86(
 
 Tensor& sgemm_conv2d_int8_x86_out(
     const Tensor& self,
-    const Tensor& input_int8_scales,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
+    IntArrayRef dilation,
     Tensor& output) {
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding, dilation);
     output.resize_(output_size);
     
     const int64_t kernel_height = kernel_size[0];
@@ -1206,85 +1202,61 @@ Tensor& sgemm_conv2d_int8_x86_out(
     else
         otter::convolution_im2col_sgemm_transform_kernel_int8_sse(weight, kernel_tf, input_channels, output_channels, kernel_width, kernel_height);
     
-    Tensor input;
-    if (self.scalar_type() != otter::ScalarType::Byte)
-        input = otter::quantize_to_int8(self, input_int8_scales);
-    else
-        input = self;
+    Tensor im2col = otter::im2col_cpu(self, kernel_size, stride, padding, dilation);
     
-    Tensor im2col = otter::im2col_cpu(input, kernel_size, stride, padding, {1, 1});
-    
-    im2col_sgemm_conv2d_int8_impl_x86(im2col, kernel_tf, bias, input_channels, output_channels, output);
+    im2col_sgemm_conv2d_int8_impl_x86(im2col, kernel_tf, input_channels, output_channels, output);
     
     return output;
 }
     
 Tensor sgemm_conv2d_int8_x86(
     const Tensor& self,
-    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
-    IntArrayRef padding) {
+    IntArrayRef padding,
+    IntArrayRef dilation) {
     
     auto output = otter::empty({}, otter::ScalarType::Int);
     
-    return sgemm_conv2d_int8_x86_out(self, input_scale_data, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, output);
+    return sgemm_conv2d_int8_x86_out(self, weight, weight_o, kernel_size, stride, padding, dilation, output);
 }
 
 Tensor& sgemm_conv2d_1x1s1_int8_x86_out(
     const Tensor& self,
-    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
     IntArrayRef padding,
     Tensor& output) {
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), {1, 1}, {1, 1}, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {1, 1}, padding);
     output.resize_(output_size);
     
     const int64_t input_channels  = self.size(1);
     const int64_t output_channels = weight.size(0);
     
-    Tensor input;
-    if (self.scalar_type() != otter::ScalarType::Byte)
-        input = otter::quantize_to_int8(self, input_scale_data);
-    else
-        input = self;
-    
-    Tensor im2col = input.view({input.size(0), input.size(1), -1});
+    Tensor im2col = self.view({self.size(0), self.size(1), -1});
     
     Tensor kernel_tf;
     if (weight_o.defined())
         kernel_tf = weight_o;
     else
         otter::convolution_im2col_sgemm_transform_kernel_int8_sse(weight, kernel_tf, input_channels, output_channels, 1, 1);
-    im2col_sgemm_conv2d_int8_impl_x86(im2col, kernel_tf, bias, input_channels, output_channels, output);
+    im2col_sgemm_conv2d_int8_impl_x86(im2col, kernel_tf, input_channels, output_channels, output);
     
     return output;
 }
 
 Tensor sgemm_conv2d_1x1s1_int8_x86(
     const Tensor& self,
-    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
     IntArrayRef padding) {
     
     auto output = otter::empty({}, otter::ScalarType::Int);
     
-    return sgemm_conv2d_1x1s1_int8_x86_out(self, input_scale_data, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, output);
+    return sgemm_conv2d_1x1s1_int8_x86_out(self, weight, weight_o, padding, output);
 }
 
 }   // end namesapce otter

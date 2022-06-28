@@ -16,43 +16,10 @@ namespace otter {
 
 #if __SSE2__
 
-Tensor depthwise_conv2d_int8_x86_pack(
-    const Tensor& self,
-    const Tensor& input_int8_scales,
-    const Tensor& weight,
-    const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
-    IntArrayRef padding,
-    IntArrayRef dilation) {
-    
-    ScalarType dtype = self.scalar_type();
-    
-    otter::Tensor input_q;
-    if (dtype != ScalarType::Byte && dtype != ScalarType::Byte4 && dtype != ScalarType::Byte8)
-        input_q = otter::quantize_to_int8(self, input_int8_scales);
-    else
-        input_q = self;
-    
-    int elempack = input_q.elempack();
-    
-    if (elempack == 8)
-        return depthwise_conv2d_int8_x86_pack8(input_q, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation);
-    else if (elempack == 1)
-        return depthwise_conv2d_int8_x86_pack1(input_q, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation);
-    
-    OTTER_CHECK(false, "Unsupport conv2d int8 pack");
-    return Tensor();
-}
-
 Tensor& depthwise_conv2d_int8_x86_pack8_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias_,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -60,7 +27,7 @@ Tensor& depthwise_conv2d_int8_x86_pack8_out(
     Tensor& output) {
     
     auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0);
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding, dilation);
     output.resize_({output_size[0], output_size[1] / 8, output_size[2], output_size[3]});
     
     const int kernel_h = kernel_size[0];
@@ -155,8 +122,6 @@ Tensor depthwise_conv2d_int8_x86_pack8(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -164,15 +129,13 @@ Tensor depthwise_conv2d_int8_x86_pack8(
     
     auto output = otter::empty({}, otter::ScalarType::Int8);
     
-    return depthwise_conv2d_int8_x86_pack8_out(self, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation, output);
+    return depthwise_conv2d_int8_x86_pack8_out(self, weight, weight_o, kernel_size, stride, padding, dilation, output);
 }
 
 Tensor& depthwise_conv2d_int8_x86_pack1_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias_,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -180,7 +143,7 @@ Tensor& depthwise_conv2d_int8_x86_pack1_out(
     Tensor& output) {
     
     auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0);
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding, dilation);
     output.resize_({output_size[0], output_size[1] / 8, output_size[2], output_size[3]});
     
     const int kernel_h = kernel_size[0];
@@ -260,8 +223,6 @@ Tensor depthwise_conv2d_int8_x86_pack1(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -269,7 +230,7 @@ Tensor depthwise_conv2d_int8_x86_pack1(
     
     auto output = otter::empty({}, otter::ScalarType::Int);
     
-    return depthwise_conv2d_int8_x86_pack1_out(self, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation, output);
+    return depthwise_conv2d_int8_x86_pack1_out(self, weight, weight_o, kernel_size, stride, padding, dilation, output);
 }
 
 #endif

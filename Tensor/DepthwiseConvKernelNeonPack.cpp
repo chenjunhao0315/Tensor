@@ -132,14 +132,11 @@ Tensor& depthwise_conv2d_3x3s1_neon_pack4_out(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias_,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
     IntArrayRef padding,
-    IntArrayRef dilation,
     Tensor& output) {
     
     auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {1, 1}, padding);
     output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
     
 #if __aarch64__
@@ -948,14 +945,11 @@ Tensor depthwise_conv2d_3x3s1_neon_pack4(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
-    IntArrayRef padding,
-    IntArrayRef dilation) {
+    IntArrayRef padding) {
     
     auto output = otter::empty({}, otter::ScalarType::Float4);
     
-    return depthwise_conv2d_3x3s1_neon_pack4_out(self, weight, weight_o, bias, kernel_size, stride, padding, dilation, output);
+    return depthwise_conv2d_3x3s1_neon_pack4_out(self, weight, weight_o, bias, padding, output);
 }
 
 Tensor& depthwise_conv2d_3x3s2_neon_pack4_out(
@@ -963,14 +957,11 @@ Tensor& depthwise_conv2d_3x3s2_neon_pack4_out(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias_,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
     IntArrayRef padding,
-    IntArrayRef dilation,
     Tensor& output) {
     
     auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {2, 2}, padding);
     output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
     
     int w = int(input.size(2));
@@ -1478,14 +1469,11 @@ Tensor depthwise_conv2d_3x3s2_neon_pack4(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
-    IntArrayRef padding,
-    IntArrayRef dilation) {
+    IntArrayRef padding) {
     
     auto output = otter::empty({}, otter::ScalarType::Float4);
     
-    return depthwise_conv2d_3x3s2_neon_pack4_out(self, weight, weight_o, bias, kernel_size, stride, padding, dilation, output);
+    return depthwise_conv2d_3x3s2_neon_pack4_out(self, weight, weight_o, bias, padding, output);
 }
 
 Tensor& depthwise_conv2d_5x5s1_neon_pack4_out(
@@ -1493,14 +1481,11 @@ Tensor& depthwise_conv2d_5x5s1_neon_pack4_out(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias_,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
     IntArrayRef padding,
-    IntArrayRef dilation,
     Tensor& output) {
     
     auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {1, 1}, padding);
     output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
     
 #if __aarch64__
@@ -2724,14 +2709,11 @@ Tensor depthwise_conv2d_5x5s1_neon_pack4(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
-    IntArrayRef padding,
-    IntArrayRef dilation) {
+    IntArrayRef padding) {
     
     auto output = otter::empty({}, otter::ScalarType::Float4);
     
-    return depthwise_conv2d_5x5s1_neon_pack4_out(self, weight, weight_o, bias, kernel_size, stride, padding, dilation, output);
+    return depthwise_conv2d_5x5s1_neon_pack4_out(self, weight, weight_o, bias, padding, output);
 }
 
 Tensor& depthwise_conv2d_5x5s2_neon_pack4_out(
@@ -2739,14 +2721,11 @@ Tensor& depthwise_conv2d_5x5s2_neon_pack4_out(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias_,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
     IntArrayRef padding,
-    IntArrayRef dilation,
     Tensor& output) {
     
     auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {2, 2}, padding);
     output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
     
     int w = int(input.size(2));
@@ -3286,14 +3265,11 @@ Tensor depthwise_conv2d_5x5s2_neon_pack4(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
-    IntArrayRef padding,
-    IntArrayRef dilation) {
+    IntArrayRef padding) {
     
     auto output = otter::empty({}, otter::ScalarType::Float4);
     
-    return depthwise_conv2d_5x5s2_neon_pack4_out(self, weight, weight_o, bias, kernel_size, stride, padding, dilation, output);
+    return depthwise_conv2d_5x5s2_neon_pack4_out(self, weight, weight_o, bias, padding, output);
 }
 
 #endif // __ARM_NEON__

@@ -156,7 +156,6 @@ void convolution_im2col_sgemm_transform_kernel_int8_neon(const Tensor& /*_kernel
 void im2col_sgemm_conv2d_int8_impl_neon(
     const Tensor& im2col_,
     const Tensor& kernel_tf,
-    const Tensor& /*bias_*/,
     int64_t input_channels,
     int64_t output_channels,
     Tensor& output) {
@@ -3362,7 +3361,6 @@ void im2col_sgemm_conv2d_int8_impl_neon(
 void im2col_sgemm_conv2d_int8_impl_neon(
     const Tensor& /*im2col_*/,
     const Tensor& /*kernel_tf*/,
-    const Tensor& /*bias_*/,
     int64_t /*input_channels*/,
     int64_t /*output_channels*/,
     Tensor& /*output*/) {}
@@ -3370,11 +3368,8 @@ void im2col_sgemm_conv2d_int8_impl_neon(
 
 Tensor& sgemm_conv2d_int8_neon_out(
     const Tensor& self,
-    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -3396,26 +3391,17 @@ Tensor& sgemm_conv2d_int8_neon_out(
     else
         otter::convolution_im2col_sgemm_transform_kernel_int8_neon(weight, kernel_tf, input_channels, output_channels, kernel_width, kernel_height);
     
-    Tensor input;
-    if (self.scalar_type() != otter::ScalarType::Byte)
-        input = otter::quantize_to_int8(self, input_scale_data);
-    else
-        input = self;
+    Tensor im2col = otter::im2col_cpu(self, kernel_size, stride, padding, dilation);
     
-    Tensor im2col = otter::im2col_cpu(input, kernel_size, stride, padding, dilation);
-    
-    im2col_sgemm_conv2d_int8_impl_neon(im2col, kernel_tf, bias, input_channels, output_channels, output);
+    im2col_sgemm_conv2d_int8_impl_neon(im2col, kernel_tf, input_channels, output_channels, output);
     
     return output;
 }
     
 Tensor sgemm_conv2d_int8_neon(
     const Tensor& self,
-    const Tensor& input_scale_data,
     const Tensor& weight,
     const Tensor& weight_o,
-    const Tensor& weight_int8_scales,
-    const Tensor& bias,
     IntArrayRef kernel_size,
     IntArrayRef stride,
     IntArrayRef padding,
@@ -3423,7 +3409,7 @@ Tensor sgemm_conv2d_int8_neon(
     
     auto output = otter::empty({}, otter::ScalarType::Int);
     
-    return sgemm_conv2d_int8_neon_out(self, input_scale_data, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation, output);
+    return sgemm_conv2d_int8_neon_out(self, weight, weight_o, kernel_size, stride, padding, dilation, output);
 }
 
 }   // end namespace otter
