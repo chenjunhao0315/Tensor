@@ -11,6 +11,7 @@
 #include "ConvolutionMM2DNeon.hpp"
 #include "ConvolutionMM2DX86.hpp"
 #include "ConvolutionMM2DInt8X86.hpp"
+#include "ConvolutionMM2DInt8Neon.hpp"
 #include "DepthwiseConvKernelNeon.hpp"
 #include "DepthwiseConvKernelX86.hpp"
 #include "DilatedConvolution.hpp"
@@ -29,6 +30,8 @@
 #if __ARM_NEON__
 #include "ConvolutionMM2DNeonPack.hpp"
 #include "DepthwiseConvKernelNeonPack.hpp"
+
+
 #endif
 
 namespace otter {
@@ -162,6 +165,8 @@ ConvBackend select_proper_conv_backend(
                                 return ConvBackend::Sgemm2dInt8X86_1x1s1;
                             }
                             return ConvBackend::Sgemm2dInt8X86;
+                        } else if (params.use_cpu_neon(input, weight)) {
+                            return ConvBackend::Sgemm2dInt8Neon;
                         }
                         return ConvBackend::SlideWin2dInt8;
                     } else if (params.use_cpu_neon(input, weight)) {
@@ -366,6 +371,7 @@ Tensor convolution(
         case ConvBackend::Sgemm2dX86:
         case ConvBackend::Sgemm2dInt8X86:
         case ConvBackend::Sgemm2dInt8X86_1x1s1:
+        case ConvBackend::Sgemm2dInt8Neon:
         case ConvBackend::SlideWin2dNeon_1x1s1:
         case ConvBackend::SlideWin2d:
         case ConvBackend::SlideWin2dNeon_3x3s1:
@@ -440,6 +446,8 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
             return otter::sgemm_conv2d_int8_x86(self, input_int8_scales, weight, weight_o, weight_int8_scales, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::Sgemm2dInt8X86_1x1s1:
             return otter::sgemm_conv2d_1x1s1_int8_x86(self, input_int8_scales, weight, weight_o, weight_int8_scales, bias, kernel_size, params.stride, params.padding);
+        case ConvBackend::Sgemm2dInt8Neon:
+            return otter::sgemm_conv2d_int8_neon(self, input_int8_scales, weight, weight_o, weight_int8_scales, bias, kernel_size, params.stride, params.padding, params.dilation);
         default:
             OTTER_CHECK(false, "Unsupported nogroup conv backend");
     }

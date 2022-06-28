@@ -1247,13 +1247,20 @@ Tensor& sgemm_conv2d_1x1s1_int8_x86_out(
     IntArrayRef padding,
     Tensor& output) {
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), {1, 1}, {1, 1}, padding);
     output.resize_(output_size);
     
     const int64_t input_channels  = self.size(1);
     const int64_t output_channels = weight.size(0);
     
-    Tensor im2col = self.view({self.size(0), self.size(1), -1});
+    Tensor input;
+    if (self.scalar_type() != otter::ScalarType::Byte)
+        input = otter::quantize_to_int8(self, input_scale_data);
+    else
+        input = self;
+    
+    Tensor im2col = input.view({input.size(0), input.size(1), -1});
+    
     Tensor kernel_tf;
     if (weight_o.defined())
         kernel_tf = weight_o;
@@ -1277,7 +1284,7 @@ Tensor sgemm_conv2d_1x1s1_int8_x86(
     
     auto output = otter::empty({}, otter::ScalarType::Int);
     
-    return sgemm_conv2d_int8_x86_out(self, input_scale_data, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, output);
+    return sgemm_conv2d_1x1s1_int8_x86_out(self, input_scale_data, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, output);
 }
 
 }   // end namesapce otter
