@@ -207,7 +207,7 @@ void im2col_sgemm_conv2d_int8_impl_neon(
         else if (size >= 2)
             tmp = otter::empty({size / 2 + size % 2, inch, 2 * maxk}, otter::ScalarType::Byte);
         else
-            tmp.create(maxk, inch, size, 8u, 1, opt.workspace_allocator);
+            tmp = otter::empty({size, inch, maxk}, otter::ScalarType::Byte8);
     }
 #else  // __ARM_FEATURE_DOTPROD
     if (inch >= 8) {
@@ -681,7 +681,7 @@ void im2col_sgemm_conv2d_int8_impl_neon(
 
     #if __aarch64__
     #if __ARM_FEATURE_DOTPROD
-                signed char* tmpptr = tmp_ra[i / 16 + (i % 16) / 8 + (i % 8) / 4 + (i % 4) / 2].data(0);
+                signed char* tmpptr = tmp_ra[i / 16 + (i % 16) / 8 + (i % 8) / 4 + (i % 4) / 2].data();
     #else
                 signed char* tmpptr = tmp_ra[i / 4 + (i % 4) / 2].data();
     #endif

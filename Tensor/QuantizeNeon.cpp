@@ -1049,6 +1049,8 @@ Tensor dequantize_from_int32_neon(const Tensor& src, const Tensor& scale_data, c
                 }
             }
         }
+        
+        return dst;
     }
     
     if (elempack == 4) {
@@ -3145,6 +3147,8 @@ Tensor requantize_from_int32_to_int8_neon(const Tensor& src, const Tensor& scale
                 }
             }
         }
+        
+        return dst;
     }
     
     if (elempack == 4) {

@@ -31,7 +31,8 @@
 #include "ConvolutionMM2DNeonPack.hpp"
 #include "DepthwiseConvKernelNeonPack.hpp"
 
-
+#include "ConvolutionMM2DInt8NeonPack.hpp"
+#include "DepthwiseConvKernelInt8NeonPack.hpp"
 #endif
 
 namespace otter {
@@ -499,31 +500,59 @@ ConvBackend select_proper_conv_packed_backend(
                     int out_elempack_int32 = 1;
 #if __SSE2__
                     out_elempack_int32 = num_output % 4 == 0 ? 4 : 1;
+#elif __ARM_NEON__
+                    out_elempack_int32 = num_output % 4 == 0 ? 4 : 1;
 #endif
                     if (params.is_depthwise(input, weight)) {
-                        if (elempack == 8) {
-                            return ConvBackend::DepthwiseInt8X86Pack8;
-                        } else if (elempack == 1) {
-                            return ConvBackend::DepthwiseInt8X86Pack1;
+                        if (params.use_cpu_x86(input, weight)) {
+                            if (elempack == 8) {
+                                return ConvBackend::DepthwiseInt8X86Pack8;
+                            } else if (elempack == 1) {
+                                return ConvBackend::DepthwiseInt8X86Pack1;
+                            }
+                        } else if (params.use_cpu_neon(input, weight)) {
+                            if (elempack == 8) {
+                                return ConvBackend::DepthwiseInt8NeonPack8;
+                            } else if (elempack == 1) {
+                                return ConvBackend::DepthwiseInt8NeonPack1;
+                            }
                         }
+                        
                     }
                     
                     if (params.use_cpu_x86(input, weight)) {
                         if (elempack == 8 && out_elempack_int32 == 4) {
                             if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
-                                return ConvBackend::Sgemm2dInt8X86Pack8to4;
+                                return ConvBackend::Sgemm2dInt8X86Pack8to4_1x1s1;
                             }
                             return ConvBackend::Sgemm2dInt8X86Pack8to4;
                         } else if (elempack == 8 && out_elempack_int32 == 1) {
                             if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
-                                return ConvBackend::Sgemm2dInt8X86Pack8to1;
+                                return ConvBackend::Sgemm2dInt8X86Pack8to1_1x1s1;
                             }
                             return ConvBackend::Sgemm2dInt8X86Pack8to1;
                         } else if (elempack == 1 && out_elempack_int32 == 4) {
                             if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
-                                return ConvBackend::Sgemm2dInt8X86Pack1to4;
+                                return ConvBackend::Sgemm2dInt8X86Pack1to4_1x1s1;
                             }
                             return ConvBackend::Sgemm2dInt8X86Pack1to4;
+                        }
+                    } else if (params.use_cpu_neon(input, weight)) {
+                        if (elempack == 8 && out_elempack_int32 == 4) {
+                            if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                                return ConvBackend::Sgemm2dInt8NeonPack8to4_1x1s1;
+                            }
+                            return ConvBackend::Sgemm2dInt8NeonPack8to4;
+                        } else if (elempack == 8 && out_elempack_int32 == 1) {
+                            if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                                return ConvBackend::Sgemm2dInt8NeonPack8to1_1x1s1;
+                            }
+                            return ConvBackend::Sgemm2dInt8NeonPack8to1;
+                        } else if (elempack == 1 && out_elempack_int32 == 4) {
+                            if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                                return ConvBackend::Sgemm2dInt8NeonPack1to4_1x1s1;
+                            }
+                            return ConvBackend::Sgemm2dInt8NeonPack1to4;
                         }
                     }
                 } else if (params.use_cpu_x86(input, weight)) {
@@ -703,6 +732,25 @@ Tensor convolution_packed(
             output = otter::depthwise_conv2d_int8_x86_pack8(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
         case ConvBackend::DepthwiseInt8X86Pack1:
             output = otter::depthwise_conv2d_int8_x86_pack1(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+#endif
+            
+#if __ARM_NEON__
+        case ConvBackend::Sgemm2dInt8NeonPack1to4:
+            output = otter::sgemm_conv2d_int8_pack1to4_neon(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dInt8NeonPack8to4:
+            output = otter::sgemm_conv2d_int8_pack8to4_neon(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dInt8NeonPack8to1:
+            output = otter::sgemm_conv2d_int8_pack8to1_neon(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dInt8NeonPack1to4_1x1s1:
+            output = otter::sgemm_conv2d_1x1s1_int8_pack1to4_neon(input, weight, weight_o, weight_int8_scales, bias, padding); break;
+        case ConvBackend::Sgemm2dInt8NeonPack8to4_1x1s1:
+            output = otter::sgemm_conv2d_1x1s1_int8_pack8to4_neon(input, weight, weight_o, weight_int8_scales, bias, padding); break;
+        case ConvBackend::Sgemm2dInt8NeonPack8to1_1x1s1:
+            output = otter::sgemm_conv2d_1x1s1_int8_pack8to1_neon(input, weight, weight_o, weight_int8_scales, bias, padding); break;
+        case ConvBackend::DepthwiseInt8NeonPack8:
+            output = otter::depthwise_conv2d_int8_neon_pack8(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::DepthwiseInt8NeonPack1:
+            output = otter::depthwise_conv2d_int8_neon_pack1(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
 #endif
         default: {
             output = convolution(input.packing(1), weight, weight_o, bias, stride, padding, dilation, transposed, output_padding, groups, false, input_int8_scales, weight_int8_scales);

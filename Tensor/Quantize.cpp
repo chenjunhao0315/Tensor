@@ -14,6 +14,10 @@
 #include "QuantizeX86.hpp"
 #endif
 
+#if __ARM_NEON__
+#include "QuantizeNeon.hpp"
+#endif
+
 namespace otter {
 
 static inline signed char float2int8(float v) {
@@ -48,11 +52,9 @@ static inline float activation_ss(float v, int activation_type, const Tensor& ac
 Tensor quantize_to_int8(const Tensor& src, const Tensor& scale_data, bool pack) {
     
 #if __SSE2__
-        return quantize_to_int8_x86(src, scale_data, pack);
+    return quantize_to_int8_x86(src, scale_data, pack);
 #elif __ARM_NEON__
-    if (src.elempack() != 1) {
-        return quantize_to_int8(src.packing(1), scale_data, pack);
-    }
+    return quantize_to_int8_neon(src, scale_data, pack);
 #endif
     
     auto dst = otter::empty_like(src, otter::ScalarType::Byte);
@@ -153,6 +155,8 @@ Tensor dequantize_from_int32(const Tensor& src, const Tensor& scale_data, const 
     
 #if __SSE2__
     return dequantize_from_int32_x86(src, scale_data, bias_data, pack);
+#else __ARM_NEON
+    return dequantize_from_int32_neon(src, scale_data, bias_data, pack);
 #endif
     
     
@@ -328,7 +332,7 @@ Tensor dequantize_from_int32(const Tensor& src, const Tensor& scale_data, const 
                         const float scale = scale_data_size == 1 ? scale_data_a[0] : scale_data_a[q];
                         const float bias = bias_data_size == 1 ? bias_data_a[0] : bias_data_a[q];
 
-                        int i = 0;   
+                        int i = 0;
                         for (; i < size; i++) {
                             ptr[i] = intptr[i] * scale + bias;
                         }
@@ -345,6 +349,8 @@ Tensor requantize_from_int32_to_int8(const Tensor& src, const Tensor& scale_in_d
     
 #if __SSE2__
     return requantize_from_int32_to_int8_x86(src, scale_in_data, scale_out_data, bias_data, activation_type, activation_params, pack);
+#elif __ARM_NEON__
+    return requantize_from_int32_to_int8_neon(src, scale_in_data, scale_out_data, bias_data, activation_type, activation_params, pack);
 #endif
     
     int dims = src.dim();

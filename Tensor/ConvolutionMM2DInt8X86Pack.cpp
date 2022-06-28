@@ -2494,7 +2494,7 @@ Tensor& sgemm_conv2d_1x1s1_int8_pack1to4_x86_out(
     IntArrayRef padding,
     Tensor& output) {
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), {1, 1}, {1, 1}, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {1, 1}, padding);
     output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
     
     const int64_t inch  = self.size(1);
@@ -2534,7 +2534,7 @@ Tensor& sgemm_conv2d_1x1s1_int8_pack8to1_x86_out(
     IntArrayRef padding,
     Tensor& output) {
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), {1, 1}, {1, 1}, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {1, 1}, padding);
     output.resize_(output_size);
     
     const int64_t inch  = self.size(1);
@@ -2574,7 +2574,7 @@ Tensor& sgemm_conv2d_1x1s1_int8_pack8to4_x86_out(
     IntArrayRef padding,
     Tensor& output) {
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), {1, 1}, {1, 1}, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {1, 1}, padding);
     output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
     
     const int64_t inch  = self.size(1);
