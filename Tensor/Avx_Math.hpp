@@ -35,7 +35,7 @@
 #include "Config.hpp"
 #include "VecIntrinsic.hpp"
 /* The original source of this file has been modified. */
-#if CPU_CAPABILITY_AVX2
+#if __AVX__
 #if defined(__GNUC__)
 # define ALIGN32_BEG __attribute__((aligned(32)))
 #elif defined(_WIN32)

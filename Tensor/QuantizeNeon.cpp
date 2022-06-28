@@ -659,7 +659,7 @@ Tensor dequantize_from_int32_neon(const Tensor& src, const Tensor& scale_data, c
 
                 if (bias_data_size == 0) {
                     otter::parallel_for(0, outw, 0, [&](int64_t begin, int64_t end) {
-                        for (int i = 0; i < outw; i++) {
+                        for (const auto i : otter::irange(begin, end)) {
                             const int* intptr = (const int*)srcptr + i * 4;
                             float* ptr = (float*)dstptr + i * 4;
 
@@ -2686,7 +2686,7 @@ Tensor requantize_from_int32_to_int8_neon(const Tensor& src, const Tensor& scale
                     });
                 } else {
                     otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
-                        for (int i = 0; i < w; i++) {
+                        for (const auto i : otter::irange(begin, end)) {
                             const int* intptr = (const int*)srcptr + i * 8;
                             signed char* ptr = (signed char*)dstptr + i * 8;
 
@@ -3889,7 +3889,7 @@ Tensor requantize_from_int32_to_int8_neon(const Tensor& src, const Tensor& scale
 
             if (bias_data_size == 0) {
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
-                    for (int i = 0; i < w; i++) {
+                    for (const auto i : otter::irange(begin, end)) {
                         float v = intptr[i] * scale_in;
                         ptr[i] = float2int8(activation_ss(v, activation_type, activation_params) * scale_out);
                     }

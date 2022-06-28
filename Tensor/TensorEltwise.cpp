@@ -744,11 +744,9 @@ template<typename Op>
 static int binary_op_pack4(const Tensor& a, const Tensor& b, Tensor& c) {
     Op op;
 
-    size_t elemsize = a.itemsize();
     int elempack = a.elempack();
     ScalarType dtype = a.scalar_type();
 
-    size_t elemsize1 = b.itemsize();
     int elempack1 = b.elempack();
     ScalarType dtype1 = b.scalar_type();
 
@@ -1010,7 +1008,7 @@ static int binary_op_pack4(const Tensor& a, const Tensor& b, Tensor& c) {
             auto c_a = c.accessor<float, 3, 4>();
 
             otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
-                for (int q = 0; q < channels; q++) {
+                for (const auto q : otter::irange(begin, end)) {
                     const float* ptr = a_a[q].data();
                     const float* ptr1 = b_a[q].data();
                     float* outptr = c_a[q].data();

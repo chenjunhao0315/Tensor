@@ -642,7 +642,7 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
         auto out_ra = out.raw_accessor<float, 2>();
         
         otter::parallel_for(0, h, 0, [&](int64_t begin, int64_t end) {
-            for (int i = 0; i < h; i++) {
+            for (const auto i : otter::irange(begin, end)) {
                 float* outptr = (float*)out_ra[i].data();
                 for (size_t b = 0; b < tensors.size(); b++) {
                     const Tensor& tensor = tensors[b];
