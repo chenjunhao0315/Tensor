@@ -44,7 +44,7 @@ void convolution_im2col_sgemm_transform_kernel_pack1to4_int8_neon(const Tensor& 
 #if __ARM_FEATURE_DOTPROD
                 for (int i = 0; i < 4; i++) {
                     for (int j = 0; j < 4; j++) {
-                        const signed char* k00 = kernel.channel(q + i).row<const signed char>(p + j);
+                        const signed char* k00 = kernel_a[q + i][p + j].data();
 
                         g00[0] = k00[k];
 
