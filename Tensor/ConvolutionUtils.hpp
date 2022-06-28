@@ -110,6 +110,8 @@ enum class ConvBackend {
     Sgemm2dInt8NeonPack1to4_1x1s1,
     DepthwiseInt8NeonPack8,
     DepthwiseInt8NeonPack1,
+    DepthwiseInt8NeonPack8_3x3s1,
+    DepthwiseInt8NeonPack8_3x3s2,
     Overrideable
 };
 

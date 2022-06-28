@@ -60,6 +60,40 @@ Tensor depthwise_conv2d_int8_neon_pack1(
     IntArrayRef padding,
     IntArrayRef dilation);
 
+Tensor& depthwise_conv2d_3x3s1_int8_neon_pack8_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor depthwise_conv2d_3x3s1_int8_neon_pack8(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor& depthwise_conv2d_3x3s2_int8_neon_pack8_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor depthwise_conv2d_3x3s2_int8_neon_pack8(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& weight_int8_scales,
+    const Tensor& bias,
+    IntArrayRef padding);
+
 #endif
 
 }   // end namespace otter

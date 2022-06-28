@@ -512,6 +512,11 @@ ConvBackend select_proper_conv_packed_backend(
                             }
                         } else if (params.use_cpu_neon(input, weight)) {
                             if (elempack == 8) {
+                                if (kernel_h == 3 && kernel_w == 3 && stride_h == 1 && stride_w == 1) {
+                                    return ConvBackend::DepthwiseInt8NeonPack8_3x3s1;
+                                } else if (kernel_h == 3 && kernel_w == 3 && stride_h == 2 && stride_w == 2) {
+                                    return ConvBackend::DepthwiseInt8NeonPack8_3x3s2;
+                                }
                                 return ConvBackend::DepthwiseInt8NeonPack8;
                             } else if (elempack == 1) {
                                 return ConvBackend::DepthwiseInt8NeonPack1;
@@ -751,6 +756,10 @@ Tensor convolution_packed(
             output = otter::depthwise_conv2d_int8_neon_pack8(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
         case ConvBackend::DepthwiseInt8NeonPack1:
             output = otter::depthwise_conv2d_int8_neon_pack1(input, weight, weight_o, weight_int8_scales, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::DepthwiseInt8NeonPack8_3x3s1:
+            output = otter::depthwise_conv2d_3x3s1_int8_neon_pack8(input, weight, weight_o, weight_int8_scales, bias, padding); break;
+        case ConvBackend::DepthwiseInt8NeonPack8_3x3s2:
+            output = otter::depthwise_conv2d_3x3s2_int8_neon_pack8(input, weight, weight_o, weight_int8_scales, bias, padding); break;
 #endif
         default: {
             output = convolution(input.packing(1), weight, weight_o, bias, stride, padding, dilation, transposed, output_padding, groups, false, input_int8_scales, weight_int8_scales);

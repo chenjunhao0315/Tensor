@@ -14,6 +14,7 @@
 #include "ConvolutionMM2DNeon.hpp"
 #include "ConvolutionMM2DX86.hpp"
 #include "ConvolutionMM2DInt8X86.hpp"
+#include "ConvolutionMM2DInt8Neon.hpp"
 
 #if __SSE2__
 #include "ConvolutionMM2DX86Pack.hpp"
@@ -25,6 +26,8 @@
 #if __ARM_NEON__
 #include "ConvolutionMM2DNeonPack.hpp"
 #include "DepthwiseConvKernelNeonPack.hpp"
+
+#include "ConvolutionMM2DInt8NeonPack.hpp"
 #endif
 
 #include "Quantize.hpp"
@@ -614,6 +617,40 @@ int ConvolutionLayer::create_pipeline_int8(const NetOption& opt) {
     if (elempack == 1 && out_elempack == 1) {
         otter::convolution_im2col_sgemm_transform_kernel_int8_sse(weight_data, weight_sgemm_int8_data, in_channels, out_channels, kernel_width, kernel_height);
     }
+#elif __ARM_NEON__
+    int elempack = 1;
+    int out_elempack = 1;
+    if (opt.use_packing_layout) {
+        elempack = in_channels % 8 == 0 ? 8 : 1;
+        out_elempack = out_channels % 4 == 0 ? 4 : 1;
+    }
+    
+    if (in_channels == groups && groups == out_channels) {
+        if (elempack == 8) {
+            int maxk = kernel_width * kernel_height;
+            weight_data_tf = weight_data.view({groups, maxk}).packing(8);
+        } else if (elempack == 1) {
+            weight_data_tf = weight_data;
+        }
+        
+        return 0;
+    }
+    
+    if (elempack == 8 && out_elempack == 4) {
+        otter::convolution_im2col_sgemm_transform_kernel_pack8to4_int8_neon(weight_data, weight_sgemm_int8_data, in_channels, out_channels, kernel_width, kernel_height);
+    }
+    
+    if (elempack == 8 && out_elempack == 1) {
+        otter::convolution_im2col_sgemm_transform_kernel_pack8to1_int8_neon(weight_data, weight_sgemm_int8_data, in_channels, out_channels, kernel_width, kernel_height);
+    }
+    
+    if (elempack == 1 && out_elempack == 4) {
+        otter::convolution_im2col_sgemm_transform_kernel_pack1to4_int8_neon(weight_data, weight_sgemm_int8_data, in_channels, out_channels, kernel_width, kernel_height);
+    }
+    
+    if (elempack == 1 && out_elempack == 1) {
+        otter::convolution_im2col_sgemm_transform_kernel_int8_neon(weight_data, weight_sgemm_int8_data, in_channels, out_channels, kernel_width, kernel_height);
+    }
 #endif
     
     return 0;
@@ -650,11 +687,27 @@ int ConvolutionLayer::forward_int8(const Tensor &bottom_blob, Tensor &top_blob, 
         out_elempack_int32 = out_channels % 4 == 0 ? 4 : 1;
     }
 #elif __ARM_NEON__
-    
+    if (opt.use_packing_layout) {
+        out_elempack_int32 = out_channels % 4 == 0 ? 4 : 1;
+    }
 #endif
     
     if (params.use_cpu_x86(bottom_blob, weight_data)) {
         // depthwise
+        if (params.is_depthwise(bottom_blob, weight_data)) {
+            optimize_kernel = weight_data_tf;
+        } else {
+            if (elempack == 8 && out_elempack_int32 == 4) {
+                optimize_kernel = weight_sgemm_int8_data;
+            } else if (elempack == 8 && out_elempack_int32 == 1) {
+                optimize_kernel = weight_sgemm_int8_data;
+            } else if (elempack == 1 && out_elempack_int32 == 4) {
+                optimize_kernel = weight_sgemm_int8_data;
+            } else if (elempack == 1 && out_elempack_int32 == 1) { // general
+                optimize_kernel = weight_sgemm_int8_data;
+            }
+        }
+    } else if (params.use_cpu_neon(bottom_blob, weight_data)) {
         if (params.is_depthwise(bottom_blob, weight_data)) {
             optimize_kernel = weight_data_tf;
         } else {
