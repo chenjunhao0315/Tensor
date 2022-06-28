@@ -56,7 +56,7 @@ int ConcatLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Te
     // assume that the first axis is batchsize
     if (bottom_blobs[0].dim() == 4 && bottom_blobs[0].size(0) == 1) {
         top_blobs[0] = bottom_blobs[0].squeeze(0);
-        for (int i = 1; i < bottom_blobs.size(); ++i) {
+        for (size_t i = 1; i < bottom_blobs.size(); ++i) {
             top_blobs[0] = otter::native::cat({top_blobs[0], bottom_blobs[i].squeeze(0)}, axis - 1);
         }
         top_blobs[0].unsqueeze_(0);

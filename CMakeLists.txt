@@ -112,8 +112,14 @@ if((IOS AND CMAKE_OSX_ARCHITECTURES MATCHES "arm")
 
     if(NOT (CMAKE_CXX_COMPILER_ID MATCHES "MSVC" OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_SIMULATE_ID MATCHES "MSVC" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT MATCHES "MSVC")))
         include(CheckCXXCompilerFlag)
-        check_cxx_compiler_flag("-march=armv8.2-a+fp16" OTTER_COMPILER_SUPPORT_ARM82_FP16)
-        check_cxx_compiler_flag("-march=armv8.2-a+fp16+dotprod" OTTER_COMPILER_SUPPORT_ARM82_FP16_DOTPROD)
+
+        set(CMAKE_REQUIRED_FLAGS "-march=armv8.2-a+fp16")
+        check_cxx_source_compiles("#include <arm_neon.h>\nint main() { float16x8_t _s, _a, _b; _s = vfmaq_f16(_s, _a, _b); return 0; }" OTTER_COMPILER_SUPPORT_ARM82_FP16)
+
+        set(CMAKE_REQUIRED_FLAGS "-march=armv8.2-a+fp16+dotprod")
+        check_cxx_source_compiles("#include <arm_neon.h>\nint main() { int32x4_t _s; int8x16_t _a, _b; _s = vdotq_s32(_s, _a, _b); return 0; }" OTTER_COMPILER_SUPPORT_ARM82_FP16_DOTPROD)
+
+        unset(CMAKE_REQUIRED_FLAGS)
     endif()
 
     if(OTTER_COMPILER_SUPPORT_ARM82_FP16)
@@ -156,6 +162,10 @@ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(riscv)")
 
     if(OTTER_COMPILER_SUPPORT_RVV)
         option(OTTER_RVV "optimize risc-v platform with v extension" ON)
+        option(OTTER_RVV_CHECK_VFREDSUM "check compilter about support rvv-intrinsic" ON)
+        if(OTTER_RVV_CHECK_VFREDSUM)
+            include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ncnn_check_rvv_vfredusum.cmake)
+        endif()
         if(NOT OTTER_COMPILER_SUPPORT_RVV_FP16)
             message(WARNING "The compiler does not support risc-v zfh extension. Upgrading your toolchain is strongly recommended.")
         endif()
@@ -202,12 +212,12 @@ else()
         check_cxx_compiler_flag("-mxop" OTTER_COMPILER_SUPPORT_X86_XOP)
         check_cxx_compiler_flag("-mf16c" OTTER_COMPILER_SUPPORT_X86_F16C)
         check_cxx_compiler_flag("-mfma -mf16c -mavx2" OTTER_COMPILER_SUPPORT_X86_AVX2)
-        check_cxx_compiler_flag("-mfma -mf16c -mavx512f -mavx512bw -mavx512vl" OTTER_COMPILER_SUPPORT_X86_AVX512)
+        check_cxx_compiler_flag("-mfma -mf16c -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl" OTTER_COMPILER_SUPPORT_X86_AVX512)
 
         set(CMAKE_REQUIRED_FLAGS "-mfma -mf16c -mavx2 -mavxvnni")
         check_cxx_source_compiles("#include <immintrin.h>\nint main() { __m256i _s, _a, _b; _s = _mm256_dpwssd_epi32(_s, _a, _b); return 0; }" OTTER_COMPILER_SUPPORT_X86_AVX_VNNI)
 
-        set(CMAKE_REQUIRED_FLAGS "-mfma -mf16c -mavx512f -mavx512bw -mavx512vl -mavx512vnni")
+        set(CMAKE_REQUIRED_FLAGS "-mfma -mf16c -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl -mavx512vnni")
         check_cxx_source_compiles("#include <immintrin.h>\nint main() { __m256i _s, _a, _b; _s = _mm256_dpwssd_epi32(_s, _a, _b); return 0; }" OTTER_COMPILER_SUPPORT_X86_AVX512_VNNI)
 
         unset(CMAKE_REQUIRED_FLAGS)

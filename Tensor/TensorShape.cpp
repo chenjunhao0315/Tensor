@@ -821,7 +821,7 @@ Tensor cat(TensorList tensors, int64_t dim) {
             otter::native::cat_packed_out(tensors, dim, out);
         } else {
             out = tensors[0].packing(1);
-            for (int i = 1; i < tensors.size(); ++i) {
+            for (size_t i = 1; i < tensors.size(); ++i) {
                 out = otter::native::cat({out, tensors[i].packing(1)}, dim);
             }
             out = out.packing(tensors[0].elempack());

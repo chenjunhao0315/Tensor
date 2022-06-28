@@ -372,7 +372,7 @@ Tensor requantize_from_int32_to_int8(const Tensor& src, const Tensor& scale_in_d
 
             if (bias_data_size == 0) {
                 otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
-                    for (int i = 0; i < w; i++) {
+                    for (const auto i : otter::irange(begin, end)) {
                         float v = intptr[i] * scale_in;
                         ptr[i] = float2int8(activation_ss(v, activation_type, activation_params) * scale_out);
                     }
