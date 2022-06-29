@@ -239,10 +239,10 @@ int DeconvolutionLayer::create_pipeline(const NetOption& opt) {
     int maxk = kernel_width * kernel_height;
     if (in_channels == groups && groups == out_channels) {
         if (out_elempack == 4) {
-            otter::depthwise_deconv2d_kernel_transform_pack_x86(weight_data, kernel_tp);
+            otter::depthwise_deconv2d_kernel_transform_pack_neon(weight_data, kernel_tp);
             kernel_tp = kernel_tp.view({{groups, maxk}}).packing(4);
         } else if (out_elempack == 1) {
-            otter::depthwise_deconv2d_kernel_transform_pack_x86(weight_data, kernel_tp);
+            otter::depthwise_deconv2d_kernel_transform_pack_neon(weight_data, kernel_tp);
         }
     } else {
         otter::depthwise_deconv2d_kernel_transform(weight_data, weight_opt_data);
