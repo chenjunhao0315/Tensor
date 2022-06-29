@@ -132,6 +132,8 @@
 		76E69EC0286A063200CA0316 /* QuantizeNeon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E69EBE286A063200CA0316 /* QuantizeNeon.cpp */; };
 		76E6A2F3286B448000CA0316 /* ConvolutionMM2DInt8NeonPack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6A2F1286B448000CA0316 /* ConvolutionMM2DInt8NeonPack.cpp */; };
 		76E6A50E286B48D500CA0316 /* DepthwiseConvKernelInt8NeonPack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6A50C286B48D500CA0316 /* DepthwiseConvKernelInt8NeonPack.cpp */; };
+		76E6A946286C2FC700CA0316 /* DepthwiseConvTransposeKernelX86Pack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6A944286C2FC700CA0316 /* DepthwiseConvTransposeKernelX86Pack.cpp */; };
+		76E6A949286C646300CA0316 /* DepthwiseConvTransposeKernelNeonPack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6A947286C646300CA0316 /* DepthwiseConvTransposeKernelNeonPack.cpp */; };
 		76E6C51327A502A30036A26F /* Tensor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51127A502A30036A26F /* Tensor.cpp */; };
 		76E6C51627A502F60036A26F /* Memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51427A502F60036A26F /* Memory.cpp */; };
 		76E6C51927A5038F0036A26F /* Allocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E6C51727A5038F0036A26F /* Allocator.cpp */; };
@@ -463,6 +465,10 @@
 		76E6A2F2286B448000CA0316 /* ConvolutionMM2DInt8NeonPack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConvolutionMM2DInt8NeonPack.hpp; sourceTree = "<group>"; };
 		76E6A50C286B48D500CA0316 /* DepthwiseConvKernelInt8NeonPack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DepthwiseConvKernelInt8NeonPack.cpp; sourceTree = "<group>"; };
 		76E6A50D286B48D500CA0316 /* DepthwiseConvKernelInt8NeonPack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DepthwiseConvKernelInt8NeonPack.hpp; sourceTree = "<group>"; };
+		76E6A944286C2FC700CA0316 /* DepthwiseConvTransposeKernelX86Pack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DepthwiseConvTransposeKernelX86Pack.cpp; sourceTree = "<group>"; };
+		76E6A945286C2FC700CA0316 /* DepthwiseConvTransposeKernelX86Pack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DepthwiseConvTransposeKernelX86Pack.hpp; sourceTree = "<group>"; };
+		76E6A947286C646300CA0316 /* DepthwiseConvTransposeKernelNeonPack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DepthwiseConvTransposeKernelNeonPack.cpp; sourceTree = "<group>"; };
+		76E6A948286C646300CA0316 /* DepthwiseConvTransposeKernelNeonPack.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DepthwiseConvTransposeKernelNeonPack.hpp; sourceTree = "<group>"; };
 		76E6C50727A502680036A26F /* Tensor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Tensor; sourceTree = BUILT_PRODUCTS_DIR; };
 		76E6C51127A502A30036A26F /* Tensor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Tensor.cpp; sourceTree = "<group>"; };
 		76E6C51227A502A30036A26F /* Tensor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Tensor.hpp; sourceTree = "<group>"; };
@@ -696,6 +702,10 @@
 				761955CD28674FB300321AE8 /* DepthwiseConvKernelInt8X86Pack.hpp */,
 				76B4B7BA282D848800BE0949 /* DepthwiseConvTransposeKernelNeon.cpp */,
 				76B4B7BB282D848800BE0949 /* DepthwiseConvTransposeKernelNeon.hpp */,
+				76E6A947286C646300CA0316 /* DepthwiseConvTransposeKernelNeonPack.cpp */,
+				76E6A948286C646300CA0316 /* DepthwiseConvTransposeKernelNeonPack.hpp */,
+				76E6A944286C2FC700CA0316 /* DepthwiseConvTransposeKernelX86Pack.cpp */,
+				76E6A945286C2FC700CA0316 /* DepthwiseConvTransposeKernelX86Pack.hpp */,
 				76BA778A27C66DC000AA896B /* DilatedConvolution.cpp */,
 				76BA778B27C66DC000AA896B /* DilatedConvolution.hpp */,
 				76BA778D27C674DA00AA896B /* DilatedConvolutionUtils.cpp */,
@@ -1178,6 +1188,7 @@
 				76F0064027B66DEF009D67F5 /* MemoryFormat.cpp in Sources */,
 				76486AF727DF7A510078FF9B /* GraphicAPI.cpp in Sources */,
 				7628E02627CE7BEB00B136FA /* MaxPoolKernel.cpp in Sources */,
+				76E6A946286C2FC700CA0316 /* DepthwiseConvTransposeKernelX86Pack.cpp in Sources */,
 				76F336BE27A5B52300E3AEF1 /* BinaryOpsKernel.cpp in Sources */,
 				760382D027C0096300CD599F /* TensorCatKernel.cpp in Sources */,
 				76BA778F27C674DA00AA896B /* DilatedConvolutionUtils.cpp in Sources */,
@@ -1224,6 +1235,7 @@
 				7628E02F27CF543800B136FA /* Padding.cpp in Sources */,
 				76F336E027A90E8E00E3AEF1 /* TensorBase.cpp in Sources */,
 				76B4B7BC282D848800BE0949 /* DepthwiseConvTransposeKernelNeon.cpp in Sources */,
+				76E6A949286C646300CA0316 /* DepthwiseConvTransposeKernelNeonPack.cpp in Sources */,
 				76B4B5BD282D6B9200BE0949 /* ConvolutionMM2DTransposeNeon.cpp in Sources */,
 				76B4BBC3282DE31000BE0949 /* Stabilizer.cpp in Sources */,
 				760704CE27E3E87500D5E00D /* TensorDistribution.cpp in Sources */,

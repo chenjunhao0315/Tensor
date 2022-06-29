@@ -20,6 +20,24 @@ TensorNucleus::TensorNucleus(Memory&& memory, const TypeMeta data_type) : Tensor
     cal_elempack();
 }
 
+std::vector<int64_t> TensorNucleus::shape() const {
+    int64_t dims = dim();
+    
+    OTTER_CHECK(dims <= 4, "Shape only support dim <= 4 but get ", dims);
+    
+    if (dims == 1) {
+        return {size(0) * elempack()};
+    } else if (dims == 2) {
+        return {size(0) * elempack(), size(1)};
+    } else if (dims == 3) {
+        return {size(0) * elempack(), size(1), size(2)};
+    } else if (dims == 4) {
+        return {size(0), size(1) * elempack(), size(2), size(3)};
+    }
+    
+    return {};
+}
+
 int64_t TensorNucleus::dim() const {
     return perspective_view_.size();
 }

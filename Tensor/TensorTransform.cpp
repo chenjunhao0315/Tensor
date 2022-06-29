@@ -41,7 +41,7 @@ static void cut_border(const Tensor& src_, Tensor &dst_, int64_t top, int64_t le
     });
 }
 
-std::vector<int64_t> resolve_roi(IntArrayRef shape, IntArrayRef border) {
+std::vector<int64_t> resolve_roi(std::vector<int64_t> shape, IntArrayRef border) {
     if (shape.size() == 1) {
         int64_t input_width = shape[0];
         
@@ -138,8 +138,18 @@ std::vector<int64_t> resolve_roi(IntArrayRef shape, IntArrayRef border) {
 Tensor& crop_(const Tensor& input, IntArrayRef border, Tensor& output) {
     OTTER_CHECK(input.dim() <= 4, "Expect input dim <= 4 but get", input.dim());
     
-    auto output_shape = resolve_roi(input.sizes(), border);
-    output.resize_(output_shape);
+    int elempack = input.elempack();
+    
+    if (elempack != 1) {
+#if __SSE2__
+        return crop_(input.packing(1), border, output);
+#else
+        return crop_(input.packing(1), border, output);
+#endif
+    }
+    
+    auto output_shape = resolve_roi(input.shape(), border);
+    output = otter::empty(output_shape, input.options());
     
     if (input.dim() == 1) {
         if (output_shape[0] == input.size(0)) {
@@ -198,7 +208,7 @@ Tensor& crop_(const Tensor& input, IntArrayRef border, Tensor& output) {
 }
 
 Tensor crop(const Tensor& input, IntArrayRef border) {
-    auto output = otter::empty({}, input.options());
+    Tensor output;
     
     return crop_(input, border, output);
 }

@@ -59,6 +59,8 @@ public:
     Tensor weight_data;
     Tensor weight_opt_data;
     Tensor bias_data;
+    
+    Tensor kernel_tp;
 };
 
 enum class DeconvParam : int {

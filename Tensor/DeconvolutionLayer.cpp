@@ -13,11 +13,25 @@
 #include "DepthwiseConvTransposeKernelNeon.hpp"
 #include "ActivationLayer.hpp"
 
+#if __SSE2__
+#include "DepthwiseConvTransposeKernelX86Pack.hpp"
+#endif
+
+#if __ARM_NEON__
+#include "DepthwiseConvTransposeKernelNeonPack.hpp"
+#endif
+
 namespace otter {
 
 DeconvolutionLayer::DeconvolutionLayer() {
     one_blob_only = true;
     support_inplace = false;
+    
+#if __SSE2__
+    support_packing = true;
+#elif __ARM_NEON__
+    support_packing = false;
+#endif
 }
 
 int DeconvolutionLayer::parse_param(LayerOption& option, ParamDict& pd) {
@@ -194,25 +208,96 @@ int DeconvolutionLayer::load_model(const Initializer& initializer) {
     return 0;
 }
 
-int DeconvolutionLayer::create_pipeline(const NetOption& /*opt*/) {
+int DeconvolutionLayer::create_pipeline(const NetOption& opt) {
     
     activation = create_activation_layer(activation_type, activation_params);
     
-    otter::depthwise_deconv2d_kernel_transform(weight_data, weight_opt_data);
+    int out_elempack = 1;
+#if __SSE2__
+    if (opt.use_packing_layout) {
+        out_elempack = out_channels % 4 == 0 ? 4 : 1;
+    }
+#elif __ARM_NEON__
+    if (opt.use_packing_layout) {
+        out_elempack = out_channels % 4 == 0 ? 4 : 1;
+    }
+#endif
+    
+#if __SSE2__
+    int maxk = kernel_width * kernel_height;
+    if (in_channels == groups && groups == out_channels) {
+        if (out_elempack == 4) {
+            otter::depthwise_deconv2d_kernel_transform_pack_x86(weight_data, kernel_tp);
+            kernel_tp = kernel_tp.view({{groups, maxk}}).packing(4);
+        } else if (out_elempack == 1) {
+            otter::depthwise_deconv2d_kernel_transform_pack_x86(weight_data, kernel_tp);
+        }
+    } else {
+        otter::depthwise_deconv2d_kernel_transform(weight_data, weight_opt_data);
+    }
+#elif __ARM_NEON__
+    int maxk = kernel_width * kernel_height;
+    if (in_channels == groups && groups == out_channels) {
+        if (out_elempack == 4) {
+            otter::depthwise_deconv2d_kernel_transform_pack_x86(weight_data, kernel_tp);
+            kernel_tp = kernel_tp.view({{groups, maxk}}).packing(4);
+        } else if (out_elempack == 1) {
+            otter::depthwise_deconv2d_kernel_transform_pack_x86(weight_data, kernel_tp);
+        }
+    } else {
+        otter::depthwise_deconv2d_kernel_transform(weight_data, weight_opt_data);
+    }
+#endif
     
     return 0;
 }
 
 int DeconvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const NetOption& opt) const {
     
+    Tensor optimize_kernel;
+    
+    int out_elempack = 1;
+#if __SSE2__
+    if (opt.use_packing_layout) {
+        out_elempack = out_channels % 4 == 0 ? 4 : 1;
+    }
+#elif __ARM_NEON__
+    if (opt.use_packing_layout) {
+        out_elempack = out_channels % 4 == 0 ? 4 : 1;
+    }
+#endif
+    
+#if __SSE2__
+    if (in_channels == groups && groups == out_channels) {
+        if (out_elempack == 4) {
+            optimize_kernel = kernel_tp;
+        } else if (out_elempack == 1) {
+            optimize_kernel = kernel_tp;
+        }
+    } else {
+        optimize_kernel = weight_opt_data;
+    }
+#elif __ARM_NEON__
+    if (in_channels == groups && groups == out_channels) {
+        if (out_elempack == 4) {
+            optimize_kernel = kernel_tp;
+        } else if (out_elempack == 1) {
+            optimize_kernel = kernel_tp;
+        }
+    } else {
+        optimize_kernel = weight_opt_data;
+    }
+#endif
+    
     top_blob = otter::convolution(
-        bottom_blob, weight_data, weight_opt_data, bias_data,
+        bottom_blob, weight_data, optimize_kernel, bias_data,
         {stride_height, stride_width},
         {padding_height, padding_width},
         {dilation_height, dilation_width},
         true,      // transpose
         {output_padding_height, output_padding_width},
-        groups
+        groups,
+        opt.use_packing_layout
     );
     
     if (activation) {

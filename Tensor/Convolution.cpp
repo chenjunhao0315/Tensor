@@ -23,6 +23,8 @@
 #include "ConvolutionMM2DX86Pack.hpp"
 #include "DepthwiseConvKernelX86Pack.hpp"
 
+#include "DepthwiseConvTransposeKernelX86Pack.hpp"
+
 #include "ConvolutionMM2DInt8X86Pack.hpp"
 #include "DepthwiseConvKernelInt8X86Pack.hpp"
 #endif
@@ -30,6 +32,8 @@
 #if __ARM_NEON__
 #include "ConvolutionMM2DNeonPack.hpp"
 #include "DepthwiseConvKernelNeonPack.hpp"
+
+#include "DepthwiseConvTransposeKernelNeonPack.hpp"
 
 #include "ConvolutionMM2DInt8NeonPack.hpp"
 #include "DepthwiseConvKernelInt8NeonPack.hpp"
@@ -288,7 +292,7 @@ Tensor convolution(
     const Tensor& input_int8_scales,
     const Tensor& weight_int8_scales) {
     
-    if ((packed_) && (!transposed_)) {
+    if (packed_) {
         return convolution_packed(
             input_r,
             weight_r,
@@ -463,13 +467,13 @@ ConvBackend select_proper_conv_packed_backend(
     const bool /*need_backward*/,
     const ConvParams& params) {
     
-    const int64_t w = input.size(3);
-    const int64_t h = input.size(2);
+//    const int64_t w = input.size(3);
+//    const int64_t h = input.size(2);
     const int64_t kernel_w = weight.size(3);
     const int64_t kernel_h = weight.size(2);
     const int64_t stride_w = params.stride[1];
     const int64_t stride_h = params.stride[0];
-    const int64_t num_input = input.size(1);
+//    const int64_t num_input = input.size(1);
     const int64_t num_output = weight.size(0);
     
     int64_t elempack = input.elempack();
@@ -489,9 +493,21 @@ ConvBackend select_proper_conv_packed_backend(
         if (params.transposed) {
             if (input.dim() == 4) {
                 if (params.use_cpu_x86(input, weight)) {
-                    
+                    if (params.is_transpose_depthwise(input, weight)) {
+                        if (out_elempack == 4) {
+                            return ConvBackend::DepthwiseTransposeX86Pack4;
+                        } else if (out_elempack == 1) {
+                            return ConvBackend::DepthwiseTransposeX86Pack1;
+                        }
+                    }
                 } else if (params.use_cpu_neon(input, weight)) {
-                    
+                    if (params.is_transpose_depthwise(input, weight)) {
+                        if (out_elempack == 4) {
+                            return ConvBackend::DepthwiseTransposeNeonPack4;
+                        } else if (out_elempack == 1) {
+                            return ConvBackend::DepthwiseTransposeNeonPack1;
+                        }
+                    }
                 }
             }
         } else {
@@ -692,6 +708,12 @@ Tensor convolution_packed(
             output = otter::depthwise_conv2d_5x5s1_x86_pack4(input, weight, weight_o, bias, padding); break;
         case ConvBackend::DepthwiseX86Pack4_5x5s2:
             output = otter::depthwise_conv2d_5x5s2_x86_pack4(input, weight, weight_o, bias, padding); break;
+            
+        // Deconv
+        case ConvBackend::DepthwiseTransposeX86Pack4:
+            output = otter::depthwise_deconv2d_pack4_x86(input, weight, weight_o, bias, stride, padding, output_padding, dilation); break;
+        case ConvBackend::DepthwiseTransposeX86Pack1:
+            output = otter::depthwise_deconv2d_pack1_x86(input, weight, weight_o, bias, stride, padding, output_padding, dilation); break;
 #endif  // __SSE2__
 #if __ARM_NEON__
         case ConvBackend::Sgemm2dNeonPack4:
@@ -718,6 +740,12 @@ Tensor convolution_packed(
             output = otter::depthwise_conv2d_5x5s2_neon_pack4(input, weight, weight_o, bias, padding); break;
         case ConvBackend::Conv2dNeonPack1to4_3x3s2:
             output = otter::conv2d_3x3s2_pack1to4_neon(input, weight, weight_o, bias, padding); break;
+            
+        // Deconv
+        case ConvBackend::DepthwiseTransposeNeonPack4:
+            output = otter::depthwise_deconv2d_pack4_neon(input, weight, weight_o, bias, stride, padding, output_padding, dilation); break;
+        case ConvBackend::DepthwiseTransposeNeonPack1:
+            output = otter::depthwise_deconv2d_pack1_neon(input, weight, weight_o, bias, stride, padding, output_padding, dilation); break;
 #endif  // __ARN_NEON__
             
 #if __SSE2__

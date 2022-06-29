@@ -51,6 +51,8 @@ public:
         return perspective_view_.strides_arrayref();
     }
     
+    std::vector<int64_t> shape() const;
+    
     virtual void set_memory_offset(int64_t memory_offset) {
         memory_offset_ = memory_offset;
     }
@@ -525,6 +527,10 @@ public:
     
     IntArrayRef strides() const {
         return tensor_nucleus_->strides();
+    }
+    
+    std::vector<int64_t> shape() const {
+        return tensor_nucleus_->shape();
     }
     
     size_t nbytes() const {

@@ -47,29 +47,13 @@ enum class ConvBackend {
     Slow2d,
     SlowTranspose2d,
     SlideWinTranspose2d,
-    Transpose2dNeon_4x4s2,
-    Sgemm2dNeon,
-    Sgemm2dNeon_1x1s1,
-    Sgemm2dNeon_1x1s2,
-    Sgemm2dX86,
-    Sgemm2dInt8X86,
-    Sgemm2dInt8X86_1x1s1,
-    Sgemm2dInt8Neon,
-    SlideWin2dNeon_1x1s1,
-    SlideWin2dNeon_3x3s1,
-    WinogradNeon_3x3s1,
-    Packed2DNeon_3x3s2,
-    WinogradX86_3x3s1,
     SlideWin2d,
     SlideWin2dInt8,
-    DepthwiseNeon_3x3s1,
-    DepthwiseNeon_3x3s2,
-    DepthwiseNeon_5x5s1,
-    DepthwiseNeon_5x5s2,
-    DepthwiseX86_3x3s1,
-    DepthwiseX86_3x3s2,
-    DepthwiseTransposeNeon,
     Slow3d,
+    
+    // x86
+    Sgemm2dX86,
+    WinogradX86_3x3s1,
     Sgemm2dX86Pack4,
     Sgemm2dX86Pack4_1x1s1,
     Sgemm2dX86Pack4_1x1s2,
@@ -77,6 +61,15 @@ enum class ConvBackend {
     Sgemm2dX86Pack1to4_1x1s1,
     Sgemm2dX86Pack4to1,
     Sgemm2dX86Pack4to1_1x1s1,
+    
+    // neon
+    Sgemm2dNeon,
+    Sgemm2dNeon_1x1s1,
+    Sgemm2dNeon_1x1s2,
+    WinogradNeon_3x3s1,
+    Packed2DNeon_3x3s2,
+    SlideWin2dNeon_1x1s1,
+    SlideWin2dNeon_3x3s1,
     Sgemm2dNeonPack4,
     Sgemm2dNeonPack4_1x1s1,
     Sgemm2dNeonPack1to4,
@@ -84,16 +77,40 @@ enum class ConvBackend {
     Sgemm2dNeonPack4to1,
     Sgemm2dNeonPack4to1_1x1s1,
     Conv2dNeonPack1to4_3x3s2,
+    
+    // depthwise x86
+    DepthwiseX86_3x3s1,
+    DepthwiseX86_3x3s2,
     DepthwiseX86Pack4,
     DepthwiseX86Pack4_3x3s1,
     DepthwiseX86Pack4_3x3s2,
     DepthwiseX86Pack4_5x5s1,
     DepthwiseX86Pack4_5x5s2,
+    
+    // depthwise neon
+    DepthwiseNeon_3x3s1,
+    DepthwiseNeon_3x3s2,
+    DepthwiseNeon_5x5s1,
+    DepthwiseNeon_5x5s2,
     DepthwiseNeonPack4,
     DepthwiseNeonPack4_3x3s1,
     DepthwiseNeonPack4_3x3s2,
     DepthwiseNeonPack4_5x5s1,
     DepthwiseNeonPack4_5x5s2,
+    
+    // deconv x86
+    DepthwiseTransposeX86Pack1,
+    DepthwiseTransposeX86Pack4,
+    
+    // deconv neon
+    Transpose2dNeon_4x4s2,
+    DepthwiseTransposeNeon,
+    DepthwiseTransposeNeonPack1,
+    DepthwiseTransposeNeonPack4,
+    
+    // int8 x86
+    Sgemm2dInt8X86,
+    Sgemm2dInt8X86_1x1s1,
     Sgemm2dInt8X86Pack8to4,
     Sgemm2dInt8X86Pack8to1,
     Sgemm2dInt8X86Pack1to4,
@@ -102,6 +119,9 @@ enum class ConvBackend {
     Sgemm2dInt8X86Pack1to4_1x1s1,
     DepthwiseInt8X86Pack8,
     DepthwiseInt8X86Pack1,
+    
+    // int8 neon
+    Sgemm2dInt8Neon,
     Sgemm2dInt8NeonPack8to4,
     Sgemm2dInt8NeonPack8to1,
     Sgemm2dInt8NeonPack1to4,
@@ -112,6 +132,8 @@ enum class ConvBackend {
     DepthwiseInt8NeonPack1,
     DepthwiseInt8NeonPack8_3x3s1,
     DepthwiseInt8NeonPack8_3x3s2,
+    
+    // not implement
     Overrideable
 };
 
