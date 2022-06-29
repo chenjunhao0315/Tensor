@@ -55,8 +55,7 @@ Tensor quantize_to_int8(const Tensor& src, const Tensor& scale_data, bool pack) 
     return quantize_to_int8_x86(src, scale_data, pack);
 #elif __ARM_NEON__
     return quantize_to_int8_neon(src, scale_data, pack);
-#endif
-    
+#else
     auto dst = otter::empty_like(src, otter::ScalarType::Byte);
     int scale_data_size = scale_data.size(0);
     auto scale_data_a = scale_data.accessor<float, 1>();
@@ -149,17 +148,16 @@ Tensor quantize_to_int8(const Tensor& src, const Tensor& scale_data, bool pack) 
     }
     
     return dst;
+#endif
 }
 
 Tensor dequantize_from_int32(const Tensor& src, const Tensor& scale_data, const Tensor& bias_data, bool pack) {
     
 #if __SSE2__
     return dequantize_from_int32_x86(src, scale_data, bias_data, pack);
-#else __ARM_NEON
+#elif __ARM_NEON
     return dequantize_from_int32_neon(src, scale_data, bias_data, pack);
-#endif
-    
-    
+#else
     auto dst = otter::empty_like(src, otter::ScalarType::Float);
     
     int scale_data_size = scale_data.size(0);
@@ -343,6 +341,7 @@ Tensor dequantize_from_int32(const Tensor& src, const Tensor& scale_data, const 
     }
     
     return dst;
+#endif
 }
 
 Tensor requantize_from_int32_to_int8(const Tensor& src, const Tensor& scale_in_data, const Tensor& scale_out_data, const Tensor& bias_data, int activation_type, const Tensor& activation_params, bool pack) {
@@ -351,8 +350,7 @@ Tensor requantize_from_int32_to_int8(const Tensor& src, const Tensor& scale_in_d
     return requantize_from_int32_to_int8_x86(src, scale_in_data, scale_out_data, bias_data, activation_type, activation_params, pack);
 #elif __ARM_NEON__
     return requantize_from_int32_to_int8_neon(src, scale_in_data, scale_out_data, bias_data, activation_type, activation_params, pack);
-#endif
-    
+#else
     int dims = src.dim();
     
     int scale_in_data_size = scale_in_data.size(0);
@@ -614,6 +612,7 @@ Tensor requantize_from_int32_to_int8(const Tensor& src, const Tensor& scale_in_d
     }
     
     return dst;
+#endif
 }
 
 }   // end namespace otter

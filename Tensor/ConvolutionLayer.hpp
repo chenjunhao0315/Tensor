@@ -9,7 +9,6 @@
 #define ConvolutionLayer_hpp
 
 #include "Layer.hpp"
-#include "ActivationLayer.hpp"
 
 namespace otter {
 

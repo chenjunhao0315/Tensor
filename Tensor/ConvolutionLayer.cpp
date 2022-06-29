@@ -7,6 +7,7 @@
 
 #include "ConvolutionLayer.hpp"
 #include "Convolution.hpp"
+#include "ActivationLayer.hpp"
 
 #include "TensorFactory.hpp"
 #include "TensorMaker.hpp"
