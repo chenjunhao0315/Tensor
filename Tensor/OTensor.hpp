@@ -50,10 +50,6 @@
 // Parallel
 #include "Parallel.hpp"
 
-// Vec
-#include "Vec.hpp"
-#include "VecIntrinsic.hpp"
-
 // Convolution
 #include "Convolution.hpp"
 #include "ConvolutionUtils.hpp"
