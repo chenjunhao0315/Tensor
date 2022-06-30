@@ -131,6 +131,19 @@ Tensor sgemm_conv2d_1x1s1_int8_pack8to4_x86(
     const Tensor& weight_o,
     IntArrayRef padding);
 
+Tensor& conv2d_3x3s2_int8_pack1to4_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    IntArrayRef padding,
+    Tensor& output);
+    
+Tensor conv2d_3x3s2_int8_pack1to4_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    IntArrayRef padding);
+
 #endif  // __SSE2__
 
 }   // end namespace otter

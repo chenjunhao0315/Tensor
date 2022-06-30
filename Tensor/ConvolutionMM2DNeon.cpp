@@ -5,6 +5,10 @@
 //  Created by 陳均豪 on 2022/2/26.
 //
 
+// https://github.com/Tencent/ncnn/blob/master/src/layer/arm/convolution_sgemm.h
+// https://github.com/Tencent/ncnn/blob/master/src/layer/arm/convolution_1x1.h
+// https://github.com/Tencent/ncnn/blob/master/src/layer/arm/convolution_3x3.h
+
 #include "ConvolutionMM2DNeon.hpp"
 #include "Tensor.hpp"
 #include "TensorFactory.hpp"

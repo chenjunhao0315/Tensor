@@ -117,6 +117,7 @@ enum class ConvBackend {
     Sgemm2dInt8X86Pack8to4_1x1s1,
     Sgemm2dInt8X86Pack8to1_1x1s1,
     Sgemm2dInt8X86Pack1to4_1x1s1,
+    Sgemm2dInt8X86Pack1to4_3x3s2,
     DepthwiseInt8X86Pack8,
     DepthwiseInt8X86Pack1,
     
@@ -128,6 +129,7 @@ enum class ConvBackend {
     Sgemm2dInt8NeonPack8to4_1x1s1,
     Sgemm2dInt8NeonPack8to1_1x1s1,
     Sgemm2dInt8NeonPack1to4_1x1s1,
+    Sgemm2dInt8NeonPack1to4_3x3s2,
     DepthwiseInt8NeonPack8,
     DepthwiseInt8NeonPack1,
     DepthwiseInt8NeonPack8_3x3s1,

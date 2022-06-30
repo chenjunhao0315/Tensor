@@ -2566,6 +2566,101 @@ Tensor sgemm_conv2d_1x1s1_int8_pack8to4_x86(
     return sgemm_conv2d_1x1s1_int8_pack8to4_x86_out(self, weight, weight_o, padding, output);
 }
 
+Tensor& conv2d_3x3s2_int8_pack1to4_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    IntArrayRef padding,
+    Tensor& output) {
+    
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {2, 2}, padding);
+    output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
+    
+    int inch = self.size(1);
+    
+    int outw = output.size(3);
+    int outh = output.size(2);
+    int outch = output.size(1);
+    const int size = outw * outh;
+
+    const int maxk = 3 * 3;
+    
+    Tensor kernel_tf;
+    if (weight_o.defined())
+        kernel_tf = weight_o;
+    else
+        convolution_im2col_sgemm_transform_kernel_pack1to4_int8_x86(weight, kernel_tf, inch, outch * 4, 3, 3);
+    
+    Tensor input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
+    
+    int w = input.size(2);
+    
+    Tensor im2col = otter::empty({inch, maxk, size}, otter::ScalarType::Byte);
+    
+    auto im2col_a = im2col.accessor<signed char, 3>();
+    auto input_a = input.accessor<signed char, 3>();
+    
+    {
+        const int gap = w * 2 - outw * 2;
+
+        otter::parallel_for(0, inch, 0, [&](int64_t begin, int64_t end) {
+            for (const auto p : otter::irange(begin, end)) {
+                const auto img = input_a[p];
+                signed char* ptr = im2col_a[p].data();
+
+                for (int u = 0; u < 3; u++) {
+                    for (int v = 0; v < 3; v++) {
+                        const signed char* sptr = img[u].data() + v;
+
+                        for (int i = 0; i < outh; i++) {
+                            int j = 0;
+                            for (; j + 3 < outw; j += 4) {
+                                ptr[0] = sptr[0];
+                                ptr[1] = sptr[2];
+                                ptr[2] = sptr[4];
+                                ptr[3] = sptr[6];
+
+                                sptr += 8;
+                                ptr += 4;
+                            }
+                            for (; j + 1 < outw; j += 2) {
+                                ptr[0] = sptr[0];
+                                ptr[1] = sptr[2];
+
+                                sptr += 4;
+                                ptr += 2;
+                            }
+                            for (; j < outw; j++) {
+                                ptr[0] = sptr[0];
+
+                                sptr += 2;
+                                ptr += 1;
+                            }
+
+                            sptr += gap;
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    im2col_sgemm_conv2d_int8_pack1to4_impl_x86(im2col, kernel_tf, output);
+    
+    return output;
+}
+    
+Tensor conv2d_3x3s2_int8_pack1to4_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    IntArrayRef padding) {
+    
+    auto output = otter::empty({}, otter::ScalarType::Int4);
+    
+    return conv2d_3x3s2_int8_pack1to4_x86_out(self, weight, weight_o, padding, output);
+}
+
 
 #endif  // __SSE2__
 

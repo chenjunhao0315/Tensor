@@ -5,6 +5,8 @@
 //  Created by 陳均豪 on 2022/6/5.
 //
 
+// https://github.com/Tencent/ncnn/blob/master/src/layer/x86/convolution_sgemm_int8.h
+
 #include "ConvolutionMM2DInt8X86.hpp"
 
 #include "Tensor.hpp"

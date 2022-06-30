@@ -5,6 +5,10 @@
 //  Created by 陳均豪 on 2022/4/2.
 //
 
+// https://github.com/Tencent/ncnn/blob/master/src/layer/x86/convolution_sgemm.h
+// https://github.com/Tencent/ncnn/blob/master/src/layer/x86/convolution_1x1.h
+// https://github.com/Tencent/ncnn/blob/master/src/layer/x86/convolution_3x3.h
+
 #include "ConvolutionMM2DX86.hpp"
 #include "Tensor.hpp"
 #include "TensorFactory.hpp"

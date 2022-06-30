@@ -555,6 +555,8 @@ ConvBackend select_proper_conv_packed_backend(
                         } else if (elempack == 1 && out_elempack_int32 == 4) {
                             if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
                                 return ConvBackend::Sgemm2dInt8X86Pack1to4_1x1s1;
+                            } else if (kernel_h == 3 && kernel_w == 3 && stride_h == 2 && stride_w == 2) {
+                                return ConvBackend::Sgemm2dInt8X86Pack1to4_3x3s2;
                             }
                             return ConvBackend::Sgemm2dInt8X86Pack1to4;
                         }
@@ -761,6 +763,8 @@ Tensor convolution_packed(
             output = otter::sgemm_conv2d_1x1s1_int8_pack8to4_x86(input, weight, weight_o, padding); break;
         case ConvBackend::Sgemm2dInt8X86Pack8to1_1x1s1:
             output = otter::sgemm_conv2d_1x1s1_int8_pack8to1_x86(input, weight, weight_o, padding); break;
+        case ConvBackend::Sgemm2dInt8X86Pack1to4_3x3s2:
+            output = otter::conv2d_3x3s2_int8_pack1to4_x86(input, weight, weight_o, padding); break;
         case ConvBackend::DepthwiseInt8X86Pack8:
             output = otter::depthwise_conv2d_int8_x86_pack8(input, weight, weight_o, kernel_size, stride, padding, dilation); break;
         case ConvBackend::DepthwiseInt8X86Pack1:

@@ -18,8 +18,8 @@ int main(int argc, const char * argv[]) {
     if (ret) {
         exit(-1);
     }
-//    auto net_profiler = net.create_extractor();
-//    net_profiler.benchmark_info("data_1", "nanodet", {1, 3, 416, 416});
+    auto net_profiler = net.create_extractor();
+    net_profiler.benchmark_info("data_1", "nanodet", {1, 3, 416, 416});
 
     otter::Net pose;
     pose.option.use_packing_layout = true;
@@ -28,8 +28,8 @@ int main(int argc, const char * argv[]) {
     if (ret) {
         exit(-1);
     }
-    auto pose_profiler = pose.create_extractor();
-    pose_profiler.benchmark_info("data_1", "conv_56", {1, 3, 256, 192});
+//    auto pose_profiler = pose.create_extractor();
+//    pose_profiler.benchmark_info("data_1", "conv_56", {1, 3, 256, 192});
 
     otter::Clock l;
     auto img = otter::cv::load_image_rgb("大合照.jpg");

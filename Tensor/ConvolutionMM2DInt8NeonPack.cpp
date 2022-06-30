@@ -5,6 +5,10 @@
 //  Created by 陳均豪 on 2022/6/28.
 //
 
+// https://github.com/Tencent/ncnn/blob/master/src/layer/arm/convolution_sgemm_pack1to4_int8.h
+// https://github.com/Tencent/ncnn/blob/master/src/layer/arm/convolution_sgemm_pack8to4_int8.h
+// https://github.com/Tencent/ncnn/blob/master/src/layer/arm/convolution_sgemm_pack8to1_int8.h
+
 #include "ConvolutionMM2DInt8NeonPack.hpp"
 #include "TensorFactory.hpp"
 #include "Parallel.hpp"
