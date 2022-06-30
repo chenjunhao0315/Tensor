@@ -50,8 +50,6 @@ Tensor& conv2d_3x3s1_winograd23_x86_out(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
     IntArrayRef padding,
     Tensor& output);
 
@@ -60,8 +58,6 @@ Tensor conv2d_3x3s1_winograd23_x86(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
     IntArrayRef padding);
 
 }   // end namespace otter

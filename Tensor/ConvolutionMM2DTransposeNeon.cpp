@@ -43,13 +43,11 @@ Tensor& deconv2d_4x4s2_neon_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias_,
-    IntArrayRef stride,
     IntArrayRef padding,
     IntArrayRef output_padding,
-    IntArrayRef dilation,
     Tensor& output) {
     
-    auto output_pad_size = otter::calculate_deconv_output_size_without_padding(self.sizes(), weight.sizes(), stride, dilation, padding, output_padding);
+    auto output_pad_size = otter::calculate_deconv_output_size_without_padding(self.sizes(), weight.sizes(), {2, 2}, {1, 1}, padding, output_padding);
     auto output_pad = otter::empty(output_pad_size, otter::ScalarType::Float);
     
     int64_t w = self.size(3);
@@ -218,14 +216,12 @@ Tensor deconv2d_4x4s2_neon(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
-    IntArrayRef stride,
     IntArrayRef padding,
-    IntArrayRef output_padding,
-    IntArrayRef dilation) {
+    IntArrayRef output_padding) {
     
     auto output = otter::empty({}, self.options());
     
-    return deconv2d_4x4s2_neon_out(self, weight, bias, stride, padding, output_padding, dilation, output);
+    return deconv2d_4x4s2_neon_out(self, weight, bias, padding, output_padding, output);
 }
 
 }   // end namespace otter

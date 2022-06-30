@@ -16,20 +16,16 @@ Tensor& deconv2d_4x4s2_neon_out(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
-    IntArrayRef stride,
     IntArrayRef padding,
     IntArrayRef output_padding,
-    IntArrayRef dilation,
     Tensor& output);
 
 Tensor deconv2d_4x4s2_neon(
     const Tensor& self,
     const Tensor& weight,
     const Tensor& bias,
-    IntArrayRef stride,
     IntArrayRef padding,
-    IntArrayRef output_padding,
-    IntArrayRef dilation);
+    IntArrayRef output_padding);
 
 }   // end namespace otter
 

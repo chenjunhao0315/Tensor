@@ -1256,12 +1256,10 @@ Tensor& conv2d_3x3s1_winograd23_x86_out(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias_,
-    IntArrayRef /*kernel_size*/,
-    IntArrayRef stride,
     IntArrayRef padding,
     Tensor& output) {
     
-    auto output_shape = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), stride, padding);
+    auto output_shape = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {1, 1}, padding);
     output.resize_(output_shape);
     
     int origin_w = (int)self.size(3) + 2 * (int)padding[1];
@@ -1852,13 +1850,11 @@ Tensor conv2d_3x3s1_winograd23_x86(
     const Tensor& weight,
     const Tensor& weight_o,
     const Tensor& bias,
-    IntArrayRef kernel_size,
-    IntArrayRef stride,
     IntArrayRef padding) {
     
     auto output = otter::empty({}, self.options());
     
-    return conv2d_3x3s1_winograd23_x86_out(self, weight, weight_o, bias, kernel_size, stride, padding, output);
+    return conv2d_3x3s1_winograd23_x86_out(self, weight, weight_o, bias, padding, output);
 }
 
 }   // end namespace otter
