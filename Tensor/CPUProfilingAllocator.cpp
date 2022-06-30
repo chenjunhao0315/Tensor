@@ -8,6 +8,7 @@
 #include "Allocator.hpp"
 #include "CPUProfilingAllocator.hpp"
 #include "Utils.hpp"
+#include "Exception.hpp"
 
 #include <climits>
 #include <map>

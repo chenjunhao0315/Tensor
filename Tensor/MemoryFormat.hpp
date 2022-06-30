@@ -11,7 +11,6 @@
 #include <cstdint>
 
 #include "Utils.hpp"
-#include "Exception.hpp"
 
 namespace otter {
 

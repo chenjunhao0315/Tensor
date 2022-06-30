@@ -8,7 +8,9 @@
 #ifndef CPUProfilingAllocator_hpp
 #define CPUProfilingAllocator_hpp
 
-#include "Exception.hpp"
+#include <vector>
+#include <cstdint>
+
 #include "SmallVector.hpp"
 #include "flat_hash_map.hpp"
 

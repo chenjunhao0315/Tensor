@@ -8,6 +8,7 @@
 #include "Tensor.hpp"
 #include "TensorShape.hpp"
 #include "Convolution.hpp"
+#include "ConvolutionMM2D.hpp"
 #include "ConvolutionMM2DNeon.hpp"
 #include "ConvolutionMM2DX86.hpp"
 #include "ConvolutionMM2DInt8X86.hpp"

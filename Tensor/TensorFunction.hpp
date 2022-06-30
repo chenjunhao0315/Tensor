@@ -8,7 +8,6 @@
 #ifndef TensorFunction_hpp
 #define TensorFunction_hpp
 
-#include "ExclusivelyOwned.hpp"
 #include "TensorIterator.hpp"
 
 namespace otter {

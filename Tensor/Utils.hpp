@@ -8,7 +8,6 @@
 #ifndef Utils_hpp
 #define Utils_hpp
 
-#include "MaybeOwned.hpp"
 #include "ArrayRef.hpp"
 #include "SmallVector.hpp"
 

@@ -8,7 +8,6 @@
 #ifndef TensorOperator_hpp
 #define TensorOperator_hpp
 
-#include "UnaryOps.hpp"
 #include "Tensor.hpp"
 #include "TensorFactory.hpp"
 

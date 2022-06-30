@@ -9,7 +9,6 @@
 #define Convolution_hpp
 
 #include "ConvolutionUtils.hpp"
-#include "ConvolutionMM2D.hpp"
 
 namespace otter {
 
