@@ -1590,7 +1590,7 @@ Tensor conv2d_1x1s2_sgemm_pack4_x86_out(
     IntArrayRef padding,
     Tensor& output) {
     
-    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {1, 1}, padding);
+    auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {2, 2}, padding);
     output.resize_({output_size[0], output_size[1] / 4, output_size[2], output_size[3]});
     
     int inch = self.size(1);
@@ -1638,7 +1638,7 @@ Tensor conv2d_1x1s2_sgemm_pack4_x86_out(
     
     const int size = outw * outh;
     
-    Tensor im2col = input.view({-1, 1, size});
+    Tensor im2col = shrinked.view({-1, 1, size});
     
     im2col_sgemm_conv2d_pack4_impl_x86(im2col, output, kernel_tf, bias);
     

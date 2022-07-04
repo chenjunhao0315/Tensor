@@ -478,6 +478,8 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
             optimize_kernel = weight_data_tf;
         } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
             optimize_kernel = weight_sgemm_data;
+        } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
+            optimize_kernel = weight_sgemm_data;
         }
     }
     
