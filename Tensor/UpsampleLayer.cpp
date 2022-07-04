@@ -130,4 +130,25 @@ int UpsampleLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const Ne
     return 0;
 }
 
+int UpsampleLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const {
+    const Tensor& bottom_blob = bottom_blobs[0];
+    const Tensor& reference_blob = bottom_blobs[1];
+    Tensor& top_blob = top_blobs[0];
+    
+    int output_height = reference_blob.size(2);
+    int output_width = reference_blob.size(3);
+    
+    if (opt.use_non_lib_optimize || bottom_blob.elempack() != 1) {
+        top_blob = otter::Interpolate(bottom_blob, {output_height, output_width}, {scale_height, scale_width}, (otter::InterpolateMode)mode);
+    } else {
+        if (mode == 1) {
+            top_blob = otter::native::upsample_nearest2d(bottom_blob, {output_height, output_width}, scale_height, scale_width);
+        } else if (mode == 2) {
+            top_blob = otter::native::upsample_bilinear2d(bottom_blob, {output_height, output_width}, align_corner, scale_height, scale_width);
+        }
+    }
+    
+    return 0;
+}
+
 }   // end namespace otter

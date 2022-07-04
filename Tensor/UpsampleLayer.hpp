@@ -24,6 +24,8 @@ public:
     
     virtual int forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
     
+    virtual int forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const;
+    
     virtual std::string type() const { return "Upsample"; }
 private:
     int mode;
