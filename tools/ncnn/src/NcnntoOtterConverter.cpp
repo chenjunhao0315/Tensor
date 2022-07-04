@@ -77,6 +77,7 @@ int slice = 1;
 int sigmoid = 1;
 int reshape = 1;
 int permute = 1;
+int relu = 1;
 
 OtterLeader ncnn2otter(const char *model_path) {
     OtterLeader new_model(model_path);
@@ -240,42 +241,15 @@ void ncnn2team(Otter &team, ParamDict &pd, std::string input_name, std::string o
         ADD_PARAM("dilation_w", dilation_w);
         (bias_term) ? sub_team.addParam({"bias_term", "true"}) : sub_team.addParam({"bias_term", "false"});
         
-        std::string true_output;
-        
-        if (activation_type == 1) {
-            ACTIVATION("Relu");
-            true_output = get_layer_name("relu_conv", conv);
-        } else if (activation_type == 2) {
-            ACTIVATION("LRelu");
-            sub_team.addParam({"alpha", std::to_string(activation_param[0])});
-            true_output = get_layer_name("lrelu_conv", conv);
-        } else if (activation_type == 3) {
-            // Suppose it is relu 6
-            if (activation_param[0] == 0 && activation_param[1] == 6) {
-                ACTIVATION("Relu6");
-                true_output = get_layer_name("relu6_conv", conv);
-            } else {
-                printf("Unsupport activation!\n");
-                exit(-100);
-            }
-        } else if (activation_type == 4) {
-            ACTIVATION("Sigmoid");
-            true_output = get_layer_name("sigmoid_conv", conv);
-        } else {
-            true_output = get_layer_name("conv", conv);
-        }
-        
         if (type == "ConvolutionDepthWise") {
             team.setName("Convolution");
             int groups = pd.get(7, 1);
             ADD_PARAM("groups", groups);
         }
         
-        printf("output_name: %s true_output: %s\n", output_name.c_str(), true_output.c_str());
-        ADD_TRANSFORM_MAP(output_name, true_output);
         std::string input = transform_map[input_name];
-        printf("try to get \"%s\" and get \"%s\"\n", input_name.c_str(), input.c_str());
         std::string output = get_layer_name("conv", conv);
+        ADD_TRANSFORM_MAP(output_name, output);
         WRITE_LAYER_NAME("conv", conv++);
         ADD_PARAM_STRING("input", input);
         ADD_PARAM_STRING("output", output);
@@ -318,42 +292,15 @@ void ncnn2team(Otter &team, ParamDict &pd, std::string input_name, std::string o
         ADD_PARAM("output_padding_w", output_pad_right);
         (bias_term) ? sub_team.addParam({"bias_term", "true"}) : sub_team.addParam({"bias_term", "false"});
         
-        std::string true_output;
-        
-        if (activation_type == 1) {
-            ACTIVATION("Relu");
-            true_output = get_layer_name("relu_deconv", deconv);
-        } else if (activation_type == 2) {
-            ACTIVATION("LRelu");
-            sub_team.addParam({"alpha", std::to_string(activation_param[0])});
-            true_output = get_layer_name("lrelu_deconv", deconv);
-        } else if (activation_type == 3) {
-            // Suppose it is relu 6
-            if (activation_param[0] == 0 && activation_param[1] == 6) {
-                ACTIVATION("Relu6");
-                true_output = get_layer_name("relu6_deconv", deconv);
-            } else {
-                printf("Unsupport activation!\n");
-                exit(-100);
-            }
-        } else if (activation_type == 4) {
-            ACTIVATION("Sigmoid");
-            true_output = get_layer_name("sigmoid_deconv", deconv);
-        } else {
-            true_output = get_layer_name("deconv", deconv);
-        }
-        
         if (type == "DeconvolutionDepthWise") {
             team.setName("Deconvolution");
             int groups = pd.get(7, 1);
             ADD_PARAM("groups", groups);
         }
         
-        printf("output_name: %s true_output: %s\n", output_name.c_str(), true_output.c_str());
-        ADD_TRANSFORM_MAP(output_name, true_output);
         std::string input = transform_map[input_name];
-        printf("try to get \"%s\" and get \"%s\"\n", input_name.c_str(), input.c_str());
         std::string output = get_layer_name("deconv", deconv);
+        ADD_TRANSFORM_MAP(output_name, output);
         WRITE_LAYER_NAME("deconv", deconv++);
         ADD_PARAM_STRING("input", input);
         ADD_PARAM_STRING("output", output);
@@ -469,7 +416,16 @@ void ncnn2team(Otter &team, ParamDict &pd, std::string input_name, std::string o
         WRITE_LAYER_NAME("sigmoid", sigmoid++);
         ADD_PARAM_STRING("input", input);
         ADD_PARAM_STRING("output", output);
-    } else if (type == "Reshape") {
+    } else if (type == "ReLU") {
+        team.setName("Relu");
+        printf("relu input name: %s\n", input_name.c_str());
+        std::string input = transform_map[input_name];
+        std::string output = get_layer_name("relu", relu);
+        ADD_TRANSFORM_MAP(output_name, output);
+        WRITE_LAYER_NAME("relu", relu++);
+        ADD_PARAM_STRING("input", input);
+        ADD_PARAM_STRING("output", output);
+    }  else if (type == "Reshape") {
         int w = pd.get(0, -233);
         int h = pd.get(1, -233);
         int c = pd.get(2, -233);
@@ -559,8 +515,20 @@ void ncnn2team(Otter &team, ParamDict &pd, std::string input_name, std::string o
             sub_team.addParam({"upsample_mode", "bicubic"});
         }
         
-        std::string input = transform_map[input_name];
-        std::string output = get_layer_name("upsample", upsample);
+        int input_count = std::count(input_name.begin(), input_name.end(), ',') + 1;
+        std::string input;
+        std::string output;
+        
+        std::stringstream ss(input_name);
+        for (int i = 0; i < input_count; ++i) {
+            std::string name;
+            getline(ss, name, ',');
+            EARSE_SPACE(name);
+            if (i)
+                input += ", ";
+            input += transform_map[name];
+        }
+        output = get_layer_name("upsample", upsample);
         ADD_TRANSFORM_MAP(output_name, output);
         WRITE_LAYER_NAME("upsample", upsample++);
         ADD_PARAM_STRING("input", input);
