@@ -95,7 +95,7 @@ int Yolov3DetectionOutputLayer::parse_param(LayerOption& option, ParamDict& pd) 
 }
 
 int Yolov3DetectionOutputLayer::compute_output_shape(ParamDict& pd) {
-    pd.set(OUTPUT_SHAPE_HINT, otter::tensor({6, 0, 0, 0}));
+    pd.set(OUTPUT_SHAPE_HINT, otter::tensor({6, 0, 0, 0}, ScalarType::Int).view({1, -1}));
     
     return 0;
 }

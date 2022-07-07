@@ -31,6 +31,9 @@
 #include "SigmoidLayer.hpp"
 #include "Yolov3DetectionOutputLayer.hpp"
 #include "NanodetPlusDetectionOutputLayer.hpp"
+#include "ROIAlignLayer.hpp"
+#include "InnerProductLayer.hpp"
+#include "FlattenLayer.hpp"
 
 namespace otter {
 
@@ -56,6 +59,9 @@ REGISTER_LAYER_CLASS(Permute);
 REGISTER_LAYER_CLASS(Sigmoid);
 REGISTER_LAYER_CLASS(Yolov3DetectionOutput);
 REGISTER_LAYER_CLASS(NanodetPlusDetectionOutput);
+REGISTER_LAYER_CLASS(ROIAlign);
+REGISTER_LAYER_CLASS(InnerProduct);
+REGISTER_LAYER_CLASS(Flatten);
 
 }   // end namespace otter
 

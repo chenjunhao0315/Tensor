@@ -102,6 +102,9 @@
 		7687218127C2DDC7006640CF /* Normalization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687217F27C2DDC7006640CF /* Normalization.cpp */; };
 		7687218827C35B9F006640CF /* BatchNormalization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687218627C35B9F006640CF /* BatchNormalization.cpp */; };
 		7687218B27C3C28D006640CF /* BatchNormalizationKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7687218927C3C28D006640CF /* BatchNormalizationKernel.cpp */; };
+		768B2CB9287665DF00F8E108 /* ROIAlignLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 768B2CB7287665DF00F8E108 /* ROIAlignLayer.cpp */; };
+		768B2CBC2876AD8A00F8E108 /* InnerProductLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 768B2CBA2876AD8A00F8E108 /* InnerProductLayer.cpp */; };
+		768B2CBF2876B7E700F8E108 /* FlattenLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 768B2CBD2876B7E700F8E108 /* FlattenLayer.cpp */; };
 		769279D427D49BC90088BD9F /* UpsampleLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 769279D227D49BC90088BD9F /* UpsampleLayer.cpp */; };
 		76927B3527D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76927B3327D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp */; };
 		76AA466327F8855600F0F3C6 /* ConvolutionMM2DX86.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76AA466127F8855600F0F3C6 /* ConvolutionMM2DX86.cpp */; };
@@ -401,6 +404,12 @@
 		7687218727C35B9F006640CF /* BatchNormalization.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BatchNormalization.hpp; sourceTree = "<group>"; };
 		7687218927C3C28D006640CF /* BatchNormalizationKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BatchNormalizationKernel.cpp; sourceTree = "<group>"; };
 		7687218A27C3C28D006640CF /* BatchNormalizationKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BatchNormalizationKernel.hpp; sourceTree = "<group>"; };
+		768B2CB7287665DF00F8E108 /* ROIAlignLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ROIAlignLayer.cpp; sourceTree = "<group>"; };
+		768B2CB8287665DF00F8E108 /* ROIAlignLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ROIAlignLayer.hpp; sourceTree = "<group>"; };
+		768B2CBA2876AD8A00F8E108 /* InnerProductLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = InnerProductLayer.cpp; sourceTree = "<group>"; };
+		768B2CBB2876AD8A00F8E108 /* InnerProductLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = InnerProductLayer.hpp; sourceTree = "<group>"; };
+		768B2CBD2876B7E700F8E108 /* FlattenLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FlattenLayer.cpp; sourceTree = "<group>"; };
+		768B2CBE2876B7E700F8E108 /* FlattenLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FlattenLayer.hpp; sourceTree = "<group>"; };
 		769279D227D49BC90088BD9F /* UpsampleLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UpsampleLayer.cpp; sourceTree = "<group>"; };
 		769279D327D49BC90088BD9F /* UpsampleLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UpsampleLayer.hpp; sourceTree = "<group>"; };
 		76927B3327D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Yolov3DetectionOutputLayer.cpp; sourceTree = "<group>"; };
@@ -918,6 +927,8 @@
 				7687217D27C2A850006640CF /* ConvolutionLayer.hpp */,
 				76CF3F3527FC6E4B009BF242 /* DeconvolutionLayer.cpp */,
 				76CF3F3627FC6E4B009BF242 /* DeconvolutionLayer.hpp */,
+				768B2CBA2876AD8A00F8E108 /* InnerProductLayer.cpp */,
+				768B2CBB2876AD8A00F8E108 /* InnerProductLayer.hpp */,
 				76E5EC7927C4A6D800A2B38A /* BatchNormalizationLayer.cpp */,
 				76E5EC7A27C4A6D800A2B38A /* BatchNormalizationLayer.hpp */,
 				7628DEE227CE096600B136FA /* LReluLayer.cpp */,
@@ -948,6 +959,8 @@
 				767B826528465EE500969C9F /* SliceLayer.hpp */,
 				767B826728467F1600969C9F /* ReshapeLayer.cpp */,
 				767B826828467F1600969C9F /* ReshapeLayer.hpp */,
+				768B2CBD2876B7E700F8E108 /* FlattenLayer.cpp */,
+				768B2CBE2876B7E700F8E108 /* FlattenLayer.hpp */,
 				767B826D28468C6E00969C9F /* PermuteLayer.cpp */,
 				767B826E28468C6E00969C9F /* PermuteLayer.hpp */,
 				760A333F27F7949F003F0542 /* SigmoidLayer.cpp */,
@@ -956,6 +969,8 @@
 				76927B3427D4E2780088BD9F /* Yolov3DetectionOutputLayer.hpp */,
 				76AA4A0627FBC6C500F0F3C6 /* NanodetPlusDetectionOutputLayer.cpp */,
 				76AA4A0727FBC6C500F0F3C6 /* NanodetPlusDetectionOutputLayer.hpp */,
+				768B2CB7287665DF00F8E108 /* ROIAlignLayer.cpp */,
+				768B2CB8287665DF00F8E108 /* ROIAlignLayer.hpp */,
 			);
 			name = Layer;
 			sourceTree = "<group>";
@@ -1218,6 +1233,7 @@
 				7628E02C27CF1C5B00B136FA /* MaxPoolLayer.cpp in Sources */,
 				7604745727D68F3F00FCB785 /* Initializer.cpp in Sources */,
 				76D409DC285FB415000C7754 /* TensorEltwise.cpp in Sources */,
+				768B2CB9287665DF00F8E108 /* ROIAlignLayer.cpp in Sources */,
 				7620AF8927B593C00081C210 /* TensorUtils.cpp in Sources */,
 				76E6C53E27A511B50036A26F /* ParallelOpenMP.cpp in Sources */,
 				76F336E927AED61200E3AEF1 /* ScalarOps.cpp in Sources */,
@@ -1286,7 +1302,9 @@
 				762047A828454A0800B8BEEF /* ParallelNative.cpp in Sources */,
 				76486AF127DCD0C10078FF9B /* TensorInterpolation.cpp in Sources */,
 				760F754C285C07FF005F72C0 /* DepthwiseConvKernelNeonPack.cpp in Sources */,
+				768B2CBF2876B7E700F8E108 /* FlattenLayer.cpp in Sources */,
 				760382D327C00DD000CD599F /* TensorCat.cpp in Sources */,
+				768B2CBC2876AD8A00F8E108 /* InnerProductLayer.cpp in Sources */,
 				765D27122847CB0800996934 /* Quantize.cpp in Sources */,
 				76E6C51327A502A30036A26F /* Tensor.cpp in Sources */,
 				76E6C52827A505700036A26F /* SmallVector.cpp in Sources */,
