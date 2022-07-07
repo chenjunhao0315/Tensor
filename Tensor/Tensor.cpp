@@ -69,6 +69,10 @@ Tensor Tensor::transpose(int64_t dim0, int64_t dim1) const {
     return otter::native::transpose(*this, dim0, dim1);
 }
 
+Tensor Tensor::repeat(IntArrayRef repeats) const {
+    return otter::native::repeat(*this, repeats);
+}
+
 Tensor Tensor::expand(IntArrayRef sizes) const {
     return otter::native::expand(*this, sizes);
 }
@@ -481,6 +485,14 @@ Tensor& Tensor::sqrt_() const {
 
 Tensor Tensor::sqrt() const {
     return otter::native::sqrt(*this);
+}
+
+Tensor& Tensor::sigmoid_() const {
+    return otter::native::sigmoid_(const_cast<Tensor&>(*this));
+}
+
+Tensor Tensor::sigmoid() const {
+    return otter::native::sigmoid(*this);
 }
 
 Tensor Tensor::dot(const Tensor& other) const {

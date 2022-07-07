@@ -28,6 +28,7 @@ DECLARE_DISPATCH(unary_fn, cos_stub);
 DECLARE_DISPATCH(unary_fn, tan_stub);
 DECLARE_DISPATCH(unary_fn, exp_stub);
 DECLARE_DISPATCH(unary_fn, sqrt_stub);
+DECLARE_DISPATCH(unary_fn, sigmoid_stub);
 
 DECLARE_DISPATCH(void(*)(TensorIterator&, const double, const double, Generator), uniform_stub);
 DECLARE_DISPATCH(void(*)(const TensorBase&, const double, const double, Generator), normal_stub);

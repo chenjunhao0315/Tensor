@@ -119,6 +119,88 @@ Tensor alias_with_sizes_and_strides(const Tensor& self, const Vec& sizes, const 
     return self_;
 }
 
+Tensor alias(const Tensor& self) {
+    return alias_with_sizes_and_strides(self, self.sizes(), self.strides());
+}
+
+Tensor repeat(const Tensor& self, IntArrayRef repeats) {
+    OTTER_CHECK(repeats.size() >= (size_t)self.dim(),
+                "Number of dimensions of repeat dims can not be smaller than number of dimensions of tensor");
+
+    // Add new leading dimensions to the tensor if the
+    // number of target dimensions is larger than the
+    // number of source dimensions.
+    int64_t num_new_dimensions = repeats.size() - self.dim();
+    DimVector padded_size(num_new_dimensions, 1);
+    padded_size.insert(padded_size.end(), self.sizes().begin(), self.sizes().end());
+    DimVector target_size(repeats.size());
+    bool zero_tensor = false;
+    for(const auto idx : otter::irange(repeats.size())) {
+        if (repeats[idx] == 0) {
+            zero_tensor = true;
+        }
+        target_size[idx] = padded_size[idx] * repeats[idx];
+    }
+
+    Tensor xtensor = self.expand(padded_size);
+
+    Tensor result = otter::empty(target_size, self.options());
+
+    // return an empty tensor if one of the repeat dimensions is zero
+    if (zero_tensor) {
+        return result;
+    }
+
+    Tensor urtensor = otter::native::alias(result);
+    for (const auto i : otter::irange(xtensor.dim())) {
+        // can't unfold with step 0, so make sure step is at least 1
+        // (it doesn't matter what it is in that case, because the size is 0).
+        auto size_i = xtensor.sizes()[i];
+        urtensor = urtensor.unfold(i, size_i, std::max<int64_t>(size_i, 1));
+    }
+
+    urtensor.copy_(xtensor.expand_as(urtensor));
+
+    return result;
+}
+
+void check_stack_inputs(TensorList tensors, int64_t dim) {
+    IntArrayRef entry_shape = tensors[0].sizes();
+    for (const auto i : otter::irange(1, tensors.size())) {
+        OTTER_CHECK(tensors[i].sizes() == entry_shape,
+                    "stack expects each tensor to be equal size, but got ", entry_shape,
+                    " at entry 0 and ", tensors[i].sizes(), " at entry ", i);
+    }
+}
+
+static inline std::vector<Tensor> get_stack_inputs(TensorList tensors, int64_t dim) {
+    std::vector<Tensor> inputs(tensors.size());
+    otter::IntArrayRef entry_shape = tensors[0].sizes();
+    inputs[0] = tensors[0].unsqueeze(dim);
+    for (const auto i : otter::irange(1, tensors.size())) {
+        OTTER_CHECK(tensors[i].sizes() == entry_shape,
+                    "stack expects each tensor to be equal size, but got ", entry_shape,
+                    " at entry 0 and ", tensors[i].sizes(), " at entry ", i);
+        inputs[i] = tensors[i].unsqueeze(dim);
+    }
+    return inputs;
+}
+
+Tensor stack(TensorList tensors, int64_t dim) {
+    OTTER_CHECK(tensors.size() > 0,
+                "stack expects a non-empty TensorList");
+    auto wrapped_dim = maybe_wrap_dim(dim, tensors[0].dim() + 1);
+    if (wrapped_dim < tensors[0].dim()) {
+        check_stack_inputs(tensors, wrapped_dim);
+        auto result_sizes = tensors[0].sizes().vec();
+        result_sizes.insert(result_sizes.begin() + wrapped_dim, tensors.size());
+        auto out = otter::native::cat(tensors, wrapped_dim);
+        return out.view(result_sizes); // one can always split a dimension with view
+    } else { //dim = tensors[0].ndimension() cannot be efficiently handled by view
+        return otter::native::cat(get_stack_inputs(tensors, dim), dim);
+    }
+}
+
 Tensor view(const Tensor& self, IntArrayRef sizes) {
     DimVector infer_size = otter::infer_size_dimvector(sizes, self.numel());
     auto stride = otter::computeStride(self.sizes(), self.strides(), infer_size);

@@ -128,6 +128,8 @@ public:
     Tensor& transpose_(int64_t dim0, int64_t dim1) const;
     Tensor transpose(int64_t dim0, int64_t dim1) const;
     
+    Tensor repeat(IntArrayRef repeats) const;
+    
     Tensor expand(IntArrayRef sizes) const;
     Tensor expand_as(const Tensor& other) const;
     
@@ -341,6 +343,9 @@ public:
     
     Tensor& sqrt_() const;
     Tensor sqrt() const;
+    
+    Tensor& sigmoid_() const;
+    Tensor sigmoid() const;
     
     Tensor dot(const Tensor& other) const;
     

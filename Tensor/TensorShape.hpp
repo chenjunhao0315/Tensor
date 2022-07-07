@@ -26,6 +26,12 @@ Tensor transpose(const Tensor& self, int64_t dim0, int64_t dim1);
 Tensor expand(const Tensor& self, IntArrayRef sizes);
 Tensor expand_as(const Tensor& self, const Tensor& other);
 
+Tensor alias(const Tensor& self);
+
+Tensor repeat(const Tensor& self, IntArrayRef repeats);
+
+Tensor stack(TensorList tensors, int64_t dim);
+
 Tensor view(const Tensor& self, IntArrayRef sizes);
 
 Tensor reshape(const Tensor& self, IntArrayRef sizes);

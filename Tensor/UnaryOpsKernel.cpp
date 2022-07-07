@@ -88,6 +88,14 @@ void sqrt_kernel(TensorIterator& iter) {
     });
 }
 
+void sigmoid_kernel(TensorIterator& iter) {
+    OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "sigmoid_cpu", [&]() {
+        cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
+            return (static_cast<scalar_t>(1) / (static_cast<scalar_t>(1) + std::exp((-a))));
+        });
+    });
+}
+
 REGISTER_DISPATCH(bitwise_not_stub, &bitwise_not_kernel);
 REGISTER_DISPATCH(neg_stub, &neg_kernel);
 REGISTER_DISPATCH(abs_stub, &abs_kernel);
@@ -96,6 +104,6 @@ REGISTER_DISPATCH(cos_stub, &cos_kernel);
 REGISTER_DISPATCH(tan_stub, &tan_kernel);
 REGISTER_DISPATCH(exp_stub, &exp_kernel);
 REGISTER_DISPATCH(sqrt_stub, &sqrt_kernel);
-
+REGISTER_DISPATCH(sigmoid_stub, &sigmoid_kernel);
 
 }

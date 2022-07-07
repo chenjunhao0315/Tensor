@@ -241,8 +241,12 @@ ConvBackend select_proper_conv_backend(
                             }
                         }
                         // General
-                        if (weight.size(2) == 3 && weight.size(3) == 3 && params.stride[0] == 1 && params.stride[1] == 1 && input.size(1) >= 16 && weight.size(0) >= 16) {
-                            return ConvBackend::WinogradX86_3x3s1;
+                        if (kernel_h == 3 && kernel_w == 3 && stride_h == 1 && stride_w == 1) {
+                            if (input.size(1) >= 16 && weight.size(0) >= 16) {
+                                return ConvBackend::Winograd43X86_3x3s1;
+                            } else {
+                                return ConvBackend::Winograd23X86_3x3s1;
+                            }
                         }
                         return ConvBackend::Sgemm2dX86;
                     } else {
@@ -383,7 +387,8 @@ Tensor convolution(
         case ConvBackend::SlideWin2dNeon_3x3s1:
         case ConvBackend::WinogradNeon_3x3s1:
         case ConvBackend::Packed2DNeon_3x3s2:
-        case ConvBackend::WinogradX86_3x3s1:
+        case ConvBackend::Winograd23X86_3x3s1:
+        case ConvBackend::Winograd43X86_3x3s1:
         case ConvBackend::SlowDilated2d:
         case ConvBackend::SlideWin2dInt8:
             if (params.groups == 1) {
@@ -442,8 +447,10 @@ Tensor convolution_nogroup_backend(const Tensor& self, const Tensor& weight, con
             return otter::conv2d_3x3s1_winograd64_neon(self, weight, weight_o, bias, params.padding);
         case ConvBackend::Packed2DNeon_3x3s2:
             return otter::conv2d_3x3s2_packed_neon(self, weight, weight_o, bias, params.padding);
-        case ConvBackend::WinogradX86_3x3s1:
+        case ConvBackend::Winograd23X86_3x3s1:
             return otter::conv2d_3x3s1_winograd23_x86(self, weight, weight_o, bias, params.padding);
+        case ConvBackend::Winograd43X86_3x3s1:
+            return otter::conv2d_3x3s1_winograd43_x86(self, weight, weight_o, bias, params.padding);
         case ConvBackend::SlideWin2d:
             return otter::slide_win_conv2d(self, weight, bias, kernel_size, params.stride, params.padding);
         case ConvBackend::SlideWin2dInt8:
@@ -600,6 +607,8 @@ ConvBackend select_proper_conv_packed_backend(
                             return ConvBackend::Sgemm2dX86Pack4_1x1s1;
                         } else if (kernel_h == 1 && kernel_w == 1 && stride_h == 2 && stride_w == 2) {
                             return ConvBackend::Sgemm2dX86Pack4_1x1s2;
+                        } else if (kernel_h == 3 && kernel_w == 3 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::Winograd63X86Pack4_3x3s1;
                         }
                         return ConvBackend::Sgemm2dX86Pack4;
                     } else if (elempack == 1 && out_elempack == 4) {
@@ -711,6 +720,8 @@ Tensor convolution_packed(
             output = otter::depthwise_conv2d_5x5s1_x86_pack4(input, weight, weight_o, bias, padding); break;
         case ConvBackend::DepthwiseX86Pack4_5x5s2:
             output = otter::depthwise_conv2d_5x5s2_x86_pack4(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Winograd63X86Pack4_3x3s1:
+            output = otter::conv2d_3x3s1_winograd63_pack4_x86(input, weight, weight_o, bias, padding); break;
             
         // Deconv
         case ConvBackend::DepthwiseTransposeX86Pack4:

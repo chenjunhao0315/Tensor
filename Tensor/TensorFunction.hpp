@@ -77,6 +77,7 @@ DECLARE_META_STRUCTURE_SELF_OVERLOAD(cos, Tensor);
 DECLARE_META_STRUCTURE_SELF_OVERLOAD(tan, Tensor);
 DECLARE_META_STRUCTURE_SELF_OVERLOAD(exp, Tensor);
 DECLARE_META_STRUCTURE_SELF_OVERLOAD(sqrt, Tensor);
+DECLARE_META_STRUCTURE_SELF_OVERLOAD(sigmoid, Tensor);
 
 DECLARE_META_STRUCTURE_TRI_DUAL(addmm);
 DECLARE_META_STRUCTURE_DUAL_NONE(mm);
@@ -252,6 +253,10 @@ struct structured_sqrt_out : structured_sqrt_Tensor {
     void impl(const Tensor & self, const Tensor & out);
 };
 
+struct structured_sigmoid_out : structured_sigmoid_Tensor {
+    void impl(const Tensor & self, const Tensor & out);
+};
+
 struct structured_addmm_out_cpu : structured_addmm {
     void impl(const Tensor & self, const Tensor & mat1, const Tensor & mat2, const Scalar & beta, const Scalar & alpha, const Tensor & out);
 };
@@ -401,6 +406,10 @@ Tensor & exp_(Tensor & self);
 Tensor sqrt(const Tensor & self);
 Tensor & sqrt_out(Tensor & out, const Tensor & self);
 Tensor & sqrt_(Tensor & self);
+
+Tensor sigmoid(const Tensor & self);
+Tensor & sigmoid_out(Tensor & out, const Tensor & self);
+Tensor & sigmoid_(Tensor & self);
 
 Tensor addmm(const Tensor & self, const Tensor & mat1, const Tensor & mat2, const Scalar & beta, const Scalar & alpha);
 Tensor & addmm_out(Tensor & out, const Tensor & self, const Tensor & mat1, const Tensor & mat2, const Scalar & beta, const Scalar & alpha);

@@ -53,6 +53,9 @@ _(elempack4<float>, Float4)         \
 _(elempack8<signed char>, Byte8)    \
 _(elempack8<int>, Int8)             \
 _(elempack8<float>, Float8)         \
+_(elempack16<signed char>, Byte16)    \
+_(elempack16<int>, Int16)             \
+_(elempack16<float>, Float16)         \
 
 enum class ScalarType : int8_t {
 #define DEFINE_ENUM(_1, n) n,

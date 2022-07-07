@@ -441,7 +441,11 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
             return 0;
         }
         if (kernel_width == 3 && kernel_height == 3 && stride_width == 1 && stride_height == 1) {
-            otter::conv3x3s1_winograd23_transform_kernel_x86(weight_data, weight_3x3_winograd23_data, in_channels, out_channels);
+            if (in_channels >= 16 && out_channels >= 16) {
+                otter::conv3x3s1_winograd43_transform_kernel_sse(weight_data, weight_3x3_winograd43_data, in_channels, out_channels);
+            } else {
+                otter::conv3x3s1_winograd23_transform_kernel_sse(weight_data, weight_3x3_winograd23_data, in_channels, out_channels);
+            }
         }
         otter::convolution_im2col_sgemm_transform_kernel_x86(weight_data, weight_sgemm_data, in_channels, out_channels, weight_data.size(3), weight_data.size(2));
     }
@@ -543,8 +547,12 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
                 }
             }
 #elif __SSE2__
-            if (kernel_width == 3 && kernel_height == 3 && stride_width == 1 && stride_height == 1 && in_channels >= 16 && out_channels >= 16) {
-                optimize_kernel = weight_3x3_winograd23_data;
+            if (kernel_width == 3 && kernel_height == 3 && stride_width == 1 && stride_height == 1) {
+                if (in_channels >= 16 && out_channels >= 16) {
+                    optimize_kernel = weight_3x3_winograd43_data;
+                } else {
+                    optimize_kernel = weight_3x3_winograd23_data;
+                }
             } else {
                 optimize_kernel = weight_sgemm_data;
             }

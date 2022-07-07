@@ -436,6 +436,31 @@ Tensor & wrapper_sqrt_(Tensor & self) {
 
 // end sqrt cpu
 
+// sigmoid cpu
+DEFINE_FINAL_OP_AFTER(sigmoid_out)
+Tensor wrapper_sigmoid(const Tensor & self) {
+    structured_sigmoid_out_functional op;
+    op.meta(self);
+    op.impl(self, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+
+Tensor & wrapper_sigmoid_out(const Tensor & self, Tensor & out) {
+    structured_sigmoid_out_out op(out);
+    op.meta(self);
+    op.impl(self, op.outputs_[0]);
+    return out;
+}
+
+Tensor & wrapper_sigmoid_(Tensor & self) {
+    structured_sigmoid_out_inplace op(self);
+    op.meta(self);
+    op.impl(self, op.outputs_[0]);
+    return self;
+}
+
+// end sigmoid cpu
+
 // addmm cpu
 struct structured_addmm_out_cpu_functional : structured_addmm_out_cpu {
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
@@ -1677,6 +1702,16 @@ Tensor & sqrt_out(Tensor & out, const Tensor & self) {
 }
 Tensor & sqrt_(Tensor & self) {
     return wrapper_sqrt_(self);
+}
+
+Tensor sigmoid(const Tensor & self) {
+    return wrapper_sigmoid(self);
+}
+Tensor & sigmoid_out(Tensor & out, const Tensor & self) {
+    return wrapper_sigmoid_out(self, out);
+}
+Tensor & sigmoid_(Tensor & self) {
+    return wrapper_sigmoid_(self);
 }
 
 Tensor addmm(const Tensor & self, const Tensor & mat1, const Tensor & mat2, const Scalar & beta, const Scalar & alpha) {

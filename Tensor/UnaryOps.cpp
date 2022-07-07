@@ -23,6 +23,7 @@ DEFINE_UNARY_META_FUNCTION_SELF(cos, Tensor);
 DEFINE_UNARY_META_FUNCTION_SELF(tan, Tensor);
 DEFINE_UNARY_META_FUNCTION_SELF(exp, Tensor);
 DEFINE_UNARY_META_FUNCTION_SELF(sqrt, Tensor);
+DEFINE_UNARY_META_FUNCTION_SELF(sigmoid, Tensor);
 
 DEFINE_DISPATCH(bitwise_not_stub);
 DEFINE_DISPATCH(neg_stub);
@@ -32,6 +33,7 @@ DEFINE_DISPATCH(cos_stub);
 DEFINE_DISPATCH(tan_stub);
 DEFINE_DISPATCH(exp_stub);
 DEFINE_DISPATCH(sqrt_stub);
+DEFINE_DISPATCH(sigmoid_stub);
 
 #define DEFINE_UNARY_IMPL_FUNCTION(name, op) \
 DEFINE_IMPL_FUNCTION(name) (const Tensor& /*self*/, const Tensor& /*out*/) { \
@@ -46,5 +48,6 @@ DEFINE_UNARY_IMPL_FUNCTION(cos_out, cos_stub)
 DEFINE_UNARY_IMPL_FUNCTION(tan_out, tan_stub)
 DEFINE_UNARY_IMPL_FUNCTION(exp_out, exp_stub)
 DEFINE_UNARY_IMPL_FUNCTION(sqrt_out, sqrt_stub)
+DEFINE_UNARY_IMPL_FUNCTION(sigmoid_out, sigmoid_stub)
 
 }

@@ -26,6 +26,8 @@ void exp_kernel(TensorIterator& iter);
 
 void sqrt_kernel(TensorIterator& iter);
 
+void sigmoid_kernel(TensorIterator& iter);
+
 
 }
 
