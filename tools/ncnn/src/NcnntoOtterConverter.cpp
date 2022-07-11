@@ -65,6 +65,7 @@ void rename_and_reconstruct(OtterLeader& graph);
 
 int data = 1;
 int conv = 1;
+int conv1d = 1;
 int deconv = 1;
 int concat = 1;
 int pool = 1;
@@ -373,6 +374,53 @@ void ncnn2team(Otter &team, ParamDict &pd, std::string input_name, std::string o
         std::string output = get_layer_name("linear", innerproduct);
         ADD_TRANSFORM_MAP(output_name, output);
         WRITE_LAYER_NAME("linear", innerproduct++);
+        ADD_PARAM_STRING("input", input);
+        ADD_PARAM_STRING("output", output);
+        
+    } else if (type == "Convolution1D") {
+        int out_channels = pd.get(0, 0);
+        int kernel_w = pd.get(1, 0);
+        int stride_w = pd.get(3, 1);
+        int dilation_w = pd.get(2, 1);
+        int pad_left = pd.get(4, 0);
+        int pad_right = pd.get(15, pad_left);
+        float pad_value = pd.get(18, 0.f);
+        int bias_term = pd.get(5, 0);
+        int weight_data_size = pd.get(6, 0);
+        int activation_type = pd.get(9, 0);
+        auto activation_param = pd.get(10, std::vector<float>());
+        if (pad_right != pad_left) {
+            printf("Padding unsupport!\n");
+            exit(-100);
+        }
+        ADD_PARAM("out_channels", out_channels);
+        ADD_PARAM("kernel_w", kernel_w);
+        ADD_PARAM("stride_w", stride_w);
+        ADD_PARAM("padding_w", pad_left);
+        ADD_PARAM("dilation_w", dilation_w);
+        (bias_term) ? sub_team.addParam({"bias_term", "true"}) : sub_team.addParam({"bias_term", "false"});
+        
+        if (activation_type == 1) {
+            ACTIVATION("Relu");
+        } else if (activation_type == 2) {
+            ACTIVATION("LRelu");
+            sub_team.addParam({"alpha", std::to_string(activation_param[0])});
+        } else if (activation_type == 3) {
+            // Suppose it is relu 6
+            if (activation_param[0] == 0 && activation_param[1] == 6) {
+                ACTIVATION("Relu6");
+            } else {
+                printf("Unsupport activation!\n");
+                exit(-100);
+            }
+        } else if (activation_type == 4) {
+            ACTIVATION("Sigmoid");
+        }
+        
+        std::string input = transform_map[input_name];
+        std::string output = get_layer_name("conv1d", conv1d);
+        ADD_TRANSFORM_MAP(output_name, output);
+        WRITE_LAYER_NAME("conv1d", conv1d++);
         ADD_PARAM_STRING("input", input);
         ADD_PARAM_STRING("output", output);
         
