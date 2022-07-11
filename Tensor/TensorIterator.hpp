@@ -299,6 +299,8 @@ public:
     TensorIteratorConfig& declare_static_dtype_and_device(ScalarType dtype, Device device);
     TensorIteratorConfig& declare_static_dtype(ScalarType dtype);
     TensorIteratorConfig& declare_static_device(Device device);
+    TensorIteratorConfig& declare_static_shape(IntArrayRef shape);
+    TensorIteratorConfig& declare_static_shape(IntArrayRef shape, IntArrayRef squash_dims);
     
     TensorIterator build() {
         TensorIterator iter;
@@ -367,6 +369,7 @@ private:
     
     ScalarType static_dtype_ = ScalarType::Undefined;
     Device static_device_ = Device::Undefined;
+    DimVector static_shape_ = {};
     
     bool resize_outputs_ = true;
     bool check_mem_overlap_ = true;

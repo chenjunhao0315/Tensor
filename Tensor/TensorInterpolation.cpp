@@ -157,6 +157,121 @@ static void resize_bilinear_image_pack4(const Tensor& src, Tensor& dst, float* a
     }
 }
 
+#if __AVX__
+static void resize_bilinear_image_pack8(const Tensor& src, Tensor& dst, float* alpha, int* xofs, float* beta, int* yofs)
+{
+    int w = dst.size(1);
+    int h = dst.size(0);
+
+    // loop body
+    Tensor rowsbuf0 = otter::empty({w}, otter::ScalarType::Float8);
+    Tensor rowsbuf1 = otter::empty({w}, otter::ScalarType::Float8);
+    float* rows0 = (float*)rowsbuf0.data_ptr();
+    float* rows1 = (float*)rowsbuf1.data_ptr();
+    
+    auto src_a = src.accessor<float, 2, 8>();
+    auto dst_a = dst.accessor<float, 2, 8>();
+
+    int prev_sy1 = -2;
+
+    for (int dy = 0; dy < h; dy++)
+    {
+        int sy = yofs[dy];
+
+        if (sy == prev_sy1)
+        {
+            // reuse all rows
+        }
+        else if (sy == prev_sy1 + 1)
+        {
+            // hresize one row
+            float* rows0_old = rows0;
+            rows0 = rows1;
+            rows1 = rows0_old;
+            const float* S1 = src_a[sy + 1].data();
+
+            const float* alphap = alpha;
+            float* rows1p = rows1;
+            int dx = 0;
+            for (; dx < w; dx++)
+            {
+                int sx = xofs[dx] * 8;
+                const float* S1p = S1 + sx;
+
+                __m256 _a0 = _mm256_set1_ps(alphap[0]);
+                __m256 _a1 = _mm256_set1_ps(alphap[1]);
+
+                __m256 _S10 = _mm256_load_ps(S1p);
+                __m256 _S11 = _mm256_load_ps(S1p + 8);
+                __m256 _rows1 = _mm256_mul_ps(_S10, _a0);
+                _rows1 = _mm256_comp_fmadd_ps(_S11, _a1, _rows1);
+                _mm256_store_ps(rows1p + dx * 8, _rows1);
+
+                alphap += 2;
+            }
+        }
+        else
+        {
+            // hresize two rows
+            const float* S0 = src_a[sy].data();
+            const float* S1 = src_a[sy + 1].data();
+
+            const float* alphap = alpha;
+            float* rows0p = rows0;
+            float* rows1p = rows1;
+            int dx = 0;
+            for (; dx < w; dx++)
+            {
+                int sx = xofs[dx] * 8;
+                const float* S0p = S0 + sx;
+                const float* S1p = S1 + sx;
+
+                __m256 _a0 = _mm256_set1_ps(alphap[0]);
+                __m256 _a1 = _mm256_set1_ps(alphap[1]);
+
+                __m256 _S00 = _mm256_load_ps(S0p);
+                __m256 _S01 = _mm256_load_ps(S0p + 8);
+                __m256 _S10 = _mm256_load_ps(S1p);
+                __m256 _S11 = _mm256_load_ps(S1p + 8);
+                __m256 _rows0 = _mm256_mul_ps(_S00, _a0);
+                __m256 _rows1 = _mm256_mul_ps(_S10, _a0);
+                _rows0 = _mm256_comp_fmadd_ps(_S01, _a1, _rows0);
+                _rows1 = _mm256_comp_fmadd_ps(_S11, _a1, _rows1);
+                _mm256_store_ps(rows0p + dx * 8, _rows0);
+                _mm256_store_ps(rows1p + dx * 8, _rows1);
+
+                alphap += 2;
+            }
+        }
+
+        prev_sy1 = sy;
+
+        // vresize
+        __m256 _b0 = _mm256_set1_ps(beta[0]);
+        __m256 _b1 = _mm256_set1_ps(beta[1]);
+
+        float* rows0p = rows0;
+        float* rows1p = rows1;
+        float* Dp = dst_a[dy].data();
+
+        for (int dx = 0; dx < w; dx++)
+        {
+            __m256 _rows0 = _mm256_load_ps(rows0p);
+            __m256 _rows1 = _mm256_load_ps(rows1p);
+            __m256 _D = _mm256_mul_ps(_rows0, _b0);
+            _D = _mm256_comp_fmadd_ps(_rows1, _b1, _D);
+            _mm256_store_ps(Dp, _D);
+
+            Dp += 8;
+            rows0p += 8;
+            rows1p += 8;
+        }
+
+        beta += 2;
+    }
+}
+#endif
+
 static void resize_bilinear_image(const Tensor& src, Tensor& dst, float* alpha, int* xofs, float* beta, int* yofs) {
     int w = dst.size(1);
     int h = dst.size(0);
@@ -297,6 +412,19 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
         
         const float* in = (const float*)input.raw_data();
         
+        if (elempack == 8)
+        {
+            otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
+                for (int q = 0; q < w; q++) {
+                    Tensor top_blob_c = output[q];
+                    __m256 _v = _mm256_load_ps((const float*)in + q * 8);
+                    top_blob_c.fill_(_v);
+                }
+            });
+
+            return output;
+        }
+        
         if (elempack == 4) {
             otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
                 for (const auto q : otter::irange(begin, end)) {
@@ -331,6 +459,71 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
         }
         
         output = otter::empty({h, outw}, input.scalar_type());
+        
+#if __AVX__
+        if (elempack == 8) {
+            auto input_a = input.accessor<float, 2, 8>();
+            auto output_a = output.accessor<float, 2, 8>();
+            
+            if (mode == InterpolateMode::NEAREST) {
+                const float ws =  w / (float)outw;
+
+                otter::parallel_for(0, h, 0, [&](int64_t begin, int64_t end) {
+                    for (int y = 0; y < h; y++) {
+                        const float* ptr = input_a[y].data();
+                        float* outptr = output_a[y].data();
+                        for (int x = 0; x < outw; x++)
+                        {
+                            int in_x = std::min((int)(x * ws), (w - 1));
+
+                            __m256 _p = _mm256_load_ps(ptr + in_x * 8);
+                            _mm256_store_ps(outptr, _p);
+
+                            outptr += 8;
+                        }
+                    }
+                });
+            }
+
+            if (mode == InterpolateMode::BILINEAR) {
+                int* buf = new int[outw + outw * 2];
+
+                int* xofs = buf;
+                float* alpha = (float*)(buf + outw);
+
+                linear_coeffs(w, outw, xofs, alpha, align_corners);
+
+                otter::parallel_for(0, h, 0, [&](int64_t begin, int64_t end) {
+                    for (int y = 0; y < h; y++) {
+                        const float* ptr = input_a[y].data();
+                        float* outptr = output_a[y].data();
+                        const float* alphap = alpha;
+
+                        for (int x = 0; x < outw; x++) {
+                            int sx = xofs[x] * 8;
+                            const float* Sp = ptr + sx;
+
+                            __m256 _a0 = _mm256_set1_ps(alphap[0]);
+                            __m256 _a1 = _mm256_set1_ps(alphap[1]);
+
+                            __m256 _S0 = _mm256_load_ps(Sp);
+                            __m256 _S1 = _mm256_load_ps(Sp + 8);
+                            __m256 _p = _mm256_mul_ps(_S0, _a0);
+                            _p = _mm256_comp_fmadd_ps(_S1, _a1, _p);
+                            _mm256_store_ps(outptr, _p);
+
+                            alphap += 2;
+                            outptr += 8;
+                        }
+                    }
+                });
+
+                delete[] buf;
+            }
+
+            return output;
+        }
+#endif // __AVX__
         
         if (elempack == 4) {
             auto input_a = input.accessor<float, 2, 4>();
@@ -459,6 +652,66 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
         }
         
         output = otter::empty({channels, outh, outw}, input.scalar_type());
+        
+#if __AVX__
+        if (elempack == 8) {
+            auto input_a = input.accessor<float, 3, 8>();
+            auto output_a = output.accessor<float, 3, 8>();
+            
+            if (mode == InterpolateMode::NEAREST) {
+                const float hs =  h / (float)outh;
+                const float ws = w / (float)outw;
+
+                otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
+                    for (const auto q : otter::irange(begin, end)) {
+                        const auto src = input_a[q];
+                        auto dst = output_a[q];
+
+                        for (int y = 0; y < outh; y++) {
+                            int in_y = std::min((int)(y * hs), (h - 1));
+
+                            const float* ptr = src[in_y].data();
+                            float* outptr = dst[y].data();
+                            for (int x = 0; x < outw; x++) {
+                                int in_x = std::min((int)(x * ws), (w - 1));
+
+                                __m256 _p = _mm256_load_ps(ptr + in_x * 8);
+                                _mm256_store_ps(outptr, _p);
+
+                                outptr += 8;
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (mode == InterpolateMode::BILINEAR) {
+                int* buf = new int[outw + outh + outw * 2 + outh * 2];
+
+                int* xofs = buf;        //new int[outw];
+                int* yofs = buf + outw; //new int[outh];
+
+                float* alpha = (float*)(buf + outw + outh);           //new float[outw * 2];
+                float* beta = (float*)(buf + outw + outh + outw * 2); //new float[outh * 2];
+
+                linear_coeffs(w, outw, xofs, alpha, align_corners);
+                linear_coeffs(h, outh, yofs, beta, align_corners);
+
+                otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
+                    for (int q = 0; q < channels; q++) {
+                        const Tensor src = input[q];
+                        Tensor dst = output[q];
+
+                        resize_bilinear_image_pack8(src, dst, alpha, xofs, beta, yofs);
+                    }
+                });
+
+                delete[] buf;
+            }
+
+            return output;
+        }
+    #endif // __AVX__
         
         if (elempack == 4) {
             auto input_a = input.accessor<float, 3, 4>();

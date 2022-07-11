@@ -143,19 +143,19 @@ Tensor conv2d_1x1s1_sgemm_pack4to1_x86(
     const Tensor& bias,
     IntArrayRef padding);
 
-static void conv3x3s1_winograd63_transform_input_pack4_sse(const Tensor& bottom_blob, Tensor& bottom_blob_tm);
+void conv3x3s1_winograd63_transform_input_pack4_sse(const Tensor& bottom_blob, Tensor& bottom_blob_tm);
 
-static void conv3x3s1_winograd63_transform_output_pack4_sse(const Tensor& top_blob_tm, Tensor& top_blob, const Tensor& bias);
+void conv3x3s1_winograd63_transform_output_pack4_sse(const Tensor& top_blob_tm, Tensor& top_blob, const Tensor& bias);
 
-static void conv3x3s1_winograd43_transform_input_pack4_sse(const Tensor& bottom_blob, Tensor& bottom_blob_tm);
+void conv3x3s1_winograd43_transform_input_pack4_sse(const Tensor& bottom_blob, Tensor& bottom_blob_tm);
 
-static void conv3x3s1_winograd43_transform_output_pack4_sse(const Tensor& top_blob_tm, Tensor& top_blob, const Tensor& bias);
+void conv3x3s1_winograd43_transform_output_pack4_sse(const Tensor& top_blob_tm, Tensor& top_blob, const Tensor& bias);
 
-static void conv3x3s1_winograd23_transform_input_pack4_sse(const Tensor& bottom_blob, Tensor& bottom_blob_tm);
+void conv3x3s1_winograd23_transform_input_pack4_sse(const Tensor& bottom_blob, Tensor& bottom_blob_tm);
 
-static void conv3x3s1_winograd23_transform_output_pack4_sse(const Tensor& top_blob_tm, Tensor& top_blob, const Tensor& bias);
+void conv3x3s1_winograd23_transform_output_pack4_sse(const Tensor& top_blob_tm, Tensor& top_blob, const Tensor& bias);
 
-static void convolution_winograd_dot_pack4_sse(Tensor& bottom_blob_tm, int outch, const Tensor& kernel_tm, Tensor& top_blob_tm);
+void convolution_winograd_dot_pack4_sse(Tensor& bottom_blob_tm, int outch, const Tensor& kernel_tm, Tensor& top_blob_tm);
 
 Tensor conv2d_3x3s1_winograd63_pack4_x86_out(
     const Tensor& self,
@@ -172,6 +172,279 @@ Tensor conv2d_3x3s1_winograd63_pack4_x86(
     const Tensor& bias,
     IntArrayRef padding);
 
+Tensor conv2d_3x3s1_winograd43_pack4_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_3x3s1_winograd43_pack4_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor conv2d_3x3s1_winograd23_pack4_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_3x3s1_winograd23_pack4_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+#if __AVX__
+
+Tensor& sgemm_conv2d_pack1to8_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation,
+    Tensor& output);
+    
+Tensor sgemm_conv2d_pack1to8_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation);
+
+Tensor& sgemm_conv2d_pack4to8_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation,
+    Tensor& output);
+    
+Tensor sgemm_conv2d_pack4to8_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation);
+
+Tensor& sgemm_conv2d_pack8_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation,
+    Tensor& output);
+    
+Tensor sgemm_conv2d_pack8_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation);
+
+Tensor& sgemm_conv2d_pack8to1_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation,
+    Tensor& output);
+    
+Tensor sgemm_conv2d_pack8to1_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation);
+
+Tensor& sgemm_conv2d_pack8to4_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation,
+    Tensor& output);
+    
+Tensor sgemm_conv2d_pack8to4_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation);
+
+Tensor conv2d_1x1s1_sgemm_pack1to8_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_1x1s1_sgemm_pack1to8_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor conv2d_1x1s1_sgemm_pack4to8_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_1x1s1_sgemm_pack4to8_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor conv2d_1x1s1_sgemm_pack8_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_1x1s1_sgemm_pack8_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor conv2d_1x1s2_sgemm_pack8_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_1x1s2_sgemm_pack8_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor conv2d_1x1s1_sgemm_pack8to1_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_1x1s1_sgemm_pack8to1_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor conv2d_1x1s1_sgemm_pack8to4_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_1x1s1_sgemm_pack8to4_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor conv2d_3x3s1_winograd63_pack8_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_3x3s1_winograd63_pack8_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor conv2d_3x3s1_winograd43_pack8_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_3x3s1_winograd43_pack8_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor conv2d_3x3s1_winograd23_pack8_x86_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor conv2d_3x3s1_winograd23_pack8_x86(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+#endif  // __AVX__
 #endif  // __SSE2__
 
 }   // end namespace otter

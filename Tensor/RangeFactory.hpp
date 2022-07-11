@@ -18,8 +18,11 @@ class TensorIterator;
 
 Tensor& linspace_out(const Scalar& start, const Scalar& end, int64_t steps, Tensor& result);
 
+Tensor& arange_out(const Scalar& start, const Scalar& end, const Scalar& step, Tensor& result);
+
 Tensor& range_out(const Scalar& start, const Scalar& end, const Scalar& step, Tensor& result);
 
+DECLARE_DISPATCH(void(*)(TensorIterator&, const Scalar&, const Scalar&, const Scalar&), arange_stub);
 DECLARE_DISPATCH(void(*)(TensorIterator&, const Scalar&, const Scalar&, int64_t), linspace_stub);
 
 }

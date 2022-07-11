@@ -11,6 +11,7 @@
 #include "VecIntrinsic.hpp"
 #include "VecBase.hpp"
 #include "neon_mathfun.hpp"
+#include "zmath.hpp"
 
 #include "Utils.hpp"
 
@@ -289,6 +290,18 @@ public:
     }
     Vectorized<float> cos() const {
         return Vectorized<float>(cos_ps(values.val[0]), cos_ps(values.val[1]));
+    }
+    Vectorized<float> floor() const {
+        return map(otter::floor_impl);
+    }
+    Vectorized<float> round() const {
+        // We do not use std::round because we would like to round midway numbers to the nearest even integer.
+        return map(otter::round_impl);
+    }
+    Vectorized<float> trunc() const {
+        float32x4_t r0 = vrndq_f32(values.val[0]);
+        float32x4_t r1 = vrndq_f32(values.val[1]);
+        return Vectorized<float>(r0, r1);
     }
     Vectorized<float> operator==(const Vectorized<float>& other) const {
         float32x4_t r0 =

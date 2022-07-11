@@ -21,6 +21,8 @@ DimVector infer_size_dimvector(IntArrayRef a, IntArrayRef b);
 // Use for Tensor -> view
 DimVector infer_size_dimvector(IntArrayRef shape, int64_t numel);
 
+std::vector<int64_t> infer_dense_strides(IntArrayRef tensor_sizes, IntArrayRef tensor_strides);
+
 template <typename Container>
 struct InferExpandGeometryResult {
     Container sizes;

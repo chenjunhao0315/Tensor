@@ -107,6 +107,12 @@
 		768B2CBF2876B7E700F8E108 /* FlattenLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 768B2CBD2876B7E700F8E108 /* FlattenLayer.cpp */; };
 		769279D427D49BC90088BD9F /* UpsampleLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 769279D227D49BC90088BD9F /* UpsampleLayer.cpp */; };
 		76927B3527D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76927B3327D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp */; };
+		76A222E6287BC91700681843 /* Sorting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76A222E4287BC91700681843 /* Sorting.cpp */; };
+		76A222E9287BCE2B00681843 /* SortingKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76A222E7287BCE2A00681843 /* SortingKernel.cpp */; };
+		76A222EC287BF92200681843 /* GridSampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76A222EA287BF92200681843 /* GridSampler.cpp */; };
+		76A222EF287BFBEE00681843 /* GridSamplerKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76A222ED287BFBEE00681843 /* GridSamplerKernel.cpp */; };
+		76A222F2287BFE6700681843 /* TensorGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76A222F0287BFE6700681843 /* TensorGeometry.cpp */; };
+		76A222F6287C0DF700681843 /* Convolution1DLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76A222F4287C0DF700681843 /* Convolution1DLayer.cpp */; };
 		76AA466327F8855600F0F3C6 /* ConvolutionMM2DX86.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76AA466127F8855600F0F3C6 /* ConvolutionMM2DX86.cpp */; };
 		76AA466627F8859300F0F3C6 /* DepthwiseConvKernelX86.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76AA466427F8859300F0F3C6 /* DepthwiseConvKernelX86.cpp */; };
 		76AA483227F988D200F0F3C6 /* ConvolutionMM2DTranspose.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76AA483027F988D200F0F3C6 /* ConvolutionMM2DTranspose.cpp */; };
@@ -414,6 +420,19 @@
 		769279D327D49BC90088BD9F /* UpsampleLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UpsampleLayer.hpp; sourceTree = "<group>"; };
 		76927B3327D4E2780088BD9F /* Yolov3DetectionOutputLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Yolov3DetectionOutputLayer.cpp; sourceTree = "<group>"; };
 		76927B3427D4E2780088BD9F /* Yolov3DetectionOutputLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Yolov3DetectionOutputLayer.hpp; sourceTree = "<group>"; };
+		76A222E4287BC91700681843 /* Sorting.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Sorting.cpp; sourceTree = "<group>"; };
+		76A222E5287BC91700681843 /* Sorting.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Sorting.hpp; sourceTree = "<group>"; };
+		76A222E7287BCE2A00681843 /* SortingKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SortingKernel.cpp; sourceTree = "<group>"; };
+		76A222E8287BCE2B00681843 /* SortingKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SortingKernel.hpp; sourceTree = "<group>"; };
+		76A222EA287BF92200681843 /* GridSampler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GridSampler.cpp; sourceTree = "<group>"; };
+		76A222EB287BF92200681843 /* GridSampler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GridSampler.hpp; sourceTree = "<group>"; };
+		76A222ED287BFBEE00681843 /* GridSamplerKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GridSamplerKernel.cpp; sourceTree = "<group>"; };
+		76A222EE287BFBEE00681843 /* GridSamplerKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GridSamplerKernel.hpp; sourceTree = "<group>"; };
+		76A222F0287BFE6700681843 /* TensorGeometry.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorGeometry.cpp; sourceTree = "<group>"; };
+		76A222F1287BFE6700681843 /* TensorGeometry.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorGeometry.hpp; sourceTree = "<group>"; };
+		76A222F3287C037300681843 /* zmath.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = zmath.hpp; sourceTree = "<group>"; };
+		76A222F4287C0DF700681843 /* Convolution1DLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Convolution1DLayer.cpp; sourceTree = "<group>"; };
+		76A222F5287C0DF700681843 /* Convolution1DLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Convolution1DLayer.hpp; sourceTree = "<group>"; };
 		76AA466127F8855600F0F3C6 /* ConvolutionMM2DX86.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionMM2DX86.cpp; sourceTree = "<group>"; };
 		76AA466227F8855600F0F3C6 /* ConvolutionMM2DX86.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConvolutionMM2DX86.hpp; sourceTree = "<group>"; };
 		76AA466427F8859300F0F3C6 /* DepthwiseConvKernelX86.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DepthwiseConvKernelX86.cpp; sourceTree = "<group>"; };
@@ -792,6 +811,8 @@
 				7628E17C27CFCFCB00B136FA /* Dropout.hpp */,
 				7628E2D227D10CDA00B136FA /* UpSample.cpp */,
 				7628E2D327D10CDA00B136FA /* UpSample.hpp */,
+				76A222E4287BC91700681843 /* Sorting.cpp */,
+				76A222E5287BC91700681843 /* Sorting.hpp */,
 				7628E2D527D1168C00B136FA /* UpSampleKernel.cpp */,
 				7628E2D627D1168C00B136FA /* UpSampleKernel.hpp */,
 				76486AEF27DCD0C00078FF9B /* TensorInterpolation.cpp */,
@@ -820,6 +841,12 @@
 				760F753F285A9E5D005F72C0 /* TensorPacking.hpp */,
 				76D409DA285FB415000C7754 /* TensorEltwise.cpp */,
 				76D409DB285FB415000C7754 /* TensorEltwise.hpp */,
+				76A222E7287BCE2A00681843 /* SortingKernel.cpp */,
+				76A222E8287BCE2B00681843 /* SortingKernel.hpp */,
+				76A222EA287BF92200681843 /* GridSampler.cpp */,
+				76A222EB287BF92200681843 /* GridSampler.hpp */,
+				76A222ED287BFBEE00681843 /* GridSamplerKernel.cpp */,
+				76A222EE287BFBEE00681843 /* GridSamplerKernel.hpp */,
 			);
 			name = Ops;
 			sourceTree = "<group>";
@@ -857,6 +884,7 @@
 				76C19988283F786600A5D737 /* VecFunctional.hpp */,
 				76C1997F283E323B00A5D737 /* neon_mathfun.hpp */,
 				767D3507284D2F8200087A7F /* sse_mathfun.hpp */,
+				76A222F3287C037300681843 /* zmath.hpp */,
 			);
 			name = vec;
 			sourceTree = "<group>";
@@ -923,6 +951,8 @@
 				7687217327C14890006640CF /* InputLayer.cpp */,
 				7687217427C14890006640CF /* InputLayer.hpp */,
 				767D3503284D05AF00087A7F /* ActivationLayer.hpp */,
+				76A222F4287C0DF700681843 /* Convolution1DLayer.cpp */,
+				76A222F5287C0DF700681843 /* Convolution1DLayer.hpp */,
 				7687217C27C2A850006640CF /* ConvolutionLayer.cpp */,
 				7687217D27C2A850006640CF /* ConvolutionLayer.hpp */,
 				76CF3F3527FC6E4B009BF242 /* DeconvolutionLayer.cpp */,
@@ -1039,6 +1069,8 @@
 				76F0064B27B7FC09009D67F5 /* ExpandUtils.hpp */,
 				76D1284F27EC2C3C00A54E6F /* TypeProperties.cpp */,
 				76D1285027EC2C3C00A54E6F /* TypeProperties.hpp */,
+				76A222F0287BFE6700681843 /* TensorGeometry.cpp */,
+				76A222F1287BFE6700681843 /* TensorGeometry.hpp */,
 			);
 			name = core;
 			sourceTree = "<group>";
@@ -1205,6 +1237,7 @@
 				7628E02627CE7BEB00B136FA /* MaxPoolKernel.cpp in Sources */,
 				76E6A946286C2FC700CA0316 /* DepthwiseConvTransposeKernelX86Pack.cpp in Sources */,
 				76F336BE27A5B52300E3AEF1 /* BinaryOpsKernel.cpp in Sources */,
+				76A222EC287BF92200681843 /* GridSampler.cpp in Sources */,
 				760382D027C0096300CD599F /* TensorCatKernel.cpp in Sources */,
 				76BA778F27C674DA00AA896B /* DilatedConvolutionUtils.cpp in Sources */,
 				7628E2D427D10CDA00B136FA /* UpSample.cpp in Sources */,
@@ -1212,6 +1245,7 @@
 				760384B527C0492200CD599F /* TensorPixel.cpp in Sources */,
 				760704D427E4FE6A00D5E00D /* TensorDistributionKernel.cpp in Sources */,
 				7687216127C0E31C006640CF /* Module.cpp in Sources */,
+				76A222F6287C0DF700681843 /* Convolution1DLayer.cpp in Sources */,
 				760704C527E3B81400D5E00D /* CPUGenerator.cpp in Sources */,
 				767D3502284C8C4200087A7F /* ConvolutionMM2DInt8X86.cpp in Sources */,
 				76AA483227F988D200F0F3C6 /* ConvolutionMM2DTranspose.cpp in Sources */,
@@ -1233,10 +1267,12 @@
 				7628E02C27CF1C5B00B136FA /* MaxPoolLayer.cpp in Sources */,
 				7604745727D68F3F00FCB785 /* Initializer.cpp in Sources */,
 				76D409DC285FB415000C7754 /* TensorEltwise.cpp in Sources */,
+				76A222E9287BCE2B00681843 /* SortingKernel.cpp in Sources */,
 				768B2CB9287665DF00F8E108 /* ROIAlignLayer.cpp in Sources */,
 				7620AF8927B593C00081C210 /* TensorUtils.cpp in Sources */,
 				76E6C53E27A511B50036A26F /* ParallelOpenMP.cpp in Sources */,
 				76F336E927AED61200E3AEF1 /* ScalarOps.cpp in Sources */,
+				76A222EF287BFBEE00681843 /* GridSamplerKernel.cpp in Sources */,
 				7687216427C0E379006640CF /* Layer.cpp in Sources */,
 				7628DEE127CDF85100B136FA /* ActivationKernel.cpp in Sources */,
 				760A333227F5F733003F0542 /* ChannelShuffle.cpp in Sources */,
@@ -1315,8 +1351,10 @@
 				76E6C51927A5038F0036A26F /* Allocator.cpp in Sources */,
 				76E6C53127A506C50036A26F /* TensorFactory.cpp in Sources */,
 				76CF3F3727FC6E4B009BF242 /* DeconvolutionLayer.cpp in Sources */,
+				76A222E6287BC91700681843 /* Sorting.cpp in Sources */,
 				762E3B3627BB7B050075F983 /* Unfold2DKernel.cpp in Sources */,
 				76E6C52227A504FC0036A26F /* PerspectiveView.cpp in Sources */,
+				76A222F2287BFE6700681843 /* TensorGeometry.cpp in Sources */,
 				76486AF427DDCE2C0078FF9B /* Drawing.cpp in Sources */,
 				76F4A59D27C9872500DFFD9E /* ConvolutionMM2DNeon.cpp in Sources */,
 				76F0064327B67E4C009D67F5 /* TensorProperties.cpp in Sources */,
@@ -1477,7 +1515,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				HEADER_SEARCH_PATHS = /usr/local/opt/llvm/lib/clang/13.0.1/include;
 				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/llvm/13.0.1/lib;
 				OTHER_CFLAGS = (
@@ -1505,7 +1543,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				HEADER_SEARCH_PATHS = /usr/local/opt/llvm/lib/clang/13.0.1/include;
 				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/llvm/13.0.1/lib;
 				OTHER_CFLAGS = (

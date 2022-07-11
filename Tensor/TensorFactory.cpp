@@ -145,6 +145,12 @@ Tensor range(const Scalar& start, const Scalar& end, const Scalar& step, ScalarT
     return otter::range_out(start, end, step, result);
 }
 
+Tensor arange(const Scalar& start, const Scalar& end, const Scalar& step, ScalarType dtype) {
+    Tensor result = empty({}, dtype);
+    
+    return otter::arange_out(start, end, step, result);
+}
+
 Tensor rand(IntArrayRef size, ScalarType dtype) {
     auto result = empty(size, dtype);
     result.uniform_(0, 1);

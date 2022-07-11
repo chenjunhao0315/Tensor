@@ -66,6 +66,61 @@ Tensor& range_out(const Scalar& start, const Scalar& end, const Scalar& step, Te
     return result;
 }
 
+Tensor& arange_out(const Scalar& start, const Scalar& end, const Scalar& step, Tensor& result) {
+    OTTER_DISPATCH_ALL_TYPES(result.scalar_type(), "arange_cpu", [&]() {
+        auto xstart = start.to<scalar_t>();
+        auto xend = end.to<scalar_t>();
+        auto xstep = step.to<scalar_t>();
+
+        OTTER_CHECK(xstep > 0 || xstep < 0, "step must be nonzero");
+        OTTER_CHECK(std::isfinite(static_cast<double>(xstart)) &&
+                    std::isfinite(static_cast<double>(xend)),
+                    "unsupported range: ", xstart, " -> ", xend);
+        OTTER_CHECK(((xstep > 0) && (xend >= xstart)) || ((xstep < 0) && (xend <= xstart)),
+                    "upper bound and larger bound inconsistent with step sign");
+
+        // we use double precision for (start - end) / step
+        // to compute size_d for consistency across devices.
+        // The problem with using accscalar_t is that accscalar_t might be float32 on gpu for a float32 scalar_t,
+        // but double on cpu for the same,
+        // and the effective output size starts differing on CPU vs GPU because of precision issues, which
+        // we dont want.
+        // the corner-case we do want to take into account is int64_t, which has higher precision than double
+        double size_d;
+        // NOLINTNEXTLINE(bugprone-branch-clone)
+        if (std::is_same<scalar_t, int64_t>::value) {
+            int64_t sgn = (xstep > 0) - (xstep < 0);
+            size_d = std::ceil((xend - xstart + xstep - sgn) / xstep);
+        } else {
+            size_d = std::ceil(static_cast<double>(end.to<double>() - start.to<double>())
+                               / step.to<double>());
+        }
+
+        OTTER_CHECK(size_d >= 0 && size_d <= static_cast<double>(std::numeric_limits<int64_t>::max()),
+                    "invalid size, possible overflow?");
+
+        int64_t size = static_cast<int64_t>(size_d);
+        int64_t numel = result.numel();
+
+        if (numel != size) {
+            if(numel > 1){
+                printf("The number of elements in the out tensor of shape!\n");
+            }
+            result.resize_({size});
+        }
+
+        Tensor r = result.is_contiguous() ? result : result.contiguous();
+        auto iter = TensorIterator::borrowing_nullary_op(r);
+        arange_stub(Device::CPU, iter, start, size, step);
+        if (!result.is_contiguous()) {
+            result.copy_(r);
+        }
+    });
+
+    return result;
+}
+
+DEFINE_DISPATCH(arange_stub);
 DEFINE_DISPATCH(linspace_stub);
 
 }

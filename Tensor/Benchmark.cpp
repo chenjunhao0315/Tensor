@@ -55,8 +55,11 @@ void benchmark(const Layer* layer, const Tensor& bottom_blob, Tensor& top_blob, 
     char in_shape_str[64] = {'\0'};
     char out_shape_str[64] = {'\0'};
 
+    if (bottom_blob.dim() == 1) {
+        sprintf(in_shape_str, "[%3lld *%lld]", bottom_blob.size(0), bottom_blob.elempack());
+    }
     if (bottom_blob.dim() == 2) {
-        sprintf(in_shape_str, "[%3lld *%lld]", bottom_blob.size(1), bottom_blob.elempack());
+        sprintf(in_shape_str, "[%3lld, %3lld *%lld]", bottom_blob.size(1), bottom_blob.size(0), bottom_blob.elempack());
     }
     if (bottom_blob.dim() == 3) {
         sprintf(in_shape_str, "[%3lld, %3lld *%lld]", bottom_blob.size(2), bottom_blob.size(1), bottom_blob.elempack());
@@ -65,8 +68,11 @@ void benchmark(const Layer* layer, const Tensor& bottom_blob, Tensor& top_blob, 
         sprintf(in_shape_str, "[%3lld, %3lld, %3lld *%lld]", bottom_blob.size(3), bottom_blob.size(2), bottom_blob.size(1), bottom_blob.elempack());
     }
 
+    if (top_blob.dim() == 1) {
+        sprintf(out_shape_str, "[%3lld *%lld]", top_blob.size(0), top_blob.elempack());
+    }
     if (top_blob.dim() == 2) {
-        sprintf(out_shape_str, "[%3lld *%lld]", top_blob.size(1), top_blob.elempack());
+        sprintf(out_shape_str, "[%3lld, %3lld *%lld]", top_blob.size(1), top_blob.size(0), top_blob.elempack());
     }
     if (top_blob.dim() == 3) {
         sprintf(out_shape_str, "[%3lld, %3lld *%lld]", top_blob.size(2), top_blob.size(1), top_blob.elempack());

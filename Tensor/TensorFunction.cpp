@@ -1508,7 +1508,7 @@ struct structured_softmax_cpu_out_functional final : public structured_softmax_c
     
     const Tensor& maybe_get_output(int64_t output_idx) override {
         return *outputs_[output_idx];
-
+        
     }
     std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
 };
@@ -1519,7 +1519,7 @@ Tensor wrapper__softmax(const Tensor & self, int64_t dim, bool half_to_float) {
     op.impl(self, dim, half_to_float, *op.outputs_[0]);
     return std::move(op.outputs_[0]).take();
 }
-    
+
 struct structured_softmax_cpu_out_out final : public structured_softmax_cpu_out {
     structured_softmax_cpu_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
     
@@ -1527,7 +1527,7 @@ struct structured_softmax_cpu_out_out final : public structured_softmax_cpu_out 
         const auto& out = outputs_[output_idx].get();
         resize_out(out, sizes, strides, options);
     }
-
+    
     const Tensor& maybe_get_output(int64_t output_idx) override {
         return outputs_[output_idx];
     }
@@ -1540,6 +1540,91 @@ Tensor & wrapper__softmax_out_out(const Tensor & self, int64_t dim, bool half_to
     op.meta(self, dim, half_to_float);
     op.impl(self, dim, half_to_float, op.outputs_[0]);
     return out;
+}
+
+struct structured_topk_out_cpu_functional final : public structured_topk_out_cpu {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        
+        outputs_[output_idx] = create_out(sizes, strides, options);
+    }
+    
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+        
+    }
+    std::array<otter::ExclusivelyOwned<Tensor>, 2> outputs_;
+};
+
+::std::tuple<Tensor, Tensor> wrapper_topk(const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted) {
+    structured_topk_out_cpu_functional op;
+    op.meta(self, k, dim, largest, sorted);
+    op.impl(self, k, dim, largest, sorted, *op.outputs_[0], *op.outputs_[1]);
+    return std::make_tuple(std::move(op.outputs_[0]).take(), std::move(op.outputs_[1]).take());
+}
+struct structured_topk_out_cpu_out final : public structured_topk_out_cpu {
+    structured_topk_out_cpu_out(Tensor& out0, Tensor& out1) : outputs_{ std::ref(out0), std::ref(out1) } {}
+    
+    
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+    }
+    
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+        
+    }
+    std::array<std::reference_wrapper<Tensor>, 2> outputs_;
+};
+
+::std::tuple<Tensor &, Tensor &> wrapper_topk_out_values(const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted, Tensor & values, Tensor & indices) {
+    structured_topk_out_cpu_out op(values, indices);
+    op.meta(self, k, dim, largest, sorted);
+    Tensor values_in = op.maybe_get_output(0);
+    Tensor indices_in = op.maybe_get_output(1);
+    op.impl(self, k, dim, largest, sorted, values_in, indices_in);
+    return std::forward_as_tuple(values, indices);
+}
+
+struct structured_sort_stable_out_functional final : public structured_sort_stable_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+    }
+    
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    
+    std::array<otter::ExclusivelyOwned<Tensor>, 2> outputs_;
+};
+::std::tuple<Tensor, Tensor> wrapper_sort_stable(const Tensor & self, bool stable, int64_t dim, bool descending) {
+    structured_sort_stable_out_functional op;
+    op.meta(self, stable, dim, descending);
+    op.impl(self, stable, dim, descending, *op.outputs_[0], *op.outputs_[1]);
+    return std::make_tuple(std::move(op.outputs_[0]).take(), std::move(op.outputs_[1]).take());
+}
+struct structured_sort_stable_out_out final : public structured_sort_stable_out {
+    structured_sort_stable_out_out(Tensor& out0, Tensor& out1) : outputs_{ std::ref(out0), std::ref(out1) } {}
+    
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+    }
+    
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 2> outputs_;
+};
+
+::std::tuple<Tensor &, Tensor &> wrapper_sort_out_values_stable(const Tensor & self, bool stable, int64_t dim, bool descending, Tensor & values, Tensor & indices) {
+    structured_sort_stable_out_out op(values, indices);
+    Tensor values_in = op.maybe_get_output(0);
+    Tensor indices_in = op.maybe_get_output(1);
+    op.meta(self, stable, dim, descending);
+    op.impl(self, stable, dim, descending, values_in, indices_in);
+    return std::forward_as_tuple(values, indices);
 }
 
 namespace native {
@@ -1934,6 +2019,26 @@ Tensor & _softmax_out(Tensor & out, const Tensor & self, int64_t dim, bool half_
 }
 Tensor & _softmax_outf(const Tensor & self, int64_t dim, bool half_to_float, Tensor & out) {
     return wrapper__softmax_out_out(self, dim, half_to_float, out);
+}
+
+::std::tuple<Tensor, Tensor> sort(const Tensor & self, bool stable, int64_t dim, bool descending) {
+    return wrapper_sort_stable(self, stable, dim, descending);
+}
+::std::tuple<Tensor &, Tensor &> sort_out(Tensor & values, Tensor & indices, const Tensor & self, bool stable, int64_t dim, bool descending) {
+    return wrapper_sort_out_values_stable(self, stable, dim, descending, values, indices);
+}
+::std::tuple<Tensor &,Tensor &> sort_outf(const Tensor & self, bool stable, int64_t dim, bool descending, Tensor & values, Tensor & indices) {
+    return wrapper_sort_out_values_stable(self, stable, dim, descending, values, indices);
+}
+
+::std::tuple<Tensor,Tensor> topk(const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted) {
+    return wrapper_topk(self, k, dim, largest, sorted);
+}
+::std::tuple<Tensor &,Tensor &> topk_out(Tensor & values, Tensor & indices, const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted) {
+    return wrapper_topk_out_values(self, k, dim, largest, sorted, values, indices);
+}
+::std::tuple<Tensor &,Tensor &> topk_outf(const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted, Tensor & values, Tensor & indices) {
+    return wrapper_topk_out_values(self, k, dim, largest, sorted, values, indices);
 }
 
 }   // end namespace native

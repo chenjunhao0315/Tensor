@@ -19,6 +19,7 @@
 #include "Math.hpp"
 #include "VecIntrinsic.hpp"
 #include "TypeCast.hpp"
+#include "zmath.hpp"
 
 // These macros helped us unify vec_base.h
 #ifdef CPU_CAPABILITY_AVX512
@@ -286,6 +287,16 @@ public:
         }
         return ret;
     }
+    Vectorized<T> floor() const {
+        return map(otter::floor_impl);
+    }
+    Vectorized<T> round() const {
+        // We do not use std::round because we would like to round midway numbers to the nearest even integer.
+        return map(otter::round_impl);
+    }
+    Vectorized<T> trunc() const {
+        return map(otter::trunc_impl);
+    }
     
 private:
     template <typename Op>
@@ -369,6 +380,43 @@ inline Vectorized<T> fmadd(const Vectorized<T>& a, const Vectorized<T>& b, const
     return a * b + c;
 }
 
+
+template <int64_t scale = 1, typename T = void>
+std::enable_if_t<scale == 1 || scale == 2 || scale == 4 || scale == 8, Vectorized<T>>
+inline gather(T const* base_addr, const Vectorized<int_same_size_t<T>>& vindex) {
+    static constexpr int size = Vectorized<T>::size();
+    int_same_size_t<T> index_arr[size];
+    vindex.store(static_cast<void*>(index_arr));
+    T buffer[size];
+    for (const auto i : otter::irange(size)) {
+        buffer[i] = base_addr[index_arr[i] * scale / sizeof(T)];
+    }
+    return Vectorized<T>::loadu(static_cast<void*>(buffer));
+}
+
+template <int64_t scale = 1, typename T = void>
+std::enable_if_t<scale == 1 || scale == 2 || scale == 4 || scale == 8, Vectorized<T>>
+inline mask_gather(const Vectorized<T>& src, T const* base_addr,
+                   const Vectorized<int_same_size_t<T>>& vindex, Vectorized<T>& mask) {
+    static constexpr int size = Vectorized<T>::size();
+    T src_arr[size];
+    int_same_size_t<T> mask_arr[size];  // use int type so we can logical and
+    int_same_size_t<T> index_arr[size];
+    src.store(static_cast<void*>(src_arr));
+    mask.store(static_cast<void*>(mask_arr));
+    vindex.store(static_cast<void*>(index_arr));
+    T buffer[size];
+    for (const auto i : otter::irange(size)) {
+        if (mask_arr[i] & 0x01) {  // check highest bit
+            buffer[i] = base_addr[index_arr[i] * scale / sizeof(T)];
+        } else {
+            buffer[i] = src_arr[i];
+        }
+    }
+    mask = Vectorized<T>();  // "zero out" mask
+    return Vectorized<T>::loadu(static_cast<void*>(buffer));
+}
+
 template <class T> Vectorized<T>
 inline operator+(const Vectorized<T> &a, const Vectorized<T> &b) {
     Vectorized<T> c;
@@ -448,6 +496,80 @@ inline void convert(const src_T *src, dst_T *dst, int64_t n) {
     }
 }
 
+template <typename T>
+inline Vectorized<int_same_size_t<T>> convert_to_int_of_same_size(const Vectorized<T>& src) {
+    static constexpr int size = Vectorized<T>::size();
+    T src_arr[size];
+    src.store(static_cast<void*>(src_arr));
+    int_same_size_t<T> buffer[size];
+    for (const auto i : otter::irange(size)) {
+        buffer[i] = static_cast<int_same_size_t<T>>(src_arr[i]);
+    }
+    return Vectorized<int_same_size_t<T>>::loadu(static_cast<void*>(buffer));
+}
+// Example inputs for AVX512:
+// a   Vectorized<float>   = {a0, b0, a1, b1, a2, b2, a3, b3, a4, b4, a5, b5, a6, b6, a7, b7}
+// b   Vectorized<float>   = {a8, b8, a9, b9, a10, b10, a11, b11, a12, b12, a13, b13, a14, b14, a15, b15}
+// returns:
+//           Vectorized<float>   = {a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15}
+//           Vectorized<float>   = {b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15}
+// Example inputs for AVX2: a           Vectorized<float>   = {a0, b0, a1, b1, a2, b2, a3, b3}
+//               b                      Vectorized<float>   = {a4, b4, a5, b5, a6, b6, a7, b7}
+//       returns:                       Vectorized<float>   = {a0, a1, a2, a3, a4, a5, a6, a7}
+//                                      Vectorized<float>   = {b0, b1, b2, b3, b4, b5, b6, b7}
+template <typename T>
+inline std::enable_if_t<Vectorized<T>::size() % 2 == 0, std::pair<Vectorized<T>, Vectorized<T>>>
+deinterleave2(const Vectorized<T>& a, const Vectorized<T>& b) {
+    static constexpr int size = Vectorized<T>::size();
+    static constexpr int half_size = size / 2;
+    T a_arr[size];
+    T b_arr[size];
+    T buffer1[size];
+    T buffer2[size];
+    a.store(static_cast<void*>(a_arr));
+    b.store(static_cast<void*>(b_arr));
+    for (const auto i : otter::irange(half_size)) {
+        buffer1[i] = a_arr[i * 2];
+        buffer1[half_size + i] = b_arr[i * 2];
+        buffer2[i] = a_arr[i * 2 + 1];
+        buffer2[half_size + i] = b_arr[i * 2 + 1];
+    }
+    return std::make_pair(Vectorized<T>::loadu(static_cast<void*>(buffer1)),
+                          Vectorized<T>::loadu(static_cast<void*>(buffer2)));
+}
+
+// inverse operation of deinterleave2
+// Example inputs for AVX512:
+//  a       Vectorized<float>   = {a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15}
+//  b       Vectorized<float>   = {b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15}
+// returns, for AVX512:
+//          Vectorized<float>   = {a0, b0, a1, b1, a2, b2, a3, b3, a4, b4, a5, b5, a6, b6, a7, b7}
+//          Vectorized<float>   = {a8, b8, a9, b9, a10, b10, a11, b11, a12, b12, a13, b13, a14, b14, a15, b15}
+// Example inputs for AVX2 : a           Vectorized<float>   = {a0, a1, a2, a3, a4, a5, a6, a7}
+//                   b                   Vectorized<float>   = {b0, b1, b2, b3, b4, b5, b6, b7}
+//       returns:            Vectorized<float>   = {a0, b0, a1, b1, a2, b2, a3, b3}
+//                           Vectorized<float>   = {a4, b4, a5, b5, a6, b6, a7, b7}
+template <typename T>
+inline std::enable_if_t<Vectorized<T>::size() % 2 == 0, std::pair<Vectorized<T>, Vectorized<T>>>
+interleave2(const Vectorized<T>& a, const Vectorized<T>& b) {
+    static constexpr int size = Vectorized<T>::size();
+    static constexpr int half_size = size / 2;
+    T a_arr[size];
+    T b_arr[size];
+    T buffer1[size];
+    T buffer2[size];
+    a.store(static_cast<void*>(a_arr));
+    b.store(static_cast<void*>(b_arr));
+    for (const auto i : otter::irange(half_size)) {
+        buffer1[i * 2] = a_arr[i];
+        buffer1[i * 2 + 1] = b_arr[i];
+        buffer2[i * 2] = a_arr[half_size + i];
+        buffer2[i * 2 + 1] = b_arr[half_size + i];
+    }
+    return std::make_pair(Vectorized<T>::loadu(static_cast<void*>(buffer1)),
+                          Vectorized<T>::loadu(static_cast<void*>(buffer2)));
+}
+
 template <class T,
 typename std::enable_if<true, int>::type = 0>
 Vectorized<T> inline maximum(const Vectorized<T> &a, const Vectorized<T> &b) {
@@ -469,7 +591,7 @@ Vectorized<T> inline minimum(const Vectorized<T> &a, const Vectorized<T> &b) {
     Vectorized<T> c;
     for (int i = 0; i != Vectorized<T>::size(); i++) {
         c[i] = (std::abs(a[i]) < std::abs(b[i])) ? a[i] : b[i];
-        if (_isnan(a[i])) {
+        if (std::isnan(a[i])) {
             // If either input is NaN, propagate a NaN.
             // NOTE: The case where b[i] was NaN is handled correctly by the naive
             // ternary operator above.

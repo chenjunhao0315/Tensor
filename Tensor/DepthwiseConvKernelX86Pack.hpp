@@ -95,6 +95,69 @@ Tensor depthwise_conv2d_5x5s2_x86_pack4(
     const Tensor& bias,
     IntArrayRef padding);
 
+#if __AVX__
+
+Tensor& depthwise_conv2d_3x3s1_x86_pack8_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor depthwise_conv2d_3x3s1_x86_pack8(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor& depthwise_conv2d_3x3s2_x86_pack8_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor depthwise_conv2d_3x3s2_x86_pack8(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor& depthwise_conv2d_5x5s1_x86_pack8_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor depthwise_conv2d_5x5s1_x86_pack8(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+Tensor& depthwise_conv2d_5x5s2_x86_pack8_out(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding,
+    Tensor& output);
+
+Tensor depthwise_conv2d_5x5s2_x86_pack8(
+    const Tensor& self,
+    const Tensor& weight,
+    const Tensor& weight_o,
+    const Tensor& bias,
+    IntArrayRef padding);
+
+#endif // __AVX__
 #endif // __SSE2__
 
 }   // end namespace otter

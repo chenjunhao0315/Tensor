@@ -389,7 +389,7 @@ void Net::convert_layout(Tensor &bottom_blob, const Layer *layer, const NetOptio
         
         if (layer->support_packing) {
             if (dtype == ScalarType::Float || dtype == ScalarType::Float4 || dtype == ScalarType::Float8) {
-                #if false
+                #if __AVX__
                     if (elemcount % 8 == 0)
                         dst_elempack = 8;
                     else if (elemcount % 4 == 0)

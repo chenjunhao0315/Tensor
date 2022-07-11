@@ -20,6 +20,7 @@
 #include "TensorCat.hpp"
 #include "TensorFactory.hpp"
 #include "TensorPacking.hpp"
+#include "Accumulator.hpp"
 
 namespace otter {
 
@@ -295,7 +296,7 @@ Tensor slice(const Tensor& self, int64_t dim, int64_t start, int64_t end, int64_
     int out_elempack = 1;
     
 #if __SSE2__
-#if false
+#if __AVX__
     out_elempack = size % 8 == 0 ? 8 : size % 4 == 0 ? 4 : 1;
 #else
     out_elempack = size % 4 == 0 ? 4 : 1;
@@ -303,6 +304,22 @@ Tensor slice(const Tensor& self, int64_t dim, int64_t start, int64_t end, int64_
 #elif __ARM_NEON__
     out_elempack = size % 4 == 0 ? 4 : 1;
 #endif
+    
+    if (elempack == 8) {
+        if (start % 8 == 0 && out_elempack == 8) {
+            auto memory_offset = self.memory_offset() + (start / elempack) * strides[dim];
+            sizes[dim] = size / elempack;
+            strides[dim] *= step;
+            
+            Tensor result;
+            result = self.as_strided(sizes, strides, memory_offset);
+            result.unsafeGetTensorNucleus()->set_dtype(get_update_scalarType(self.scalar_type(), out_elempack));
+            
+            return result;
+        } else {
+            return slice(self.packing(1), dim, start, end, step);
+        }
+    }
     
     if (elempack == 4) {
         if (start % 4 == 0 && out_elempack == 4) {
@@ -411,6 +428,36 @@ Tensor& squeeze_(Tensor& self, int64_t dim) {
     auto g = inferSqueezeGeometry(self, dim);
     self.as_strided_(std::get<0>(g), std::get<1>(g));
     return self;
+}
+
+Tensor flatten(const Tensor& self, int64_t start_dim, int64_t end_dim) {
+    start_dim = maybe_wrap_dim(start_dim, self.dim());
+    end_dim = maybe_wrap_dim(end_dim, self.dim());
+    OTTER_CHECK(start_dim <= end_dim, "flatten() has invalid args: start_dim cannot come after end_dim");
+
+    if (self.dim() == 0) {
+        return self.reshape({1});
+    }
+    if (start_dim == end_dim) {
+        return self;
+    }
+
+    // We don't want to infer_size on the entire shape, because that can give us an extra degree
+    // of freedom we don't want; for example, consider shape [0, 1, 3, 0], with start_dim=1, end_dim=2.
+    // It's clear we want result shape [0, 3, 0] but passing [0, -1, 0] to infer_size means the -1
+    // can take on any value and satisfy the constraints.
+    auto slice_numel = otter::multiply_integers(self.sizes().slice(start_dim, end_dim - start_dim + 1));
+    std::vector<int64_t> shape;
+    shape.reserve(self.dim() - end_dim + start_dim);
+    for (const auto i : otter::irange(start_dim)) {
+        shape.push_back(self.sizes()[i]);
+    }
+    shape.push_back(slice_numel);
+    for (const auto i : otter::irange(end_dim + 1, self.dim())) {
+        shape.push_back(self.sizes()[i]);
+    }
+
+    return native::reshape(self, shape);
 }
 
 Tensor narrow(const Tensor& self, int64_t dim, int64_t start, int64_t length) {
@@ -612,7 +659,7 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
         
         int out_elempack = 1;
 #if __SSE2__
-#if false
+#if __AVX__
         out_elempack = top_w % 8 == 0 ? 8 : top_w % 4 == 0 ? 4 : 1;
 #else
         out_elempack = top_w % 4 == 0 ? 4 : 1;
@@ -651,7 +698,7 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
         
         int out_elempack = 1;
 #if __SSE2__
-#if false
+#if __AVX__
         out_elempack = top_h % 8 == 0 ? 8 : top_h % 4 == 0 ? 4 : 1;
 #else
         out_elempack = top_h % 4 == 0 ? 4 : 1;
@@ -757,7 +804,7 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
         
         int out_elempack = 1;
 #if __SSE2__
-#if false
+#if __AVX__
         out_elempack = top_channels % 8 == 0 ? 8 : top_channels % 4 == 0 ? 4 : 1;
 #else
         out_elempack = top_channels % 4 == 0 ? 4 : 1;

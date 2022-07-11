@@ -430,6 +430,13 @@ inline void sincos256_ps(v8sf x, v8sf *s, v8sf *c) {
   *s = _mm256_xor_ps(xmm1, sign_bit_sin);
   *c = _mm256_xor_ps(xmm2, sign_bit_cos);
 }
+
+OTTER_ALWAYS_INLINE __m256 pow256_ps(__m256 a, __m256 b)
+{
+    // pow(x, m) = exp(m * log(x))
+    return exp256_ps(_mm256_mul_ps(b, log256_ps(a)));
+}
+
 #endif // CPU_CAPABILITY_AVX2
 
 #endif /* Avx_Math_hpp */

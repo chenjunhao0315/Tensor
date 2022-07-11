@@ -31,6 +31,13 @@ struct alignas(sizeof(T) * 16) elempack16 {
     T values[16] = {0};
 };
 
+template <typename T>
+struct alignas(sizeof(T) * 64) elempack64 {
+    using value_type = T;
+    
+    T values[64] = {0};
+};
+
 }   // end namespace otter
 
 

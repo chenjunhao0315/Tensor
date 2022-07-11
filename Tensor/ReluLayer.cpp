@@ -36,45 +36,75 @@ int ReluLayer::forward_inplace(Tensor& bottom_blob, const NetOption& opt) const 
             for (const auto q : otter::irange(begin, end)) {
                 float* ptr = (float*)input_output_ra[q].data();
 
+                int i = 0;
     #if __ARM_NEON
-                int nn = size >> 2;
-                int remain = size - (nn << 2);
-    #else
-                int remain = size;
-    #endif // __ARM_NEON
-
-    #if __ARM_NEON
-    #if __aarch64__
                 float32x4_t _zero = vdupq_n_f32(0.f);
-                for (; nn > 0; nn--)
+                for (; i + 15 < size; i += 16)
                 {
-                    float32x4_t _p = vld1q_f32(ptr);
-                    _p = vmaxq_f32(_p, _zero);
-                    vst1q_f32(ptr, _p);
-
+    #if __aarch64__
+                    asm volatile(
+                        "prfm   pldl1keep, [%0, #512]   \n"
+                        "ld1    {v0.4s, v1.4s, v2.4s, v3.4s}, [%0] \n"
+                        "fmax   v0.4s, v0.4s, %2.4s     \n"
+                        "fmax   v1.4s, v1.4s, %2.4s     \n"
+                        "fmax   v2.4s, v2.4s, %2.4s     \n"
+                        "fmax   v3.4s, v3.4s, %2.4s     \n"
+                        "st1    {v0.4s, v1.4s, v2.4s, v3.4s}, [%0], #64 \n"
+                        : "=r"(ptr) // %0
+                        : "0"(ptr),
+                        "w"(_zero) // %2
+                        : "memory", "v0", "v1", "v2", "v3");
+    #else  // __aarch64__
+                    asm volatile(
+                        "pld        [%0, #512]      \n"
+                        "vldm       %0, {d0-d7}     \n"
+                        "vmax.f32   q0, q0, %q2     \n"
+                        "vmax.f32   q1, q1, %q2     \n"
+                        "vmax.f32   q2, q2, %q2     \n"
+                        "vmax.f32   q3, q3, %q2     \n"
+                        "vstm       %0!, {d0-d7}    \n"
+                        : "=r"(ptr) // %0
+                        : "0"(ptr),
+                        "w"(_zero) // %2
+                        : "memory", "q0", "q1", "q2", "q3");
+    #endif // __aarch64__
+                }
+                for (; i + 7 < size; i += 8)
+                {
+                    float32x4_t _p0 = vld1q_f32(ptr);
+                    float32x4_t _p1 = vld1q_f32(ptr + 4);
+                    _p0 = vmaxq_f32(_p0, _zero);
+                    _p1 = vmaxq_f32(_p1, _zero);
+                    vst1q_f32(ptr, _p0);
+                    vst1q_f32(ptr + 4, _p1);
+                    ptr += 8;
+                }
+                for (; i + 3 < size; i += 4)
+                {
+                    float32x4_t _ptr = vld1q_f32(ptr);
+                    _ptr = vmaxq_f32(_ptr, _zero);
+                    vst1q_f32(ptr, _ptr);
                     ptr += 4;
                 }
-    #else
-                if (nn > 0)
+    #elif __SSE2__
+    #if __AVX__
+                __m256 _zero_avx = _mm256_setzero_ps();
+                for (; i + 7 < size; i += 8)
                 {
-                    asm volatile(
-                        "veor       q1, q0, q0          \n"
-                        "0:                             \n"
-                        "pld        [%1, #128]          \n"
-                        "vld1.f32   {d0-d1}, [%1 :128]  \n"
-                        "vmax.f32   q0, q0, q1          \n"
-                        "subs       %0, #1              \n"
-                        "vst1.f32   {d0-d1}, [%1 :128]! \n"
-                        "bne        0b                  \n"
-                        : "=r"(nn), // %0
-                        "=r"(ptr) // %1
-                        : "0"(nn),
-                        "1"(ptr)
-                        : "cc", "memory", "q0", "q1");
+                    __m256 _p = _mm256_loadu_ps(ptr);
+                    _mm256_storeu_ps(ptr, _mm256_max_ps(_zero_avx, _p));
+                    ptr += 8;
                 }
-    #endif // __aarch64__
-    #endif // __ARM_NEON
-                for (; remain > 0; remain--)
+    #endif  // __AVX__
+                __m128 _zero = _mm_setzero_ps();
+                for (; i + 3 < size; i += 4)
+                {
+                    __m128 _p = _mm_load_ps(ptr);
+                    _mm_store_ps(ptr, _mm_max_ps(_zero, _p));
+                    ptr += 4;
+                }
+    #endif  // __SSE2__
+                for (; i < size; i++)
                 {
                     *ptr = std::max(*ptr, 0.f);
 

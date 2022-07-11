@@ -28,6 +28,7 @@ public:
     virtual std::string type() const { return "ROIAlign"; }
     
 public:
+    int version;
     int aligned;
     int pooled_width;
     int pooled_height;
@@ -36,6 +37,7 @@ public:
 };
 
 enum class ROIAlignParam {
+    Version,
     Aligned,
     PooledWidth,
     PooledHeight,

@@ -481,14 +481,14 @@ ConvBackend select_proper_conv_packed_backend(
     const int64_t kernel_h = weight.size(2);
     const int64_t stride_w = params.stride[1];
     const int64_t stride_h = params.stride[0];
-//    const int64_t num_input = input.size(1);
+    const int64_t num_input = input.size(1);
     const int64_t num_output = weight.size(0);
     
     int64_t elempack = input.elempack();
     int64_t out_elempack = 1;
     
 #if __SSE2__
-#if false
+#if __AVX__
     out_elempack = num_output % 8 == 0 ? 8 : num_output % 4 == 0 ? 4 : 1;
 #else
     out_elempack = num_output % 4 == 0 ? 4 : 1;
@@ -517,6 +517,7 @@ ConvBackend select_proper_conv_packed_backend(
                         }
                     }
                 }
+                return ConvBackend::Overrideable;
             }
         } else {
             if (input.dim() == 4) {
@@ -588,27 +589,82 @@ ConvBackend select_proper_conv_packed_backend(
                     }
                 } else if (params.use_cpu_x86(input, weight)) {
                     // Depthwise
-                    if (params.is_depthwise(input, weight) && elempack == 4) {
-                        if (kernel_h == 3 && kernel_w == 3 && stride_h == 1 && stride_w == 1) {
-                            return ConvBackend::DepthwiseX86Pack4_3x3s1;
-                        } else if (kernel_h == 3 && kernel_w == 3 && stride_h == 2 && stride_w == 2) {
-                            return ConvBackend::DepthwiseX86Pack4_3x3s2;
-                        } else if (kernel_h == 5 && kernel_w == 5 && stride_h == 1 && stride_w == 1) {
-                            return ConvBackend::DepthwiseX86Pack4_5x5s1;
-                        } else if (kernel_h == 5 && kernel_w == 5 && stride_h == 2 && stride_w == 2) {
-                            return ConvBackend::DepthwiseX86Pack4_5x5s2;
+                    if (params.is_depthwise(input, weight)) {
+                        if (elempack == 4) {
+                            if (kernel_h == 3 && kernel_w == 3 && stride_h == 1 && stride_w == 1) {
+                                return ConvBackend::DepthwiseX86Pack4_3x3s1;
+                            } else if (kernel_h == 3 && kernel_w == 3 && stride_h == 2 && stride_w == 2) {
+                                return ConvBackend::DepthwiseX86Pack4_3x3s2;
+                            } else if (kernel_h == 5 && kernel_w == 5 && stride_h == 1 && stride_w == 1) {
+                                return ConvBackend::DepthwiseX86Pack4_5x5s1;
+                            } else if (kernel_h == 5 && kernel_w == 5 && stride_h == 2 && stride_w == 2) {
+                                return ConvBackend::DepthwiseX86Pack4_5x5s2;
+                            }
+                            return ConvBackend::DepthwiseX86Pack4;
+                        } else if (elempack == 8) {
+                            if (kernel_h == 3 && kernel_w == 3 && stride_h == 1 && stride_w == 1) {
+                                return ConvBackend::DepthwiseX86Pack8_3x3s1;
+                            } else if (kernel_h == 3 && kernel_w == 3 && stride_h == 2 && stride_w == 2) {
+                                return ConvBackend::DepthwiseX86Pack8_3x3s2;
+                            } else if (kernel_h == 5 && kernel_w == 5 && stride_h == 1 && stride_w == 1) {
+                                return ConvBackend::DepthwiseX86Pack8_5x5s1;
+                            } else if (kernel_h == 5 && kernel_w == 5 && stride_h == 2 && stride_w == 2) {
+                                return ConvBackend::DepthwiseX86Pack8_5x5s2;
+                            }
+//                            return ConvBackend::DepthwiseX86Pack8;
                         }
-                        return ConvBackend::DepthwiseX86Pack4;
+                        return ConvBackend::Overrideable;
                     }
                     
                     // General
-                    if (elempack == 4 && out_elempack == 4) {
+                    if (elempack == 1 && out_elempack == 8) {
+                        if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::Sgemm2dX86Pack1to8_1x1s1;
+                        }
+                        return ConvBackend::Sgemm2dX86Pack1to8;
+                    } else if (elempack == 4 && out_elempack == 8) {
+                        if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::Sgemm2dX86Pack4to8_1x1s1;
+                        }
+                        return ConvBackend::Sgemm2dX86Pack4to8;
+                    } else if (elempack == 8 && out_elempack == 8) {
+                        if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::Sgemm2dX86Pack8_1x1s1;
+                        } else if (kernel_h == 1 && kernel_w == 1 && stride_h == 2 && stride_w == 2) {
+                            return ConvBackend::Sgemm2dX86Pack8_1x1s2;
+                        } else if (kernel_h == 3 && kernel_w == 3 && stride_h == 1 && stride_w == 1) {
+                            if (num_input >= 8 && num_output >= 8 && num_input <= 32 && num_output <= 32) {
+                                return ConvBackend::Winograd63X86Pack8_3x3s1;
+                            } else if (num_input >= 8 && num_output >= 8) {
+                                return ConvBackend::Winograd43X86Pack8_3x3s1;
+                            } else {
+                                return ConvBackend::Winograd43X86Pack8_3x3s1;
+                            }
+                        }
+                        return ConvBackend::Sgemm2dX86Pack8;
+                    } else if (elempack == 8 && out_elempack == 1) {
+                        if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::Sgemm2dX86Pack8to1_1x1s1;
+                        }
+                        return ConvBackend::Sgemm2dX86Pack8to1;
+                    } else if (elempack == 8 && out_elempack == 4) {
+                        if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
+                            return ConvBackend::Sgemm2dX86Pack8to4_1x1s1;
+                        }
+                        return ConvBackend::Sgemm2dX86Pack8to4;
+                    } else if (elempack == 4 && out_elempack == 4) {
                         if (kernel_h == 1 && kernel_w == 1 && stride_h == 1 && stride_w == 1) {
                             return ConvBackend::Sgemm2dX86Pack4_1x1s1;
                         } else if (kernel_h == 1 && kernel_w == 1 && stride_h == 2 && stride_w == 2) {
                             return ConvBackend::Sgemm2dX86Pack4_1x1s2;
                         } else if (kernel_h == 3 && kernel_w == 3 && stride_h == 1 && stride_w == 1) {
-                            return ConvBackend::Winograd63X86Pack4_3x3s1;
+                            if (num_input >= 8 && num_output >= 8 && num_input <= 32 && num_output <= 32) {
+                                return ConvBackend::Winograd63X86Pack4_3x3s1;
+                            } else if (num_input >= 8 && num_output >= 8) {
+                                return ConvBackend::Winograd43X86Pack4_3x3s1;
+                            } else {
+                                return ConvBackend::Winograd43X86Pack4_3x3s1;
+                            }
                         }
                         return ConvBackend::Sgemm2dX86Pack4;
                     } else if (elempack == 1 && out_elempack == 4) {
@@ -722,12 +778,58 @@ Tensor convolution_packed(
             output = otter::depthwise_conv2d_5x5s2_x86_pack4(input, weight, weight_o, bias, padding); break;
         case ConvBackend::Winograd63X86Pack4_3x3s1:
             output = otter::conv2d_3x3s1_winograd63_pack4_x86(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Winograd43X86Pack4_3x3s1:
+            output = otter::conv2d_3x3s1_winograd43_pack4_x86(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Winograd23X86Pack4_3x3s1:
+            output = otter::conv2d_3x3s1_winograd23_pack4_x86(input, weight, weight_o, bias, padding); break;
             
         // Deconv
         case ConvBackend::DepthwiseTransposeX86Pack4:
             output = otter::depthwise_deconv2d_pack4_x86(input, weight, weight_o, bias, stride, padding, output_padding, dilation); break;
         case ConvBackend::DepthwiseTransposeX86Pack1:
             output = otter::depthwise_deconv2d_pack1_x86(input, weight, weight_o, bias, stride, padding, output_padding, dilation); break;
+            
+#if __AVX__
+        case ConvBackend::Sgemm2dX86Pack1to8:
+            output = otter::sgemm_conv2d_pack1to8_x86(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dX86Pack1to8_1x1s1:
+            output = otter::conv2d_1x1s1_sgemm_pack1to8_x86(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Sgemm2dX86Pack4to8:
+            output = otter::sgemm_conv2d_pack4to8_x86(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dX86Pack4to8_1x1s1:
+            output = otter::conv2d_1x1s1_sgemm_pack4to8_x86(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Sgemm2dX86Pack8:
+            output = otter::sgemm_conv2d_pack8_x86(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dX86Pack8_1x1s1:
+            output = otter::conv2d_1x1s1_sgemm_pack8_x86(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Sgemm2dX86Pack8_1x1s2:
+            output = otter::conv2d_1x1s2_sgemm_pack8_x86(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Sgemm2dX86Pack8to4:
+            output = otter::sgemm_conv2d_pack8to4_x86(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dX86Pack8to4_1x1s1:
+            output = otter::conv2d_1x1s1_sgemm_pack8to4_x86(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Sgemm2dX86Pack8to1:
+            output = otter::sgemm_conv2d_pack8to1_x86(input, weight, weight_o, bias, kernel_size, stride, padding, dilation); break;
+        case ConvBackend::Sgemm2dX86Pack8to1_1x1s1:
+            output = otter::conv2d_1x1s1_sgemm_pack8to1_x86(input, weight, weight_o, bias, padding); break;
+            
+        case ConvBackend::DepthwiseX86Pack8_3x3s1:
+            output = otter::depthwise_conv2d_3x3s1_x86_pack8(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::DepthwiseX86Pack8_3x3s2:
+            output = otter::depthwise_conv2d_3x3s2_x86_pack8(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::DepthwiseX86Pack8_5x5s1:
+            output = otter::depthwise_conv2d_5x5s1_x86_pack8(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::DepthwiseX86Pack8_5x5s2:
+            output = otter::depthwise_conv2d_5x5s2_x86_pack8(input, weight, weight_o, bias, padding); break;
+            
+        case ConvBackend::Winograd63X86Pack8_3x3s1:
+            output = otter::conv2d_3x3s1_winograd63_pack8_x86(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Winograd43X86Pack8_3x3s1:
+            output = otter::conv2d_3x3s1_winograd43_pack8_x86(input, weight, weight_o, bias, padding); break;
+        case ConvBackend::Winograd23X86Pack8_3x3s1:
+            output = otter::conv2d_3x3s1_winograd23_pack8_x86(input, weight, weight_o, bias, padding); break;
+            
+#endif  // __AVX__
 #endif  // __SSE2__
 #if __ARM_NEON__
         case ConvBackend::Sgemm2dNeonPack4:

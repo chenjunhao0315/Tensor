@@ -153,6 +153,14 @@ struct structured_softmax : public TensorIterator {
     void meta(const Tensor & self, int64_t dim, bool half_to_float);
 };
 
+struct structured_topk : public TensorIterator {
+    void meta(const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted);
+};
+
+struct structured_sort_stable : public TensorIterator {
+    void meta(const Tensor & self, bool stable, int64_t dim, bool descending);
+};
+
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override { \
@@ -341,6 +349,14 @@ struct structured_softmax_cpu_out : public structured_softmax {
     void impl(const Tensor & self, int64_t dim, bool half_to_float, const Tensor & out);
 };
 
+struct structured_sort_stable_out : public structured_sort_stable {
+    void impl(const Tensor & self, bool stable, int64_t dim, bool descending, Tensor & values, Tensor & indices);
+};
+
+struct structured_topk_out_cpu : public structured_topk {
+    void impl(const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted, Tensor & values,  Tensor & indices);
+};
+
 namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha);
@@ -493,6 +509,14 @@ Tensor & lt_(Tensor & self, const Tensor & other);
 Tensor _softmax(const Tensor & self, int64_t dim, bool half_to_float);
 Tensor & _softmax_out(Tensor & out, const Tensor & self, int64_t dim, bool half_to_float);
 Tensor & _softmax_outf(const Tensor & self, int64_t dim, bool half_to_float, Tensor & out);
+
+::std::tuple<Tensor, Tensor> sort(const Tensor & self, bool stable, int64_t dim, bool descending);
+::std::tuple<Tensor &, Tensor &> sort_out(Tensor & values, Tensor & indices, const Tensor & self, bool stable, int64_t dim, bool descending);
+::std::tuple<Tensor &,Tensor &> sort_outf(const Tensor & self, bool stable, int64_t dim, bool descending, Tensor & values, Tensor & indices);
+
+::std::tuple<Tensor,Tensor> topk(const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted);
+::std::tuple<Tensor &,Tensor &> topk_out(Tensor & values, Tensor & indices, const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted);
+::std::tuple<Tensor &,Tensor &> topk_outf(const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted, Tensor & values, Tensor & indices);
 
 }   // end namespace native
 

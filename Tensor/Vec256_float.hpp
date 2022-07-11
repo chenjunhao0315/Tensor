@@ -140,6 +140,18 @@ public:
         return cos256_ps(values);
     }
     
+    Vectorized<float> floor() const {
+        return _mm256_floor_ps(values);
+    }
+    
+    Vectorized<float> round() const {
+        return _mm256_round_ps(values, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
+    }
+    
+    Vectorized<float> trunc() const {
+        return _mm256_round_ps(values, (_MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC));
+    }
+    
     Vectorized<float> operator==(const Vectorized<float>& other) const {
         return _mm256_cmp_ps(values, other.values, _CMP_EQ_OQ);
     }

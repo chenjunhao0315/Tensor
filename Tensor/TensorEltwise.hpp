@@ -14,6 +14,8 @@ namespace otter {
 
 Tensor eltwise_add_pack4(const Tensor& src1, const Tensor& src2);
 
+Tensor eltwise_add_pack8(const Tensor& src1, const Tensor& src2);
+
 }   // end namespace otter
 
 #endif /* TensorEltwise_hpp */

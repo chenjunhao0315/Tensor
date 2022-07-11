@@ -251,6 +251,31 @@ static void crop_pack4_sse(const Tensor& src_, Tensor& dst_, int top, int left) 
         ptr += (left + right) * 4;
     }
 }
+#if __AVX__
+static void crop_pack8_avx(const Tensor& src_, Tensor& dst_, int top, int left)
+{
+    auto src = (src_.dim() == 1) ? src_.unsqueeze(0) : src_;
+    auto dst = (dst_.dim() == 1) ? dst_.unsqueeze(0) : dst_;
+    
+    int w = dst.size(1);
+    int h = dst.size(0);
+    int right = src.size(1) - dst.size(1) - left;
+
+    const float* ptr = (const float*)src[top].data_ptr() + left * 8;
+    float* outptr = (float*)dst.data_ptr();
+
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            __m256 _p = _mm256_loadu_ps(ptr);
+            _mm256_storeu_ps(outptr, _p);
+            ptr += 8;
+            outptr += 8;
+        }
+
+        ptr += (left + right) * 8;
+    }
+}
+#endif // __AVX__
 
 Tensor& crop_x86_(const Tensor& input, IntArrayRef border, Tensor& output) {
     int elempack = input.elempack();
@@ -258,6 +283,134 @@ Tensor& crop_x86_(const Tensor& input, IntArrayRef border, Tensor& output) {
     ScalarType dtype = input.scalar_type();
     
     auto output_shape = resolve_roi(input.shape(), border);
+    
+    if (elempack == 8) {
+        if (dims == 1) {
+            int w = input.size(0);
+            int outw = output_shape[0];
+            int woffset = border[0];
+            
+            int out_elempack = outw % 8 == 1 ? 8 : outw % 4 == 0 ? 4 : 1;
+            
+            if (outw / out_elempack == w && out_elempack == 4) {
+                output = input;
+                
+                return output;
+            }
+            
+            if (woffset % 8 == 0 && out_elempack == 8) {
+                output = otter::empty({outw / out_elempack}, otter::get_update_scalarType(dtype, out_elempack));
+
+                crop_pack8_avx(input, output, 0, woffset / elempack);
+
+                return output;
+            }
+        } else if (dims == 2) {
+            int h = input.size(0);
+            int w = input.size(1);
+            int outh = output_shape[0];
+            int outw = output_shape[1];
+            int hoffset = border[2];
+            int woffset = border[0];
+            
+            int out_elempack = outh % 8 == 0 ? 8 : outh % 4 == 0 ? 4 : 1;
+            
+            if (outw == w && outh / out_elempack == h && out_elempack == 4) {
+                output = input;
+                
+                return output;
+            }
+            
+            if (hoffset % 8 == 0 && out_elempack == 8) {
+                output = otter::empty({outh / out_elempack, outw}, otter::get_update_scalarType(dtype, out_elempack));
+
+                crop_pack8_avx(input, output, hoffset / elempack, woffset);
+
+                return output;
+            }
+        } else if (dims == 3) {
+            int channels = input.size(0);
+            int h = input.size(1);
+            int w = input.size(2);
+            int outc = output_shape[0];
+            int outh = output_shape[1];
+            int outw = output_shape[2];
+            
+            int woffset = border[0];
+            int hoffset = border[2];
+            int coffset = (border.size() > 4) ? border[4] : 0;
+            
+            int out_elempack = outc % 8 == 0 ? 8 : outc % 4 == 0 ? 4 : 1;
+
+            if (outw == w && outh == h && outc / out_elempack == channels && out_elempack == 8) {
+                output = input;
+                
+                return output;
+            }
+
+            if (coffset % 8 == 0 && out_elempack == 8) {
+                const Tensor bottom_blob_sliced = otter::native::slice(input, 0, coffset, coffset + outc, 1);
+                
+                if (outw == w && outh == h) {
+                    output = bottom_blob_sliced.clone();
+                }
+                
+                output = otter::empty({outc / out_elempack, outh, outw}, otter::get_update_scalarType(dtype, out_elempack));
+
+                otter::parallel_for(0, outc / out_elempack, 0, [&](int64_t begin, int64_t end) {
+                    for (const auto q : otter::irange(begin, end)) {
+                        const auto m = bottom_blob_sliced[q];
+                        auto borderm = output[q];
+
+                        crop_pack8_avx(m, borderm, hoffset, woffset);
+                    }
+                });
+
+                return output;
+            }
+        } else if (dims == 4) {
+            int b = input.size(0);
+            int channels = input.size(1);
+            int h = input.size(2);
+            int w = input.size(3);
+            int outb = output_shape[0];
+            int outc = output_shape[1];
+            int outh = output_shape[2];
+            int outw = output_shape[3];
+            
+            int woffset = border[0];
+            int hoffset = border[2];
+            int coffset = (border.size() > 4) ? border[4] : 0;
+            int boffset = (border.size() > 6) ? border[6] : 0;
+            
+            int out_elempack = outc % 8 == 0 ? 8 : outc % 4 == 0 ? 4 : 1;
+
+            if (outw == w && outh == h && outb == b && outc / out_elempack == channels && out_elempack == 8) {
+                output = input;
+                
+                return output;
+            }
+            
+            output = otter::empty({outb, outc / out_elempack, outh, outw}, otter::get_update_scalarType(dtype, out_elempack));
+
+            if (coffset % 8 == 0 && out_elempack == 8) {
+                for (const auto q : otter::irange(boffset, boffset + outb)) {
+                    const auto bottom_blob_sliced = otter::native::slice(input[q], 0, coffset, coffset + outc, 1);
+                    auto output_sliced = output[q];
+                    otter::parallel_for(0, outc / out_elempack, 0, [&](int64_t begin, int64_t end) {
+                        for (const auto c : otter::irange(begin, end)) {
+                            const auto m = bottom_blob_sliced[c];
+                            auto borderm = output_sliced[c];
+
+                            crop_pack8_avx(m, borderm, hoffset, woffset);
+                        }
+                    });
+                }
+
+                return output;
+            }
+        }
+    }
     
     if (elempack == 4) {
         if (dims == 1) {
@@ -288,7 +441,7 @@ Tensor& crop_x86_(const Tensor& input, IntArrayRef border, Tensor& output) {
             int hoffset = border[2];
             int woffset = border[0];
             
-            int out_elempack = outw % 4 == 0 ? 4 : 1;
+            int out_elempack = outh % 4 == 0 ? 4 : 1;
             
             if (outw == w && outh / out_elempack == h && out_elempack == 4) {
                 output = input;

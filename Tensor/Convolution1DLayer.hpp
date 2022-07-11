@@ -1,21 +1,21 @@
 //
-//  InnerProductLayer.hpp
+//  Convolution1DLayer.hpp
 //  Tensor
 //
-//  Created by 陳均豪 on 2022/7/7.
+//  Created by 陳均豪 on 2022/7/11.
 //
 
-#ifndef InnerProductLayer_hpp
-#define InnerProductLayer_hpp
+#ifndef Convolution1D1DLayer_hpp
+#define Convolution1D1DLayer_hpp
 
 #include "Layer.hpp"
 
 namespace otter {
 
-class InnerProductLayer : public Layer {
+class Convolution1DLayer : public Layer {
 public:
-    InnerProductLayer();
-    ~InnerProductLayer();
+    ~Convolution1DLayer();
+    Convolution1DLayer();
     
     virtual int parse_param(LayerOption& option, ParamDict& pd);
     
@@ -31,10 +31,17 @@ public:
     
     virtual int forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
     
-    virtual std::string type() const { return "InnerProduct"; }
-private:
-    int out_features;
-    int in_features;
+    virtual std::string type() const { return "Convolution1D"; }
+public:
+    int in_channels;
+    int out_channels;
+    int kernel_w;
+    int stride_w;
+    int padding_w;
+    int dilation_w;
+    
+    int groups;
+    
     int bias_term;
     
     int activation_type;
@@ -42,19 +49,24 @@ private:
     Tensor activation_params;
     
     Tensor weight_data;
+    Tensor weight_data_packed;
     Tensor bias_data;
     
-    Tensor weight_data_tm;
 };
 
-enum class InnerProductParam : int {
-    OutFeatures,
-    InFeatures,
+enum class Conv1DParam : int {
+    In_channels,
+    Out_channels,
+    Kernel_width,
+    Stride_width,
+    Padding_width,
+    Dilation_width,
+    Groups,
     Bias_term,
     Activation_type,
     Activation_params
 };
 
-}   // end namespace otter
+}
 
-#endif /* InnerProductLayer_hpp */
+#endif /* Convolution1DLayer_hpp */

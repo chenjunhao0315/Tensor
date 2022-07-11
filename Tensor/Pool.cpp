@@ -912,7 +912,256 @@ Tensor max_pool2d_3x3s2_pack4_x86(const Tensor& self, IntArrayRef padding) {
     
     return output;
 }
-#endif
+#if __AVX__
+
+Tensor max_pool2d_2x2s2_pack8_avx(const Tensor& bottom_blob, IntArrayRef padding) {
+    Tensor input = otter::constant_pad(bottom_blob, {padding[1], padding[1], padding[0], padding[0]}, 0);
+    
+    int64_t w = input.size(3);
+    int64_t h = input.size(2);
+
+    int64_t outw = (w - 2) / 2 + 1;
+    int64_t outh = (h - 2) / 2 + 1;
+    
+    int64_t inch = input.size(1);
+    
+    Tensor output = otter::empty({1, inch, outh, outw}, otter::ScalarType::Float8);
+
+    const int tailstep = (w - 2 * outw + w) * 8;
+    
+    auto input_a = input.accessor<float, 4, 8>()[0];
+    auto output_a = output.accessor<float, 4, 8>()[0];
+
+    otter::parallel_for(0, inch, 0, [&](int64_t begin, int64_t end) {
+        for (const auto q : otter::irange(begin, end)) {
+            const auto img0 = input_a[q];
+            float* outptr = output_a[q].data();
+
+            const float* r0 = img0[0].data();
+            const float* r1 = img0[1].data();
+
+            for (int i = 0; i < outh; i++) {
+                int j = 0;
+
+                for (; j < outw; j++) {
+                    __m256 _r00 = _mm256_loadu_ps(r0);
+                    __m256 _r01 = _mm256_loadu_ps(r0 + 8);
+                    __m256 _r10 = _mm256_loadu_ps(r1);
+                    __m256 _r11 = _mm256_loadu_ps(r1 + 8);
+
+                    __m256 _max0 = _mm256_max_ps(_r00, _r01);
+                    __m256 _max1 = _mm256_max_ps(_r10, _r11);
+                    __m256 _max = _mm256_max_ps(_max0, _max1);
+
+                    _mm256_storeu_ps(outptr, _max);
+
+                    r0 += 16;
+                    r1 += 16;
+                    outptr += 8;
+                }
+
+                r0 += tailstep;
+                r1 += tailstep;
+            }
+        }
+    });
+    
+    return output;
+}
+
+Tensor max_pool2d_3x3s2_pack8_avx(const Tensor& bottom_blob, IntArrayRef padding)
+{
+    Tensor input = otter::constant_pad(bottom_blob, {padding[1], padding[1], padding[0], padding[0]}, 0);
+    
+    int64_t w = input.size(3);
+    int64_t h = input.size(2);
+
+    int64_t outw = (w - 3) / 2 + 1;
+    int64_t outh = (h - 3) / 2 + 1;
+    
+    int64_t inch = input.size(1);
+    
+    Tensor output = otter::empty({1, inch, outh, outw}, otter::ScalarType::Float8);
+
+    const int tailstep = (w - 2 * outw + w) * 8;
+    
+    auto input_a = input.accessor<float, 4, 8>()[0];
+    auto output_a = output.accessor<float, 4, 8>()[0];
+
+    otter::parallel_for(0, inch, 0, [&](int64_t begin, int64_t end) {
+        for (const auto q : otter::irange(begin, end)) {
+            const auto img0 = input_a[q];
+            float* outptr = output_a[q].data();
+
+            const float* r0 = img0[0].data();
+            const float* r1 = img0[1].data();
+            const float* r2 = img0[2].data();
+            for (int i = 0; i < outh; i++)
+            {
+                int j = 0;
+                for (; j + 3 < outw; j += 4)
+                {
+                    __m256 _r00 = _mm256_loadu_ps(r0);
+                    __m256 _r01 = _mm256_loadu_ps(r0 + 8);
+                    __m256 _r02 = _mm256_loadu_ps(r0 + 16);
+                    __m256 _r10 = _mm256_loadu_ps(r1);
+                    __m256 _r11 = _mm256_loadu_ps(r1 + 8);
+                    __m256 _r12 = _mm256_loadu_ps(r1 + 16);
+                    __m256 _r20 = _mm256_loadu_ps(r2);
+                    __m256 _r21 = _mm256_loadu_ps(r2 + 8);
+                    __m256 _r22 = _mm256_loadu_ps(r2 + 16);
+
+                    __m256 _max00 = _mm256_max_ps(_r00, _r01);
+                    _max00 = _mm256_max_ps(_max00, _r02);
+                    _max00 = _mm256_max_ps(_max00, _r10);
+                    _max00 = _mm256_max_ps(_max00, _r11);
+                    __m256 _max01 = _mm256_max_ps(_r12, _r20);
+                    _max01 = _mm256_max_ps(_max01, _r21);
+                    _max01 = _mm256_max_ps(_max01, _r22);
+
+                    __m256 _r03 = _mm256_loadu_ps(r0 + 24);
+                    __m256 _r04 = _mm256_loadu_ps(r0 + 32);
+                    __m256 _r13 = _mm256_loadu_ps(r1 + 24);
+                    __m256 _r14 = _mm256_loadu_ps(r1 + 32);
+                    __m256 _r23 = _mm256_loadu_ps(r2 + 24);
+                    __m256 _r24 = _mm256_loadu_ps(r2 + 32);
+
+                    _mm256_storeu_ps(outptr, _mm256_max_ps(_max00, _max01));
+
+                    __m256 _max10 = _mm256_max_ps(_r03, _r04);
+                    _max10 = _mm256_max_ps(_max10, _r02);
+                    _max10 = _mm256_max_ps(_max10, _r13);
+                    _max10 = _mm256_max_ps(_max10, _r14);
+                    __m256 _max11 = _mm256_max_ps(_r12, _r23);
+                    _max10 = _mm256_max_ps(_max10, _r24);
+                    _max10 = _mm256_max_ps(_max10, _r22);
+
+                    __m256 _r05 = _mm256_loadu_ps(r0 + 40);
+                    __m256 _r06 = _mm256_loadu_ps(r0 + 48);
+                    __m256 _r15 = _mm256_loadu_ps(r1 + 40);
+                    __m256 _r16 = _mm256_loadu_ps(r1 + 48);
+                    __m256 _r25 = _mm256_loadu_ps(r2 + 40);
+                    __m256 _r26 = _mm256_loadu_ps(r2 + 48);
+
+                    _mm256_storeu_ps(outptr + 8, _mm256_max_ps(_max10, _max11));
+
+                    __m256 _max20 = _mm256_max_ps(_r05, _r06);
+                    _max20 = _mm256_max_ps(_max20, _r04);
+                    _max20 = _mm256_max_ps(_max20, _r15);
+                    _max20 = _mm256_max_ps(_max20, _r16);
+                    __m256 _max21 = _mm256_max_ps(_r14, _r25);
+                    _max20 = _mm256_max_ps(_max20, _r26);
+                    _max20 = _mm256_max_ps(_max20, _r24);
+
+                    __m256 _r07 = _mm256_loadu_ps(r0 + 56);
+                    __m256 _r08 = _mm256_loadu_ps(r0 + 64);
+                    __m256 _r17 = _mm256_loadu_ps(r1 + 56);
+                    __m256 _r18 = _mm256_loadu_ps(r1 + 64);
+                    __m256 _r27 = _mm256_loadu_ps(r2 + 56);
+                    __m256 _r28 = _mm256_loadu_ps(r2 + 64);
+
+                    _mm256_storeu_ps(outptr + 16, _mm256_max_ps(_max20, _max21));
+
+                    __m256 _max30 = _mm256_max_ps(_r07, _r08);
+                    _max30 = _mm256_max_ps(_max30, _r06);
+                    _max30 = _mm256_max_ps(_max30, _r17);
+                    _max30 = _mm256_max_ps(_max30, _r18);
+                    __m256 _max31 = _mm256_max_ps(_r16, _r27);
+                    _max30 = _mm256_max_ps(_max30, _r28);
+                    _max30 = _mm256_max_ps(_max30, _r26);
+
+                    _mm256_storeu_ps(outptr + 24, _mm256_max_ps(_max30, _max31));
+
+                    r0 += 64;
+                    r1 += 64;
+                    r2 += 64;
+                    outptr += 32;
+                }
+                for (; j + 1 < outw; j += 2)
+                {
+                    __m256 _r00 = _mm256_loadu_ps(r0);
+                    __m256 _r01 = _mm256_loadu_ps(r0 + 8);
+                    __m256 _r02 = _mm256_loadu_ps(r0 + 16);
+                    __m256 _r10 = _mm256_loadu_ps(r1);
+                    __m256 _r11 = _mm256_loadu_ps(r1 + 8);
+                    __m256 _r12 = _mm256_loadu_ps(r1 + 16);
+                    __m256 _r20 = _mm256_loadu_ps(r2);
+                    __m256 _r21 = _mm256_loadu_ps(r2 + 8);
+                    __m256 _r22 = _mm256_loadu_ps(r2 + 16);
+
+                    __m256 _max00 = _mm256_max_ps(_r00, _r01);
+                    _max00 = _mm256_max_ps(_max00, _r02);
+                    _max00 = _mm256_max_ps(_max00, _r10);
+                    _max00 = _mm256_max_ps(_max00, _r11);
+                    __m256 _max01 = _mm256_max_ps(_r12, _r20);
+                    _max01 = _mm256_max_ps(_max01, _r21);
+                    _max01 = _mm256_max_ps(_max01, _r22);
+
+                    __m256 _r03 = _mm256_loadu_ps(r0 + 24);
+                    __m256 _r04 = _mm256_loadu_ps(r0 + 32);
+                    __m256 _r13 = _mm256_loadu_ps(r1 + 24);
+                    __m256 _r14 = _mm256_loadu_ps(r1 + 32);
+                    __m256 _r23 = _mm256_loadu_ps(r2 + 24);
+                    __m256 _r24 = _mm256_loadu_ps(r2 + 32);
+
+                    _mm256_storeu_ps(outptr, _mm256_max_ps(_max00, _max01));
+
+                    __m256 _max10 = _mm256_max_ps(_r03, _r04);
+                    _max10 = _mm256_max_ps(_max10, _r02);
+                    _max10 = _mm256_max_ps(_max10, _r13);
+                    _max10 = _mm256_max_ps(_max10, _r14);
+                    __m256 _max11 = _mm256_max_ps(_r12, _r23);
+                    _max10 = _mm256_max_ps(_max10, _r24);
+                    _max10 = _mm256_max_ps(_max10, _r22);
+
+                    _mm256_storeu_ps(outptr + 8, _mm256_max_ps(_max10, _max11));
+
+                    r0 += 32;
+                    r1 += 32;
+                    r2 += 32;
+                    outptr += 16;
+                }
+
+                for (; j < outw; j++)
+                {
+                    __m256 _r00 = _mm256_loadu_ps(r0);
+                    __m256 _r01 = _mm256_loadu_ps(r0 + 8);
+                    __m256 _r02 = _mm256_loadu_ps(r0 + 16);
+                    __m256 _r10 = _mm256_loadu_ps(r1);
+                    __m256 _r11 = _mm256_loadu_ps(r1 + 8);
+                    __m256 _r12 = _mm256_loadu_ps(r1 + 16);
+                    __m256 _r20 = _mm256_loadu_ps(r2);
+                    __m256 _r21 = _mm256_loadu_ps(r2 + 8);
+                    __m256 _r22 = _mm256_loadu_ps(r2 + 16);
+
+                    __m256 _max0 = _mm256_max_ps(_r00, _r01);
+                    _max0 = _mm256_max_ps(_max0, _r02);
+                    _max0 = _mm256_max_ps(_max0, _r10);
+                    _max0 = _mm256_max_ps(_max0, _r11);
+                    __m256 _max1 = _mm256_max_ps(_r12, _r20);
+                    _max1 = _mm256_max_ps(_max1, _r21);
+                    _max1 = _mm256_max_ps(_max1, _r22);
+
+                    _mm256_storeu_ps(outptr, _mm256_max_ps(_max0, _max1));
+
+                    r0 += 16;
+                    r1 += 16;
+                    r2 += 16;
+                    outptr += 8;
+                }
+
+                r0 += tailstep;
+                r1 += tailstep;
+                r2 += tailstep;
+            }
+        }
+    });
+    
+    return output;
+}
+
+#endif  // __AVX__
+#endif  // __SSE2__
 
 Tensor max_pool2d(const Tensor& self, IntArrayRef kernel_size, IntArrayRef stride, IntArrayRef padding, IntArrayRef dilation, bool ceil_mode) {
     Tensor output;
@@ -937,12 +1186,19 @@ Tensor max_pool2d(const Tensor& self, IntArrayRef kernel_size, IntArrayRef strid
     }
 #elif __SSE2__
     if (self.elempack() != 1) {
+#if __AVX__
+        if (!ceil_mode && dilation[0] == 1 && dilation[1] == 1 && kernel_size[0] == 3 && kernel_size[1] == 3 && stride[0] == 2 && stride[1] == 2 && self.scalar_type() == otter::ScalarType::Float8) {
+            return max_pool2d_3x3s2_pack8_avx(self, padding);
+        } else if (!ceil_mode && dilation[0] == 1 && dilation[1] == 1 && kernel_size[0] == 3 && kernel_size[1] == 3 && stride[0] == 2 && stride[1] == 2 && self.scalar_type() == otter::ScalarType::Float8) {
+            return max_pool2d_2x2s2_pack8_avx(self, padding);
+        }
+#endif
         if (!ceil_mode && dilation[0] == 1 && dilation[1] == 1 && kernel_size[0] == 3 && kernel_size[1] == 3 && stride[0] == 2 && stride[1] == 2 && self.scalar_type() == otter::ScalarType::Float4) {
             return max_pool2d_3x3s2_pack4_x86(self, padding);
-        } else if (!ceil_mode && dilation[0] == 1 && dilation[1] == 1 && kernel_size[0] == 3 && kernel_size[1] == 3 && stride[0] == 2 && stride[1] == 2 && self.scalar_type() == otter::ScalarType::Float4) {
+        } else if (!ceil_mode && dilation[0] == 1 && dilation[1] == 1 && kernel_size[0] == 2 && kernel_size[1] == 2 && stride[0] == 2 && stride[1] == 2 && self.scalar_type() == otter::ScalarType::Float4) {
             return max_pool2d_2x2s2_pack4_x86(self, padding);
         }
-        return max_pool2d(self.packing(1), kernel_size, stride, padding, dilation, ceil_mode);
+        return max_pool2d(self.packing(1), kernel_size, stride, padding, dilation, ceil_mode).packing(self.elempack());
     } else {
         auto output_and_indices = otter::native::max_pool2d_with_indices(self, kernel_size, stride, padding, dilation, ceil_mode);
         output = std::get<0>(output_and_indices);

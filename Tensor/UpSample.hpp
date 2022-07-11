@@ -157,6 +157,42 @@ static inline void compute_source_index_and_lambda(
     }
 }
 
+// Based on
+// https://en.wikipedia.org/wiki/Bicubic_interpolation#Bicubic_convolution_algorithm
+template <typename scalar_t>
+static inline scalar_t cubic_convolution1(scalar_t x, scalar_t A) {
+  return ((A + 2) * x - (A + 3)) * x * x + 1;
+}
+template <typename scalar_t>
+static inline scalar_t cubic_convolution2(scalar_t x, scalar_t A) {
+  return ((A * x - 5 * A) * x + 8 * A) * x - 4 * A;
+}
+template <typename scalar_t>
+static inline void get_cubic_upsample_coefficients(
+    scalar_t coeffs[4],
+    scalar_t t) {
+  scalar_t A = -0.75;
+  scalar_t x1 = t;
+  coeffs[0] = cubic_convolution2<scalar_t>(x1 + 1.0, A);
+  coeffs[1] = cubic_convolution1<scalar_t>(x1, A);
+  // opposite coefficients
+  scalar_t x2 = 1.0 - t;
+  coeffs[2] = cubic_convolution1<scalar_t>(x2, A);
+  coeffs[3] = cubic_convolution2<scalar_t>(x2 + 1.0, A);
+}
+
+template <typename scalar_t>
+static inline scalar_t cubic_interp1d(
+    scalar_t x0,
+    scalar_t x1,
+    scalar_t x2,
+    scalar_t x3,
+    scalar_t t) {
+  scalar_t coeffs[4];
+  get_cubic_upsample_coefficients<scalar_t>(coeffs, t);
+  return x0 * coeffs[0] + x1 * coeffs[1] + x2 * coeffs[2] + x3 * coeffs[3];
+}
+
 }   // end namespace otter
 
 #endif /* UpSample_hpp */

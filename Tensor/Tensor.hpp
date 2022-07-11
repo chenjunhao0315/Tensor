@@ -155,6 +155,8 @@ public:
     Tensor squeeze(int64_t dim) const;
     Tensor& squeeze_(int64_t dim) const;
     
+    Tensor flatten(int64_t start_dim = 0, int64_t end_dim = -1) const;
+    
     Tensor narrow(int64_t dim, int64_t start, int64_t length) const;
     
     Tensor unfold(int64_t dim, int64_t size, int64_t step) const;
@@ -356,6 +358,10 @@ public:
     
     Tensor softmax(int64_t dim, ScalarType dtype = ScalarType::Undefined) const;
     
+    ::std::tuple<Tensor, Tensor> sort(int64_t dim = -1, bool descending = false) const;
+    ::std::tuple<Tensor, Tensor> sort(bool stable, int64_t dim = -1, bool descending = false) const;
+    
+    ::std::tuple<Tensor, Tensor> topk(int64_t k, int64_t dim = -1, bool largest = true, bool sorted = true) const;
 };
 
 template <typename T, typename... Args>

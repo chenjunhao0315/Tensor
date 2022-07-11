@@ -129,6 +129,11 @@ void TensorIterator::compute_mem_overlaps(const TensorIteratorConfig& config) {
 }
 
 void TensorIterator::compute_shape(const TensorIteratorConfig& config) {
+    if (!config.static_shape_.empty()) {
+        shape_ = config.static_shape_;
+        return;
+    }
+    
     all_ops_same_shape_ = true;
     has_scalars_ = false;
     has_tensors_ = false;
@@ -225,8 +230,8 @@ void TensorIterator::compute_types(const TensorIteratorConfig &config) {
     }
     
     OTTER_INTERNAL_ASSERT(!(has_different_input_dtypes && !config.promote_inputs_to_common_dtype_ &&
-             (has_undefined_outputs || config.enforce_safe_casting_to_output_ ||
-              config.cast_common_dtype_to_outputs_)));
+                            (has_undefined_outputs || config.enforce_safe_casting_to_output_ ||
+                             config.cast_common_dtype_to_outputs_)));
     
     if (config.check_all_same_dtype_ &&
         (has_different_input_dtypes || has_different_output_dtypes ||
@@ -758,6 +763,26 @@ TensorIteratorConfig& TensorIteratorConfig::declare_static_dtype(ScalarType dtyp
 
 TensorIteratorConfig& TensorIteratorConfig::declare_static_device(Device device) {
     static_device_ = device;
+    return *this;
+}
+
+TensorIteratorConfig& TensorIteratorConfig::declare_static_shape(IntArrayRef shape) {
+    // WARNING:
+    //   This will bypass all shape checking in the TensorIterator. Kernels which call this method
+    //   are expected to check shapes before calling `add_owned_input` or `add_owned_output`.
+    OTTER_CHECK(!resize_outputs_, "resize_outputs() must be called before declare_static_shape(...)")
+    static_shape_ = DimVector(shape);
+    return *this;
+}
+
+TensorIteratorConfig& TensorIteratorConfig::declare_static_shape(IntArrayRef shape, IntArrayRef squash_dims) {
+    declare_static_shape(shape);
+    if (!static_shape_.size()) return *this;
+    for (const auto& squash_dim : squash_dims) {
+        OTTER_CHECK(squash_dim >= 0 && squash_dim < static_cast<int64_t>(static_shape_.size()),
+                    "squash_dim ", squash_dim, " must be in [0, ", static_shape_.size(), ").");
+        (static_shape_)[squash_dim] = 1;
+    }
     return *this;
 }
 

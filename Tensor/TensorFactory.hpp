@@ -49,6 +49,8 @@ Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, ScalarTyp
 
 Tensor range(const Scalar& start, const Scalar& end, const Scalar& step, ScalarType dtype);
 
+Tensor arange(const Scalar& start, const Scalar& end, const Scalar& step, ScalarType dtype);
+
 Tensor rand(IntArrayRef size, ScalarType dtype);
 Tensor rand(IntArrayRef size, TensorOptions options);
 Tensor rand_like(IntArrayRef size, ScalarType dtype);

@@ -145,6 +145,10 @@ Tensor& Tensor::squeeze_(int64_t dim) const {
     return otter::native::squeeze_(const_cast<Tensor&>(*this), dim);
 }
 
+Tensor Tensor::flatten(int64_t start_dim, int64_t end_dim) const {
+    return otter::native::flatten(*this, start_dim, end_dim);
+}
+
 Tensor Tensor::narrow(int64_t dim, int64_t start, int64_t length) const {
     return otter::native::narrow(*this, dim, start, length);
 }
@@ -515,6 +519,18 @@ Tensor Tensor::softmax(int64_t dim, ScalarType dtype) const {
     if (dtype != ScalarType::Undefined)
         return otter::native::_softmax(this->to(dtype), dim, false);
     return otter::native::_softmax(*this, dim, false);
+}
+
+::std::tuple<Tensor, Tensor> Tensor::sort(int64_t dim, bool descending) const {
+    return otter::native::sort(*this, false, dim, descending);
+}
+
+::std::tuple<Tensor, Tensor> Tensor::sort(bool stable, int64_t dim, bool descending) const {
+    return otter::native::sort(*this, stable, dim, descending);
+}
+
+::std::tuple<Tensor, Tensor> Tensor::topk(int64_t k, int64_t dim, bool largest, bool sorted) const {
+    return otter::native::topk(*this, k, dim, largest, sorted);
 }
 
 #define DEFINE_ITEM(T, name)      \

@@ -385,7 +385,7 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
     
 #if __SSE2__
     if (opt.use_packing_layout) {
-#if false
+#if __AVX__
         elempack = in_channels % 8 == 0 ? 8 : in_channels % 4 == 0 ? 4 : 1;
         out_elempack = out_channels % 8 == 0 ? 8 : out_channels % 4 == 0 ? 4 : 1;
 #else
@@ -467,7 +467,7 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
     
     if (opt.use_packing_layout) {
 #if __SSE2__
-#if false
+#if __AVX__
         out_elempack = out_channels % 8 == 0 ? 8 : out_channels % 4 == 0 ? 4 : 1;
 #else
         out_elempack = out_channels % 4 == 0 ? 4 : 1;

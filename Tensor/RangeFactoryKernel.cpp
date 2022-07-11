@@ -35,6 +35,29 @@ void linspace_kernel(TensorIterator& iter, const Scalar& scalar_start, const Sca
     });
 }
 
+void arange_kernel(TensorIterator& iter, const Scalar& scalar_start, const Scalar& scalar_steps, const Scalar& scalar_step) {
+    OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "arange_cpu", [&]() {
+        auto start = scalar_start.to<scalar_t>();
+        auto steps = scalar_steps.to<scalar_t>();
+        auto step = scalar_step.to<scalar_t>();
+        otter::parallel_for(0, steps, otter::GRAIN_SIZE, [&](int64_t p_begin, int64_t p_end) {
+            int64_t idx(p_begin);
+            TensorIterator it(iter);
+            cpu_serial_kernel_vec(it,
+                [start, step, &idx]() -> scalar_t {
+                    return start + step * (idx++);
+                },
+                [start, step, &idx]() -> Vectorized<scalar_t> {
+                    Vectorized<scalar_t> res;
+                    res = Vectorized<scalar_t>::arange(start + step * idx, step);
+                    idx += Vectorized<scalar_t>::size();
+                    return res;
+            }, {p_begin, p_end});
+        });
+    });
+}
+
+REGISTER_DISPATCH(arange_stub, &arange_kernel);
 REGISTER_DISPATCH(linspace_stub, &linspace_kernel);
 
 }

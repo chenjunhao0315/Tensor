@@ -59,7 +59,21 @@ int ShortCutLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<
     
     ShortCutBackend backend = shortcut_check_and_select_backend(bottom_blob, bottom_blob_next);
     
-    if (elempack1 == 4 || elempack2 == 4) {
+    if (elempack1 == 8 || elempack2 == 8) {
+        if (backend == ShortCutBackend::Eltwise_add) {
+            if (bottom_blob.dim() == 4 && bottom_blob.size(0) == 1 && bottom_blob_next.dim() == 4 && bottom_blob_next.size(0) == 1) {
+                output = eltwise_add_pack8(bottom_blob.squeeze(0), bottom_blob_next.squeeze(0)).unsqueeze_(0);
+            } else {
+                if (bottom_blob.dim() > 4 || bottom_blob_next.dim() > 4) {
+                    output = bottom_blob.packing(1) + bottom_blob_next.packing(1);
+                } else {
+                    output = eltwise_add_pack8(bottom_blob, bottom_blob_next);
+                }
+            }
+        }
+        
+        return 0;
+    } else if (elempack1 == 4 || elempack2 == 4) {
         if (backend == ShortCutBackend::Eltwise_add) {
             if (bottom_blob.dim() == 4 && bottom_blob.size(0) == 1 && bottom_blob_next.dim() == 4 && bottom_blob_next.size(0) == 1) {
                 output = eltwise_add_pack4(bottom_blob.squeeze(0), bottom_blob_next.squeeze(0)).unsqueeze_(0);
