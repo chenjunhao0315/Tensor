@@ -32,6 +32,13 @@ struct alignas(sizeof(T) * 16) elempack16 {
 };
 
 template <typename T>
+struct alignas(sizeof(T) * 32) elempack32 {
+    using value_type = T;
+    
+    T values[32] = {0};
+};
+
+template <typename T>
 struct alignas(sizeof(T) * 64) elempack64 {
     using value_type = T;
     

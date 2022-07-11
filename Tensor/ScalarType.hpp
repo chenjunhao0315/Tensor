@@ -56,6 +56,9 @@ _(elempack8<float>, Float8)         \
 _(elempack16<signed char>, Byte16)    \
 _(elempack16<int>, Int16)             \
 _(elempack16<float>, Float16)         \
+_(elempack32<signed char>, Byte32)    \
+_(elempack32<int>, Int32)             \
+_(elempack32<float>, Float32)         \
 _(elempack64<signed char>, Byte64)    \
 _(elempack64<int>, Int64)             \
 _(elempack64<float>, Float64)         \

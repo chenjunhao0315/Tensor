@@ -161,6 +161,22 @@ struct structured_sort_stable : public TensorIterator {
     void meta(const Tensor & self, bool stable, int64_t dim, bool descending);
 };
 
+
+struct structured_scatter_src : public TensorIterator {
+    void meta(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src);
+};
+
+struct structured_scatter_value : public TensorIterator {
+    void meta(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value);
+};
+
+struct structured_scatter_reduce : public TensorIterator {
+    void meta(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce);
+};
+struct structured_scatter_value_reduce : public TensorIterator {
+    void meta(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce);
+};
+
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override { \
@@ -355,6 +371,22 @@ struct structured_sort_stable_out : public structured_sort_stable {
 
 struct structured_topk_out_cpu : public structured_topk {
     void impl(const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted, Tensor & values,  Tensor & indices);
+};
+
+struct structured_scatter_src_out : public structured_scatter_src {
+    void impl(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, const Tensor & out);
+};
+
+struct structured_scatter_value_out : public structured_scatter_value {
+    void impl(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, const Tensor & out);
+};
+
+struct structured_scatter_reduce_out : public structured_scatter_reduce {
+    void impl(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce, const Tensor & out);
+};
+
+struct structured_scatter_value_reduce_out : public structured_scatter_value_reduce {
+    void impl(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce, const Tensor & out);
 };
 
 namespace native {

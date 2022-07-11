@@ -108,9 +108,8 @@ int Convolution1DLayer::parse_param(LayerOption& option, ParamDict& pd) {
 
 int Convolution1DLayer::compute_output_shape(ParamDict& pd) {
     auto shape_a = bottom_shapes[0].accessor<int, 2>()[0];
-    int input_batch    = shape_a[0];
-    int input_channels = shape_a[1];
-    int input_length   = shape_a[2];
+    int input_channels = shape_a[0];
+    int input_length   = shape_a[1];
     int out_channels    = pd.get((int)Conv1DParam::Out_channels, 1);
     int kernel_w    = pd.get((int)Conv1DParam::Kernel_width, 3);
     int stride_w    = pd.get((int)Conv1DParam::Stride_width,  1);
@@ -120,7 +119,7 @@ int Convolution1DLayer::compute_output_shape(ParamDict& pd) {
     int out_length  = (input_length + 2 * padding_w - dilation_w * (kernel_w - 1) - 1) / stride_w + 1;
     
     pd.set((int)Conv1DParam::In_channels, input_channels);
-    pd.set(OUTPUT_SHAPE_HINT, otter::tensor({input_batch, out_channels, out_length}, ScalarType::Int).view({1, -1}));
+    pd.set(OUTPUT_SHAPE_HINT, otter::tensor({out_channels, out_length}, ScalarType::Int).view({1, -1}));
     
     return 0;
 }
@@ -133,6 +132,7 @@ int Convolution1DLayer::load_param(const ParamDict &pd) {
     padding_w   = pd.get((int)Conv1DParam::Padding_width,  0);
     dilation_w  = pd.get((int)Conv1DParam::Dilation_width,  1);
     bias_term = pd.get((int)Conv1DParam::Bias_term, 0);
+    groups = pd.get((int)Conv1DParam::Groups, 1);
     activation_type = pd.get((int)Conv1DParam::Activation_type, 0);
     activation_params = pd.get((int)Conv1DParam::Activation_params, Tensor());
     

@@ -415,7 +415,7 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
         if (elempack == 8)
         {
             otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
-                for (int q = 0; q < w; q++) {
+                for (const auto q : otter::irange(begin, end)) {
                     Tensor top_blob_c = output[q];
                     __m256 _v = _mm256_load_ps((const float*)in + q * 8);
                     top_blob_c.fill_(_v);
@@ -469,7 +469,7 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
                 const float ws =  w / (float)outw;
 
                 otter::parallel_for(0, h, 0, [&](int64_t begin, int64_t end) {
-                    for (int y = 0; y < h; y++) {
+                    for (const auto y : otter::irange(begin, end)) {
                         const float* ptr = input_a[y].data();
                         float* outptr = output_a[y].data();
                         for (int x = 0; x < outw; x++)
@@ -494,7 +494,7 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
                 linear_coeffs(w, outw, xofs, alpha, align_corners);
 
                 otter::parallel_for(0, h, 0, [&](int64_t begin, int64_t end) {
-                    for (int y = 0; y < h; y++) {
+                    for (const auto y : otter::irange(begin, end)) {
                         const float* ptr = input_a[y].data();
                         float* outptr = output_a[y].data();
                         const float* alphap = alpha;
@@ -698,7 +698,7 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
                 linear_coeffs(h, outh, yofs, beta, align_corners);
 
                 otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
-                    for (int q = 0; q < channels; q++) {
+                    for (const auto q : otter::irange(begin, end)) {
                         const Tensor src = input[q];
                         Tensor dst = output[q];
 

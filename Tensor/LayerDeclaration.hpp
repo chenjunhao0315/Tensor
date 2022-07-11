@@ -34,6 +34,7 @@
 #include "ROIAlignLayer.hpp"
 #include "InnerProductLayer.hpp"
 #include "FlattenLayer.hpp"
+#include "Convolution1DLayer.hpp"
 
 namespace otter {
 
@@ -62,6 +63,7 @@ REGISTER_LAYER_CLASS(NanodetPlusDetectionOutput);
 REGISTER_LAYER_CLASS(ROIAlign);
 REGISTER_LAYER_CLASS(InnerProduct);
 REGISTER_LAYER_CLASS(Flatten);
+REGISTER_LAYER_CLASS(Convolution1D);
 
 }   // end namespace otter
 

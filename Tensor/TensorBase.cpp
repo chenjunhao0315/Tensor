@@ -133,8 +133,8 @@ bool TensorNucleus::compute_strides_like_channels_last_2d() const {
 void TensorNucleus::cal_elempack() {
     static constexpr int64_t _elempackLookup[static_cast<int>(
         ScalarType::NumOptions)] =
-    /*       sp1  iu1  iu2  ip1  iu8  fp1  fu8  bu1  sp4  ip4  fp4  sp8  ip8  fp8  sp16  ip16  fp16  sp64  ip64  fp64 */
-    /* 0 */ {  1,   1,   1,   1,   1,   1,   1,   1,   4,   4,   4,   8,   8,   8,   16,   16,   16,   64,   64,   64};
+    /*       sp1  iu1  iu2  ip1  iu8  fp1  fu8  bu1  sp4  ip4  fp4  sp8  ip8  fp8  sp16  ip16  fp16  sp32  ip32  fp32  sp64  ip64  fp64 */
+    /* 0 */ {  1,   1,   1,   1,   1,   1,   1,   1,   4,   4,   4,   8,   8,   8,   16,   16,   16,   32,   32,   32,   64,   64,   64};
     
     elempack_ =  _elempackLookup[static_cast<int>(data_type_.index())];
 }

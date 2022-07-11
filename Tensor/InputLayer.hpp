@@ -28,6 +28,7 @@ public:
     
     virtual int forward_inplace(Tensor& bottom_top_blob, const NetOption& opt) const;
 public:
+    int force_dim;
     DimVector shape;
 };
 
@@ -35,7 +36,8 @@ enum class InputParam : int {
     Batch   = 0,
     Channel = 1,
     Height  = 2,
-    Width   = 3
+    Width   = 3,
+    Dim
 };
 
 }

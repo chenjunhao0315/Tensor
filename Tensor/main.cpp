@@ -138,8 +138,6 @@ int main(int argc, const char * argv[]) {
     mask_roi_align.addLayer(otter::LayerOption{{"type", "Input"}, {"name", "roi"}, {"input", ""}, {"output", "roi"}, {"channel", "1"}, {"height", "1"}, {"width", "5"}});
     mask_roi_align.addLayer(otter::LayerOption{{"type", "ROIAlign"}, {"name", "roi_align"}, {"aligned", "1"}, {"spatial_scale", "0.25"}, {"pooled_width", "14"}, {"pooled_height", "14"}, {"input", "feature, roi"}, {"output", "roi_align"}, {"verions", "0"}});
     mask_roi_align.compile();
-
-    initialize_clock.stop_and_show("ms (initialize)");
     
     otter::Net mask_head;
     mask_head.load_otter("mask_head-opt.otter", otter::CompileMode::Inference);
@@ -149,6 +147,16 @@ int main(int argc, const char * argv[]) {
     if (ret) {
         exit(-1);
     }
+    
+    otter::Net point_rend_head;
+    point_rend_head.load_otter("point_head-opt.otter", otter::CompileMode::Inference);
+    
+    ret = point_rend_head.load_weight("point_head-opt.bin", otter::Net::WeightType::Ncnn);
+    if (ret) {
+        exit(-1);
+    }
+    
+    initialize_clock.stop_and_show("ms (initialize)");
 
     FILE *img = fopen("img.bin", "rb");
     fseek(img, 0, SEEK_END);
@@ -181,6 +189,8 @@ int main(int argc, const char * argv[]) {
     feature_extractor.extract("conv_60", fpn_2, 1);
     feature_extractor.extract("conv_61", fpn_3, 1);
     feature_extractor.extract("pool_2", fpn_4, 1);
+    
+    conv_block.stop_and_show("ms (conv block)");
 
 //    cout << fpn_0 << endl;
 
@@ -193,62 +203,66 @@ int main(int argc, const char * argv[]) {
 
     otter::Clock rpn_clock;
     std::vector<otter::Tensor> cls_scores, bbox_preds;
-    otter::Tensor rpn_0_cls, rpn_0_reg;
-    otter::Tensor rpn_1_cls, rpn_1_reg;
-    otter::Tensor rpn_2_cls, rpn_2_reg;
-    otter::Tensor rpn_3_cls, rpn_3_reg;
-    otter::Tensor rpn_4_cls, rpn_4_reg;
     {
-        auto rpn_extractor = rpn.create_extractor();
-        rpn_extractor.input("data_1", fpn_0);
+        otter::Tensor rpn_0_cls, rpn_0_reg;
+        otter::Tensor rpn_1_cls, rpn_1_reg;
+        otter::Tensor rpn_2_cls, rpn_2_reg;
+        otter::Tensor rpn_3_cls, rpn_3_reg;
+        otter::Tensor rpn_4_cls, rpn_4_reg;
+        {
+            auto rpn_extractor = rpn.create_extractor();
+            rpn_extractor.input("data_1", fpn_0);
 
-        rpn_extractor.extract("conv_3", rpn_0_cls, 0);
-        rpn_extractor.extract("conv_2", rpn_0_reg, 0);
-        cls_scores.push_back(rpn_0_cls);
-        bbox_preds.push_back(rpn_0_reg);
-    }
-    {
-        auto rpn_extractor = rpn.create_extractor();
-        rpn_extractor.input("data_1", fpn_1);
+            rpn_extractor.extract("conv_3", rpn_0_cls, 0);
+            rpn_extractor.extract("conv_2", rpn_0_reg, 0);
+            cls_scores.push_back(rpn_0_cls);
+            bbox_preds.push_back(rpn_0_reg);
+        }
+        {
+            auto rpn_extractor = rpn.create_extractor();
+            rpn_extractor.input("data_1", fpn_1);
 
-        rpn_extractor.extract("conv_3", rpn_1_cls, 0);
-        rpn_extractor.extract("conv_2", rpn_1_reg, 0);
-        cls_scores.push_back(rpn_1_cls);
-        bbox_preds.push_back(rpn_1_reg);
-    }
-    {
-        auto rpn_extractor = rpn.create_extractor();
-        rpn_extractor.input("data_1", fpn_2);
+            rpn_extractor.extract("conv_3", rpn_1_cls, 0);
+            rpn_extractor.extract("conv_2", rpn_1_reg, 0);
+            cls_scores.push_back(rpn_1_cls);
+            bbox_preds.push_back(rpn_1_reg);
+        }
+        {
+            auto rpn_extractor = rpn.create_extractor();
+            rpn_extractor.input("data_1", fpn_2);
 
-        rpn_extractor.extract("conv_3", rpn_2_cls, 0);
-        rpn_extractor.extract("conv_2", rpn_2_reg, 0);
-        cls_scores.push_back(rpn_2_cls);
-        bbox_preds.push_back(rpn_2_reg);
-    }
-    {
-        auto rpn_extractor = rpn.create_extractor();
-        rpn_extractor.input("data_1", fpn_3);
+            rpn_extractor.extract("conv_3", rpn_2_cls, 0);
+            rpn_extractor.extract("conv_2", rpn_2_reg, 0);
+            cls_scores.push_back(rpn_2_cls);
+            bbox_preds.push_back(rpn_2_reg);
+        }
+        {
+            auto rpn_extractor = rpn.create_extractor();
+            rpn_extractor.input("data_1", fpn_3);
 
-        rpn_extractor.extract("conv_3", rpn_3_cls, 0);
-        rpn_extractor.extract("conv_2", rpn_3_reg, 0);
-        cls_scores.push_back(rpn_3_cls);
-        bbox_preds.push_back(rpn_3_reg);
-    }
-    {
-        auto rpn_extractor = rpn.create_extractor();
-        rpn_extractor.input("data_1", fpn_4);
+            rpn_extractor.extract("conv_3", rpn_3_cls, 0);
+            rpn_extractor.extract("conv_2", rpn_3_reg, 0);
+            cls_scores.push_back(rpn_3_cls);
+            bbox_preds.push_back(rpn_3_reg);
+        }
+        {
+            auto rpn_extractor = rpn.create_extractor();
+            rpn_extractor.input("data_1", fpn_4);
 
-        rpn_extractor.extract("conv_3", rpn_4_cls, 0);
-        rpn_extractor.extract("conv_2", rpn_4_reg, 0);
-        cls_scores.push_back(rpn_4_cls);
-        bbox_preds.push_back(rpn_4_reg);
+            rpn_extractor.extract("conv_3", rpn_4_cls, 0);
+            rpn_extractor.extract("conv_2", rpn_4_reg, 0);
+            cls_scores.push_back(rpn_4_cls);
+            bbox_preds.push_back(rpn_4_reg);
+        }
     }
-    conv_block.stop_and_show("ms (conv block)");
+//    conv_block.stop_and_show("ms (conv block)");
 
     
     otter::Clock proposal_list_clock;
     otter::Tensor proposal_list = generate_proposal_lists(cls_scores, bbox_preds, {727, 1333});
     proposal_list_clock.stop_and_show("ms (proposal_list)");
+    
+    rpn_clock.stop_and_show("ms (rpn + proposal generate)");
     
     otter::Clock bbox_clock;
     // Simple test bbox
@@ -381,8 +395,23 @@ int main(int argc, const char * argv[]) {
                     // head
                     // input: fine_grained_point_feats, coarse_point_feats
                     
-                    fine_grained_point_feats.print();
-                    coarse_point_feats.print();
+//                    fine_grained_point_feats.print();
+//                    coarse_point_feats.print();
+                    
+                    std::vector<otter::Tensor> mask_point_pred_v(fine_grained_point_feats.size(0));
+                    
+                    for (const auto i : otter::irange(0, fine_grained_point_feats.size(0))) {
+                        auto point_rend_extractor = point_rend_head.create_extractor();
+                        point_rend_extractor.input("data_1", fine_grained_point_feats[i]);
+                        point_rend_extractor.input("data_2", coarse_point_feats[i]);
+                        
+                        point_rend_extractor.extract("conv1d_4", mask_point_pred_v[i], 0);
+                    }
+                    
+                    auto mask_point_pred = otter::native::cat(mask_point_pred_v, 0);
+                    
+                    refined_mask_pred = refined_mask_pred.view({num_rois, channels, mask_height, mask_width});
+                    
                 }
             }
         }
