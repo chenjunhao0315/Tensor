@@ -67,7 +67,7 @@ public:
     Tensor weight_3x3s2_data;
     Tensor weight_3x3_winograd23_data;
     Tensor weight_3x3_winograd43_data;
-    Tensor weight_3x3_winograd64_data;
+    Tensor weight_3x3_winograd63_data;
     Tensor bias_data;
     
     Tensor weight_data_int8_scales;

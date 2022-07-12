@@ -204,6 +204,16 @@ Tensor conv2d_3x3s1_winograd23_pack4_x86(
 
 #if __AVX__
 
+void convolution_im2col_sgemm_transform_kernel_pack1to8_avx(const Tensor& _kernel, Tensor& kernel_tm, int inch, int outch, int kernel_w, int kernel_h);
+
+void convolution_im2col_sgemm_transform_kernel_pack4to8_avx(const Tensor& _kernel, Tensor& kernel_tm, int inch, int outch, int kernel_w, int kernel_h);
+
+void convolution_im2col_sgemm_transform_kernel_pack8_avx(const Tensor& _kernel, Tensor& kernel_tm, int inch, int outch, int kernel_w, int kernel_h);
+
+void convolution_im2col_sgemm_transform_kernel_pack8to1_avx(const Tensor& _kernel, Tensor& kernel_tm, int inch, int outch, int kernel_w, int kernel_h);
+
+void convolution_im2col_sgemm_transform_kernel_pack8to4_avx(const Tensor& _kernel, Tensor& kernel_tm, int inch, int outch, int kernel_w, int kernel_h);
+
 Tensor& sgemm_conv2d_pack1to8_x86_out(
     const Tensor& self,
     const Tensor& weight,
@@ -398,6 +408,12 @@ Tensor conv2d_1x1s1_sgemm_pack8to4_x86(
     const Tensor& weight_o,
     const Tensor& bias,
     IntArrayRef padding);
+
+void conv3x3s1_winograd63_transform_kernel_pack8_avx(const Tensor& kernel, Tensor& kernel_tm_pack8, int inch, int outch);
+
+void conv3x3s1_winograd43_transform_kernel_pack8_avx(const Tensor& kernel, Tensor& kernel_tm_pack8, int inch, int outch);
+
+void conv3x3s1_winograd23_transform_kernel_pack8_avx(const Tensor& kernel, Tensor& kernel_tm_pack8, int inch, int outch);
 
 Tensor conv2d_3x3s1_winograd63_pack8_x86_out(
     const Tensor& self,

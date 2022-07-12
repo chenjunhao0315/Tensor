@@ -663,7 +663,7 @@ ConvBackend select_proper_conv_packed_backend(
                             } else if (num_input >= 8 && num_output >= 8) {
                                 return ConvBackend::Winograd43X86Pack4_3x3s1;
                             } else {
-                                return ConvBackend::Winograd43X86Pack4_3x3s1;
+                                return ConvBackend::Winograd23X86Pack4_3x3s1;
                             }
                         }
                         return ConvBackend::Sgemm2dX86Pack4;

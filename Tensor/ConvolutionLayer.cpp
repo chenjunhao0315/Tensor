@@ -381,7 +381,7 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
             }
         }
     }
-#endif
+#endif  // __ARM_NEON__
     
 #if __SSE2__
     if (opt.use_packing_layout) {
@@ -393,6 +393,60 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
         out_elempack = out_channels % 4 == 0 ? 4 : 1;
 #endif
     }
+    
+#if __SSE2__
+#if __AVX__
+    if (elempack == 1 && out_elempack == 8) {
+        if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack1to8_avx(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else {
+            otter::convolution_im2col_sgemm_transform_kernel_pack1to8_avx(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        }
+    }
+    
+    if (elempack == 4 && out_elempack == 8) {
+        if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4to8_avx(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else {
+            otter::convolution_im2col_sgemm_transform_kernel_pack4to8_avx(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        }
+    }
+    
+    if (elempack == 8 && out_elempack == 8) {
+        if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack8_avx(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack8_avx(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else if (kernel_height == 3 && kernel_width == 3 && stride_height== 1 && stride_width == 1) {
+            if (in_channels >= 8 && out_channels >= 8 && in_channels <= 32 && out_channels <= 32) {
+                otter::conv3x3s1_winograd63_transform_kernel_pack8_avx(weight_data, weight_3x3_winograd63_data, in_channels, out_channels);
+            } else if (in_channels >= 8 && out_channels >= 8) {
+                otter::conv3x3s1_winograd43_transform_kernel_pack8_avx(weight_data, weight_3x3_winograd43_data, in_channels, out_channels);
+            } else {
+                otter::conv3x3s1_winograd23_transform_kernel_pack8_avx(weight_data, weight_3x3_winograd23_data, in_channels, out_channels);
+            }
+        } else {
+            otter::convolution_im2col_sgemm_transform_kernel_pack8_avx(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        }
+    }
+    
+    if (elempack == 8 && out_elempack == 1) {
+        if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack8to1_avx(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else {
+            otter::convolution_im2col_sgemm_transform_kernel_pack8to1_avx(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        }
+    }
+    
+    if (elempack == 8 && out_elempack == 4) {
+        if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
+            otter::convolution_im2col_sgemm_transform_kernel_pack8to4_avx(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        } else {
+            otter::convolution_im2col_sgemm_transform_kernel_pack8to4_avx(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
+        }
+    }
+#endif  // __AVX__
+#endif  // __SSE2__
     
     if (elempack == 4 && out_elempack == 4) {
         if (in_channels == groups && groups == out_channels) {
@@ -471,11 +525,45 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
         out_elempack = out_channels % 8 == 0 ? 8 : out_channels % 4 == 0 ? 4 : 1;
 #else
         out_elempack = out_channels % 4 == 0 ? 4 : 1;
-#endif
-#elif __ARM_NEON__
+#endif  // __AVX__
+#elif __ARM_NEON__  // __SSE2__
         out_elempack = out_channels % 4 == 0 ? 4 : 1;
-#endif
+#endif  // __ARM_NEON__
     }
+    
+#if __SSE2__
+#if __AVX__
+    if (elempack == 1 && out_elempack == 8) {
+        optimize_kernel = weight_sgemm_data;
+    }
+    
+    if (elempack == 4 && out_elempack == 8) {
+        optimize_kernel = weight_sgemm_data;
+    }
+    
+    if (elempack == 8 && out_elempack == 8) {
+        if (kernel_width == 3 && kernel_height == 3 && stride_width == 1 && stride_height == 1) {
+            if (in_channels >= 8 && out_channels >= 8 && in_channels <= 32 && out_channels <= 32) {
+                optimize_kernel = weight_3x3_winograd63_data;
+            } else if (in_channels >= 8 && out_channels >= 8) {
+                optimize_kernel = weight_3x3_winograd43_data;
+            } else {
+                optimize_kernel = weight_3x3_winograd23_data;
+            }
+        } else {
+            optimize_kernel = weight_sgemm_data;
+        }
+    }
+    
+    if (elempack == 8 && out_elempack == 1) {
+        optimize_kernel = weight_sgemm_data;
+    }
+    
+    if (elempack == 8 && out_elempack == 4) {
+        optimize_kernel = weight_sgemm_data;
+    }
+#endif  // __AVX__
+#endif  // __SSE2__
     
     if (elempack == 4 && out_elempack == 4) {
         if (in_channels == groups && groups == out_channels) {
