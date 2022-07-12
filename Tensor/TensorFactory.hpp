@@ -38,10 +38,12 @@ Tensor full(IntArrayRef size, const Scalar& fill_value, TensorOptions options);
 
 Tensor zeros(IntArrayRef size, ScalarType dtype);
 Tensor zeros(IntArrayRef size, TensorOptions options);
+Tensor zeros_like(const Tensor& self);
 Tensor zeros_like(const Tensor& self, ScalarType dtype);
 Tensor zeros_like(const Tensor& self, TensorOptions options);
 Tensor ones(IntArrayRef size, ScalarType dtype);
 Tensor ones(IntArrayRef size, TensorOptions options);
+Tensor ones_like(const Tensor& self);
 Tensor ones_like(const Tensor& self, ScalarType dtype);
 Tensor ones_like(const Tensor& self, TensorOptions options);
 

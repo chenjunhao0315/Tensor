@@ -96,6 +96,12 @@ Tensor ones(IntArrayRef size, TensorOptions options) {
     return result.fill_(1);
 }
 
+Tensor ones_like(const Tensor& self) {
+    auto result = empty_like(self, self.options());
+    
+    return result.fill_(1);
+}
+
 Tensor ones_like(const Tensor& self, ScalarType dtype) {
     auto result = empty_like(self, dtype);
     
@@ -116,6 +122,12 @@ Tensor zeros(IntArrayRef size, ScalarType dtype) {
 
 Tensor zeros(IntArrayRef size, TensorOptions options) {
     auto result = empty_cpu(size, options);
+    
+    return result.zero_();
+}
+
+Tensor zeros_like(const Tensor& self) {
+    auto result = empty_like(self, self.options());
     
     return result.zero_();
 }

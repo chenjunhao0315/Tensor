@@ -52,7 +52,7 @@ void draw_coco_detection(otter::Tensor& image, const otter::Tensor& pred, int wi
     for (const auto i : otter::irange(objects.size())) {
         const Object& obj = objects[i];
 
-//        fprintf(stderr, "Label: %s (%.5f) x: %.2f y: %.2f width: %.2f height: %.2f\n", coco_class_names[obj.label], obj.prob, obj.rect.x, obj.rect.y, obj.rect.width, obj.rect.height);
+        fprintf(stderr, "Label: %s (%.5f) x: %.2f y: %.2f width: %.2f height: %.2f\n", coco_class_names[obj.label], obj.prob, obj.rect.x, obj.rect.y, obj.rect.width, obj.rect.height);
         
         int x1 = obj.rect.x;
         int y1 = obj.rect.y;

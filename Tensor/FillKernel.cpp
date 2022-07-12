@@ -13,7 +13,7 @@
 namespace otter {
 
 void fill_kernel(TensorIterator& iter, const Scalar& value_scalar) {
-    OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "fill_cpu", [&]() {
+    OTTER_DISPATCH_ALL_TYPES_AND(otter::ScalarType::Bool, iter.dtype(), "fill_cpu", [&]() {
         scalar_t value = value_scalar.to<scalar_t>();
         cpu_kernel(
             iter,

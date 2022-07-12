@@ -533,6 +533,80 @@ Tensor Tensor::softmax(int64_t dim, ScalarType dtype) const {
     return otter::native::topk(*this, k, dim, largest, sorted);
 }
 
+Tensor  Tensor::scatter(int64_t dim, const Tensor & index, const Tensor & src) const {
+    return otter::native::scatter(*this, dim, index, src);
+}
+Tensor& Tensor::scatter_(int64_t dim, const Tensor & index, const Tensor & src) const {
+    return otter::native::scatter_(const_cast<Tensor&>(*this), dim, index, src);
+}
+Tensor  Tensor::scatter(int64_t dim, const Tensor & index, const Scalar & value) const {
+    return otter::native::scatter(*this, dim, index, value);
+}
+Tensor& Tensor::scatter_(int64_t dim, const Tensor & index, const Scalar & value) const {
+    return otter::native::scatter_(const_cast<Tensor&>(*this), dim, index, value);
+}
+Tensor  Tensor::scatter(int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce) const {
+    return otter::native::scatter(*this, dim, index, src, reduce);
+}
+Tensor& Tensor::scatter_(int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce) const {
+    return otter::native::scatter_(const_cast<Tensor&>(*this), dim, index, src, reduce);
+}
+Tensor  Tensor::scatter(int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce) const {
+    return otter::native::scatter(*this, dim, index, value, reduce);
+}
+Tensor& Tensor::scatter_(int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce) const {
+    return otter::native::scatter_(const_cast<Tensor&>(*this), dim, index, value, reduce);
+}
+
+::std::vector<Tensor> Tensor::tensor_split(int64_t sections, int64_t dim) const {
+    return otter::native::tensor_split(*this, sections, dim);
+}
+
+::std::vector<Tensor> Tensor::tensor_split(IntArrayRef indices, int64_t dim) const {
+    return otter::native::tensor_split(*this, indices, dim);
+}
+
+::std::vector<Tensor> Tensor::tensor_split(const Tensor & tensor_indices_or_sections, int64_t dim) const {
+    return otter::native::tensor_split(*this, tensor_indices_or_sections, dim);
+}
+
+::std::vector<Tensor> Tensor::split(int64_t split_size, int64_t dim) const {
+    return otter::native::split(*this, split_size, dim);
+}
+
+::std::vector<Tensor> Tensor::split(IntArrayRef split_size, int64_t dim) const {
+    return otter::native::split(*this, split_size, dim);
+}
+
+::std::vector<Tensor> Tensor::split_with_sizes(IntArrayRef split_sizes, int64_t dim) const {
+    return otter::native::split_with_sizes(*this, split_sizes, dim);
+}
+
+::std::vector<Tensor> Tensor::hsplit(int64_t sections) const {
+    return otter::native::hsplit(*this, sections);
+}
+
+::std::vector<Tensor> Tensor::hsplit(IntArrayRef indices) const {
+    return otter::native::hsplit(*this, indices);
+}
+
+::std::vector<Tensor> Tensor::vsplit(int64_t sections) const {
+    return otter::native::vsplit(*this, sections);
+}
+
+::std::vector<Tensor> Tensor::vsplit(IntArrayRef indices) const {
+    return otter::native::vsplit(*this, indices);
+}
+
+::std::vector<Tensor> Tensor::dsplit(int64_t sections) const {
+    return otter::native::dsplit(*this, sections);
+}
+
+::std::vector<Tensor> Tensor::dsplit(IntArrayRef indices) const {
+    return otter::native::dsplit(*this, indices);
+}
+
+
 #define DEFINE_ITEM(T, name)      \
     template <>                         \
     T Tensor::item() const {            \

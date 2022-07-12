@@ -86,6 +86,8 @@ otter::Tensor denormalize(otter::Tensor& grid);
 
 otter::Tensor point_sample(otter::Tensor& input, otter::Tensor& points, bool align_corners = false);
 
+otter::Tensor get_seg_masks(otter::Tensor& mask_pred, otter::Tensor& det_bboxes, otter::Tensor& det_labels, otter::IntArrayRef ori_shape);
+
 void draw_detection(otter::Tensor& det_bbox, otter::Tensor& det_label, otter::Tensor& img);
 
 void QuickSortFloatD(float* A, int low, int high, int* order);
@@ -255,14 +257,13 @@ int main(int argc, const char * argv[]) {
             bbox_preds.push_back(rpn_4_reg);
         }
     }
+    rpn_clock.stop_and_show("ms (rpn)");
 //    conv_block.stop_and_show("ms (conv block)");
 
     
     otter::Clock proposal_list_clock;
     otter::Tensor proposal_list = generate_proposal_lists(cls_scores, bbox_preds, {727, 1333});
     proposal_list_clock.stop_and_show("ms (proposal_list)");
-    
-    rpn_clock.stop_and_show("ms (rpn + proposal generate)");
     
     otter::Clock bbox_clock;
     // Simple test bbox
@@ -405,18 +406,26 @@ int main(int argc, const char * argv[]) {
                         point_rend_extractor.input("data_1", fine_grained_point_feats[i]);
                         point_rend_extractor.input("data_2", coarse_point_feats[i]);
                         
-                        point_rend_extractor.extract("conv1d_4", mask_point_pred_v[i], 0);
+                        otter::Tensor mask_point_out;
+                        point_rend_extractor.extract("conv1d_4", mask_point_out, 0);
+                        mask_point_pred_v[i] = mask_point_out.unsqueeze(0);
                     }
                     
                     auto mask_point_pred = otter::native::cat(mask_point_pred_v, 0);
                     
                     refined_mask_pred = refined_mask_pred.view({num_rois, channels, mask_height, mask_width});
-                    
+                    point_indices = point_indices.unsqueeze(1).expand({-1, channels, -1});
+                    refined_mask_pred = refined_mask_pred.reshape({num_rois, channels, mask_height * mask_width});
+                    refined_mask_pred = refined_mask_pred.scatter_(2, point_indices, mask_point_pred);
+                    refined_mask_pred = refined_mask_pred.view({num_rois, channels, mask_height, mask_width});
                 }
+                mask_pred = refined_mask_pred;
+                
+                // get_seg_masks
+                segm_result = get_seg_masks(mask_pred, _bboxes, det_label, {349, 640});
             }
         }
     }
-    
     
     total_clock.stop_and_show("ms (total)");
     
@@ -427,6 +436,70 @@ int main(int argc, const char * argv[]) {
     otter::cv::save_image(final, "airplane");
 
     return 0;
+}
+
+otter::Tensor get_seg_masks(otter::Tensor& mask_pred, otter::Tensor& det_bboxes, otter::Tensor& det_labels, otter::IntArrayRef ori_shape) {
+    
+    mask_pred = mask_pred.sigmoid();
+    auto bboxes = det_bboxes.slice(1, 0, 4, 1);
+    auto labels = det_labels;
+    
+    int img_h = ori_shape[0];
+    int img_w = ori_shape[1];
+    
+    bboxes = bboxes / otter::tensor({2.0828, 2.0831, 2.0828, 2.0831}, bboxes.options());
+    
+    float threshold = 0.5;
+    
+    int N = mask_pred.size(0);
+    
+    int num_chunks = N;
+    
+    auto chunks = otter::native::chunk(otter::arange(0, N, 1, otter::ScalarType::Long), num_chunks);
+    
+    auto im_mask = otter::zeros({N, img_h, img_w}, otter::ScalarType::Bool);
+    
+    std::vector<otter::Tensor> update_mask_pred(mask_pred.size(0));
+    
+    auto label_data = labels.accessor<int64_t, 2>();
+    for (const auto i : otter::irange(0, mask_pred.size(0))) {
+        update_mask_pred[i] = mask_pred[i][label_data[i][0]].unsqueeze(0);
+    }
+    
+    mask_pred = otter::native::stack(update_mask_pred, 0);
+    update_mask_pred.clear();
+    
+    for (int i = 0; i < mask_pred.size(0); ++i) {
+        auto mask = mask_pred[i][0] > threshold;
+        
+        mask = mask.to(otter::ScalarType::Byte) * 255;
+        mask = mask.view({mask.size(0), mask.size(1), 1});
+        
+        mask.print();
+        otter::cv::save_image(mask, std::to_string(i).c_str());
+//        auto mask_a = mask.accessor<bool, 2>();
+        
+//        otter::Tensor mask_test = otter::empty({mask_pred.size(1), mask_pred.size(2)}, otter::ScalarType::Byte);
+//        auto mask_test_a = mask_test.accessor<unsigned char, 2>();
+//
+//        for (int h = 0; h < mask.size(0); ++h) {
+//            for (int w = 0; w < mask.size(1); ++w) {
+//                mask_test_a[h][w] = (mask_a[h][w] == 1) ? 255 : 0;
+//            }
+//        }
+        
+//        otter::cv::save_image(mask_test.unsqueeze(-1), std::to_string(i).c_str());
+    }
+    
+//    for (int inds = 0; inds < chunks.size(); ++inds) {
+//
+//    }
+    
+    return otter::Tensor();
+}
+
+otter::Tensor _do_paste_mask(otter::Tensor& mask, otter::Tensor& boxes, int img_h, int img_w) {
+    return otter::Tensor();
 }
 
 otter::Tensor denormalize(otter::Tensor& grid) {

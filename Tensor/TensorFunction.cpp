@@ -1627,6 +1627,268 @@ struct structured_sort_stable_out_out final : public structured_sort_stable_out 
     return std::forward_as_tuple(values, indices);
 }
 
+struct structured_gather_out_functional final : public structured_gather_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+    }
+    
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_gather(const Tensor & self, int64_t dim, const Tensor & index, bool sparse_grad) {
+    structured_gather_out_functional op;
+    op.meta(self, dim, index, sparse_grad);
+    op.impl(self, dim, index, sparse_grad, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_gather_out_out final : public structured_gather_out {
+    structured_gather_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+    }
+    
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+    
+};
+Tensor & wrapper_gather_out_out(const Tensor & self, int64_t dim, const Tensor & index, bool sparse_grad, Tensor & out) {
+    structured_gather_out_out op(out);
+    op.meta(self, dim, index, sparse_grad);
+    op.impl(self, dim, index, sparse_grad, op.maybe_get_output(0));
+    return out;
+}
+
+struct structured_scatter_src_out_functional final : public structured_scatter_src_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_scatter_src(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src) {
+    structured_scatter_src_out_functional op;
+    op.meta(self, dim, index, src);
+    op.impl(self, dim, index, src, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_scatter_src_out_out final : public structured_scatter_src_out {
+    structured_scatter_src_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+    
+};
+Tensor & wrapper_scatter_out_src_out(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, Tensor & out) {
+    structured_scatter_src_out_out op(out);
+    op.meta(self, dim, index, src);
+    op.impl(self, dim, index, src, op.maybe_get_output(0));
+    
+    return out;
+}
+struct structured_scatter_src_out_inplace final : public structured_scatter_src_out {
+    structured_scatter_src_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+    
+};
+Tensor & wrapper_scatter__src(Tensor & self, int64_t dim, const Tensor & index, const Tensor & src) {
+    structured_scatter_src_out_inplace op(self);
+    op.meta(self, dim, index, src);
+    op.impl(self, dim, index, src, op.outputs_[0]);
+    
+    return self;
+}
+struct structured_scatter_value_out_functional final : public structured_scatter_value_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_scatter_value(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value) {
+    structured_scatter_value_out_functional op;
+    op.meta(self, dim, index, value);
+    op.impl(self, dim, index, value, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_scatter_value_out_out final : public structured_scatter_value_out {
+    structured_scatter_value_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+    
+};
+Tensor & wrapper_scatter_out_value_out(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, Tensor & out) {
+    structured_scatter_value_out_out op(out);
+    op.meta(self, dim, index, value);
+    op.impl(self, dim, index, value, op.maybe_get_output(0));
+    
+    return out;
+}
+struct structured_scatter_value_out_inplace final : public structured_scatter_value_out {
+    structured_scatter_value_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+    
+};
+Tensor & wrapper_scatter__value(Tensor & self, int64_t dim, const Tensor & index, const Scalar & value) {
+    structured_scatter_value_out_inplace op(self);
+    op.meta(self, dim, index, value);
+    op.impl(self, dim, index, value, op.outputs_[0]);
+    
+    return self;
+}
+struct structured_scatter_reduce_out_functional final : public structured_scatter_reduce_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_scatter_reduce(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce) {
+    structured_scatter_reduce_out_functional op;
+    op.meta(self, dim, index, src, reduce);
+    op.impl(self, dim, index, src, reduce, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_scatter_reduce_out_out final : public structured_scatter_reduce_out {
+    structured_scatter_reduce_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+    
+};
+Tensor & wrapper_scatter_out_reduce_out(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce, Tensor & out) {
+    structured_scatter_reduce_out_out op(out);
+    op.meta(self, dim, index, src, reduce);
+    op.impl(self, dim, index, src, reduce, op.maybe_get_output(0));
+    
+    return out;
+}
+struct structured_scatter_reduce_out_inplace final : public structured_scatter_reduce_out {
+    structured_scatter_reduce_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+    
+};
+Tensor & wrapper_scatter__reduce(Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce) {
+    structured_scatter_reduce_out_inplace op(self);
+    op.meta(self, dim, index, src, reduce);
+    op.impl(self, dim, index, src, reduce, op.outputs_[0]);
+    
+    return self;
+}
+struct structured_scatter_value_reduce_out_functional final : public structured_scatter_value_reduce_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+        
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return *outputs_[output_idx];
+    }
+    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_scatter_value_reduce(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce) {
+    structured_scatter_value_reduce_out_functional op;
+    op.meta(self, dim, index, value, reduce);
+    op.impl(self, dim, index, value, reduce, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_scatter_value_reduce_out_out final : public structured_scatter_value_reduce_out {
+    structured_scatter_value_reduce_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+        
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+    
+};
+Tensor & wrapper_scatter_out_value_reduce_out(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce, Tensor & out) {
+    structured_scatter_value_reduce_out_out op(out);
+    op.meta(self, dim, index, value, reduce);
+    op.impl(self, dim, index, value, reduce, op.maybe_get_output(0));
+    
+    return out;
+}
+struct structured_scatter_value_reduce_out_inplace final : public structured_scatter_value_reduce_out {
+    structured_scatter_value_reduce_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+        
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+    
+};
+Tensor & wrapper_scatter__value_reduce(Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce) {
+    structured_scatter_value_reduce_out_inplace op(self);
+    op.meta(self, dim, index, value, reduce);
+    op.impl(self, dim, index, value, reduce, op.outputs_[0]);
+    
+    return self;
+}
+
 namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha) {
@@ -2039,6 +2301,55 @@ Tensor & _softmax_outf(const Tensor & self, int64_t dim, bool half_to_float, Ten
 }
 ::std::tuple<Tensor &,Tensor &> topk_outf(const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted, Tensor & values, Tensor & indices) {
     return wrapper_topk_out_values(self, k, dim, largest, sorted, values, indices);
+}
+
+Tensor scatter(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src) {
+    return wrapper_scatter_src(self, dim, index, src);
+}
+Tensor & scatter_out(Tensor & out, const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src) {
+    return wrapper_scatter_out_src_out(self, dim, index, src, out);
+}
+Tensor & scatter_outf(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, Tensor & out) {
+    return wrapper_scatter_out_src_out(self, dim, index, src, out);
+}
+Tensor & scatter_(Tensor & self, int64_t dim, const Tensor & index, const Tensor & src) {
+    return wrapper_scatter__src(self, dim, index, src);
+}
+Tensor scatter(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value) {
+    return wrapper_scatter_value(self, dim, index, value);
+}
+Tensor & scatter_out(Tensor & out, const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value) {
+    return wrapper_scatter_out_value_out(self, dim, index, value, out);
+}
+Tensor & scatter_outf(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, Tensor & out) {
+    return wrapper_scatter_out_value_out(self, dim, index, value, out);
+}
+Tensor & scatter_(Tensor & self, int64_t dim, const Tensor & index, const Scalar & value) {
+    return wrapper_scatter__value(self, dim, index, value);
+}
+Tensor scatter(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce) {
+    return wrapper_scatter_reduce(self, dim, index, src, reduce);
+}
+Tensor & scatter_out(Tensor & out, const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce) {
+    return wrapper_scatter_out_reduce_out(self, dim, index, src, reduce, out);
+}
+Tensor & scatter_outf(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce, Tensor & out) {
+    return wrapper_scatter_out_reduce_out(self, dim, index, src, reduce, out);
+}
+Tensor & scatter_(Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce) {
+    return wrapper_scatter__reduce(self, dim, index, src, reduce);
+}
+Tensor scatter(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce) {
+    return wrapper_scatter_value_reduce(self, dim, index, value, reduce);
+}
+Tensor & scatter_out(Tensor & out, const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce) {
+    return wrapper_scatter_out_value_reduce_out(self, dim, index, value, reduce, out);
+}
+Tensor & scatter_outf(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce, Tensor & out) {
+    return wrapper_scatter_out_value_reduce_out(self, dim, index, value, reduce, out);
+}
+Tensor & scatter_(Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce) {
+    return wrapper_scatter__value_reduce(self, dim, index, value, reduce);
 }
 
 }   // end namespace native

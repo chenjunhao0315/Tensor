@@ -163,6 +163,20 @@ public:
     
     Tensor detach() const;
     
+    ::std::vector<Tensor> tensor_split(int64_t sections, int64_t dim = 0) const;
+    ::std::vector<Tensor> tensor_split(IntArrayRef indices, int64_t dim = 0) const;
+    ::std::vector<Tensor> tensor_split(const Tensor & tensor_indices_or_sections, int64_t dim = 0) const;
+    
+    ::std::vector<Tensor> split(int64_t split_size, int64_t dim = 0) const;
+    ::std::vector<Tensor> split(IntArrayRef split_size, int64_t dim = 0) const;
+    ::std::vector<Tensor> split_with_sizes(IntArrayRef split_sizes, int64_t dim = 0) const;
+    ::std::vector<Tensor> hsplit(int64_t sections) const;
+    ::std::vector<Tensor> hsplit(IntArrayRef indices) const;
+    ::std::vector<Tensor> vsplit(int64_t sections) const;
+    ::std::vector<Tensor> vsplit(IntArrayRef indices) const;
+    ::std::vector<Tensor> dsplit(int64_t sections) const;
+    ::std::vector<Tensor> dsplit(IntArrayRef indices) const;
+    
     Tensor operator~() const {
         return bitwise_not();
     }
@@ -362,6 +376,15 @@ public:
     ::std::tuple<Tensor, Tensor> sort(bool stable, int64_t dim = -1, bool descending = false) const;
     
     ::std::tuple<Tensor, Tensor> topk(int64_t k, int64_t dim = -1, bool largest = true, bool sorted = true) const;
+    
+    Tensor scatter(int64_t dim, const Tensor & index, const Tensor & src) const;
+    Tensor & scatter_(int64_t dim, const Tensor & index, const Tensor & src) const;
+    Tensor scatter(int64_t dim, const Tensor & index, const Scalar & value) const;
+    Tensor & scatter_(int64_t dim, const Tensor & index, const Scalar & value) const;
+    Tensor scatter(int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce) const;
+    Tensor & scatter_(int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce) const;
+    Tensor scatter(int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce) const;
+    Tensor & scatter_(int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce) const;
 };
 
 template <typename T, typename... Args>

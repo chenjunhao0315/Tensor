@@ -127,7 +127,7 @@ Tensor alias(const Tensor& self) {
 Tensor repeat(const Tensor& self, IntArrayRef repeats) {
     OTTER_CHECK(repeats.size() >= (size_t)self.dim(),
                 "Number of dimensions of repeat dims can not be smaller than number of dimensions of tensor");
-
+    
     // Add new leading dimensions to the tensor if the
     // number of target dimensions is larger than the
     // number of source dimensions.
@@ -142,16 +142,16 @@ Tensor repeat(const Tensor& self, IntArrayRef repeats) {
         }
         target_size[idx] = padded_size[idx] * repeats[idx];
     }
-
+    
     Tensor xtensor = self.expand(padded_size);
-
+    
     Tensor result = otter::empty(target_size, self.options());
-
+    
     // return an empty tensor if one of the repeat dimensions is zero
     if (zero_tensor) {
         return result;
     }
-
+    
     Tensor urtensor = otter::native::alias(result);
     for (const auto i : otter::irange(xtensor.dim())) {
         // can't unfold with step 0, so make sure step is at least 1
@@ -159,9 +159,9 @@ Tensor repeat(const Tensor& self, IntArrayRef repeats) {
         auto size_i = xtensor.sizes()[i];
         urtensor = urtensor.unfold(i, size_i, std::max<int64_t>(size_i, 1));
     }
-
+    
     urtensor.copy_(xtensor.expand_as(urtensor));
-
+    
     return result;
 }
 
@@ -352,13 +352,13 @@ struct InferUnsqueezeGeometryResult {
     DimVector strides;
     InferUnsqueezeGeometryResult(IntArrayRef tensor_sizes, IntArrayRef tensor_strides) : sizes(tensor_sizes.begin(), tensor_sizes.end()), strides(tensor_strides.begin(), tensor_strides.end()) {}
 };
-    
+
 InferUnsqueezeGeometryResult inferUnsqueezeGeometry(const Tensor& tensor, int64_t dim) {
     InferUnsqueezeGeometryResult result(tensor.sizes(), tensor.strides());
     int64_t new_stride = dim >= tensor.dim() ? 1 : result.sizes[dim] * result.strides[dim];
     result.sizes.insert(result.sizes.begin() + dim, 1);
     result.strides.insert(result.strides.begin() + dim, new_stride);
-
+    
     return result;
 }
 
@@ -371,7 +371,7 @@ Tensor unsqueeze(const Tensor& self, int64_t dim) {
 
 Tensor& unsqueeze_(Tensor& self, int64_t dim) {
     dim = maybe_wrap_dim(dim, self.dim() + 1);
-
+    
     auto g = inferUnsqueezeGeometry(self, dim);
     self.as_strided_(g.sizes, g.strides);
     return self;
@@ -381,14 +381,14 @@ std::tuple<DimVector, DimVector>
 inferSqueezeGeometry(const Tensor &tensor) {
     DimVector sizes;
     DimVector strides;
-
+    
     for(const auto d : otter::irange(tensor.dim())) {
         if(tensor.sizes()[d] != 1) {
             sizes.push_back(tensor.sizes()[d]);
             strides.push_back(tensor.strides()[d]);
         }
     }
-
+    
     return std::make_tuple(std::move(sizes), std::move(strides));
 }
 
@@ -396,7 +396,7 @@ std::tuple<DimVector, DimVector>
 inferSqueezeGeometry(const Tensor& tensor, int64_t dim) {
     DimVector sizes;
     DimVector strides;
-
+    
     for(const auto d : otter::irange(tensor.dim())) {
         if(d != dim || tensor.sizes()[dim] != 1) {
             sizes.push_back(tensor.sizes()[d]);
@@ -420,7 +420,7 @@ Tensor squeeze(const Tensor& self, int64_t dim) {
 Tensor& squeeze_(Tensor& self, int64_t dim) {
     int64_t dims = self.dim();
     dim = maybe_wrap_dim(dim, self.dim());
-
+    
     if (dims == 0 || self.sizes()[dim] != 1) {
         self.as_strided_(self.sizes(), self.strides());
         return self;
@@ -434,14 +434,14 @@ Tensor flatten(const Tensor& self, int64_t start_dim, int64_t end_dim) {
     start_dim = maybe_wrap_dim(start_dim, self.dim());
     end_dim = maybe_wrap_dim(end_dim, self.dim());
     OTTER_CHECK(start_dim <= end_dim, "flatten() has invalid args: start_dim cannot come after end_dim");
-
+    
     if (self.dim() == 0) {
         return self.reshape({1});
     }
     if (start_dim == end_dim) {
         return self;
     }
-
+    
     // We don't want to infer_size on the entire shape, because that can give us an extra degree
     // of freedom we don't want; for example, consider shape [0, 1, 3, 0], with start_dim=1, end_dim=2.
     // It's clear we want result shape [0, 3, 0] but passing [0, -1, 0] to infer_size means the -1
@@ -456,7 +456,7 @@ Tensor flatten(const Tensor& self, int64_t start_dim, int64_t end_dim) {
     for (const auto i : otter::irange(end_dim + 1, self.dim())) {
         shape.push_back(self.sizes()[i]);
     }
-
+    
     return native::reshape(self, shape);
 }
 
@@ -541,11 +541,11 @@ Tensor& cat_out(TensorList tensors, int64_t dim, Tensor& out) {
         }
         check_cat_shape_except_dim(notSkippedTensor, tensor, dim, i);
         cat_dim_size += tensor.sizes()[dim];
-    
+        
         if (!tensor.is_contiguous(first_tensor_mem_format)) {
             allContiguous = false;
         }
-    
+        
         if (tensor.sizes() != notSkippedTensor.sizes() ||
             tensor.strides() != notSkippedTensor.strides()) {
             reuse_iterator = false;
@@ -583,7 +583,7 @@ Tensor& cat_out(TensorList tensors, int64_t dim, Tensor& out) {
         auto result_slice = out.narrow(dim, 0, slice_dim_size);
         auto result_slice_data = result_slice.data_ptr();
         auto result_stride_bytes = out.stride(dim) * elementSize(out.scalar_type());
-
+        
         auto iter = TensorIteratorConfig()
             .set_check_mem_overlap(false)  // Already checked above
             .resize_outputs(false)
@@ -591,7 +591,7 @@ Tensor& cat_out(TensorList tensors, int64_t dim, Tensor& out) {
             .add_input(source_slice)
             .enforce_safe_casting_to_output(true)
             .build();
-
+        
         for (auto const &tensor : tensors) {
             if (should_skip(tensor)) {
                 continue;
@@ -610,7 +610,7 @@ Tensor& cat_out(TensorList tensors, int64_t dim, Tensor& out) {
             }
             auto slice_dim_size = tensor.sizes()[dim];
             auto result_slice = out.narrow(dim, offset, slice_dim_size);
-    
+            
             auto iter = TensorIteratorConfig()
                 .set_check_mem_overlap(false)  // Already checked above
                 .resize_outputs(false)
@@ -672,10 +672,10 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
         float* outptr = (float*)out.raw_data();
         for (size_t b = 0; b < tensors.size(); b++) {
             const Tensor& tensor = tensors[b];
-
+            
             const float* ptr = (const float*)tensor.raw_data();
             memcpy(outptr, ptr, tensor.size(0) * tensor.itemsize());
-
+            
             outptr += tensor.size(0) * tensor.elempack();
         }
         
@@ -716,34 +716,34 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
         float* outptr = (float*)out_unpacked.raw_data();
         for (size_t b = 0; b < tensors.size(); b++) {
             const Tensor& tensor = tensors[b];
-
+            
             if (tensor.elempack() == 4 && elempack == 1) {
                 auto tensor_a = tensor.accessor<float, 2, 4>();
                 for (const auto i : otter::irange(0, tensor.size(0))) {
                     const float* r0 = tensor_a[i].data();
-
+                    
                     float* outptr0 = outptr;
                     float* outptr1 = outptr + w;
                     float* outptr2 = outptr + w * 2;
                     float* outptr3 = outptr + w * 3;
-
+                    
                     for (int j = 0; j < w; j++) {
                         *outptr0++ = r0[0];
                         *outptr1++ = r0[1];
                         *outptr2++ = r0[2];
                         *outptr3++ = r0[3];
-
+                        
                         r0 += 4;
                     }
-
+                    
                     outptr += w * 4;
                 }
             } else {
                 int size = w * tensor.size(0);
-
+                
                 const float* ptr = (const float*)tensor.raw_data();
                 memcpy(outptr, ptr, size * tensor.itemsize());
-
+                
                 outptr += size * tensor.elempack();
             }
         }
@@ -775,10 +775,10 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
                 float* outptr = (float*)out_ra[i].data();
                 for (size_t b = 0; b < tensors.size(); b++) {
                     const Tensor& tensor = tensors[b];
-
+                    
                     const float* ptr = (const float*)tensor[i].raw_data();
                     memcpy(outptr, ptr, tensor.size(1) * elemsize);
-
+                    
                     outptr += tensor.size(1) * elempack;
                 }
             }
@@ -824,38 +824,38 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
         int p = 0;
         for (size_t b = 0; b < tensors.size(); b++) {
             const Tensor& tensor = tensors[b];
-
+            
             if (tensor.elempack() == 4 && elempack == 1) {
                 int size = tensor.size(1) * tensor.size(2);
                 
                 auto tensor_a = tensor.accessor<float, 3, 4>();
-
+                
                 for (const auto q : otter::irange(0, tensor.size(0))) {
                     const float* r0 = tensor_a[q].data();
-
+                    
                     float* outptr0 = (float*)out_unpacked_ra[p + 0].data();
                     float* outptr1 = (float*)out_unpacked_ra[p + 1].data();
                     float* outptr2 = (float*)out_unpacked_ra[p + 2].data();
                     float* outptr3 = (float*)out_unpacked_ra[p + 3].data();
-
+                    
                     for (int i = 0; i < size; i++) {
                         *outptr0++ = r0[0];
                         *outptr1++ = r0[1];
                         *outptr2++ = r0[2];
                         *outptr3++ = r0[3];
-
+                        
                         r0 += 4;
                     }
-
+                    
                     p += 4;
                 }
             } else {
                 int size = tensor.numel();
-
+                
                 const float* ptr = (const float*)tensor.raw_data();
                 float* outptr = (float*)out_unpacked_ra[p].data();
                 memcpy(outptr, ptr, size * tensor.itemsize());
-
+                
                 p += tensor.size(0);
             }
         }
@@ -886,15 +886,15 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
         otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
             for (const auto q : otter::irange(begin, end)) {
                 float* outptr = (float*)out_ra[q].data();
-
+                
                 for (size_t b = 0; b < tensors.size(); b++) {
                     const Tensor& tensor = tensors[b];
-
+                    
                     int size = tensor.size(1) * tensor.size(2);
-
+                    
                     const float* ptr = (const float*)tensor[q].raw_data();
                     memcpy(outptr, ptr, size * elemsize);
-
+                    
                     outptr += size * elempack;
                 }
             }
@@ -922,14 +922,14 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
         otter::parallel_for(0, channels, 0, [&](int64_t begin, int64_t end) {
             for (const auto q : otter::irange(begin, end)) {
                 float* outptr = (float*)out_ra[q].data();
-
+                
                 for (int i = 0; i < h; i++) {
                     for (size_t b = 0; b < tensors.size(); b++) {
                         const Tensor& tensor = tensors[b];
-
+                        
                         const float* ptr = (const float*)tensor[q][i].raw_data();
                         memcpy(outptr, ptr, tensor.size(2) * elemsize);
-
+                        
                         outptr += tensor.size(2) * elempack;
                     }
                 }
@@ -964,17 +964,17 @@ Tensor cat(TensorList tensors, int64_t dim) {
 Tensor unfold(const Tensor& self, int64_t dimension, int64_t size, int64_t step) {
     // some special handling to deal with allow dimension == 0 when self.dim() == 0
     dimension = otter::maybe_wrap_dim(dimension, self.dim(), /*wrap_scalar=*/true);
-
+    
     const auto sizes = self.sizes();
     const auto strides = self.strides();
     int64_t max_size = self.dim() == 0 ? 1 : sizes[dimension];
     OTTER_CHECK(size <= max_size, "maximum size for tensor at dimension ", dimension,
-                                  " is ", max_size, " but size is ", size);
+                " is ", max_size, " but size is ", size);
     OTTER_CHECK(step > 0, "step is ", step, " but must be > 0");
-
+    
     DimVector new_size(self.dim() + 1);
     DimVector new_stride(self.dim() + 1);
-
+    
     new_size[self.dim()] = size;
     new_stride[self.dim()] = self.dim() == 0 ? 1 : strides[dimension];
     for(const auto d : otter::irange(self.dim())) {
@@ -988,10 +988,155 @@ Tensor unfold(const Tensor& self, int64_t dimension, int64_t size, int64_t step)
             new_stride[d] = self_stride;
         }
     }
-
+    
     return self.as_strided(new_size, new_stride);
 }
 
+std::vector<Tensor> chunk(const Tensor& self, int64_t chunks, int64_t dim) {
+    OTTER_CHECK(self.dim() > 0,
+                "chunk expects at least a 1-dimensional tensor");
+    OTTER_CHECK(chunks > 0,
+                "chunk expects `chunks` to be greater than 0, got: ", chunks);
+    const auto dim_size = self.size(dim);
+    int64_t split_size = (dim_size + chunks - 1) / chunks;
+    // We need to call split_with_sizes in the case where split_size and dimension size are 0, because
+    // a call to split would discard the number of chunks (because we can have an arbitrary number of
+    // 0-sized chunks adding up to 0).  So, call split_with_sizes with the correct number of chunks,
+    // eventually we will do this for all cases.
+    if (split_size == 0 && dim_size == 0) {
+        std::vector<int64_t> split_sizes(chunks, split_size);
+        split_sizes[chunks - 1] = split_size - (split_size * chunks - dim_size);
+        return self.split_with_sizes(split_sizes, dim);
+    } else {
+        return self.split(split_size, dim);
+    }
+}
+
+std::vector<Tensor> tensor_split(const Tensor& self, int64_t sections, int64_t dim) {
+    OTTER_CHECK(self.dim() > 0, "tensor_split expected at least a 1-dimensional tensor, but got a tensor with ", self.dim()," dims");
+    int64_t dim_ = maybe_wrap_dim(dim, self.dim());
+    OTTER_CHECK(sections > 0, "number of sections must be larger than 0, got ", sections);
+    const auto dim_size = self.size(dim_);
+    std::vector<Tensor> splits(sections);
+    int64_t min_split_size = dim_size / sections;
+    int64_t num_splits_one_extra = dim_size % sections;
+    int64_t start_idx = 0;
+    for (const auto split_idx : otter::irange(sections)) {
+        int64_t split_size = (split_idx < num_splits_one_extra) ? (min_split_size + 1) : min_split_size;
+        splits[split_idx] = slice(self, dim_, start_idx, start_idx + split_size);
+        start_idx += split_size;
+    }
+    return splits;
+}
+std::vector<Tensor> tensor_split(const Tensor& self, IntArrayRef indices, int64_t dim) {
+    OTTER_CHECK(self.dim() > 0, "tensor_split expected at least a 1-dimensional tensor, but got a tensor with ", self.dim()," dims");
+    int64_t dim_ = maybe_wrap_dim(dim, self.dim());
+    int64_t num_indices = indices.size();
+    std::vector<Tensor> splits(num_indices + 1);
+    int64_t start_idx = 0;
+    for (const auto split_idx : otter::irange(num_indices)) {
+        int64_t end_idx = indices[split_idx];
+        splits[split_idx] = slice(self, dim_, start_idx, end_idx);
+        start_idx = end_idx;
+    }
+    splits[num_indices] = slice(self, dim_, start_idx, self.size(dim_));
+    return splits;
+}
+std::vector<Tensor> tensor_split(const Tensor& self, const Tensor& tensor_indices_or_sections, int64_t dim) {
+    OTTER_CHECK(self.dim() > 0, "tensor_split expected at least a 1-dimensional tensor, but got a tensor with ", self.dim()," dims");
+    auto split_dtype = tensor_indices_or_sections.scalar_type();
+    OTTER_CHECK(split_dtype == otter::ScalarType::Long,
+                "tensor_split expected tensor_indices_or_sections to have dtype of long, but got ", split_dtype);
+    auto split_dim = tensor_indices_or_sections.dim();
+    OTTER_CHECK(split_dim == 1 || split_dim == 0,
+                "tensor_split expected tensor_indices_or_sections to be a zero-dimensional or one-dimensional tensor, but got a tensor with ", split_dim, " dims");
+    if (split_dim == 0) {
+        int64_t sections = tensor_indices_or_sections.item<int64_t>();
+        return self.tensor_split(sections, dim);
+    } else {
+        auto indices_data = tensor_indices_or_sections.data_ptr<int64_t>();
+        auto stride = tensor_indices_or_sections.stride(0);
+        auto numel = tensor_indices_or_sections.numel();
+        std::vector<int64_t> indices(numel);
+        for (const auto offset : otter::irange(numel)) {
+            // indices tensor could be non-contiguous
+            indices[offset] = *(indices_data + offset * stride);
+        }
+        return self.tensor_split(indices, dim);
+    }
+}
+
+std::vector<Tensor> split(const Tensor& self, int64_t split_size, int64_t dim) {
+    const auto num_splits = get_num_splits(self, split_size, dim);
+    std::vector<Tensor> splits(num_splits);
+    int64_t last_split_size = split_size - (split_size * num_splits - self.size(dim));
+    for (const auto i : otter::irange(num_splits)) {
+        auto length = i < num_splits - 1 ? split_size : last_split_size;
+        splits[i] = self.narrow(dim, i * split_size, length);
+    }
+    return splits;
+}
+
+std::vector<Tensor> split(const Tensor& self, IntArrayRef sizes, int64_t dim) {
+    return split_with_sizes(self, sizes, dim);
+}
+
+std::vector<Tensor> hsplit(const Tensor& self, int64_t split_size) {
+    OTTER_CHECK(self.dim() >= 1, "torch.hsplit requires a tensor with at least 1 dimension, but got a tensor with ", self.dim(), " dimensions!")
+    int64_t dim = (self.dim() == 1) ? 0 : 1;
+    OTTER_CHECK(split_size != 0 && self.sizes()[dim] % split_size == 0,
+                "torch.hsplit attempted to split along dimension ", dim,", but the size of the dimension ", self.sizes()[dim], " is not divisible by the split_size ", split_size, "!");
+    return tensor_split(self, split_size, dim);
+}
+std::vector<Tensor> vsplit(const Tensor& self, int64_t split_size) {
+    OTTER_CHECK(self.dim() >= 2, "torch.vsplit requires a tensor with at least 2 dimension, but got a tensor with ", self.dim(), " dimensions!")
+    OTTER_CHECK(split_size != 0 && self.sizes()[0] % split_size == 0,
+                "torch.vsplit attempted to split along dimension ", 0,", but the size of the dimension ", self.sizes()[0], " is not divisible by the split_size ", split_size, "!");
+    return tensor_split(self, split_size, 0);
+}
+
+std::vector<Tensor> dsplit(const Tensor& self, int64_t split_size) {
+    OTTER_CHECK(self.dim() >= 3, "torch.dsplit requires a tensor with at least 3 dimension, but got a tensor with ", self.dim(), " dimensions!")
+    OTTER_CHECK(split_size != 0 && self.sizes()[2] % split_size == 0,
+                "torch.dsplit attempted to split along dimension ", 2,", but the size of the dimension ", self.sizes()[2], " is not divisible by the split_size ", split_size, "!");
+    return tensor_split(self, split_size, 2);
+}
+
+std::vector<Tensor> split_with_sizes(const Tensor& self, IntArrayRef split_sizes, int64_t dim) {
+    OTTER_CHECK(self.dim() != 0, "split expects at least a 1-dimensional tensor");
+    int64_t dim_size = self.size(dim);
+    int64_t num_splits = split_sizes.size();
+    std::vector<Tensor> splits(num_splits);
+    int64_t start_idx = 0;
+    for (const auto i : otter::irange(num_splits)) {
+        auto length = split_sizes[i];
+        OTTER_CHECK(length >= 0,
+                    "split_with_sizes expects split_sizes have only non-negative ",
+                    "entries, but got split_sizes=", split_sizes);
+        splits[i] = self.narrow(dim, start_idx, length);
+        start_idx += length;
+    }
+    OTTER_CHECK(start_idx == dim_size,
+                "split_with_sizes expects split_sizes to sum exactly to ", dim_size,
+                " (input tensor's size at dimension ", dim, "), ", "but got split_sizes=", split_sizes);
+    return splits;
+}
+
+std::vector<Tensor> hsplit(const Tensor& self, IntArrayRef split_sizes) {
+    OTTER_CHECK(self.dim() >= 1, "torch.hsplit requires a tensor with at least 1 dimension, but got a tensor with ", self.dim(), " dimensions!")
+    return tensor_split(self, split_sizes, (self.dim() == 1) ? 0 : 1);
+}
+
+std::vector<Tensor> vsplit(const Tensor& self, IntArrayRef split_sizes) {
+    OTTER_CHECK(self.dim() >= 2, "torch.vsplit requires a tensor with at least 2 dimension, but got a tensor with ", self.dim(), " dimensions!")
+    return tensor_split(self, split_sizes, 0);
+}
+
+std::vector<Tensor> dsplit(const Tensor& self, IntArrayRef split_sizes) {
+    OTTER_CHECK(self.dim() >= 3, "torch.dsplit requires a tensor with at least 3 dimension, but got a tensor with ", self.dim(), " dimensions!")
+    return tensor_split(self, split_sizes, 2);
+}
+
 }   // end namespace native
-    
+
 }   // end namespace otter

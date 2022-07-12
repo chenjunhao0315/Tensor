@@ -161,7 +161,6 @@ struct structured_sort_stable : public TensorIterator {
     void meta(const Tensor & self, bool stable, int64_t dim, bool descending);
 };
 
-
 struct structured_scatter_src : public TensorIterator {
     void meta(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src);
 };
@@ -173,9 +172,22 @@ struct structured_scatter_value : public TensorIterator {
 struct structured_scatter_reduce : public TensorIterator {
     void meta(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce);
 };
+
 struct structured_scatter_value_reduce : public TensorIterator {
     void meta(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce);
 };
+
+struct structured_gather : public TensorIterator {
+    void meta(const Tensor & self, int64_t dim, const Tensor & index, bool sparse_grad);
+};
+
+//struct structured_scatter_reduce_two : public TensorIterator {
+//    void meta(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce, bool include_self);
+//};
+//
+//struct structured_scatter_add : public TensorIterator {
+//    void meta(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src);
+//};
 
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \
@@ -389,6 +401,18 @@ struct structured_scatter_value_reduce_out : public structured_scatter_value_red
     void impl(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce, const Tensor & out);
 };
 
+struct structured_gather_out : public structured_gather {
+    void impl(const Tensor & self, int64_t dim, const Tensor & index, bool sparse_grad, const Tensor & out);
+};
+
+//struct structured_scatter_reduce_two_out : public structured_scatter_reduce_two {
+//    void impl(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce, bool include_self, const Tensor & out);
+//};
+//
+//struct structured_scatter_add_out : public structured_scatter_add {
+//    void impl(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, const Tensor & out);
+//};
+
 namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha);
@@ -549,6 +573,23 @@ Tensor & _softmax_outf(const Tensor & self, int64_t dim, bool half_to_float, Ten
 ::std::tuple<Tensor,Tensor> topk(const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted);
 ::std::tuple<Tensor &,Tensor &> topk_out(Tensor & values, Tensor & indices, const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted);
 ::std::tuple<Tensor &,Tensor &> topk_outf(const Tensor & self, int64_t k, int64_t dim, bool largest, bool sorted, Tensor & values, Tensor & indices);
+
+Tensor scatter(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src);
+Tensor & scatter_out(Tensor & out, const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src);
+Tensor & scatter_outf(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, Tensor & out);
+Tensor & scatter_(Tensor & self, int64_t dim, const Tensor & index, const Tensor & src);
+Tensor scatter(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value);
+Tensor & scatter_out(Tensor & out, const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value);
+Tensor & scatter_outf(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, Tensor & out);
+Tensor & scatter_(Tensor & self, int64_t dim, const Tensor & index, const Scalar & value);
+Tensor scatter(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce);
+Tensor & scatter_out(Tensor & out, const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce);
+Tensor & scatter_outf(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce, Tensor & out);
+Tensor & scatter_(Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce);
+Tensor scatter(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce);
+Tensor & scatter_out(Tensor & out, const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce);
+Tensor & scatter_outf(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce, Tensor & out);
+Tensor & scatter_(Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce);
 
 }   // end namespace native
 

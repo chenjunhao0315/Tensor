@@ -114,6 +114,7 @@
 		76A222F2287BFE6700681843 /* TensorGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76A222F0287BFE6700681843 /* TensorGeometry.cpp */; };
 		76A222F6287C0DF700681843 /* Convolution1DLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76A222F4287C0DF700681843 /* Convolution1DLayer.cpp */; };
 		76A222F9287C6C8E00681843 /* TensorAdvancedIndexing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76A222F7287C6C8D00681843 /* TensorAdvancedIndexing.cpp */; };
+		76A222FC287D127300681843 /* ScatterGatherKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76A222FA287D127300681843 /* ScatterGatherKernel.cpp */; };
 		76AA466327F8855600F0F3C6 /* ConvolutionMM2DX86.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76AA466127F8855600F0F3C6 /* ConvolutionMM2DX86.cpp */; };
 		76AA466627F8859300F0F3C6 /* DepthwiseConvKernelX86.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76AA466427F8859300F0F3C6 /* DepthwiseConvKernelX86.cpp */; };
 		76AA483227F988D200F0F3C6 /* ConvolutionMM2DTranspose.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76AA483027F988D200F0F3C6 /* ConvolutionMM2DTranspose.cpp */; };
@@ -436,6 +437,8 @@
 		76A222F5287C0DF700681843 /* Convolution1DLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Convolution1DLayer.hpp; sourceTree = "<group>"; };
 		76A222F7287C6C8D00681843 /* TensorAdvancedIndexing.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorAdvancedIndexing.cpp; sourceTree = "<group>"; };
 		76A222F8287C6C8D00681843 /* TensorAdvancedIndexing.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorAdvancedIndexing.hpp; sourceTree = "<group>"; };
+		76A222FA287D127300681843 /* ScatterGatherKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScatterGatherKernel.cpp; sourceTree = "<group>"; };
+		76A222FB287D127300681843 /* ScatterGatherKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ScatterGatherKernel.hpp; sourceTree = "<group>"; };
 		76AA466127F8855600F0F3C6 /* ConvolutionMM2DX86.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionMM2DX86.cpp; sourceTree = "<group>"; };
 		76AA466227F8855600F0F3C6 /* ConvolutionMM2DX86.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConvolutionMM2DX86.hpp; sourceTree = "<group>"; };
 		76AA466427F8859300F0F3C6 /* DepthwiseConvKernelX86.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DepthwiseConvKernelX86.cpp; sourceTree = "<group>"; };
@@ -852,6 +855,8 @@
 				76A222EE287BFBEE00681843 /* GridSamplerKernel.hpp */,
 				76A222F7287C6C8D00681843 /* TensorAdvancedIndexing.cpp */,
 				76A222F8287C6C8D00681843 /* TensorAdvancedIndexing.hpp */,
+				76A222FA287D127300681843 /* ScatterGatherKernel.cpp */,
+				76A222FB287D127300681843 /* ScatterGatherKernel.hpp */,
 			);
 			name = Ops;
 			sourceTree = "<group>";
@@ -1277,6 +1282,7 @@
 				7620AF8927B593C00081C210 /* TensorUtils.cpp in Sources */,
 				76E6C53E27A511B50036A26F /* ParallelOpenMP.cpp in Sources */,
 				76F336E927AED61200E3AEF1 /* ScalarOps.cpp in Sources */,
+				76A222FC287D127300681843 /* ScatterGatherKernel.cpp in Sources */,
 				76A222EF287BFBEE00681843 /* GridSamplerKernel.cpp in Sources */,
 				7687216427C0E379006640CF /* Layer.cpp in Sources */,
 				7628DEE127CDF85100B136FA /* ActivationKernel.cpp in Sources */,

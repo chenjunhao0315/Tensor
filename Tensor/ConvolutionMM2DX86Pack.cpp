@@ -2202,7 +2202,7 @@ void conv3x3s1_winograd63_transform_output_pack4_sse(const Tensor& top_blob_tm, 
     auto top_blob_tm_a = top_blob_tm.accessor<float, 3, 4>();
 
     otter::parallel_for(0, outch, 0, [&](int64_t begin, int64_t end) {
-        for (int p = 0; p < outch; p++)
+        for (const auto p : otter::irange(begin, end))
         {
             const auto out0_tm = top_blob_tm_a[p];
             auto out0 = top_blob_a[p];
@@ -3948,7 +3948,7 @@ void im2col_sgemm_pack8_avx(const Tensor& bottom_im2col, Tensor& top_blob, const
         nn_size = (size - remain_size_start) >> 3;
 
         otter::parallel_for(0, nn_size, 0, [&](int64_t begin, int64_t end) {
-            for (int ii = 0; ii < nn_size; ii++) {
+            for (const auto ii : otter::irange(begin, end)) {
                 int i = remain_size_start + ii * 8;
 
                 float* tmpptr = tmp_a[i / 12 + (i % 12) / 8].data();
