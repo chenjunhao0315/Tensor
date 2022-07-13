@@ -6,6 +6,7 @@
 #include "DrawDetection.hpp"
 #include "TensorFactory.hpp"
 #include "GridSampler.hpp"
+#include "GraphicAPI.hpp"
 
 using namespace std;
 
@@ -88,7 +89,9 @@ otter::Tensor point_sample(otter::Tensor& input, otter::Tensor& points, bool ali
 
 otter::Tensor get_seg_masks(otter::Tensor& mask_pred, otter::Tensor& det_bboxes, otter::Tensor& det_labels, otter::IntArrayRef ori_shape);
 
-void draw_detection(otter::Tensor& det_bbox, otter::Tensor& det_label, otter::Tensor& img);
+otter::Tensor _do_paste_mask(const otter::Tensor& mask, const otter::Tensor& boxes, int img_h, int img_w, int& x0_int, int& y0_int, int& x1_int, int& y1_int);
+
+void draw_detection(otter::Tensor& det_bbox, otter::Tensor& det_label, otter::Tensor& det_mask, otter::Tensor& img);
 
 void QuickSortFloatD(float* A, int low, int high, int* order);
 
@@ -121,7 +124,7 @@ int main(int argc, const char * argv[]) {
         otter::Net* ROIAlign = new otter::Net;
         ROIAlign->addLayer(otter::LayerOption{{"type", "Input"}, {"name", "feature"}, {"output", "feature"}, {"channel", "256"}, {"height", "184"}, {"width", "336"}});
         ROIAlign->addLayer(otter::LayerOption{{"type", "Input"}, {"name", "roi"}, {"input", ""}, {"output", "roi"}, {"channel", "1"}, {"height", "1"}, {"width", "5"}});
-        ROIAlign->addLayer(otter::LayerOption{{"type", "ROIAlign"}, {"name", "roi_align"}, {"aligned", "1"}, {"spatial_scale", std::to_string(spatial_scale)}, {"pooled_width", "7"}, {"pooled_height", "7"}, {"version", "1"}, {"input", "feature, roi"}, {"output", "roi_align"}});
+        ROIAlign->addLayer(otter::LayerOption{{"type", "ROIAlign"}, {"name", "roi_align"}, {"aligned", "1"}, {"spatial_scale", std::to_string(spatial_scale)}, {"pooled_width", "7"}, {"pooled_height", "7"}, {"version", "2"}, {"input", "feature, roi"}, {"output", "roi_align"}});
         ROIAlign->compile();
 
         bbox_roi_align[i] = ROIAlign;
@@ -138,7 +141,7 @@ int main(int argc, const char * argv[]) {
     otter::Net mask_roi_align;
     mask_roi_align.addLayer(otter::LayerOption{{"type", "Input"}, {"name", "feature"}, {"output", "feature"}, {"channel", "256"}, {"height", "184"}, {"width", "336"}});
     mask_roi_align.addLayer(otter::LayerOption{{"type", "Input"}, {"name", "roi"}, {"input", ""}, {"output", "roi"}, {"channel", "1"}, {"height", "1"}, {"width", "5"}});
-    mask_roi_align.addLayer(otter::LayerOption{{"type", "SimpleROIAlign"}, {"name", "roi_align"}, {"aligned", "1"}, {"spatial_scale", "0.25"}, {"pooled_width", "14"}, {"pooled_height", "14"}, {"input", "feature, roi"}, {"output", "roi_align"}, {"verions", "0"}});
+    mask_roi_align.addLayer(otter::LayerOption{{"type", "SimpleROIAlign"}, {"name", "roi_align"}, {"aligned", "1"}, {"spatial_scale", "0.25"}, {"pooled_width", "14"}, {"pooled_height", "14"}, {"input", "feature, roi"}, {"output", "roi_align"}});
     mask_roi_align.compile();
     
     otter::Net mask_head;
@@ -273,8 +276,10 @@ int main(int argc, const char * argv[]) {
     {
         // Simple test bbox
         // bbox2roi
+        otter::Clock bbox_rois_clock;
         auto rois = bbox2roi(proposal_list);
-
+        bbox_rois_clock.stop_and_show("ms (bbox_rois)");
+        
         if (rois.size(0) == 0) {
             det_bbox = otter::zeros({0, 5}, rois.options());
             det_label = otter::zeros({0, }, otter::ScalarType::Long);
@@ -288,8 +293,11 @@ int main(int argc, const char * argv[]) {
             auto roi_feats = otter::empty({rois.size(0), 256, 7, 7}, rois.options());
 
             // map_roi_levels
+            otter::Clock roi_levels_clock;
             auto target_lvls = map_roi_levels(rois, num_levels);
+            roi_levels_clock.stop_and_show("ms (roi_levels)");
             
+            otter::Clock roi_align_clock;
             for (const auto i : otter::irange(0, num_levels)) {
                 auto mask = target_lvls == i;
 
@@ -303,6 +311,7 @@ int main(int argc, const char * argv[]) {
                 if (index_count > 0) {
                     auto rois_ = extract_index(rois, mask);
 
+                    otter::Clock bbox_roi_align_net;
                     otter::Net* net = bbox_roi_align[i];
                     auto ex = net->create_extractor();
                     ex.input("feature", feats[i]);
@@ -310,10 +319,12 @@ int main(int argc, const char * argv[]) {
 
                     otter::Tensor roi_feats_t;
                     ex.extract("roi_align", roi_feats_t, 0);
+                    bbox_roi_align_net.stop_and_show("ms (bbox_roi_align_net)");
                     
                     fill_index(roi_feats, roi_feats_t, mask);
                 }
             }
+            roi_align_clock.stop_and_show("ms (bbox_roi_align)");
 
             otter::Clock bbox_net_clock;
             auto bbox_extractor = bbox_head.create_extractor();
@@ -324,7 +335,9 @@ int main(int argc, const char * argv[]) {
             bbox_extractor.extract("linear_4", bbox_pred, 0);
             bbox_net_clock.stop_and_show("ms (bbox net)");
             
+            otter::Clock get_bboxes_clock;
             get_bboxes(det_bbox, det_label, rois, cls_score, bbox_pred, {727, 1333});
+            get_bboxes_clock.stop_and_show("ms (get_bboxes)");
         }
     }
     bbox_clock.stop_and_show("ms (bbox)");
@@ -342,13 +355,16 @@ int main(int argc, const char * argv[]) {
 
             auto mask_rois = bbox2roi(_bboxes);
             
+            otter::Clock mask_roi_align_clock;
             auto mask_roi_extractor = mask_roi_align.create_extractor();
             mask_roi_extractor.input("feature", feats[0]);
             mask_roi_extractor.input("roi", mask_rois);
             
             otter::Tensor mask_feats;   // 1
             mask_roi_extractor.extract("roi_align", mask_feats, 0);
+            mask_roi_align_clock.stop_and_show("ms (mask_roi_align)");
             
+            otter::Clock mask_head_clock;
             std::vector<otter::Tensor> mask_conv(mask_feats.size(0));
             for (const auto i : otter::irange(0, mask_feats.size(0))) {
                 auto mask_extractor = mask_head.create_extractor();
@@ -362,12 +378,14 @@ int main(int argc, const char * argv[]) {
             
             otter::Tensor mask_pred;    // 2
             mask_extractor.extract("linear_3", mask_pred, 0);
+            mask_head_clock.stop_and_show("ms (mask_head)");
 
             mask_pred = mask_pred.view({mask_pred.size(0), 80, 7, 7});
             
             if (det_bbox.size(0) > 0) {
                 // _mask_point_forward_test
                 
+                otter::Clock point_rend_clock;
                 auto refined_mask_pred = mask_pred.clone();
                 
                 int subdivision_step = 5;
@@ -375,7 +393,9 @@ int main(int argc, const char * argv[]) {
                 int scale_factor = 2;
                 
                 for (int i = 0; i < subdivision_step; ++i) {
+                    otter::Clock upsample_clock;
                     refined_mask_pred = otter::Interpolate(refined_mask_pred, {refined_mask_pred.size(3) * scale_factor, refined_mask_pred.size(2) * scale_factor}, {double(scale_factor), double(scale_factor)}, otter::InterpolateMode::BILINEAR, false);
+                    upsample_clock.stop_and_show("ms (upsample)");
                     
                     int num_rois = refined_mask_pred.size(0);
                     int channels = refined_mask_pred.size(1);
@@ -386,13 +406,19 @@ int main(int argc, const char * argv[]) {
                         continue;
                     }
                     
+                    otter::Clock roi_rel_points_clock;
                     otter::Tensor point_indices, rel_roi_points;
                     get_roi_rel_points_test(point_indices, rel_roi_points, refined_mask_pred, det_label);
+                    roi_rel_points_clock.stop_and_show("ms (roi_rel_points)");
                     
                     // _get_fine_grained_point_feats
+                    otter::Clock get_fine_grained_clock;
                     auto fine_grained_point_feats = _get_fine_grained_point_feats(feats, mask_rois, rel_roi_points);
+                    get_fine_grained_clock.stop_and_show("ms (get_fine_grained)");
                     
+                    otter::Clock point_sample_clock;
                     auto coarse_point_feats = point_sample(mask_pred, rel_roi_points);
+                    point_sample_clock.stop_and_show("ms (point smaple)");
                     
                     // head
                     // input: fine_grained_point_feats, coarse_point_feats
@@ -409,9 +435,8 @@ int main(int argc, const char * argv[]) {
                         point_rend_extractor.extract("conv1d_4", mask_point_out, 0);
                         mask_point_pred_v[i] = mask_point_out.unsqueeze(0);
                     }
-                    mask_net_single.stop_and_show("ms (mask net single)");
-                    
                     auto mask_point_pred = otter::native::cat(mask_point_pred_v, 0);
+                    mask_net_single.stop_and_show("ms (pointrend net single)");
                     
                     refined_mask_pred = refined_mask_pred.view({num_rois, channels, mask_height, mask_width});
                     point_indices = point_indices.unsqueeze(1).expand({-1, channels, -1});
@@ -420,9 +445,12 @@ int main(int argc, const char * argv[]) {
                     refined_mask_pred = refined_mask_pred.view({num_rois, channels, mask_height, mask_width});
                 }
                 mask_pred = refined_mask_pred;
+                point_rend_clock.stop_and_show("ms (pointrend total)");
                 
                 // get_seg_masks
+                otter::Clock seg_mask_clock;
                 segm_result = get_seg_masks(mask_pred, _bboxes, det_label, {349, 640});
+                seg_mask_clock.stop_and_show("ms (seg_mask)");
             }
         }
     }
@@ -433,7 +461,7 @@ int main(int argc, const char * argv[]) {
     auto draw_bbox = det_bbox;
     auto draw_label = det_label;
     auto final = otter::cv::load_image_pixel("/Users/chenjunhao/Desktop/NTHUEE_Project/pointrend/input.jpg");
-    draw_detection(draw_bbox, draw_label, final);
+    draw_detection(draw_bbox, draw_label, segm_result, final);
     otter::cv::save_image(final, "airplane");
 
     return 0;
@@ -470,8 +498,17 @@ otter::Tensor get_seg_masks(otter::Tensor& mask_pred, otter::Tensor& det_bboxes,
     mask_pred = otter::native::stack(update_mask_pred, 0);
     update_mask_pred.clear();
     
+    for (int inds = 0; inds < chunks.size(); ++inds) {
+        int x0_int, y0_int, x1_int, y1_int;
+        
+        auto mask = _do_paste_mask(mask_pred[inds], bboxes[inds], img_h, img_w, x0_int, y0_int, x1_int, y1_int).squeeze(0);
+        mask = mask > threshold;
+        
+        im_mask[inds].slice(0, y0_int, y1_int, 1).slice(1, x0_int, x1_int, 1) = mask;
+    }
+    
     for (int i = 0; i < mask_pred.size(0); ++i) {
-        auto mask = mask_pred[i][0] > threshold;
+        auto mask = im_mask[i];
         
         mask = mask.to(otter::ScalarType::Byte) * 255;
         mask = mask.view({mask.size(0), mask.size(1), 1});
@@ -479,17 +516,85 @@ otter::Tensor get_seg_masks(otter::Tensor& mask_pred, otter::Tensor& det_bboxes,
         otter::cv::save_image(mask, std::to_string(i).c_str());
     }
     
-    cout << bboxes << endl;
-    
-    for (int inds = 0; inds < chunks.size(); ++inds) {
-        
-    }
-    
-    return otter::Tensor();
+    return im_mask;
 }
 
-otter::Tensor _do_paste_mask(otter::Tensor& mask, otter::Tensor& boxes, int img_h, int img_w) {
-    return otter::Tensor();
+otter::Tensor _do_paste_mask(const otter::Tensor& mask, const otter::Tensor& boxes, int img_h, int img_w, int& x0_int, int& y0_int, int& x1_int, int& y1_int) {
+    auto boxes_a = boxes.accessor<float, 1>();
+    
+    float x0 = boxes_a[0];
+    float y0 = boxes_a[1];
+    float x1 = boxes_a[2];
+    float y1 = boxes_a[3];
+    
+    x0_int = std::max(0.f, std::floor(x0) - 1);
+    y0_int = std::max(0.f, std::floor(y0) - 1);
+    x1_int = std::min(float(img_w), std::ceil(x1) + 1);
+    y1_int = std::min(float(img_h), std::ceil(y1) + 1);
+    
+    auto img_y = otter::arange(y0_int, y1_int, 1, otter::ScalarType::Float) + 0.5;
+    auto img_x = otter::arange(x0_int, x1_int, 1, otter::ScalarType::Float) + 0.5;
+    img_y = (img_y - y0) / (y1 - y0) * 2 - 1;
+    img_x = (img_x - x0) / (x1 - x0) * 2 - 1;
+    
+    auto gx = img_x.view({1, 1, -1}).expand({1, img_y.size(0), img_x.size(0)});
+    auto gy = img_y.view({1, -1, 1}).expand({1, img_y.size(0), img_x.size(0)});
+    
+    auto grid = otter::native::stack({gx, gy}, 3);
+    
+    auto img_masks = otter::grid_sampler(mask.unsqueeze(0).to(otter::ScalarType::Float), grid, 0, 0, false);
+    
+    return img_masks.squeeze(0);
+}
+
+void draw_mask(const otter::Tensor& mask, const otter::cv::Color& color, float blend_ratio, otter::Tensor& img) {
+    int img_h = mask.size(0);
+    int img_w = mask.size(1);
+    
+    auto img_a = img.accessor<unsigned char, 3>();
+    auto mask_a = mask.accessor<bool, 2>();
+    
+    unsigned char color_data[3];
+    otter::cv::colorToRawData(color, color_data, otter::ScalarType::Byte, 3, 0);
+    
+    for (int h = 0; h < img_h; ++h) {
+        for (int w = 0; w < img_w; ++w) {
+            if (mask_a[h][w]) {
+                auto pixel = img_a[h][w];
+                
+                pixel[0] = pixel[0] * blend_ratio + color_data[0] * (1 - blend_ratio);
+                pixel[1] = pixel[1] * blend_ratio + color_data[1] * (1 - blend_ratio);
+                pixel[2] = pixel[2] * blend_ratio + color_data[2] * (1 - blend_ratio);
+            }
+        }
+    }
+}
+
+void draw_detection(otter::Tensor& det_bbox, otter::Tensor& det_label, otter::Tensor& det_mask, otter::Tensor& img) {
+    auto bbox_a = det_bbox.accessor<float, 2>();
+    auto label_a = det_label.accessor<int64_t, 2>();
+    
+    std::vector<otter::Tensor> final_pred;
+    for (const auto i : otter::irange(0, det_bbox.size(0))) {
+        auto pred = otter::empty({6}, otter::ScalarType::Float);
+        auto pred_a = pred.accessor<float, 1>();
+        if (bbox_a[i][4] > 0.3) {
+            auto bbox_s = bbox_a[i];
+            auto label_s = label_a[i];
+            pred_a[0] = label_s[0] + 1;
+            pred_a[1] = bbox_s[4];
+            pred_a[2] = bbox_s[0];
+            pred_a[3] = bbox_s[1];
+            pred_a[4] = bbox_s[2] - bbox_s[0];
+            pred_a[5] = bbox_s[3] - bbox_s[1];
+            
+            final_pred.push_back(pred);
+            draw_mask(det_mask[i], otter::cv::getDefaultColor(otter::cv::ORANGE), 0.4, img);
+        }
+    }
+    auto pred = otter::native::stack(final_pred, 0);
+    
+    otter::draw_coco_detection(img, pred, img.size(1), img.size(0));
 }
 
 otter::Tensor denormalize(otter::Tensor& grid) {
@@ -591,27 +696,6 @@ otter::Tensor get_uncertainty(const otter::Tensor& mask_pred, const otter::Tenso
     }
     
     return -otter::native::abs(gt_class_logits);
-}
-
-void draw_detection(otter::Tensor& det_bbox, otter::Tensor& det_label, otter::Tensor& img) {
-    auto pred = otter::empty({det_bbox.size(0), 6}, otter::ScalarType::Float);
-    
-    auto pred_a = pred.accessor<float, 2>();
-    auto bbox_a = det_bbox.accessor<float, 2>();
-    auto label_a = det_label.accessor<int64_t, 2>();
-    for (const auto i : otter::irange(0, det_bbox.size(0))) {
-        auto pred_s = pred_a[i];
-        auto bbox_s = bbox_a[i];
-        auto label_s = label_a[i];
-        pred_s[0] = label_s[0] + 1;
-        pred_s[1] = bbox_s[4];
-        pred_s[2] = bbox_s[0];
-        pred_s[3] = bbox_s[1];
-        pred_s[4] = bbox_s[2] - bbox_s[0];
-        pred_s[5] = bbox_s[3] - bbox_s[1];
-    }
-    
-    otter::draw_coco_detection(img, pred, img.size(1), img.size(0));
 }
 
 void get_bboxes(otter::Tensor& det_bboxes, otter::Tensor& det_labels, otter::Tensor& rois, otter::Tensor& cls_score, otter::Tensor& bbox_pred, otter::IntArrayRef image_shape) {

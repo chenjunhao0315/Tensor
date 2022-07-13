@@ -15,7 +15,7 @@
 namespace otter {
 
 void direct_copy_kernel(TensorIterator& iter) {
-    OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "copy_kernel", [&]() {
+    OTTER_DISPATCH_ALL_TYPES_AND(otter::ScalarType::Bool, iter.dtype(), "copy_kernel", [&]() {
         cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
             return a;
         });

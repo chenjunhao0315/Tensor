@@ -8,6 +8,8 @@
 #ifndef GridSamplerKernel_hpp
 #define GridSamplerKernel_hpp
 
+#include <array>
+
 #include "DispatchStub.hpp"
 
 namespace otter {
