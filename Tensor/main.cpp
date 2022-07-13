@@ -138,7 +138,7 @@ int main(int argc, const char * argv[]) {
     otter::Net mask_roi_align;
     mask_roi_align.addLayer(otter::LayerOption{{"type", "Input"}, {"name", "feature"}, {"output", "feature"}, {"channel", "256"}, {"height", "184"}, {"width", "336"}});
     mask_roi_align.addLayer(otter::LayerOption{{"type", "Input"}, {"name", "roi"}, {"input", ""}, {"output", "roi"}, {"channel", "1"}, {"height", "1"}, {"width", "5"}});
-    mask_roi_align.addLayer(otter::LayerOption{{"type", "ROIAlign"}, {"name", "roi_align"}, {"aligned", "1"}, {"spatial_scale", "0.25"}, {"pooled_width", "14"}, {"pooled_height", "14"}, {"input", "feature, roi"}, {"output", "roi_align"}, {"verions", "0"}});
+    mask_roi_align.addLayer(otter::LayerOption{{"type", "SimpleROIAlign"}, {"name", "roi_align"}, {"aligned", "1"}, {"spatial_scale", "0.25"}, {"pooled_width", "14"}, {"pooled_height", "14"}, {"input", "feature, roi"}, {"output", "roi_align"}, {"verions", "0"}});
     mask_roi_align.compile();
     
     otter::Net mask_head;
@@ -329,6 +329,7 @@ int main(int argc, const char * argv[]) {
     }
     bbox_clock.stop_and_show("ms (bbox)");
     
+    otter::Clock seg_clock;
     // Simple test mask
     // @param: x, det_bbox, det_label
     otter::Tensor segm_result;
@@ -396,11 +397,9 @@ int main(int argc, const char * argv[]) {
                     // head
                     // input: fine_grained_point_feats, coarse_point_feats
                     
-//                    fine_grained_point_feats.print();
-//                    coarse_point_feats.print();
-                    
                     std::vector<otter::Tensor> mask_point_pred_v(fine_grained_point_feats.size(0));
                     
+                    otter::Clock mask_net_single;
                     for (const auto i : otter::irange(0, fine_grained_point_feats.size(0))) {
                         auto point_rend_extractor = point_rend_head.create_extractor();
                         point_rend_extractor.input("data_1", fine_grained_point_feats[i]);
@@ -410,6 +409,7 @@ int main(int argc, const char * argv[]) {
                         point_rend_extractor.extract("conv1d_4", mask_point_out, 0);
                         mask_point_pred_v[i] = mask_point_out.unsqueeze(0);
                     }
+                    mask_net_single.stop_and_show("ms (mask net single)");
                     
                     auto mask_point_pred = otter::native::cat(mask_point_pred_v, 0);
                     
@@ -426,6 +426,7 @@ int main(int argc, const char * argv[]) {
             }
         }
     }
+    seg_clock.stop_and_show("ms (seg)");
     
     total_clock.stop_and_show("ms (total)");
     
@@ -475,25 +476,14 @@ otter::Tensor get_seg_masks(otter::Tensor& mask_pred, otter::Tensor& det_bboxes,
         mask = mask.to(otter::ScalarType::Byte) * 255;
         mask = mask.view({mask.size(0), mask.size(1), 1});
         
-        mask.print();
         otter::cv::save_image(mask, std::to_string(i).c_str());
-//        auto mask_a = mask.accessor<bool, 2>();
-        
-//        otter::Tensor mask_test = otter::empty({mask_pred.size(1), mask_pred.size(2)}, otter::ScalarType::Byte);
-//        auto mask_test_a = mask_test.accessor<unsigned char, 2>();
-//
-//        for (int h = 0; h < mask.size(0); ++h) {
-//            for (int w = 0; w < mask.size(1); ++w) {
-//                mask_test_a[h][w] = (mask_a[h][w] == 1) ? 255 : 0;
-//            }
-//        }
-        
-//        otter::cv::save_image(mask_test.unsqueeze(-1), std::to_string(i).c_str());
     }
     
-//    for (int inds = 0; inds < chunks.size(); ++inds) {
-//
-//    }
+    cout << bboxes << endl;
+    
+    for (int inds = 0; inds < chunks.size(); ++inds) {
+        
+    }
     
     return otter::Tensor();
 }
@@ -538,7 +528,7 @@ otter::Tensor rel_roi_point_to_rel_img_point(otter::Tensor& rois, otter::Tensor&
     auto abs_img_point = rel_roi_point_to_abs_img_point(rois, rel_roi_points);
     auto rel_img_point = abs_img_point_to_rel_img_point(abs_img_point, img, spatial_scale);
     
-    return rel_roi_points;
+    return rel_img_point;
 }
 
 otter::Tensor abs_img_point_to_rel_img_point(otter::Tensor& abs_img_points, otter::IntArrayRef img, float spatial_scale) {
@@ -549,13 +539,12 @@ otter::Tensor abs_img_point_to_rel_img_point(otter::Tensor& abs_img_points, otte
 
 otter::Tensor rel_roi_point_to_abs_img_point(otter::Tensor& rois, otter::Tensor& rel_roi_points) {
     if (rois.size(1) == 5) {
-        rois = rois.slice(0, 1, 5, 1);
+        rois = rois.slice(1, 1, 5, 1);
     }
     auto abs_img_points = rel_roi_points.clone();
     
-    auto abs_img_points_slice = abs_img_points.slice(1, 0, -1, 1);
-    auto xs = abs_img_points_slice.slice(1, 0, 1, 1) * (rois.slice(1, 2, 3, 1) - rois.slice(1, 0, 1, 1));
-    auto ys = abs_img_points_slice.slice(1, 1, 2, 1) * (rois.slice(1, 3, 4, 1) - rois.slice(1, 1 ,2, 1));
+    auto xs = abs_img_points.slice(2, 0, 1, 1).squeeze(2) * (rois.slice(1, 2, 3, 1) - rois.slice(1, 0, 1, 1));
+    auto ys = abs_img_points.slice(2, 1, 2, 1).squeeze(2) * (rois.slice(1, 3, 4, 1) - rois.slice(1, 1 ,2, 1));
     xs += rois.slice(1, 0, 1, 1);
     ys += rois.slice(1, 1, 2, 1);
     

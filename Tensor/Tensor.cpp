@@ -606,6 +606,17 @@ Tensor& Tensor::scatter_(int64_t dim, const Tensor & index, const Scalar & value
     return otter::native::dsplit(*this, indices);
 }
 
+Tensor Tensor::baddbmm(const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha) const {
+    return otter::native::baddbmm(*this, batch1, batch2, beta, alpha);
+}
+Tensor & Tensor::baddbmm_(const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha) const {
+    return otter::native::baddbmm_(const_cast<Tensor&>(*this), batch1, batch2, beta, alpha);
+}
+
+Tensor Tensor::bmm(const Tensor & mat2) const {
+    return otter::native::bmm(*this, mat2);
+}
+
 
 #define DEFINE_ITEM(T, name)      \
     template <>                         \

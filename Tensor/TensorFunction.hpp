@@ -189,6 +189,14 @@ struct structured_gather : public TensorIterator {
 //    void meta(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src);
 //};
 
+struct structured_bmm : public TensorIterator {
+    void meta(const Tensor & self, const Tensor & mat2);
+};
+
+struct structured_baddbmm : public TensorIterator {
+    void meta(const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha);
+};
+
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override { \
@@ -413,6 +421,14 @@ struct structured_gather_out : public structured_gather {
 //    void impl(const Tensor & self, int64_t dim, const Tensor & index, const Tensor & src, const Tensor & out);
 //};
 
+struct structured_bmm_out_cpu : public structured_bmm {
+    void impl(const Tensor & self, const Tensor & mat2, const Tensor & out);
+};
+
+struct structured_baddbmm_out_cpu : public structured_baddbmm {
+    void impl(const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha, const Tensor & out);
+};
+
 namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha);
@@ -590,6 +606,15 @@ Tensor scatter(const Tensor & self, int64_t dim, const Tensor & index, const Sca
 Tensor & scatter_out(Tensor & out, const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce);
 Tensor & scatter_outf(const Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce, Tensor & out);
 Tensor & scatter_(Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce);
+
+Tensor baddbmm(const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha);
+Tensor & baddbmm_out(Tensor & out, const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha);
+Tensor & baddbmm_outf(const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha, Tensor & out);
+Tensor & baddbmm_(Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha);
+
+Tensor bmm(const Tensor & self, const Tensor & mat2);
+Tensor & bmm_out(Tensor & out, const Tensor & self, const Tensor & mat2);
+Tensor & bmm_outf(const Tensor & self, const Tensor & mat2, Tensor & out);
 
 }   // end namespace native
 

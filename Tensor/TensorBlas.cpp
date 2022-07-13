@@ -58,6 +58,84 @@ void normalize_last_dims(
     }
 }
 
+template <typename scalar_t>
+void gemm_batched_generic(
+    TransposeType transa, TransposeType transb,
+    int64_t batch_size, int64_t m, int64_t n, int64_t k,
+    scalar_t alpha,
+    const scalar_t **a, int64_t lda,
+    const scalar_t **b, int64_t ldb,
+    scalar_t beta,
+    scalar_t **c, int64_t ldc) {
+    for (const auto batch : otter::irange(batch_size)) {
+        gemm(transa, transb, m, n, k, alpha, a[batch], lda, b[batch], ldb, beta, c[batch], ldc);
+    }
+}
+template <typename scalar_t>
+void gemm_batched(
+    TransposeType transa, TransposeType transb,
+    int64_t batch_size, int64_t m, int64_t n, int64_t k,
+    scalar_t alpha,
+    const scalar_t **a, int64_t lda,
+    const scalar_t **b, int64_t ldb,
+    scalar_t beta,
+    scalar_t **c, int64_t ldc) {
+    if (batch_size == 1) {
+        return gemm(transa, transb, m, n, k, alpha, a[0], lda, b[0], ldb, beta, c[0], ldc);
+    }
+    gemm_batched_generic(transa, transb, batch_size, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
+}
+template <typename scalar_t>
+void gemm_batched_with_stride_generic(
+    TransposeType transa, TransposeType transb,
+    int64_t batch_size, int64_t m, int64_t n, int64_t k,
+    scalar_t alpha,
+    const scalar_t *a, int64_t lda, int64_t batch_stride_a,
+    const scalar_t *b, int64_t ldb, int64_t batch_stride_b,
+    scalar_t beta,
+    scalar_t *c, int64_t ldc, int64_t batch_stride_c) {
+    for (const auto batch : otter::irange(batch_size)) {
+        const auto a_batch = a + batch_stride_a * batch;
+        const auto b_batch = b + batch_stride_b * batch;
+        const auto c_batch = c + batch_stride_c * batch;
+        gemm(transa, transb, m, n, k, alpha, a_batch, lda, b_batch, ldb, beta, c_batch, ldc);
+    }
+}
+template <typename scalar_t>
+void gemm_batched_with_stride(
+    TransposeType transa, TransposeType transb,
+    int64_t batch_size, int64_t m, int64_t n, int64_t k,
+    scalar_t alpha,
+    const scalar_t *a, int64_t lda, int64_t batch_stride_a,
+    const scalar_t *b, int64_t ldb, int64_t batch_stride_b,
+    scalar_t beta,
+    scalar_t *c, int64_t ldc, int64_t batch_stride_c) {
+    if (batch_size == 1) {
+        return gemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
+    }
+    gemm_batched_with_stride_generic(
+        transa, transb, batch_size, m, n, k, alpha, a, lda, batch_stride_a,
+        b, ldb, batch_stride_b, beta, c, ldc, batch_stride_c);
+}
+#define INSTANTIATE_BATCHED_GEMM(scalar_t, DType)               \
+  template void gemm_batched(                                   \
+      TransposeType transa, TransposeType transb,               \
+      int64_t batch_size, int64_t m, int64_t n, int64_t k,      \
+      scalar_t alpha,                                           \
+      const scalar_t **a, int64_t lda,                          \
+      const scalar_t **b, int64_t ldb,                          \
+      scalar_t beta,                                            \
+      scalar_t **c, int64_t ldc);                               \
+  template void gemm_batched_with_stride(                       \
+      TransposeType transa, TransposeType transb,               \
+      int64_t batch_size, int64_t m, int64_t n, int64_t k,      \
+      scalar_t alpha,                                           \
+      const scalar_t *a, int64_t lda, int64_t batch_stride_a,   \
+      const scalar_t *b, int64_t ldb, int64_t batch_stride_b,   \
+      scalar_t beta,                                            \
+      scalar_t *c, int64_t ldc, int64_t batch_stride_c);
+OTTER_ALL_SCALAR_TYPES(INSTANTIATE_BATCHED_GEMM)
+
 inline void dot_check(const Tensor& self, const Tensor& other) {
     OTTER_CHECK(self.dim() == 1 && other.dim() == 1, "1D tensor expected");
     OTTER_CHECK(self.dtype() == other.dtype(), "Same dtype expected");

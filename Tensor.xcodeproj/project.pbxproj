@@ -132,6 +132,8 @@
 		76BA779527C6CCB700AA896B /* im2col.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76BA779327C6CCB700AA896B /* im2col.cpp */; };
 		76C19983283F6C0A00A5D737 /* TensorSoftmax.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76C19981283F6C0A00A5D737 /* TensorSoftmax.cpp */; };
 		76C19986283F6C1D00A5D737 /* TensorSoftmaxKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76C19984283F6C1D00A5D737 /* TensorSoftmaxKernel.cpp */; };
+		76C4DFF9287D65A60038A363 /* SimpleROIAlignLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76C4DFF7287D65A60038A363 /* SimpleROIAlignLayer.cpp */; };
+		76C4DFFC287D69620038A363 /* AffineGridGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76C4DFFA287D69620038A363 /* AffineGridGenerator.cpp */; };
 		76CEF55727FCACDE00AC46F6 /* TensorCompare.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CEF55527FCACDE00AC46F6 /* TensorCompare.cpp */; };
 		76CEF55A27FCAFA900AC46F6 /* TensorCompareKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CEF55827FCAFA900AC46F6 /* TensorCompareKernel.cpp */; };
 		76CF3F3727FC6E4B009BF242 /* DeconvolutionLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76CF3F3527FC6E4B009BF242 /* DeconvolutionLayer.cpp */; };
@@ -476,6 +478,10 @@
 		76C19984283F6C1D00A5D737 /* TensorSoftmaxKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorSoftmaxKernel.cpp; sourceTree = "<group>"; };
 		76C19985283F6C1D00A5D737 /* TensorSoftmaxKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorSoftmaxKernel.hpp; sourceTree = "<group>"; };
 		76C19988283F786600A5D737 /* VecFunctional.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VecFunctional.hpp; sourceTree = "<group>"; };
+		76C4DFF7287D65A60038A363 /* SimpleROIAlignLayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SimpleROIAlignLayer.cpp; sourceTree = "<group>"; };
+		76C4DFF8287D65A60038A363 /* SimpleROIAlignLayer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SimpleROIAlignLayer.hpp; sourceTree = "<group>"; };
+		76C4DFFA287D69620038A363 /* AffineGridGenerator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AffineGridGenerator.cpp; sourceTree = "<group>"; };
+		76C4DFFB287D69620038A363 /* AffineGridGenerator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AffineGridGenerator.hpp; sourceTree = "<group>"; };
 		76CEF55527FCACDE00AC46F6 /* TensorCompare.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorCompare.cpp; sourceTree = "<group>"; };
 		76CEF55627FCACDE00AC46F6 /* TensorCompare.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorCompare.hpp; sourceTree = "<group>"; };
 		76CEF55827FCAFA900AC46F6 /* TensorCompareKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorCompareKernel.cpp; sourceTree = "<group>"; };
@@ -857,6 +863,8 @@
 				76A222F8287C6C8D00681843 /* TensorAdvancedIndexing.hpp */,
 				76A222FA287D127300681843 /* ScatterGatherKernel.cpp */,
 				76A222FB287D127300681843 /* ScatterGatherKernel.hpp */,
+				76C4DFFA287D69620038A363 /* AffineGridGenerator.cpp */,
+				76C4DFFB287D69620038A363 /* AffineGridGenerator.hpp */,
 			);
 			name = Ops;
 			sourceTree = "<group>";
@@ -1011,6 +1019,8 @@
 				76AA4A0727FBC6C500F0F3C6 /* NanodetPlusDetectionOutputLayer.hpp */,
 				768B2CB7287665DF00F8E108 /* ROIAlignLayer.cpp */,
 				768B2CB8287665DF00F8E108 /* ROIAlignLayer.hpp */,
+				76C4DFF7287D65A60038A363 /* SimpleROIAlignLayer.cpp */,
+				76C4DFF8287D65A60038A363 /* SimpleROIAlignLayer.hpp */,
 			);
 			name = Layer;
 			sourceTree = "<group>";
@@ -1328,6 +1338,7 @@
 				7628DEDE27CDF5E600B136FA /* Activation.cpp in Sources */,
 				76F336C727A5CEEC00E3AEF1 /* DispatchStub.cpp in Sources */,
 				7620AF6E27B4060A0081C210 /* RangeFactory.cpp in Sources */,
+				76C4DFFC287D69620038A363 /* AffineGridGenerator.cpp in Sources */,
 				7687218827C35B9F006640CF /* BatchNormalization.cpp in Sources */,
 				767B03FD283A7BAE00466736 /* Benchmark.cpp in Sources */,
 				7628E17D27CFCFCB00B136FA /* Dropout.cpp in Sources */,
@@ -1343,6 +1354,7 @@
 				76A222F9287C6C8E00681843 /* TensorAdvancedIndexing.cpp in Sources */,
 				76D1285127EC2C3C00A54E6F /* TypeProperties.cpp in Sources */,
 				7628DEE727CE155400B136FA /* ShortCutLayer.cpp in Sources */,
+				76C4DFF9287D65A60038A363 /* SimpleROIAlignLayer.cpp in Sources */,
 				7628E17A27CFCE5700B136FA /* DropoutLayer.cpp in Sources */,
 				760704B827E32E7200D5E00D /* DefaultColor.cpp in Sources */,
 				762E3B5627BEA4A20075F983 /* MemoryOverlap.cpp in Sources */,

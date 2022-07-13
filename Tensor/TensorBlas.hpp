@@ -53,6 +53,26 @@ void gemm(
     const scalar_t beta,
     scalar_t *c, int64_t ldc);
 
+template <typename scalar_t>
+void gemm_batched(
+    TransposeType transa, TransposeType transb,
+    int64_t batch_size, int64_t m, int64_t n, int64_t k,
+    scalar_t alpha,
+    const scalar_t **a, int64_t lda,
+    const scalar_t **b, int64_t ldb,
+    scalar_t beta,
+    scalar_t **c, int64_t ldc);
+
+template <typename scalar_t>
+void gemm_batched_with_stride(
+    TransposeType transa, TransposeType transb,
+    int64_t batch_size, int64_t m, int64_t n, int64_t k,
+    scalar_t alpha,
+    const scalar_t *a, int64_t lda, int64_t batch_stride_a,
+    const scalar_t *b, int64_t ldb, int64_t batch_stride_b,
+    scalar_t beta,
+    scalar_t *c, int64_t ldc, int64_t batch_stride_c);
+
 }
 
 #endif /* TensorBlas_hpp */

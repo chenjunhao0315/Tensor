@@ -12,8 +12,6 @@ namespace otter {
 
 void addmm_impl_cpu_(Tensor &result, const Tensor &self, Tensor m1, Tensor m2, const Scalar& beta, const Scalar& alpha);
 
-Tensor matmul(Tensor& output, const Tensor& tensor1, const Tensor& tensor2);
-
 enum DecompTypes {
     /** Gaussian elimination with the optimal pivot element chosen. */
     DECOMP_LU       = 0,

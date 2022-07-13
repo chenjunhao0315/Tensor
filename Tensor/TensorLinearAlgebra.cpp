@@ -18,6 +18,7 @@
 #include <float.h>
 #include <time.h>
 #include "TensorOperator.hpp"
+#include "Parallel.hpp"
 
 namespace otter {
 
@@ -141,13 +142,273 @@ void addmm_impl_cpu_(Tensor &result, const Tensor &self, Tensor m1, Tensor m2, c
     }
 }
 
-Tensor matmul(Tensor& output, const Tensor& tensor1, const Tensor& tensor2) {
-    auto dim_tensor1 = tensor1.dim();
-    auto dim_tensor2 = tensor2.dim();
-    (void)dim_tensor1;
-    (void)dim_tensor2;
-    
-    return output;
+template <typename Meta>
+void common_checks_baddbmm_bmm(Meta& meta, const Tensor& batch1, const Tensor& batch2, const Scalar& beta, const Scalar& alpha, bool is_bmm, const Tensor& self_baddbmm = Tensor()) {
+  OTTER_CHECK(batch1.dim() == 3, "batch1 must be a 3D tensor");
+  OTTER_CHECK(batch2.dim() == 3, "batch2 must be a 3D tensor");
+  const auto batch1_sizes = batch1.sizes();
+  const auto batch2_sizes = batch2.sizes();
+  int64_t bs = batch1_sizes[0];
+  int64_t contraction_size = batch1_sizes[2];
+  int64_t res_rows = batch1_sizes[1];
+  int64_t res_cols = batch2_sizes[2];
+  std::vector<int64_t> output_size {bs, res_rows, res_cols};
+  OTTER_CHECK(batch2_sizes[0] == bs && batch2_sizes[1] == contraction_size,
+              "Expected size for first two dimensions of batch2 tensor to be: [",
+              bs, ", ", contraction_size, "] but got: [", batch2_sizes[0], ", ", batch2_sizes[1], "].");
+  auto& result = meta.maybe_get_output(0);
+  // 'set_output' does not resize for in-place calls
+  meta.set_output(0, output_size, {}, batch2.options());
+  const auto result_sizes = result.sizes();
+  // Error is raised if called from in-place overload with incorrect shape
+//  OTTER_CHECK(result_sizes == output_size,
+//              "Expected an output tensor with shape [", output_size, "] but got shape ", result_sizes);
+}
+DEFINE_META_FUNCTION(bmm)(const Tensor& self, const Tensor& mat2) {
+    common_checks_baddbmm_bmm(*this, self, mat2, Scalar(0.0), Scalar(1.0), true);
+}
+DEFINE_META_FUNCTION(baddbmm)(const Tensor& self, const Tensor& batch1, const Tensor& batch2, const Scalar& beta, const Scalar& alpha) {
+  auto self_ = expand_size(self, {batch1.size(0), batch1.size(1), batch2.size(2)});
+  common_checks_baddbmm_bmm(*this, batch1, batch2, beta, alpha, false, *self_);
+}
+
+static void addbmm_impl_(Tensor &result, const Tensor &self, const Tensor &batch1, const Tensor &batch2, const Scalar& beta, const Scalar& alpha) {
+  OTTER_CHECK(batch1.dim() == 3, "batch1 must be a 3D tensor");
+  OTTER_CHECK(batch2.dim() == 3, "batch2 must be a 3D tensor");
+  OTTER_CHECK(batch1.size(0) == batch2.size(0),
+      "batch1 and batch2 must have same number of batches, got ",
+      batch1.size(0), " and ", batch2.size(0));
+  OTTER_CHECK(batch1.size(2) == batch2.size(1),
+      "Incompatible matrix sizes for bmm (",
+      batch1.size(1), "x", batch1.size(2), " and ",
+      batch2.size(1), "x", batch2.size(2), ")");
+  const int64_t dim1 = batch1.size(1);
+  const int64_t dim2 = batch2.size(2);
+  OTTER_CHECK(self.size(0) == dim1 && self.size(1) == dim2,
+      "self tensor does not match matmul output shape");
+  result.resize_as_(self);
+  if (beta.to<double>() != 0.0 && !self.is_same(result)) {
+    result.copy_(self);
+  }
+  const int64_t num_batches = batch1.size(0);
+  if (num_batches == 0) {
+    if (beta.to<double>() != 0.0) {
+      result.mul_(beta);
+    } else {
+      result.zero_();
+    }
+    return;
+  }
+  auto adjusted_beta(beta);
+  for (const auto batch : otter::irange(num_batches)) {
+    result.addmm_(batch1[batch], batch2[batch], adjusted_beta, alpha);
+    adjusted_beta = 1; // accumulate output once
+  }
+}
+Tensor& addbmm_out(const Tensor& self, const Tensor& batch1, const Tensor& batch2, const Scalar& beta, const Scalar& alpha, Tensor& result) {
+  auto b_self = expand_size(self, {batch1.size(1), batch2.size(2)});
+  {
+    addbmm_impl_(result, *b_self, batch1, batch2, beta, alpha);
+  }
+  return result;
+}
+Tensor &addbmm_(Tensor& self, const Tensor& batch1, const Tensor& batch2, const Scalar& beta, const Scalar& alpha) {
+  return addbmm_out(self, batch1, batch2, beta, alpha, self);
+}
+Tensor addbmm(const Tensor& self, const Tensor& batch1, const Tensor& batch2, const Scalar& beta, const Scalar& alpha) {
+  Tensor result = otter::empty({0}, self.options());
+  return addbmm_out(self, batch1, batch2, beta, alpha, result);
+}
+
+template <typename scalar_t, bool is_bmm>
+inline void baddbmm_cpu_kernel(const Tensor& result, const Tensor& self, const Tensor& mat2, const Scalar& beta_, const Scalar& alpha_) {
+  int64_t bs = result.size(0);
+  int64_t is = result.size(1);
+  int64_t js = result.size(2);
+  int64_t ks = self.size(2);
+  scalar_t alpha = alpha_.to<scalar_t>();
+  scalar_t beta = beta_.to<scalar_t>();
+  auto r0 = result.accessor<scalar_t, 3>();
+  auto s0 = self.accessor<scalar_t, 3>();
+  auto m0 = mat2.accessor<scalar_t, 3>();
+  int64_t grain_size = std::min(otter::GRAIN_SIZE / (is * js * ks), (int64_t)1);
+  parallel_for(0, bs, grain_size, [&](int64_t b_begin, int64_t b_end) {
+      for (const auto b : otter::irange(b_begin, b_end)) {
+        auto r1 = r0[b];
+        auto s1 = s0[b];
+        auto m1 = m0[b];
+        for (const auto i : otter::irange(is)) {
+          auto r2 = r1[i];
+          auto s2 = s1[i];
+          for (const auto j : otter::irange(js)) {
+            scalar_t &r = r2[j];
+            if (is_bmm) {
+              r = 0;
+              for (const auto k : otter::irange(ks)) {
+                r += s2[k] * m1[k][j];
+              }
+            } else {
+              r *= beta;
+              for (const auto k : otter::irange(ks)) {
+                r += alpha * s2[k] * m1[k][j];
+              }
+            }
+          }
+        }
+      }
+    });
+}
+void baddbmm_with_gemm_(const Tensor &result, const Tensor &mat1, const Tensor &mat2, const Scalar &beta_, const Scalar &alpha_) {
+  OTTER_INTERNAL_ASSERT(result.is_contiguous());
+  const auto result_sizes = result.sizes();
+  const auto result_strides = result.strides();
+  const auto mat1_strides = mat1.strides();
+  const auto mat2_strides = mat2.strides();
+  const auto mat1_sizes = mat1.sizes();
+  const auto mat2_sizes = mat2.sizes();
+  auto is_transposed = [](const otter::IntArrayRef& strides, const otter::IntArrayRef& sizes) {
+    return strides[1] == 1 && strides[2] >= sizes[1];
+  };
+  // gemm expects fortran order matrices, so we swap argument order to transpose everything
+  const auto transpose_a = is_transposed(mat2_strides, mat2_sizes);
+  const auto transpose_b = is_transposed(mat1_strides, mat1_sizes);
+  const int64_t batch_size = mat1_sizes[0];
+  const int64_t m = result_sizes[2];
+  const int64_t n = result_sizes[1];
+  const int64_t k = mat2_sizes[1];
+  const int64_t lda = mat2_strides[transpose_a ? 2 : 1];
+  const int64_t ldb = mat1_strides[transpose_b ? 2 : 1];
+  const int64_t ldc = result_strides[1];
+  OTTER_DISPATCH_FLOATING_TYPES(result.scalar_type(), "baddbmm_with_gemm", [&] {
+    const auto alpha = alpha_.to<scalar_t>();
+    const auto beta = beta_.to<scalar_t>();
+    otter::gemm_batched_with_stride(
+        transpose_a ? TransposeType::Transpose : TransposeType::NoTranspose,
+        transpose_b ? TransposeType::Transpose : TransposeType::NoTranspose,
+        batch_size, m, n, k, alpha,
+        mat2.data_ptr<scalar_t>(), lda, mat2_strides[0],
+        mat1.data_ptr<scalar_t>(), ldb, mat1_strides[0],
+        beta,
+        result.data_ptr<scalar_t>(), ldc, result_strides[0]);
+  });
+}
+// This tries to apply some optimizations to bmm/baddbmm:
+// - When the operand size is small, computation are parallelized over the batch
+//   dimension using OMP and naive matrix multiplication is applied.
+// - When the operand size is larger than the threshold, if compiled with MKL, MKL's batch gemm is used.
+// - Otherwise, we use a series of matrix multiplications.
+// The threshold of 400 for the first has not been thoroughly benchmarked yet and may have room for further
+// optimization, it likely depends on the characteristics of the CPU, MKL will be different from non-MKL etc.,
+// but this seems to be a first starting point.
+static inline void bmm_out_or_baddbmm_(const Tensor& self_or_result_, const Tensor& batch1, const Tensor& batch2, const Scalar& beta, const Scalar& alpha, bool is_bmm_out) {
+  // is_bmm_out: true for bmm_out, false for baddbmm_
+  // self_or_result is "self" for baddbmm_ and "result" for bmm_out
+  Tensor& self_or_result = const_cast<Tensor&>(self_or_result_);
+  const auto batch1_sizes = batch1.sizes();
+  const auto batch2_sizes = batch2.sizes();
+  int64_t bs = batch1_sizes[0];
+  int64_t contraction_size = batch1_sizes[2];
+  int64_t res_rows = batch1_sizes[1];
+  int64_t res_cols = batch2_sizes[2];
+  // handle pathological cases that blas may not like
+  if (self_or_result.numel() == 0) {
+    return;
+  } else if (contraction_size == 0) {
+    if (is_bmm_out || (beta.to<double>() == 0.0)) {
+      self_or_result.zero_();
+      return;
+    } else {
+      self_or_result.mul_(beta);
+      return;
+    }
+  }
+  auto batch_items_contiguous_or_transposed = [&](const Tensor& t) {
+    const auto sizes = t.sizes();
+    const auto strides = t.strides();
+    return (strides[2] == 1 && strides[1] >= sizes[2])
+            || (strides[1] == 1 && strides[2] >= sizes[1]);
+  };
+  if (contraction_size * res_rows * res_cols < 400) {
+    if (is_bmm_out) {
+      OTTER_DISPATCH_ALL_TYPES(batch1.scalar_type(), "bmm", [&] {
+          baddbmm_cpu_kernel<scalar_t, true>(self_or_result, batch1, batch2, beta, alpha);
+        });
+    } else {
+      OTTER_DISPATCH_ALL_TYPES(batch1.scalar_type(), "baddbmm", [&] {
+          baddbmm_cpu_kernel<scalar_t, false>(self_or_result, batch1, batch2, beta, alpha);
+        });
+    }
+  } else { // split along batch dimension
+#ifdef OTTER_MOBILE
+    /*
+     * We only do multithreading when Inference mode is enabled because various
+     * thread local state is not appropriately propagated through
+     * otter::parallel_for. e.g. RecordFunction related state, dispatchKeySet Big
+     * concern with this is that if we use otter::parallel_for where state is not
+     * propagated then dispatch machinery may work differently on main thread
+     * vs. other threads, leading to undefined behavior.
+     * Thus it is recommended to not use otter::parallel_for where lambdas do
+     * ops that go through dispatcher.
+     * For now we circument this by InferenceMode guard in order to unlock
+     * performance.
+     * Longer term we probably want a separate API that explicitly calls out
+     * the TLS that it propagates.
+     * Also note that this is enabled for mobile only because blas
+     * implementation for non-mobile build is already multithreaded.
+     */
+    // Benchmarking was done as follows:
+    // bmm_test: operator benchmark under
+    // benchmarks/operator_benchmarks/pt/bmm_test.py Ran this benchmark for
+    // various matrix sizes on Samsung S8U
+    const bool enable_multithreaded_bmm = bs >= 4 && res_rows >= 4 && res_cols >= 16 && contraction_size >= 16;
+#else
+    const bool enable_multithreaded_bmm{false};
+#endif
+    if (is_bmm_out) {
+      if (enable_multithreaded_bmm) {
+        auto bmm_out_fn = [&](uint64_t start, uint64_t end) {
+          for (const auto b : otter::irange(start, end)) {
+            auto r = self_or_result.select(0, b);
+            addmm_impl_cpu_(
+                r, r, batch1.select(0, b), batch2.select(0, b), 0, 1);
+          }
+        };
+        otter::parallel_for(0, bs, 1, bmm_out_fn);
+      } else {
+        for (const auto b : otter::irange(bs)) {
+          auto r = self_or_result.select(0, b);
+          addmm_impl_cpu_(r, r, batch1.select(0, b), batch2.select(0, b), 0, 1);
+        }
+      }
+    } else {
+      if (enable_multithreaded_bmm) {
+        auto bmm_fn = [&](uint64_t start, uint64_t end) {
+          for (const auto b : otter::irange(start, end)) {
+            self_or_result.select(0, b).addmm_(
+                batch1.select(0, b), batch2.select(0, b), beta, alpha);
+          }
+        };
+        otter::parallel_for(0, bs, 1, bmm_fn);
+      } else {
+        for (const auto b : otter::irange(bs)) {
+          self_or_result.select(0, b).addmm_(
+              batch1.select(0, b), batch2.select(0, b), beta, alpha);
+        }
+      }
+    }
+  }
+  return;
+}
+
+DEFINE_IMPL_FUNCTION(baddbmm_out_cpu)
+(const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar& beta, const Scalar& alpha, const Tensor& result) {
+    bmm_out_or_baddbmm_(result, batch1, batch2, beta, alpha, false);
+  }
+DEFINE_IMPL_FUNCTION(bmm_out_cpu)
+(const Tensor & batch1, const Tensor & batch2, const Tensor & result) {
+    {
+    bmm_out_or_baddbmm_(result, batch1, batch2, Scalar(0.0), Scalar(1.0), true);
+    }
 }
 
 #define det2(m)   ((double)m(0,0)*m(1,1) - (double)m(0,1)*m(1,0))

@@ -35,6 +35,7 @@
 #include "InnerProductLayer.hpp"
 #include "FlattenLayer.hpp"
 #include "Convolution1DLayer.hpp"
+#include "SimpleROIAlignLayer.hpp"
 
 namespace otter {
 
@@ -64,6 +65,7 @@ REGISTER_LAYER_CLASS(ROIAlign);
 REGISTER_LAYER_CLASS(InnerProduct);
 REGISTER_LAYER_CLASS(Flatten);
 REGISTER_LAYER_CLASS(Convolution1D);
+REGISTER_LAYER_CLASS(SimpleROIAlign);
 
 }   // end namespace otter
 

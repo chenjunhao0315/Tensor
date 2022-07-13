@@ -385,6 +385,11 @@ public:
     Tensor & scatter_(int64_t dim, const Tensor & index, const Tensor & src, int64_t reduce) const;
     Tensor scatter(int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce) const;
     Tensor & scatter_(int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce) const;
+    
+    Tensor baddbmm(const Tensor & batch1, const Tensor & batch2, const Scalar & beta = 1, const Scalar & alpha = 1) const;
+    Tensor & baddbmm_(const Tensor & batch1, const Tensor & batch2, const Scalar & beta = 1, const Scalar & alpha = 1) const;
+    
+    Tensor bmm(const Tensor & mat2) const;
 };
 
 template <typename T, typename... Args>

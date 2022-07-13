@@ -48,10 +48,13 @@ Tensor ones_like(const Tensor& self, ScalarType dtype);
 Tensor ones_like(const Tensor& self, TensorOptions options);
 
 Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, ScalarType dtype);
+Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, TensorOptions options);
 
 Tensor range(const Scalar& start, const Scalar& end, const Scalar& step, ScalarType dtype);
+Tensor range(const Scalar& start, const Scalar& end, const Scalar& step, TensorOptions options);
 
 Tensor arange(const Scalar& start, const Scalar& end, const Scalar& step, ScalarType dtype);
+Tensor arange(const Scalar& start, const Scalar& end, const Scalar& step, TensorOptions options);
 
 Tensor rand(IntArrayRef size, ScalarType dtype);
 Tensor rand(IntArrayRef size, TensorOptions options);

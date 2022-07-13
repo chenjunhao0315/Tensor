@@ -1888,6 +1888,102 @@ Tensor & wrapper_scatter__value_reduce(Tensor & self, int64_t dim, const Tensor 
     
     return self;
 }
+struct structured_baddbmm_out_cpu_functional final : public structured_baddbmm_out_cpu {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+    }
+
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+      return *outputs_[output_idx];
+    }
+    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_baddbmm(const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha) {
+    structured_baddbmm_out_cpu_functional op;
+    op.meta(self, batch1, batch2, beta, alpha);
+    op.impl(self, batch1, batch2, beta, alpha, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_baddbmm_out_cpu_out final : public structured_baddbmm_out_cpu {
+    structured_baddbmm_out_cpu_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+
+    }
+
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+      return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_baddbmm_out_out(const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha, Tensor & out) {
+    structured_baddbmm_out_cpu_out op(out);
+    op.meta(self, batch1, batch2, beta, alpha);
+    op.impl(self, batch1, batch2, beta, alpha, op.maybe_get_output(0));
+
+    return out;
+}
+struct structured_baddbmm_out_cpu_inplace final : public structured_baddbmm_out_cpu {
+    structured_baddbmm_out_cpu_inplace(Tensor& self) : outputs_{std::ref(self)} {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        check_inplace(out, sizes, options);
+
+    }
+
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+      return outputs_[output_idx];
+    }
+    
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_baddbmm_(Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha) {
+    structured_baddbmm_out_cpu_inplace op(self);
+    op.meta(self, batch1, batch2, beta, alpha);
+    op.impl(self, batch1, batch2, beta, alpha, op.outputs_[0]);
+
+    return self;
+}
+
+struct structured_bmm_out_cpu_functional final : public structured_bmm_out_cpu {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+    }
+
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+      return *outputs_[output_idx];
+    }
+    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_bmm(const Tensor & self, const Tensor & mat2) {
+    structured_bmm_out_cpu_functional op;
+    op.meta(self, mat2);
+    op.impl(self, mat2, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_bmm_out_cpu_out final : public structured_bmm_out_cpu {
+    structured_bmm_out_cpu_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+
+    }
+
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+      return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_bmm_out_out(const Tensor & self, const Tensor & mat2, Tensor & out) {
+    structured_bmm_out_cpu_out op(out);
+    op.meta(self, mat2);
+    op.impl(self, mat2, op.maybe_get_output(0));
+
+    return out;
+}
 
 namespace native {
 
@@ -2350,6 +2446,29 @@ Tensor & scatter_outf(const Tensor & self, int64_t dim, const Tensor & index, co
 }
 Tensor & scatter_(Tensor & self, int64_t dim, const Tensor & index, const Scalar & value, int64_t reduce) {
     return wrapper_scatter__value_reduce(self, dim, index, value, reduce);
+}
+
+Tensor baddbmm(const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha) {
+    return wrapper_baddbmm(self, batch1, batch2, beta, alpha);
+}
+Tensor & baddbmm_out(Tensor & out, const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha) {
+    return wrapper_baddbmm_out_out(self, batch1, batch2, beta, alpha, out);
+}
+Tensor & baddbmm_outf(const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha, Tensor & out) {
+    return wrapper_baddbmm_out_out(self, batch1, batch2, beta, alpha, out);
+}
+Tensor & baddbmm_(Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha) {
+    return wrapper_baddbmm_(self, batch1, batch2, beta, alpha);
+}
+
+Tensor bmm(const Tensor & self, const Tensor & mat2) {
+    return wrapper_bmm(self, mat2);
+}
+Tensor & bmm_out(Tensor & out, const Tensor & self, const Tensor & mat2) {
+    return wrapper_bmm_out_out(self, mat2, out);
+}
+Tensor & bmm_outf(const Tensor & self, const Tensor & mat2, Tensor & out) {
+    return wrapper_bmm_out_out(self, mat2, out);
 }
 
 }   // end namespace native

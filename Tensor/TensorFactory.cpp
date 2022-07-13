@@ -151,14 +151,33 @@ Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, ScalarTyp
     return otter::linspace_out(start, end, steps, result);
 }
 
+Tensor linspace(const Scalar& start, const Scalar& end, int64_t steps, TensorOptions options) {
+    assert(steps >= 0);
+    
+    Tensor result = empty({steps}, options);
+    return otter::linspace_out(start, end, steps, result);
+}
+
 Tensor range(const Scalar& start, const Scalar& end, const Scalar& step, ScalarType dtype) {
     Tensor result = empty({}, dtype);
     
     return otter::range_out(start, end, step, result);
 }
 
+Tensor range(const Scalar& start, const Scalar& end, const Scalar& step, TensorOptions options) {
+    Tensor result = empty({}, options);
+    
+    return otter::range_out(start, end, step, result);
+}
+
 Tensor arange(const Scalar& start, const Scalar& end, const Scalar& step, ScalarType dtype) {
     Tensor result = empty({}, dtype);
+    
+    return otter::arange_out(start, end, step, result);
+}
+
+Tensor arange(const Scalar& start, const Scalar& end, const Scalar& step, TensorOptions options) {
+    Tensor result = empty({}, options);
     
     return otter::arange_out(start, end, step, result);
 }
