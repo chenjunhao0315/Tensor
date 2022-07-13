@@ -507,14 +507,14 @@ otter::Tensor get_seg_masks(otter::Tensor& mask_pred, otter::Tensor& det_bboxes,
         im_mask[inds].slice(0, y0_int, y1_int, 1).slice(1, x0_int, x1_int, 1) = mask;
     }
     
-    for (int i = 0; i < mask_pred.size(0); ++i) {
-        auto mask = im_mask[i];
-        
-        mask = mask.to(otter::ScalarType::Byte) * 255;
-        mask = mask.view({mask.size(0), mask.size(1), 1});
-        
-        otter::cv::save_image(mask, std::to_string(i).c_str());
-    }
+//    for (int i = 0; i < mask_pred.size(0); ++i) {
+//        auto mask = im_mask[i];
+//
+//        mask = mask.to(otter::ScalarType::Byte) * 255;
+//        mask = mask.view({mask.size(0), mask.size(1), 1});
+//
+//        otter::cv::save_image(mask, std::to_string(i).c_str());
+//    }
     
     return im_mask;
 }
@@ -868,7 +868,9 @@ otter::Tensor generate_proposal_lists(std::vector<otter::Tensor>& cls_scores, st
         featmap_sizes.push_back(cls_score.sizes().slice(2));
     }
     
+    otter::Clock generate_prior_clock;
     auto mlvl_priors = anchor_generator.grid_priors(featmap_sizes);
+    generate_prior_clock.stop_and_show("ms (generate prior)");
     
     otter::Tensor result_list = anchor_generator._get_bboxes_single(cls_scores, bbox_preds, mlvl_priors, image_shape);
     
@@ -1134,10 +1136,7 @@ otter::Tensor AnchorGenerator::single_level_grid_priors(otter::IntArrayRef featm
     
     auto shifts = otter::native::stack({shift_xx, shift_yy, shift_xx, shift_yy}, -1);
     
-    otter::Tensor all_anchors = otter::empty({shifts.size(0), base_anchors.size(0), base_anchors.size(1)}, otter::ScalarType::Float);
-    for (int i = 0; i < shifts.size(0); ++i) {
-        all_anchors[i] = base_anchors + shifts[i];
-    }
+    auto all_anchors = base_anchors.expand({shifts.size(0), base_anchors.size(0), base_anchors.size(1)}) + shifts.view({shifts.size(0), -1, shifts.size(1)});
     
     return all_anchors.view({-1, 4});
 }
