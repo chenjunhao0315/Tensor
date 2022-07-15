@@ -784,6 +784,29 @@ int Extractor::benchmark_info(std::string start_name, std::string end_name, IntA
     
     return ret;
 }
+
+int Extractor::benchmark_info(std::vector<std::string> start_name, std::vector<std::string> end_name, std::vector<IntArrayRef> input_shape) {
+    assert(start_name.size() == input_shape.size());
+    
+    for (const auto i : otter::irange(0, start_name.size())) {
+        Tensor input = otter::rand(input_shape[i], otter::ScalarType::Float);
+        this->input(start_name[i], input);
+    }
+    
+    int ret = 0;
+    for (const auto i : otter::irange(0, end_name.size())) {
+        int blob_index = net_->find_blob_index_by_name(end_name[i]);
+        
+        OTTER_CHECK(blob_index >= -1 && blob_index < int(blob_tensors_.size()), "Extract failed!\n");
+        
+        if (!blob_tensors_[blob_index].defined()) {
+            int layer_index = net_->blobs[blob_index].producer;
+            ret = net_->forward_layer_benchmark(layer_index, blob_tensors_, option);
+        }
+    }
+    
+    return ret;
+}
 #endif
 
 }   // end namespace otter

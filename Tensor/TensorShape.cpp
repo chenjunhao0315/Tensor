@@ -717,6 +717,66 @@ Tensor& cat_packed_out(TensorList tensors, int64_t dim, Tensor& out) {
         for (size_t b = 0; b < tensors.size(); b++) {
             const Tensor& tensor = tensors[b];
             
+#if __AVX__
+            if (tensor.elempack() == 8 && elempack == 4) {
+                auto tensor_a = tensor.accessor<float, 2, 8>();
+                for (int i = 0; i < tensor.size(0); i++) {
+                    const float* r0 = tensor_a[i].data();
+
+                    float* outptr0 = outptr;
+                    float* outptr1 = outptr + w * 4;
+
+                    for (int j = 0; j < w; j++) {
+                        outptr0[0] = r0[0];
+                        outptr0[1] = r0[1];
+                        outptr0[2] = r0[2];
+                        outptr0[3] = r0[3];
+                        outptr1[0] = r0[4];
+                        outptr1[1] = r0[5];
+                        outptr1[2] = r0[6];
+                        outptr1[3] = r0[7];
+
+                        outptr0 += 4;
+                        outptr1 += 4;
+                        r0 += 8;
+                    }
+
+                    outptr += w * 8;
+                }
+            }
+            if (tensor.elempack() == 8 && elempack == 1) {
+                auto tensor_a = tensor.accessor<float, 2, 8>();
+                for (int i = 0; i < tensor.size(0); i++) {
+                    const float* r0 = tensor_a[i].data();
+
+                    float* outptr0 = outptr;
+                    float* outptr1 = outptr + w;
+                    float* outptr2 = outptr + w * 2;
+                    float* outptr3 = outptr + w * 3;
+                    float* outptr4 = outptr + w * 4;
+                    float* outptr5 = outptr + w * 5;
+                    float* outptr6 = outptr + w * 6;
+                    float* outptr7 = outptr + w * 7;
+
+                    for (int j = 0; j < w; j++)
+                    {
+                        *outptr0++ = r0[0];
+                        *outptr1++ = r0[1];
+                        *outptr2++ = r0[2];
+                        *outptr3++ = r0[3];
+                        *outptr4++ = r0[4];
+                        *outptr5++ = r0[5];
+                        *outptr6++ = r0[6];
+                        *outptr7++ = r0[7];
+
+                        r0 += 8;
+                    }
+
+                    outptr += w * 8;
+                }
+            }
+#endif // __AVX__
+            
             if (tensor.elempack() == 4 && elempack == 1) {
                 auto tensor_a = tensor.accessor<float, 2, 4>();
                 for (const auto i : otter::irange(0, tensor.size(0))) {

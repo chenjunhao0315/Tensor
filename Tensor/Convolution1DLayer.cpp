@@ -222,9 +222,7 @@ int Convolution1DLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, con
 
     const int kernel_extent_w = dilation_w * (kernel_w - 1) + 1;
 
-    Tensor bottom_blob_bordered = otter::constant_pad(bottom_blob, {padding_w, padding_w
-        
-    }, 0);
+    Tensor bottom_blob_bordered = otter::constant_pad(bottom_blob, {padding_w, padding_w}, 0);
 
     w = bottom_blob_bordered.size(1);
     h = bottom_blob_bordered.size(0);
@@ -254,30 +252,27 @@ int Convolution1DLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, con
 #if __AVX__
     if (elempack == 8 && out_elempack == 8)
     {
-        auto weight_data_packed_ra = weight_data_packed.raw_accessor<float, 3>();
+        auto bottom_blob_bordered_a = bottom_blob_bordered.accessor<float, 2, 8>();
+        auto top_blob_a = top_blob.accessor<float, 2, 8>();
+        auto weight_data_packed_a = weight_data_packed.accessor<float, 3, 64>();
         {
             otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
-                for (const auto p : otter::irange(begin, end))
-                {
-                    float* outptr = top_blob_ra[p].data();
+                for (const auto p : otter::irange(begin, end)) {
+                    float* outptr = top_blob_a[p].data();
 
-                    for (int j = 0; j < outw; j++)
-                    {
+                    for (int j = 0; j < outw; j++) {
                         __m256 _sum = _mm256_set1_ps(0.f);
 
-                        if (bias_term)
-                        {
+                        if (bias_term) {
                             _sum = _mm256_loadu_ps(((const float*)bias_data_ptr) + p * 8);
                         }
 
-                        const float* kptr = weight_data_packed_ra[p].data();
+                        const float* kptr = weight_data_packed_a[p].data();
 
-                        for (int q = 0; q < h; q++)
-                        {
-                            const float* sptr = bottom_blob_bordered_ra[q].data() + j * stride_w * 8;
+                        for (int q = 0; q < h; q++) {
+                            const float* sptr = bottom_blob_bordered_a[q].data() + j * stride_w * 8;
 
-                            for (int k = 0; k < kernel_w; k++)
-                            {
+                            for (int k = 0; k < kernel_w; k++) {
                                 __m256 _val0 = _mm256_broadcast_ss(sptr);
                                 __m256 _val1 = _mm256_broadcast_ss(sptr + 1);
                                 __m256 _val2 = _mm256_broadcast_ss(sptr + 2);
@@ -317,7 +312,7 @@ int Convolution1DLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, con
 
     if (elempack == 1 && out_elempack == 8)
     {
-        auto weight_data_packed_ra = weight_data_packed.raw_accessor<float, 3>();
+        auto weight_data_packed_a = weight_data_packed.accessor<float, 3, 8>();
         {
             otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
                 for (const auto p : otter::irange(begin, end)) {
@@ -332,7 +327,7 @@ int Convolution1DLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, con
                             _sum = _mm256_loadu_ps(((const float*)bias_data_ptr) + p * 8);
                         }
 
-                        const float* kptr = weight_data_packed_ra[p].data();
+                        const float* kptr = weight_data_packed_a[p].data();
 
                         for (int q = 0; q < h; q++)
                         {
