@@ -38,80 +38,87 @@ ScalarType get_update_scalarType(const ScalarType& src, int out_elempack) {
     constexpr auto fp16 = ScalarType::Float16;
     constexpr auto fp32 = ScalarType::Float32;
     constexpr auto fp64 = ScalarType::Float64;
+    constexpr auto hp1  = ScalarType::HFloat;
+    constexpr auto hp4  = ScalarType::HFloat4;
+    constexpr auto hp8  = ScalarType::HFloat8;
+    constexpr auto hp16 = ScalarType::HFloat16;
+    constexpr auto hp32 = ScalarType::HFloat32;
+    constexpr auto hp64 = ScalarType::HFloat64;
     
     constexpr auto iu1 = ScalarType::Char;
     constexpr auto iu2 = ScalarType::Short;
     constexpr auto iu8 = ScalarType::Long;
     constexpr auto fu8 = ScalarType::Double;
     constexpr auto bu1 = ScalarType::Bool;
+    constexpr auto hf1 = ScalarType::HFloat;
 
     static constexpr ScalarType _promoteTypesLookup[(1 << 6) + 1][static_cast<int>(ScalarType::NumOptions)] = {
-        /*         sp1  iu1  iu2   ip1  iu8   fp1  fu8  bu1   sp4   ip4   fp4   sp8   ip8   fp8  sp16  ip16  fp16  sp32  ip32  fp32  sp64  ip64  fp64 */
-        /*  0 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /*  1 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp1,  ip1,  fp1,  sp1,  ip1,  fp1,  sp1,  ip1,  fp1,  sp1,  ip1,  fp1,  sp1,  ip1,  fp1},
-        /*  2 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /*  3 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /*  4 */ { sp4, iu1, iu2,  ip4, iu8,  fp4, fu8, bu1,  sp4,  ip4,  fp4,  sp4,  ip4,  fp4,  sp4,  ip4,  fp4,  sp4,  ip4,  fp4,  sp4,  ip4,  fp4},
-        /*  5 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /*  6 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /*  7 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /*  8 */ { sp8, iu1, iu2,  ip8, iu8,  fp8, fu8, bu1,  sp8,  ip8,  fp8,  sp8,  ip8,  fp8,  sp8,  ip8,  fp8,  sp8,  ip8,  fp8,  sp8,  ip8,  fp8},
-        /*  9 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 10 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 11 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 12 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 13 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 14 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 15 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 16 */ {sp16, iu1, iu2, ip16, iu8, fp16, fu8, bu1, sp16, ip16, fp16, sp16, ip16, fp16, sp16, ip16, fp16, sp16, ip16, fp16, sp16, ip16, fp16},
-        /* 17 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 18 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 19 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 20 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 21 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 22 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 23 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 24 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 25 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 26 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 27 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 28 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 29 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 30 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 31 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 32 */ {sp32, iu1, iu2, ip32, iu8, fp32, fu8, bu1, sp32, ip32, fp32, sp32, ip32, fp32, sp32, ip32, fp32, sp32, ip32, fp32, sp32, ip32, fp32},
-        /* 33 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 34 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 35 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 36 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 37 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 38 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 39 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 40 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 41 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 42 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 43 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 44 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 45 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 46 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 47 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 48 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 49 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 50 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 51 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 52 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 53 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 54 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 55 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 56 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 57 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 58 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 59 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 60 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 61 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 62 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 63 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1,  sp4,  ip4,  fp4,  sp8,  ip8,  fp8, sp16, ip16, fp16, sp32, ip32, fp32, sp64, ip64, fp64},
-        /* 64 */ {sp64, iu1, iu2, ip64, iu8, fp64, fu8, bu1, sp64, ip64, fp64, sp64, ip64, fp64, sp64, ip64, fp64, sp64, ip64, fp64, sp64, ip64, fp64},
+        /*         sp1  iu1  iu2   ip1  iu8   fp1  fu8  bu1  hf1   sp4   ip4   fp4   hp4   sp8   ip8   fp8   hp8  sp16  ip16  fp16   hp16  sp32  ip32  fp32   hp32  sp64  ip64  fp64   hp64 */
+        /*  0 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /*  1 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp1,  ip1,  fp1,  hp4,  sp1,  ip1,  fp1,  hp1,  sp1,  ip1,  fp1,   hp1,  sp1,  ip1,  fp1,   hp1,  sp1,  ip1,  fp1,   hp1},
+        /*  2 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /*  3 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /*  4 */ { sp4, iu1, iu2,  ip4, iu8,  fp4, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp4,  ip4,  fp4,  hp4,  sp4,  ip4,  fp4,   hp4,  sp4,  ip4,  fp4,   hp4,  sp4,  ip4,  fp4,   hp4},
+        /*  5 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /*  6 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /*  7 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /*  8 */ { sp8, iu1, iu2,  ip8, iu8,  fp8, fu8, bu1, hf1,  sp8,  ip8,  fp8,  hp8,  sp8,  ip8,  fp8,  hp8,  sp8,  ip8,  fp8,   hp8,  sp8,  ip8,  fp8,   hp8,  sp8,  ip8,  fp8,   hp8},
+        /*  9 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 10 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 11 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 12 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 13 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 14 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 15 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 16 */ {sp16, iu1, iu2, ip16, iu8, fp16, fu8, bu1, hf1, sp16, ip16, fp16, hp16, sp16, ip16, fp16, hp16, sp16, ip16, fp16,  hp16, sp16, ip16, fp16,  hp16, sp16, ip16, fp16,  hp16},
+        /* 17 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 18 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 19 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 20 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 21 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 22 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 23 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 24 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 25 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 26 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 27 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 28 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 29 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 30 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 31 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 32 */ {sp32, iu1, iu2, ip32, iu8, fp32, fu8, bu1, hf1, sp32, ip32, fp32, hp32, sp32, ip32, fp32, hp32, sp32, ip32, fp32,  hp32, sp32, ip32, fp32,  hp32, sp32, ip32, fp32,  hp32},
+        /* 33 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 34 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 35 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 36 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 37 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 38 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 39 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 40 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 41 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 42 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 43 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 44 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 45 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 46 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 47 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 48 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 49 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 50 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 51 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 52 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 53 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 54 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 55 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 56 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 57 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 58 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 59 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 60 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 61 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 62 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 63 */ { sp1, iu1, iu2,  ip1, iu8,  fp1, fu8, bu1, hf1,  sp4,  ip4,  fp4,  hp4,  sp8,  ip8,  fp8,  hp8, sp16, ip16, fp16,  hp16, sp32, ip32, fp32,  hp32, sp64, ip64, fp64,  hp64},
+        /* 64 */ {sp64, iu1, iu2, ip64, iu8, fp64, fu8, bu1, hf1, sp64, ip64, fp64, hp64, sp64, ip64, fp64, hp64, sp64, ip64, fp64,  hp64, sp64, ip64, fp64,  hp64, sp64, ip64, fp64,  hp64},
     };
     return _promoteTypesLookup[static_cast<int>(out_elempack)][static_cast<int>(src)];
 }
@@ -119,8 +126,8 @@ ScalarType get_update_scalarType(const ScalarType& src, int out_elempack) {
 int64_t get_elempack_from_type(const ScalarType& src) {
     static constexpr int64_t _elempackLookup[static_cast<int>(
         ScalarType::NumOptions)] =
-    /*       sp1  iu1  iu2  ip1  iu8  fp1  fu8  bu1  sp4  ip4  fp4  sp8  ip8  fp8  sp16  ip16  fp16  sp32  ip32  fp32  sp64  ip64  fp64 */
-    /* 0 */ {  1,   1,   1,   1,   1,   1,   1,   1,   4,   4,   4,   8,   8,   8,   16,   16,   16,   32,   32,   32,   64,   64,   64};
+    /*       sp1  iu1  iu2  ip1  iu8  fp1  fu8  bu1  hf1  sp4  ip4  fp4  hp4  sp8  ip8  fp8  hp8  sp16  ip16  fp16  hp16  sp32  ip32  fp32  hp32  sp64  ip64  fp64  hp64 */
+    /* 0 */ {  1,   1,   1,   1,   1,   1,   1,   1,   1,   4,   4,   4,   4,   8,   8,   8,   8,   16,   16,   16,   16,   32,   32,   32,   32,   64,   64,   64,   64};
     return _elempackLookup[static_cast<int>(src)];
 }
 

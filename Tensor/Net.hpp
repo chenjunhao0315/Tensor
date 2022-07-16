@@ -99,6 +99,7 @@ public:
     
 #if OTTER_BENCHMARK
     int benchmark(std::string start_name, std::string end_name, IntArrayRef input_shape, int loop_count = 8);
+    int benchmark(std::vector<std::string> start_name, std::vector<std::string> end_name, std::vector<IntArrayRef> input_shape, int loop_count = 8);
     int benchmark_info(std::string start_name, std::string end_name, IntArrayRef input_shape);
     int benchmark_info(std::vector<std::string> start_name, std::vector<std::string> end_name, std::vector<IntArrayRef> input_shape);
 #endif

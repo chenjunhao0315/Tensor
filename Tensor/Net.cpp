@@ -767,6 +767,47 @@ int Extractor::benchmark(std::string start_name, std::string end_name, IntArrayR
     return ret;
 }
 
+int Extractor::benchmark(std::vector<std::string> start_name, std::vector<std::string> end_name, std::vector<IntArrayRef> input_shape, int loop_count) {
+    
+    assert(start_name.size() == input_shape.size());
+    
+    std::vector<Tensor> inputs(start_name.size());
+    for (const auto i : otter::irange(0, start_name.size())) {
+        inputs[i] = otter::rand(input_shape[i], otter::ScalarType::Float);
+    }
+    std::vector<Tensor> outputs(end_name.size());
+    
+    int ret = 0;
+    
+    double min = __FLT_MAX__;
+    double max = 0;
+    double avg = 0;
+    
+    for (int i = 0; i < loop_count; ++i) {
+        for (auto& t : blob_tensors_)
+            t.reset();
+        for (const auto j : otter::irange(0, start_name.size())) {
+            this->input(start_name[j], inputs[j]);
+        }
+        
+        double t = get_current_time();
+        for (const auto j : otter::irange(0, end_name.size())) {
+            ret |= this->extract(end_name[j], outputs[j], 0);
+        }
+        t = get_current_time() - t;
+        
+        avg += t;
+        if (t > max)
+            max = t;
+        if (t < min)
+            min = t;
+    }
+    
+    printf("min: %.2f max: %.2f avg: %.2f\n", min, max, avg / loop_count);
+    
+    return ret;
+}
+
 int Extractor::benchmark_info(std::string start_name, std::string end_name, IntArrayRef input_shape) {
     Tensor input = otter::rand(input_shape, otter::ScalarType::Float);
     this->input(start_name, input);
@@ -801,7 +842,7 @@ int Extractor::benchmark_info(std::vector<std::string> start_name, std::vector<s
         
         if (!blob_tensors_[blob_index].defined()) {
             int layer_index = net_->blobs[blob_index].producer;
-            ret = net_->forward_layer_benchmark(layer_index, blob_tensors_, option);
+            ret |= net_->forward_layer_benchmark(layer_index, blob_tensors_, option);
         }
     }
     

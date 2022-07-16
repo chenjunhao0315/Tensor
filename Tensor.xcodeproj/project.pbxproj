@@ -79,6 +79,7 @@
 		76486AF727DF7A510078FF9B /* GraphicAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AF527DF7A510078FF9B /* GraphicAPI.cpp */; };
 		76486AFA27DF7CD80078FF9B /* LineIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AF827DF7CD80078FF9B /* LineIterator.cpp */; };
 		7651B6C62805CA77006710F5 /* LineDetection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7651B6C42805CA77006710F5 /* LineDetection.cpp */; };
+		7657320D2882928D004AE619 /* HFloat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7657320B2882928D004AE619 /* HFloat.cpp */; };
 		765D27122847CB0800996934 /* Quantize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 765D27102847CB0800996934 /* Quantize.cpp */; };
 		7663C21F281AF75900102057 /* Observer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C21D281AF75900102057 /* Observer.cpp */; };
 		7663C233281B503200102057 /* PoseEstimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C231281B503200102057 /* PoseEstimation.cpp */; };
@@ -364,6 +365,10 @@
 		76486AF927DF7CD80078FF9B /* LineIterator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LineIterator.hpp; sourceTree = "<group>"; };
 		7651B6C42805CA77006710F5 /* LineDetection.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LineDetection.cpp; sourceTree = "<group>"; };
 		7651B6C52805CA77006710F5 /* LineDetection.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LineDetection.hpp; sourceTree = "<group>"; };
+		7657320B2882928D004AE619 /* HFloat.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HFloat.cpp; sourceTree = "<group>"; };
+		7657320C2882928D004AE619 /* HFloat.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = HFloat.hpp; sourceTree = "<group>"; };
+		7657320E288293DC004AE619 /* TypeSafeSignMath.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TypeSafeSignMath.hpp; sourceTree = "<group>"; };
+		7657321028829752004AE619 /* HFloat-inl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = "HFloat-inl.hpp"; sourceTree = "<group>"; };
 		765D27102847CB0800996934 /* Quantize.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Quantize.cpp; sourceTree = "<group>"; };
 		765D27112847CB0800996934 /* Quantize.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Quantize.hpp; sourceTree = "<group>"; };
 		7663C21D281AF75900102057 /* Observer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Observer.cpp; sourceTree = "<group>"; };
@@ -643,11 +648,15 @@
 			children = (
 				76E6C51A27A504000036A26F /* TypeMeta.cpp */,
 				76E6C51B27A504000036A26F /* TypeMeta.hpp */,
+				7657320E288293DC004AE619 /* TypeSafeSignMath.hpp */,
 				76E6C51D27A504C80036A26F /* ScalarType.cpp */,
 				76E6C51E27A504C80036A26F /* ScalarType.hpp */,
 				760382BE27BF4AAB00CD599F /* DefaultDtype.cpp */,
 				760382BF27BF4AAB00CD599F /* DefaultDtype.hpp */,
 				761C9D03285215E500A272EF /* PackedData.hpp */,
+				7657320B2882928D004AE619 /* HFloat.cpp */,
+				7657320C2882928D004AE619 /* HFloat.hpp */,
+				7657321028829752004AE619 /* HFloat-inl.hpp */,
 			);
 			name = Dtype;
 			sourceTree = "<group>";
@@ -1288,6 +1297,7 @@
 				7604745727D68F3F00FCB785 /* Initializer.cpp in Sources */,
 				76D409DC285FB415000C7754 /* TensorEltwise.cpp in Sources */,
 				76A222E9287BCE2B00681843 /* SortingKernel.cpp in Sources */,
+				7657320D2882928D004AE619 /* HFloat.cpp in Sources */,
 				768B2CB9287665DF00F8E108 /* ROIAlignLayer.cpp in Sources */,
 				7620AF8927B593C00081C210 /* TensorUtils.cpp in Sources */,
 				76E6C53E27A511B50036A26F /* ParallelOpenMP.cpp in Sources */,
@@ -1461,6 +1471,7 @@
 					"-msse4.2",
 					"-msse4a",
 					"-mfma",
+					"-mf16c",
 				);
 				SDKROOT = macosx;
 			};
@@ -1525,6 +1536,7 @@
 					"-msse4.2",
 					"-msse4a",
 					"-mfma",
+					"-mf16c",
 				);
 				SDKROOT = macosx;
 			};
@@ -1553,6 +1565,7 @@
 					"-msse4a",
 					"-mfma",
 					"-DOTTER_CONFIG=1",
+					"-mf16c",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1581,6 +1594,7 @@
 					"-msse4a",
 					"-mfma",
 					"-DOTTER_CONFIG=1",
+					"-mf16c",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

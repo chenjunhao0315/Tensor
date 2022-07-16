@@ -15,7 +15,7 @@
 namespace otter {
 
 void direct_copy_kernel(TensorIterator& iter) {
-    OTTER_DISPATCH_ALL_TYPES_AND(otter::ScalarType::Bool, iter.dtype(), "copy_kernel", [&]() {
+    OTTER_DISPATCH_ALL_TYPES_AND2(otter::ScalarType::Bool, otter::ScalarType::HFloat, iter.dtype(), "copy_kernel", [&]() {
         cpu_kernel(iter, [=](scalar_t a) -> scalar_t {
             return a;
         });
@@ -32,9 +32,9 @@ void copy_kernel(TensorIterator& iter, bool /*non_blocking*/) {
     if (dtype == iter.dtype(1)) {
         copy_same_dtype(iter);
     } else {
-        OTTER_DISPATCH_ALL_TYPES_AND(otter::ScalarType::Bool, dtype, "copy_", [&]() {
+        OTTER_DISPATCH_ALL_TYPES_AND2(otter::ScalarType::Bool, otter::ScalarType::HFloat, dtype, "copy_", [&]() {
             using dest_t = scalar_t;
-            OTTER_DISPATCH_ALL_TYPES_AND(otter::ScalarType::Bool, iter.dtype(1), "copy_", [&]() {
+            OTTER_DISPATCH_ALL_TYPES_AND2(otter::ScalarType::Bool, otter::ScalarType::HFloat, iter.dtype(1), "copy_", [&]() {
                 cpu_kernel(iter, [=](scalar_t src) -> dest_t {
                     return otter::static_cast_with_inter_type<dest_t, scalar_t>::apply(src);;
                 });

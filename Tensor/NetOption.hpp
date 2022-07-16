@@ -19,6 +19,7 @@ public:
     bool train;
     bool use_non_lib_optimize;
     bool use_packing_layout;
+    bool use_fp16_storage;
     int openmp_blocktime;
 };
 

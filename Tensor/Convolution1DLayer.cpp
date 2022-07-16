@@ -16,6 +16,7 @@
 #include "QuantizeX86.hpp"
 #include "ActivationLayer.hpp"
 #include "TensorPacking.hpp"
+#include "HFloat.hpp"
 
 namespace otter {
 
@@ -162,6 +163,12 @@ int Convolution1DLayer::create_pipeline(const NetOption& opt) {
     
     activation = create_activation_layer(activation_type, activation_params);
     
+#if __F16C__
+    if (opt.use_fp16_storage) {
+        return create_pipeline_fp16s(opt);
+    }
+#endif
+    
     int elempack = 1;
     int out_elempack = 1;
 
@@ -216,6 +223,13 @@ int Convolution1DLayer::create_pipeline(const NetOption& opt) {
 }
 
 int Convolution1DLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const {
+    
+#if __F16C__
+    if (opt.use_fp16_storage) {
+        return forward_fp16s(bottom_blob, top_blob, opt);
+    }
+#endif
+
     int w = bottom_blob.size(1);
     int h = bottom_blob.size(0);
     int elempack = bottom_blob.elempack();
@@ -716,5 +730,594 @@ int Convolution1DLayer::forward(const Tensor& bottom_blob, Tensor& top_blob, con
 
     return 0;
 }
+
+#if __F16C__
+int Convolution1DLayer::create_pipeline_fp16s(const NetOption& opt) {
+    int elempack = 1;
+    int out_elempack = 1;
+
+#if __SSE2__
+    if (opt.use_packing_layout)
+    {
+#if __AVX__
+        elempack = in_channels % 8 == 0 ? 8 : in_channels % 4 == 0 ? 4 : 1;
+        out_elempack = out_channels % 8 == 0 ? 8 : out_channels % 4 == 0 ? 4 : 1;
+#else
+        elempack = in_channels % 4 == 0 ? 4 : 1;
+        out_elempack = out_channels % 4 == 0 ? 4 : 1;
+#endif
+    }
+#endif // __SSE2__
+
+    // src = kw-inch-outch
+    // dst = pb-pa-kw-inch/pa-outch/pb
+    {
+        Tensor weight_data_r2 = weight_data.view({out_channels, in_channels, kernel_w});
+        
+        weight_data_packed_fp16s = otter::empty({out_channels / out_elempack, in_channels / elempack, kernel_w}, otter::get_update_scalarType(otter::ScalarType::HFloat16, elempack * out_elempack));
+        
+        auto weight_data_r2_a = weight_data_r2.raw_accessor<float, 3>();
+        auto weight_data_packed_fp16s_ra = weight_data_packed_fp16s.raw_accessor<unsigned short, 3>();
+
+        for (int q = 0; q + (out_elempack - 1) < out_channels; q += out_elempack)
+        {
+            unsigned short* g00 = weight_data_packed_fp16s_ra[q / out_elempack].data();
+
+            for (int p = 0; p + (elempack - 1) < in_channels; p += elempack)
+            {
+                for (int k = 0; k < kernel_w; k++)
+                {
+                    for (int i = 0; i < elempack; i++)
+                    {
+                        for (int j = 0; j < out_elempack; j++)
+                        {
+                            const float* k00 = weight_data_r2_a[q + j][p + i].data();
+
+                            g00[0] = otter::fp16_ieee_from_fp32_value(k00[k]);
+
+                            g00++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    weight_data_fp16s = weight_data.to(otter::ScalarType::HFloat);
+
+    return 0;
+}
+
+int Convolution1DLayer::forward_fp16s(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const {
+    int w = bottom_blob.size(1);
+    int h = bottom_blob.size(0);
+    int elempack = bottom_blob.elempack();
+
+    const int kernel_extent_w = dilation_w * (kernel_w - 1) + 1;
+
+    Tensor bottom_blob_bordered = otter::constant_pad(bottom_blob, {padding_w, padding_w}, 0);
+
+    w = bottom_blob_bordered.size(1);
+    h = bottom_blob_bordered.size(0);
+
+    int out_elempack = 1;
+#if __SSE2__
+    if (opt.use_packing_layout)
+    {
+#if __AVX__
+        out_elempack = out_channels % 8 == 0 ? 8 : out_channels % 4 == 0 ? 4 : 1;
+#else
+        out_elempack = out_channels % 4 == 0 ? 4 : 1;
+#endif
+    }
+#endif // __SSE2__
+
+    const int outw = (w - kernel_extent_w) / stride_w + 1;
+    const int outh = out_channels / out_elempack;
+    
+    top_blob = otter::empty({outh, outw}, otter::get_update_scalarType(otter::ScalarType::Float, out_elempack));
+    
+    auto bottom_blob_bordered_ra = bottom_blob_bordered.raw_accessor<float, 2>();
+    auto top_blob_ra = top_blob.raw_accessor<float, 2>();
+    const float* bias_data_ptr = bias_term ? bias_data.data_ptr<float>() : nullptr;
+
+#if __SSE2__
+#if __AVX__
+    if (elempack == 8 && out_elempack == 8)
+    {
+        auto bottom_blob_bordered_a = bottom_blob_bordered.accessor<float, 2, 8>();
+        auto top_blob_a = top_blob.accessor<float, 2, 8>();
+        auto weight_data_packed_fp16s_a = weight_data_packed_fp16s.accessor<unsigned short, 3, 64>();
+        {
+            otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
+                for (const auto p : otter::irange(begin, end)) {
+                    float* outptr = top_blob_a[p].data();
+
+                    for (int j = 0; j < outw; j++) {
+                        __m256 _sum = _mm256_set1_ps(0.f);
+
+                        if (bias_term) {
+                            _sum = _mm256_loadu_ps(((const float*)bias_data_ptr) + p * 8);
+                        }
+
+                        const unsigned short* kptr = weight_data_packed_fp16s_a[p].data();
+
+                        for (int q = 0; q < h; q++) {
+                            const float* sptr = bottom_blob_bordered_a[q].data() + j * stride_w * 8;
+
+                            for (int k = 0; k < kernel_w; k++) {
+                                __m256 _val0 = _mm256_broadcast_ss(sptr);
+                                __m256 _val1 = _mm256_broadcast_ss(sptr + 1);
+                                __m256 _val2 = _mm256_broadcast_ss(sptr + 2);
+                                __m256 _val3 = _mm256_broadcast_ss(sptr + 3);
+                                __m256 _val4 = _mm256_broadcast_ss(sptr + 4);
+                                __m256 _val5 = _mm256_broadcast_ss(sptr + 5);
+                                __m256 _val6 = _mm256_broadcast_ss(sptr + 6);
+                                __m256 _val7 = _mm256_broadcast_ss(sptr + 7);
+
+                                __m256i _w01 = _mm256_lddqu_si256((const __m256i*)kptr);
+                                __m256i _w23 = _mm256_lddqu_si256((const __m256i*)(kptr + 16));
+                                __m256i _w45 = _mm256_lddqu_si256((const __m256i*)(kptr + 32));
+                                __m256i _w67 = _mm256_lddqu_si256((const __m256i*)(kptr + 48));
+
+                                __m256 _w0 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w01, 0));
+                                __m256 _w1 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w01, 1));
+                                __m256 _w2 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w23, 0));
+                                __m256 _w3 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w23, 1));
+                                __m256 _w4 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w45, 0));
+                                __m256 _w5 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w45, 1));
+                                __m256 _w6 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w67, 0));
+                                __m256 _w7 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w67, 1));
+
+                                _mm256_comp_fmadd_ps8(_sum,
+                                                      _val0, _val1, _val2, _val3, _val4, _val5, _val6, _val7,
+                                                      _w0, _w1, _w2, _w3, _w4, _w5, _w6, _w7);
+
+                                sptr += dilation_w * 8;
+                                kptr += 64;
+                            }
+                        }
+
+                        _sum = activation_avx(_sum, activation_type, activation_params);
+
+                        _mm256_storeu_ps(outptr, _sum);
+                        outptr += 8;
+                    }
+                }
+            });
+        }
+    }
+
+    if (elempack == 1 && out_elempack == 8)
+    {
+        auto weight_data_packed_fp16s_a = weight_data_packed_fp16s.accessor<unsigned short, 3, 8>();
+        {
+            otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
+                for (const auto p : otter::irange(begin, end)) {
+                    float* outptr = top_blob_ra[p].data();
+
+                    for (int j = 0; j < outw; j++)
+                    {
+                        __m256 _sum = _mm256_set1_ps(0.f);
+
+                        if (bias_term)
+                        {
+                            _sum = _mm256_loadu_ps(((const float*)bias_data_ptr) + p * 8);
+                        }
+
+                        const unsigned short* kptr = weight_data_packed_fp16s_a[p].data();
+
+                        for (int q = 0; q < h; q++)
+                        {
+                            const float* sptr = bottom_blob_bordered_ra[q].data() + j * stride_w;
+
+                            for (int k = 0; k < kernel_w; k++)
+                            {
+                                __m256 _val = _mm256_set1_ps(sptr[0]);
+                                __m256 _w = _mm256_cvtph_ps(_mm_lddqu_si128((const __m128i*)kptr));
+                                _sum = _mm256_comp_fmadd_ps(_val, _w, _sum);
+
+                                sptr += dilation_w;
+                                kptr += 8;
+                            }
+                        }
+
+                        _sum = activation_avx(_sum, activation_type, activation_params);
+
+                        _mm256_storeu_ps(outptr, _sum);
+                        outptr += 8;
+                    }
+                }
+            });
+        }
+    }
+
+    if (elempack == 4 && out_elempack == 8)
+    {
+        auto weight_data_packed_fp16s_a = weight_data_packed_fp16s.accessor<unsigned short, 3, 32>();
+        {
+            otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
+                for (const auto p : otter::irange(begin, end))
+                {
+                    float* outptr = top_blob_ra[p].data();
+
+                    for (int j = 0; j < outw; j++)
+                    {
+                        __m256 _sum = _mm256_set1_ps(0.f);
+
+                        if (bias_term)
+                        {
+                            _sum = _mm256_loadu_ps((const float*)bias_data_ptr + p * 8);
+                        }
+
+                        const unsigned short* kptr = weight_data_packed_fp16s_a[p].data();
+
+                        for (int q = 0; q < h; q++)
+                        {
+                            const float* sptr = bottom_blob_bordered_ra[q].data() + j * stride_w * 4;
+
+                            for (int k = 0; k < kernel_w; k++)
+                            {
+                                __m256 _val0 = _mm256_broadcast_ss(sptr);
+                                __m256 _val1 = _mm256_broadcast_ss(sptr + 1);
+                                __m256 _val2 = _mm256_broadcast_ss(sptr + 2);
+                                __m256 _val3 = _mm256_broadcast_ss(sptr + 3);
+
+                                __m256i _w01 = _mm256_lddqu_si256((const __m256i*)kptr);
+                                __m256 _w0 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w01, 0));
+                                _sum = _mm256_comp_fmadd_ps(_val0, _w0, _sum);
+                                __m256 _w1 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w01, 1));
+                                _sum = _mm256_comp_fmadd_ps(_val1, _w1, _sum);
+                                __m256i _w23 = _mm256_lddqu_si256((const __m256i*)(kptr + 16));
+                                __m256 _w2 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w23, 0));
+                                _sum = _mm256_comp_fmadd_ps(_val2, _w2, _sum);
+                                __m256 _w3 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w23, 1));
+                                _sum = _mm256_comp_fmadd_ps(_val3, _w3, _sum);
+
+                                sptr += dilation_w * 4;
+                                kptr += 32;
+                            }
+                        }
+
+                        _sum = activation_avx(_sum, activation_type, activation_params);
+
+                        _mm256_storeu_ps(outptr, _sum);
+                        outptr += 8;
+                    }
+                }
+            });
+        }
+    }
+
+    if (elempack == 8 && out_elempack == 1)
+    {
+        auto weight_data_packed_fp16s_a = weight_data_packed_fp16s.accessor<unsigned short, 3, 8>();
+        {
+            otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
+                for (const auto p : otter::irange(begin, end))
+                {
+                    float* outptr = top_blob_ra[p].data();
+
+                    for (int j = 0; j < outw; j++)
+                    {
+                        float sum = 0.f;
+
+                        if (bias_term)
+                        {
+                            sum = bias_data_ptr[p];
+                        }
+
+                        const unsigned short* kptr = weight_data_packed_fp16s_a[p].data();
+
+                        __m256 _sum8 = _mm256_set1_ps(0);
+
+                        for (int q = 0; q < h; q++)
+                        {
+                            const float* sptr = bottom_blob_bordered_ra[q].data() + j * stride_w * 8;
+
+                            for (int k = 0; k < kernel_w; k++) // 29.23
+                            {
+                                __m256 _val = _mm256_loadu_ps(sptr);
+                                __m256 _w = _mm256_cvtph_ps(_mm_lddqu_si128((const __m128i*)kptr));
+                                __m256 _s8 = _mm256_mul_ps(_val, _w);
+                                _sum8 = _mm256_add_ps(_sum8, _s8);
+
+                                sptr += dilation_w * 8;
+                                kptr += 8;
+                            }
+                        }
+                        sum += _mm256_reduce_add_ps(_sum8); // dot
+                        sum = activation_ss(sum, activation_type, activation_params);
+
+                        outptr[j] = sum;
+                    }
+                }
+            });
+        }
+    }
+
+    if (elempack == 8 && out_elempack == 4)
+    {
+        auto weight_data_packed_fp16s_a = weight_data_packed_fp16s.accessor<unsigned short, 3, 32>();
+        {
+            otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
+                for (const auto p : otter::irange(begin, end))
+                {
+                    float* outptr = top_blob_ra[p].data();
+
+                    for (int j = 0; j < outw; j++)
+                    {
+                        __m128 _sum = _mm_set1_ps(0.f);
+                        
+                        __m256 _sum01 = _mm256_setzero_ps();
+                        __m256 _sum23 = _mm256_setzero_ps();
+                        __m256 _sum45 = _mm256_setzero_ps();
+                        __m256 _sum67 = _mm256_setzero_ps();
+
+                        if (bias_term)
+                        {
+                            _sum = _mm_loadu_ps((const float*)bias_data_ptr + p * 4);
+                        }
+
+                        const unsigned short* kptr = weight_data_packed_fp16s_a[p].data();
+
+                        for (int q = 0; q < h; q++)
+                        {
+                            const float* sptr = bottom_blob_bordered_ra[q].data() + j * stride_w * 8;
+
+                            for (int k = 0; k < kernel_w; k++)
+                            {
+                                __m128 _val0 = _mm_broadcast_ss(sptr);
+                                __m128 _val1 = _mm_broadcast_ss(sptr + 1);
+                                __m128 _val2 = _mm_broadcast_ss(sptr + 2);
+                                __m128 _val3 = _mm_broadcast_ss(sptr + 3);
+                                __m128 _val4 = _mm_broadcast_ss(sptr + 4);
+                                __m128 _val5 = _mm_broadcast_ss(sptr + 5);
+                                __m128 _val6 = _mm_broadcast_ss(sptr + 6);
+                                __m128 _val7 = _mm_broadcast_ss(sptr + 7);
+                                
+                                __m256 _val01 = _mm256_insertf128_ps(_mm256_castps128_ps256(_val0), _val1, 1);
+                                __m256 _val23 = _mm256_insertf128_ps(_mm256_castps128_ps256(_val2), _val3, 1);
+                                __m256 _val45 = _mm256_insertf128_ps(_mm256_castps128_ps256(_val4), _val5, 1);
+                                __m256 _val67 = _mm256_insertf128_ps(_mm256_castps128_ps256(_val6), _val7, 1);
+
+                                __m256i _w0123 = _mm256_lddqu_si256((const __m256i*)kptr);
+                                __m256i _w4567 = _mm256_lddqu_si256((const __m256i*)(kptr + 16));
+
+                                __m256 _w01 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w0123, 0));
+                                __m256 _w23 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w0123, 1));
+                                __m256 _w45 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w4567, 0));
+                                __m256 _w67 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w4567, 1));
+
+                                _sum01 = _mm256_comp_fmadd_ps(_val01, _w01, _sum01);
+                                _sum23 = _mm256_comp_fmadd_ps(_val23, _w23, _sum23);
+                                _sum45 = _mm256_comp_fmadd_ps(_val45, _w45, _sum45);
+                                _sum67 = _mm256_comp_fmadd_ps(_val67, _w67, _sum67);
+
+                                sptr += dilation_w * 8;
+                                kptr += 32;
+                            }
+                        }
+                        
+                        _sum01 = _mm256_add_ps(_sum01, _sum23);
+                        _sum45 = _mm256_add_ps(_sum45, _sum67);
+                        _sum01 = _mm256_add_ps(_sum01, _sum45);
+
+                        _sum = _mm_add_ps(_sum, _mm256_extractf128_ps(_sum01, 0));
+                        _sum = _mm_add_ps(_sum, _mm256_extractf128_ps(_sum01, 1));
+
+                        _sum = activation_sse(_sum, activation_type, activation_params);
+
+                        _mm_storeu_ps(outptr, _sum);
+                        outptr += 4;
+                    }
+                }
+            });
+        }
+    }
+#endif
+
+    if (elempack == 4 && out_elempack == 4)
+    {
+        auto weight_data_packed_fp16s_a = weight_data_packed_fp16s.accessor<unsigned short, 3, 16>();
+        {
+            otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
+                for (const auto p : otter::irange(begin, end))
+                {
+                    float* outptr = top_blob_ra[p].data();
+
+                    for (int j = 0; j < outw; j++)
+                    {
+                        __m128 _sum = _mm_set1_ps(0.f);
+                        
+                        __m256 _sum01 = _mm256_setzero_ps();
+                        __m256 _sum23 = _mm256_setzero_ps();
+
+                        if (bias_term)
+                        {
+                            _sum = _mm_loadu_ps((const float*)bias_data_ptr + p * 4);
+                        }
+
+                        const unsigned short* kptr = weight_data_packed_fp16s_a[p].data();
+
+                        for (int q = 0; q < h; q++)
+                        {
+                            const float* sptr = bottom_blob_bordered_ra[q].data() + j * stride_w * 4;
+
+                            for (int k = 0; k < kernel_w; k++)
+                            {
+                                __m128 _val0 = _mm_set1_ps(sptr[0]);
+                                __m128 _val1 = _mm_set1_ps(sptr[1]);
+                                __m128 _val2 = _mm_set1_ps(sptr[2]);
+                                __m128 _val3 = _mm_set1_ps(sptr[3]);
+
+                                __m256 _val01 = _mm256_insertf128_ps(_mm256_castps128_ps256(_val0), _val1, 1);
+                                __m256 _val23 = _mm256_insertf128_ps(_mm256_castps128_ps256(_val2), _val3, 1);
+
+                                __m256i _w0123 = _mm256_lddqu_si256((const __m256i*)kptr);
+                                __m256 _w01 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w0123, 0));
+                                __m256 _w23 = _mm256_cvtph_ps(_mm256_extractf128_si256(_w0123, 1));
+                                
+                                _sum01 = _mm256_comp_fmadd_ps(_val01, _w01, _sum01);
+                                _sum23 = _mm256_comp_fmadd_ps(_val23, _w23, _sum23);
+
+                                sptr += dilation_w * 4;
+                                kptr += 16;
+                            }
+                        }
+                        
+                        _sum01 = _mm256_add_ps(_sum01, _sum23);
+                        
+                        _sum = _mm_add_ps(_sum, _mm256_extractf128_ps(_sum01, 0));
+                        _sum = _mm_add_ps(_sum, _mm256_extractf128_ps(_sum01, 1));
+
+                        _sum = activation_sse(_sum, activation_type, activation_params);
+
+                        _mm_storeu_ps(outptr, _sum);
+                        outptr += 4;
+                    }
+                }
+            });
+        }
+    }
+
+    if (elempack == 1 && out_elempack == 4)
+    {
+        auto weight_data_packed_fp16s_a = weight_data_packed_fp16s.accessor<unsigned short, 3, 4>();
+        {
+            otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
+                for (const auto p : otter::irange(begin, end))
+                {
+                    float* outptr = top_blob_ra[p].data();
+
+                    for (int j = 0; j < outw; j++)
+                    {
+                        __m128 _sum = _mm_set1_ps(0.f);
+
+                        if (bias_term)
+                        {
+                            _sum = _mm_loadu_ps((const float*)bias_data_ptr + p * 4);
+                        }
+
+                        const unsigned short* kptr = weight_data_packed_fp16s_a[p].data();
+
+                        for (int q = 0; q < h; q++)
+                        {
+                            const float* sptr = bottom_blob_bordered_ra[q].data() + j * stride_w;
+
+                            for (int k = 0; k < kernel_w; k++)
+                            {
+                                __m128 _val = _mm_set1_ps(sptr[0]);
+                                __m128 _w = _mm_cvtph_ps(_mm_loadl_epi64((const __m128i*)kptr));
+                                _sum = _mm_add_ps(_mm_mul_ps(_val, _w), _sum);
+
+                                sptr += dilation_w;
+                                kptr += 4;
+                            }
+                        }
+
+                        _sum = activation_sse(_sum, activation_type, activation_params);
+
+                        _mm_storeu_ps(outptr, _sum);
+                        outptr += 4;
+                    }
+                }
+            });
+        }
+    }
+
+    if (elempack == 4 && out_elempack == 1)
+    {
+        auto weight_data_packed_fp16s_a = weight_data_packed_fp16s.accessor<unsigned short, 3, 4>();
+        {
+            otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
+                for (const auto p : otter::irange(begin, end))
+                {
+                    float* outptr = top_blob_ra[p].data();
+
+                    for (int j = 0; j < outw; j++)
+                    {
+                        float sum = 0.f;
+
+                        if (bias_term)
+                        {
+                            sum = bias_data_ptr[p];
+                        }
+
+                        const unsigned short* kptr = weight_data_packed_fp16s_a[p].data();
+
+                        for (int q = 0; q < h; q++)
+                        {
+                            const float* sptr = bottom_blob_bordered_ra[q].data() + j * stride_w * 4;
+
+                            for (int k = 0; k < kernel_w; k++)
+                            {
+                                __m128 _val = _mm_loadu_ps(sptr);
+                                __m128 _w = _mm_cvtph_ps(_mm_loadl_epi64((const __m128i*)kptr));
+                                __m128 _s4 = _mm_mul_ps(_val, _w);
+                                sum += _mm_reduce_add_ps(_s4); // dot
+
+                                sptr += dilation_w * 4;
+                                kptr += 4;
+                            }
+                        }
+
+                        sum = activation_ss(sum, activation_type, activation_params);
+
+                        outptr[j] = sum;
+                    }
+                }
+            });
+        }
+    }
+#endif // __SSE2__
+    
+    const unsigned short* weight_data_ptr = (const unsigned short*)weight_data_fp16s.data_ptr();
+
+    if (elempack == 1 && out_elempack == 1)
+    {
+        {
+            otter::parallel_for(0, outh, 0, [&](int64_t begin, int64_t end) {
+                for (const auto p : otter::irange(begin, end)) {
+                    float* outptr = top_blob_ra[p].data();
+
+                    for (int j = 0; j < outw; j++)
+                    {
+                        float sum = 0.f;
+
+                        if (bias_term)
+                        {
+                            sum = bias_data_ptr[p];
+                        }
+
+                        const unsigned short* kptr = (const unsigned short*)weight_data_ptr + kernel_w * h * p;
+
+                        for (int q = 0; q < h; q++)
+                        {
+                            const float* sptr = bottom_blob_bordered_ra[q].data() + j * stride_w;
+
+                            for (int k = 0; k < kernel_w; k++)
+                            {
+                                float val = sptr[0];
+                                float wt = otter::fp16_ieee_to_fp32_value(kptr[0]);
+                                sum += val * wt;
+
+                                sptr += dilation_w;
+                                kptr += 1;
+                            }
+                        }
+
+                        sum = activation_ss(sum, activation_type, activation_params);
+
+                        outptr[j] = sum;
+                    }
+                }
+            });
+        }
+    }
+
+    return 0;
+}
+#endif  __F16C__
 
 }   // end namespace otter

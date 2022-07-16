@@ -158,6 +158,7 @@ int main(int argc, const char * argv[]) {
     }
     
     otter::Net point_rend_head;
+    point_rend_head.option.use_fp16_storage = true;
     point_rend_head.load_otter("point_head-opt.otter", otter::CompileMode::Inference);
     
     ret = point_rend_head.load_weight("point_head-opt.bin", otter::Net::WeightType::Ncnn);
@@ -167,7 +168,7 @@ int main(int argc, const char * argv[]) {
     
     initialize_clock.stop_and_show("ms (initialize)");
     
-    const char* filepath = "5D4A6413.JPG";
+    const char* filepath = "input.jpg";
 
 //    FILE *img = fopen("img.bin", "rb");
 //    fseek(img, 0, SEEK_END);
@@ -191,8 +192,10 @@ int main(int argc, const char * argv[]) {
 //    bbox_head_profiler.benchmark_info("data_1", "linear_3", {1000, 256, 7, 7});
 //    bbox_head_profiler.benchmark_info("data_1", "linear_4", {1000, 256, 7, 7});
 //
+    
 //    auto pointrend_head_profiler = point_rend_head.create_extractor();
-//    pointrend_head_profiler.benchmark_info({"data_1", "data_2"}, {"conv1d_4"}, {{256, 782}, {80, 782}});
+//    pointrend_head_profiler.benchmark_info({"data_1", "data_2"}, {"conv1d_4"}, {{256, 784}, {80, 784}});
+//    pointrend_head_profiler.benchmark({"data_1", "data_2"}, {"conv1d_4"}, {{256, 784}, {80, 784}}, 256);
 
     otter::Clock total_clock;
     otter::Clock conv_block;
@@ -503,8 +506,6 @@ otter::Tensor pointrend_pre_process(otter::Tensor& img) {
     scale_h = (float)resized_img.size(2) / img.size(2);
     scale_w = (float)resized_img.size(3) / img.size(3);
     
-    printf("scale_h: %f scale_w: %f\n", scale_h, scale_w);
-    
     // padding to multiply of 32
     int wpad = (w + 31) / 32 * 32 - w;
     int hpad = (h + 31) / 32 * 32 - h;
@@ -558,14 +559,14 @@ otter::Tensor get_seg_masks(otter::Tensor& mask_pred, otter::Tensor& det_bboxes,
         im_mask[inds].slice(0, y0_int, y1_int, 1).slice(1, x0_int, x1_int, 1) = mask;
     }
     
-    for (int i = 0; i < mask_pred.size(0); ++i) {
-        auto mask = im_mask[i];
-
-        mask = mask.to(otter::ScalarType::Byte) * 255;
-        mask = mask.view({mask.size(0), mask.size(1), 1});
-
-        otter::cv::save_image(mask, std::to_string(i).c_str());
-    }
+//    for (int i = 0; i < mask_pred.size(0); ++i) {
+//        auto mask = im_mask[i];
+//
+//        mask = mask.to(otter::ScalarType::Byte) * 255;
+//        mask = mask.view({mask.size(0), mask.size(1), 1});
+//
+//        otter::cv::save_image(mask, std::to_string(i).c_str());
+//    }
     
     return im_mask;
 }

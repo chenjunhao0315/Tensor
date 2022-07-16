@@ -31,6 +31,12 @@ public:
     
     virtual int forward(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
     
+#if __F16C__
+    virtual int create_pipeline_fp16s(const NetOption& opt);
+    
+    virtual int forward_fp16s(const Tensor& bottom_blob, Tensor& top_blob, const NetOption& opt) const;
+#endif
+    
     virtual std::string type() const { return "Convolution1D"; }
 public:
     int in_channels;
@@ -51,6 +57,9 @@ public:
     Tensor weight_data;
     Tensor weight_data_packed;
     Tensor bias_data;
+    
+    Tensor weight_data_fp16s;
+    Tensor weight_data_packed_fp16s;
     
 };
 

@@ -14,8 +14,10 @@
 
 #include "Exception.hpp"
 #include "TypeCast.hpp"
+#include "TypeSafeSignMath.hpp"
 
 #include "PackedData.hpp"
+#include "HFloat.hpp"
 
 namespace otter {
 
@@ -26,7 +28,8 @@ _(int16_t, Short)                                              \
 _(int, Int)                                                    \
 _(int64_t, Long)                                               \
 _(float, Float)                                                \
-_(double, Double)
+_(double, Double)                                              \
+_(otter::HFloat, HFloat)
 
 #define OTTER_ALL_SCALAR_TYPES(_)       \
 _(uint8_t, Byte)      /* 0 */       \
@@ -36,7 +39,8 @@ _(int, Int)           /* 3 */       \
 _(int64_t, Long)      /* 4 */       \
 _(float, Float)       /* 5 */       \
 _(double, Double)     /* 6 */       \
-_(bool, Bool)         /* 7 */
+_(bool, Bool)         /* 7 */       \
+_(otter::HFloat, HFloat)
 
 #define OTTER_ALL_SCALAR_TYPES_W_PACKED(_)       \
 _(uint8_t, Byte)      /* 0 */       \
@@ -47,21 +51,27 @@ _(int64_t, Long)      /* 4 */       \
 _(float, Float)       /* 5 */       \
 _(double, Double)     /* 6 */       \
 _(bool, Bool)         /* 7 */       \
-_(elempack4<signed char>, Byte4)    \
-_(elempack4<int>, Int4)             \
-_(elempack4<float>, Float4)         \
-_(elempack8<signed char>, Byte8)    \
-_(elempack8<int>, Int8)             \
-_(elempack8<float>, Float8)         \
-_(elempack16<signed char>, Byte16)    \
-_(elempack16<int>, Int16)             \
-_(elempack16<float>, Float16)         \
-_(elempack32<signed char>, Byte32)    \
-_(elempack32<int>, Int32)             \
-_(elempack32<float>, Float32)         \
-_(elempack64<signed char>, Byte64)    \
-_(elempack64<int>, Int64)             \
-_(elempack64<float>, Float64)         \
+_(otter::HFloat, HFloat)                \
+_(elempack4<signed char>, Byte4)        \
+_(elempack4<int>, Int4)                 \
+_(elempack4<float>, Float4)             \
+_(elempack4<unsigned short>, HFloat4)   \
+_(elempack8<signed char>, Byte8)        \
+_(elempack8<int>, Int8)                 \
+_(elempack8<float>, Float8)             \
+_(elempack8<unsigned short>, HFloat8)   \
+_(elempack16<signed char>, Byte16)      \
+_(elempack16<int>, Int16)               \
+_(elempack16<float>, Float16)           \
+_(elempack16<unsigned short>, HFloat16) \
+_(elempack32<signed char>, Byte32)      \
+_(elempack32<int>, Int32)               \
+_(elempack32<float>, Float32)           \
+_(elempack32<unsigned short>, HFloat32) \
+_(elempack64<signed char>, Byte64)      \
+_(elempack64<int>, Int64)               \
+_(elempack64<float>, Float64)           \
+_(elempack64<unsigned short>, HFloat64) \
 
 enum class ScalarType : int8_t {
 #define DEFINE_ENUM(_1, n) n,
@@ -103,7 +113,7 @@ static inline bool isIntegralType(ScalarType t, bool includeBool) {
 
 static inline bool isFloatingType(ScalarType t) {
   return (
-      t == ScalarType::Double || t == ScalarType::Float);
+      t == ScalarType::Double || t == ScalarType::Float || t == ScalarType::HFloat);
 }
 
 static inline bool isSignedType(ScalarType t) {
@@ -170,141 +180,6 @@ struct CppTypeToScalarType;
 OTTER_ALL_SCALAR_TYPES(SPECIALIZE_CppTypeToScalarType)
 
 #undef SPECIALIZE_CppTypeToScalarType
-
-template <typename To, typename From>
-typename std::enable_if<std::is_same<From, bool>::value, bool>::type overflows(From f) {
-    (void)f;
-    return false;
-}
-
-template <typename T>
-struct scalar_value_type {
-    using type = T;
-};
-
-// Returns false since we cannot have x < 0 if x is unsigned.
-template <typename T>
-static inline constexpr bool is_negative(const T& x, std::true_type is_unsigned) {
-    (void)x;
-    (void)is_unsigned;
-    return false;
-}
-
-// Returns true if a signed variable x < 0
-template <typename T>
-static inline constexpr bool is_negative(const T& x, std::false_type is_unsigned) {
-    (void)is_unsigned;
-    return x < T(0);
-}
-
-// Returns true if x < 0
-template <typename T>
-inline constexpr bool is_negative(const T& x) {
-    return is_negative(x, std::is_unsigned<T>());
-}
-
-// Returns the sign of an unsigned variable x as 0, 1
-template <typename T>
-static inline constexpr int signum(const T& x, std::true_type is_unsigned) {
-    (void)is_unsigned;
-    return T(0) < x;
-}
-
-// Returns the sign of a signed variable x as -1, 0, 1
-template <typename T>
-static inline constexpr int signum(const T& x, std::false_type is_unsigned) {
-    (void)is_unsigned;
-    return (T(0) < x) - (x < T(0));
-}
-
-// Returns the sign of x as -1, 0, 1
-template <typename T>
-inline constexpr int signum(const T& x) {
-    return signum(x, std::is_unsigned<T>());
-}
-
-// Returns true if a and b are not both negative
-template <typename T, typename U>
-inline constexpr bool signs_differ(const T& a, const U& b) {
-    return is_negative(a) != is_negative(b);
-}
-
-// Returns true if x is greater than the greatest value of the type Limit
-template <typename Limit, typename T>
-inline constexpr bool greater_than_max(const T& x) {
-    constexpr bool can_overflow = std::numeric_limits<T>::digits> std::numeric_limits<Limit>::digits;
-    return can_overflow && x > std::numeric_limits<Limit>::max();
-}
-
-// Returns true if x < lowest(Limit). Standard comparison
-template <typename Limit, typename T>
-static inline constexpr bool less_than_lowest(const T& x, std::false_type limit_is_unsigned, std::false_type x_is_unsigned) {
-    (void)limit_is_unsigned;
-    (void)x_is_unsigned;
-    return x < std::numeric_limits<Limit>::lowest();
-}
-
-// Returns false since all the limit is signed and therefore includes
-// negative values but x cannot be negative because it is unsigned
-template <typename Limit, typename T>
-static inline constexpr bool less_than_lowest(const T& x, std::false_type limit_is_unsigned, std::true_type x_is_unsigned) {
-    (void)x;
-    (void)limit_is_unsigned;
-    (void)x_is_unsigned;
-    return false;
-}
-
-// Returns true if x < 0, where 0 is constructed from T.
-// Limit is not signed, so its lower value is zero
-template <typename Limit, typename T>
-static inline constexpr bool less_than_lowest(const T& x, std::true_type limit_is_unsigned, std::false_type x_is_unsigned) {
-    (void)limit_is_unsigned;
-    (void)x_is_unsigned;
-    return x < T(0);
-}
-
-// Returns false sign both types are unsigned
-template <typename Limit, typename T>
-static inline constexpr bool less_than_lowest(const T& x, std::true_type limit_is_unsigned, std::true_type x_is_unsigned) {
-    (void)x;
-    (void)limit_is_unsigned;
-    (void)x_is_unsigned;
-    return false;
-}
-
-// Returns true if x is less than the lowest value of type T
-template <typename Limit, typename T>
-inline constexpr bool less_than_lowest(const T& x) {
-    return less_than_lowest<Limit>(x, std::is_unsigned<Limit>(), std::is_unsigned<T>());
-}
-
-// skip isnan and isinf check for integral types
-template <typename To, typename From>
-typename std::enable_if<std::is_integral<From>::value && !std::is_same<From, bool>::value, bool>::type
-overflows(From f) {
-    using limit = std::numeric_limits<typename scalar_value_type<To>::type>;
-    if (!limit::is_signed && std::numeric_limits<From>::is_signed) {
-        // allow for negative numbers to wrap using two's complement arithmetic.
-        // For example, with uint8, this allows for `a - b` to be treated as
-        // `a + 255 * b`.
-        return greater_than_max<To>(f) || (is_negative(f) && -static_cast<uint64_t>(f) > limit::max());
-    } else {
-        return less_than_lowest<To>(f) || greater_than_max<To>(f);
-    }
-}
-
-template <typename To, typename From>
-typename std::enable_if<std::is_floating_point<From>::value, bool>::type
-overflows(From f) {
-    using limit = std::numeric_limits<typename scalar_value_type<To>::type>;
-    if (limit::has_infinity && std::isinf(static_cast<double>(f))) {
-        return false;
-    }
-    if (!limit::has_quiet_NaN && (f != f)) {
-        return true;
-    }
-    return f < limit::lowest() || f > limit::max();
-}
 
 #define ERROR_UNSUPPORTED_CAST fprintf(stderr, "[ScalarType] Unsupported cast!\n")
 
@@ -390,6 +265,7 @@ static inline ScalarType promoteTypes(ScalarType a, ScalarType b) {
   constexpr auto f4 = ScalarType::Float;
   constexpr auto f8 = ScalarType::Double;
   constexpr auto b1 = ScalarType::Bool;
+  constexpr auto f2 = ScalarType::HFloat;
   constexpr auto ud = ScalarType::Undefined;
   if (a == ud || b == ud) {
     return ScalarType::Undefined;
@@ -400,15 +276,16 @@ static inline ScalarType promoteTypes(ScalarType a, ScalarType b) {
   // corrent values for the type promotions in complex type cases.
   static constexpr ScalarType _promoteTypesLookup[static_cast<int>(
       ScalarType::NumOptions)][static_cast<int>(ScalarType::NumOptions)] = {
-      /*        u1  i1  i2  i4  i8  f4  f8  b1*/
-      /* u1 */ {u1, i2, i2, i4, i8, f4, f8, u1},
-      /* i1 */ {i2, i1, i2, i4, i8, f4, f8, i1},
-      /* i2 */ {i2, i2, i2, i4, i8, f4, f8, i2},
-      /* i4 */ {i4, i4, i4, i4, i8, f4, f8, i4},
-      /* i8 */ {i8, i8, i8, i8, i8, f4, f8, i8},
-      /* f4 */ {f4, f4, f4, f4, f4, f4, f8, f4},
-      /* f8 */ {f8, f8, f8, f8, f8, f8, f8, f8},
-      /* b1 */ {u1, i1, i2, i4, i8, f4, f8, b1}
+      /*        u1  i1  i2  i4  i8  f4  f8  b1  f2*/
+      /* u1 */ {u1, i2, i2, i4, i8, f4, f8, u1, f2},
+      /* i1 */ {i2, i1, i2, i4, i8, f4, f8, i1, f2},
+      /* i2 */ {i2, i2, i2, i4, i8, f4, f8, i2, f2},
+      /* i4 */ {i4, i4, i4, i4, i8, f4, f8, i4, f2},
+      /* i8 */ {i8, i8, i8, i8, i8, f4, f8, i8, f2},
+      /* f4 */ {f4, f4, f4, f4, f4, f4, f8, f4, f4},
+      /* f8 */ {f8, f8, f8, f8, f8, f8, f8, f8, f8},
+      /* b1 */ {u1, i1, i2, i4, i8, f4, f8, b1, f4},
+      /* f2 */ {f2, f2, f2, f2, f2, f4, f8, f2, f2}
   };
   return _promoteTypesLookup[static_cast<int>(a)][static_cast<int>(b)];
 }
