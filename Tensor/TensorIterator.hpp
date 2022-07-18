@@ -145,9 +145,11 @@ struct OperandInfo {
 
 class TensorIterator {
 public:
+    using DimMask = std::bitset<64>;
     using StrideVector = SmallVector<int64_t, 6>;
     using PtrVector = SmallVector<char*, 4>;
     using loop2d_t = otter::FunctionRef<void(char** data, const int64_t* strides, int64_t size0, int64_t size1)>;
+    using loop_subiter_t = otter::FunctionRef<void(TensorIterator& subiter)>;
     
     void build(TensorIteratorConfig& config);
     
@@ -159,6 +161,31 @@ public:
     IntArrayRef shape() const { return shape_; }
     IntArrayRef view_offsets() const { return view_offsets_; }
     
+    bool is_contiguous() const;
+    bool is_dim_reduced(int dim) const;
+    
+    int64_t element_size(int arg) const {
+        return elementSize(dtype(arg));
+    }
+    
+    IntArrayRef strides(int arg) const {
+        return operands_[arg].stride_bytes;
+    }
+    
+    bool has_contiguous_first_dim() const {
+        int num_tensors = ntensors();
+        for (const auto i : otter::irange(num_tensors)) {
+            if (strides(i)[0] != element_size(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    void coalesce_dimensions();
+    int num_reduce_dims() const;
+    
+    void* data_ptr(int arg) const;
     ScalarType dtype(int arg = 0) const { return operands_[arg].current_dtype; }
     ScalarType input_dtype(int arg=0) const { return operands_[num_outputs_ + arg].current_dtype; }
     ScalarType common_dtype() const { return common_dtype_; }
@@ -189,6 +216,15 @@ public:
         return operands_[arg].tensor_base();
     }
     
+    const TensorBase& input_base(int arg = 0) {
+        assert(arg >= 0 && arg < ntensors() - num_outputs_);
+        return tensor_base(num_outputs_ + arg);
+    }
+    const Tensor& input(int arg = 0) {
+        assert(arg >= 0 && arg < ntensors() - num_outputs_);
+        return tensor(num_outputs_ + arg);
+    }
+    
     const Tensor& output(int arg = 0) {
         assert(arg < num_outputs_);
         return tensor(arg);
@@ -199,7 +235,21 @@ public:
         return tensor_base(arg);
     }
     
+    /// Shrinks an iterated dimension
+    void narrow(int dim, int64_t start, int64_t size);
+    /// Narrows every dim after and including `start_dim` to size one.
+    void select_all_keeping_dim(int start_dim, IntArrayRef starts);
+    /// Replaces the data pointer for the operand at index `arg`.
+    /// The new pointer should have the same sizes, strides and dtype as the
+    /// original
     void unsafe_replace_operand(int arg, void* data);
+    
+    StrideVector get_dim_strides(int dim) const;
+    StrideVector get_strides() const;
+    StrideVector get_inner_strides() const {
+        return get_dim_strides(0);
+    }
+    PtrVector get_base_ptrs() const;
     
     template <typename loop1d_t, std::enable_if_t<std::is_convertible<loop1d_t, otter::FunctionRef<void(char**, const int64_t* strides, int64_t size)>>::value, int> = 0>
     void for_each(loop1d_t loop, int64_t grain_size = otter::GRAIN_SIZE) {
@@ -207,6 +257,10 @@ public:
     }
     
     void for_each(loop2d_t loop, int64_t grain_size = otter::GRAIN_SIZE);
+    
+    void foreach_reduced_elt(loop_subiter_t loop, bool parallelize = true);
+    
+    void parallel_reduce(loop2d_t loop);
     
     template <typename loop1d_t, std::enable_if_t<std::is_convertible<loop1d_t,  otter::FunctionRef<void(char**, const int64_t* strides, int64_t size)>>::value, int> = 0>
     void serial_for_each(loop1d_t loop, Range range) {
@@ -254,6 +308,11 @@ public:
     static TensorIterator borrowing_nullary_op(const TensorBase& out);
     static TensorIterator borrowing_nullary_op(TensorBase&& out) = delete;
     static TensorIterator borrowing_binary_op(const TensorBase& out, const TensorBase& a, const TensorBase& b);
+    static TensorIterator reduce_op(TensorBase& out, const TensorBase& a);
+    static TensorIterator reduce_op(
+        TensorBase& out1,
+        TensorBase& out2,
+        const TensorBase& a);
     
 private:
     DimVector shape_;
@@ -265,6 +324,9 @@ private:
     bool all_ops_same_shape_ = false;
     bool has_scalars_ = false;
     bool has_tensors_ = false;
+    bool is_reduction_ = false;
+    bool enforce_linear_iteration_ = false;
+    bool has_coalesced_dimensions_ = false;
     
     Device common_device_;
     ScalarType common_dtype_;
@@ -361,6 +423,16 @@ public:
         return *this;
     }
     
+    TensorIteratorConfig& enforce_linear_iteration(const bool _enforce_linear_iteration = true) {
+        enforce_linear_iteration_ = _enforce_linear_iteration;
+        return *this;
+    }
+    
+    TensorIteratorConfig& is_reduction(const bool _is_reduction) {
+        is_reduction_ = _is_reduction;
+        return *this;
+    }
+    
 private:
     SmallVector<MaybeOwned<TensorBase>, 4> tensors_;
     
@@ -380,6 +452,8 @@ private:
     bool promote_inputs_to_common_dtype_ = false;
     bool cast_common_dtype_to_outputs_ = false;
     bool promote_integer_inputs_to_float_ = false;
+    bool is_reduction_ = false;
+    bool enforce_linear_iteration_ = false;
 };
 
 struct DimCounter {

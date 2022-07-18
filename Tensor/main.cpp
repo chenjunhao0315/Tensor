@@ -64,8 +64,6 @@ otter::Tensor bbox2roi(otter::Tensor& bboxes);
 
 otter::Tensor map_roi_levels(otter::Tensor& rois, int num_levels);
 
-otter::Tensor extract_index(otter::Tensor& src, otter::Tensor& idx);
-
 void fill_index(otter::Tensor& dst, const otter::Tensor& src, const otter::Tensor& idx);
 
 void get_bboxes(otter::Tensor& det_bboxes, otter::Tensor& det_labels, otter::Tensor& rois, otter::Tensor& cls_score, otter::Tensor& bbox_pred, otter::IntArrayRef image_shape);
@@ -324,7 +322,7 @@ int main(int argc, const char * argv[]) {
                 }
 
                 if (index_count > 0) {
-                    auto rois_ = extract_index(rois, mask);
+                    auto rois_ = rois.masked_select(mask.view({-1, 1})).view({-1, 5});
 
                     otter::Clock bbox_roi_align_net;
                     otter::Net* net = bbox_roi_align[i];
@@ -793,11 +791,11 @@ void multiclass_nms(otter::Tensor& dets, otter::Tensor& labels, const otter::Ten
     scores = scores.reshape({-1});
     labels = labels.reshape({-1});
     
-    auto valid_mask = scores > score_thr;
+    auto valid_mask = scores.gt(score_thr);
     
-    bboxes = extract_index(bboxes, valid_mask);
-    scores = extract_index(scores, valid_mask);
-    labels = extract_index(labels, valid_mask);
+    bboxes = bboxes.masked_select(valid_mask.unsqueeze(-1)).view({-1, 4});
+    scores = scores.masked_select(valid_mask);
+    labels = labels.masked_select(valid_mask);
     
     std::vector<Rect> nms_proposal_boxes;
     std::vector<float> nms_scores;
@@ -856,38 +854,6 @@ void fill_index(otter::Tensor& dst, const otter::Tensor& src, const otter::Tenso
             ++j;
         }
     }
-}
-
-otter::Tensor extract_index(otter::Tensor& src, otter::Tensor& idx) {
-    int index_count = 0;
-    const bool* idx_data = idx.data_ptr<bool>();
-    
-    for (const auto i : otter::irange(0, idx.numel())) {
-        if (idx_data[i])
-            index_count++;
-    }
-    
-    int dim = src.dim();
-    
-    otter::Tensor dst;
-    if (dim == 1) {
-        dst = otter::empty({index_count}, src.options());
-    } else if (dim == 2) {
-        dst = otter::empty({index_count, src.size(1)}, src.options());
-    } else if (dim == 3) {
-        dst = otter::empty({index_count, src.size(1), src.size(2)}, src.options());
-    } else if (dim == 4) {
-        dst = otter::empty({index_count, src.size(1), src.size(2), src.size(3)}, src.options());
-    }
-
-    for (int i = 0, j = 0; i < idx.numel(); ++i) {
-        if (idx_data[i]) {
-            dst[j] = src[i];
-            ++j;
-        }
-    }
-    
-    return dst;
 }
 
 otter::Tensor map_roi_levels(otter::Tensor& rois, int num_levels) {
@@ -1082,8 +1048,8 @@ otter::Tensor AnchorGenerator::_bbox_post_process(std::vector<otter::Tensor>& ml
             }
             auto valid_mask = (w > min_bbox_size) & (h > min_bbox_size);
             
-            proposals = extract_index(proposals, valid_mask);
-            scores = extract_index(scores, valid_mask);
+            proposals = proposals.masked_select(valid_mask.unsqueeze(-1)).view({-1, 4});
+            scores = scores.masked_select(valid_mask);
         }
         
         std::vector<Rect> nms_proposal_boxes;

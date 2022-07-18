@@ -745,7 +745,7 @@ int Convolution1DLayer::create_pipeline_fp16s(const NetOption& opt) {
 #else
         elempack = in_channels % 4 == 0 ? 4 : 1;
         out_elempack = out_channels % 4 == 0 ? 4 : 1;
-#endif
+#endif // __AVX__
     }
 #endif // __SSE2__
 
@@ -808,7 +808,7 @@ int Convolution1DLayer::forward_fp16s(const Tensor& bottom_blob, Tensor& top_blo
         out_elempack = out_channels % 8 == 0 ? 8 : out_channels % 4 == 0 ? 4 : 1;
 #else
         out_elempack = out_channels % 4 == 0 ? 4 : 1;
-#endif
+#endif // __AVX__
     }
 #endif // __SSE2__
 
@@ -1115,7 +1115,7 @@ int Convolution1DLayer::forward_fp16s(const Tensor& bottom_blob, Tensor& top_blo
             });
         }
     }
-#endif
+#endif // __AVX__
 
     if (elempack == 4 && out_elempack == 4)
     {

@@ -32,6 +32,10 @@ int get_num_threads() {
     return 1;
 }
 
+int get_thread_num() {
+    return thread_num_;
+}
+
 int get_kmp_blocktime() {
 #if defined(_OPENMP) && __clang__
     return kmp_get_blocktime();

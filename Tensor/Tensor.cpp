@@ -22,6 +22,7 @@
 #include "TensorDistribution.hpp"
 #include "TensorPacking.hpp"
 #include "TypeMeta.hpp"
+#include "TensorAdvancedIndexing.hpp"
 
 namespace otter {
 
@@ -201,16 +202,26 @@ Tensor& Tensor::random_(Generator generator) const {
     return otter::native::random_(const_cast<Tensor&>(*this), generator);
 }
 
-Tensor& Tensor::zero_() {
-    return native::zero_(*this);
+Tensor& Tensor::zero_() const {
+    return native::zero_(const_cast<Tensor&>(*this));
 }
 
-Tensor& Tensor::fill_(const Scalar &value) {
-    return native::fill_out(*this, value);
+Tensor& Tensor::fill_(const Scalar &value) const {
+    return native::fill_out(const_cast<Tensor&>(*this), value);
 }
 
-Tensor& Tensor::fill_(const Tensor &value) {
-    return native::fill_(*this, value);
+Tensor& Tensor::fill_(const Tensor &value) const {
+    return native::fill_(const_cast<Tensor&>(*this), value);
+}
+
+const TensorBase& TensorBase::fill_(const Scalar& scalar) const {
+    Tensor self(*this);
+    return otter::native::fill_(self, scalar);
+}
+
+const TensorBase& TensorBase::zero_() const {
+    Tensor self(*this);
+    return otter::native::zero_(self);
 }
 
 Tensor Tensor::to(ScalarType dtype, bool non_blocking, bool copy, MemoryFormat memory_format) const {
@@ -615,6 +626,79 @@ Tensor & Tensor::baddbmm_(const Tensor & batch1, const Tensor & batch2, const Sc
 
 Tensor Tensor::bmm(const Tensor & mat2) const {
     return otter::native::bmm(*this, mat2);
+}
+
+Tensor Tensor::nonzero() const {
+    return otter::nonzero_cpu(*this);
+}
+
+Tensor & Tensor::masked_fill_(const Tensor & mask, const Scalar & value) const {
+    return otter::masked_fill__cpu(const_cast<Tensor&>(*this), mask, value);
+}
+
+Tensor Tensor::masked_fill(const Tensor & mask, const Scalar & value) const {
+    return otter::masked_fill(*this, mask, value);
+}
+
+Tensor & Tensor::masked_fill_(const Tensor & mask, const Tensor & value) const {
+    return otter::masked_fill__cpu(const_cast<Tensor&>(*this), mask, value);
+}
+
+Tensor Tensor::masked_fill(const Tensor & mask, const Tensor & value) const {
+    return otter::masked_fill(*this, mask, value);
+}
+
+
+Tensor & Tensor::index_fill_(int64_t dim, const Tensor & index, const Scalar & value) const {
+    return otter::index_fill_(const_cast<Tensor&>(*this), dim, index, value);
+}
+
+Tensor Tensor::index_fill(int64_t dim, const Tensor & index, const Scalar & value) const {
+    return otter::index_fill(*this, dim, index, value);
+}
+
+Tensor & Tensor::index_fill_(int64_t dim, const Tensor & index, const Tensor & value) const {
+    return otter::index_fill_(const_cast<Tensor&>(*this), dim, index, value);
+}
+
+Tensor Tensor::index_fill(int64_t dim, const Tensor & index, const Tensor & value) const {
+    return otter::index_fill(*this, dim, index, value);
+}
+
+Tensor & Tensor::index_put_(const std::vector<otter::optional<Tensor>> & indices, const Tensor & values, bool accumulate) const {
+    return otter::index_put_(const_cast<Tensor&>(*this), indices, values, accumulate);
+}
+
+Tensor Tensor::index_put(const std::vector<otter::optional<Tensor>> & indices, const Tensor & values, bool accumulate) const {
+    return otter::index_put(*this, indices, values, accumulate);
+}
+
+Tensor Tensor::index_select(int64_t dim, const Tensor & index) const {
+    return otter::index_select_cpu_(*this, dim, index);
+}
+
+Tensor Tensor::masked_select(const Tensor & mask) const {
+    return otter::masked_select_cpu(*this, mask);
+}
+
+Tensor Tensor::take(const Tensor & index) const {
+    return otter::take(*this, index);
+}
+
+Tensor & Tensor::put_(const Tensor & index, const Tensor & source, bool accumulate) const {
+    return otter::put_(const_cast<Tensor&>(*this), index, source, accumulate);
+}
+
+Tensor Tensor::put(const Tensor & index, const Tensor & source, bool accumulate) const {
+    return otter::put(*this, index, source, accumulate);
+}
+
+Tensor Tensor::sum(ScalarType dtype) const {
+    return otter::native::sum(*this, IntArrayRef{}, false, dtype);
+}
+
+Tensor Tensor::sum(IntArrayRef dim, bool keepdim, ScalarType dtype) const {
+    return otter::native::sum(*this, dim, keepdim, dtype);
 }
 
 

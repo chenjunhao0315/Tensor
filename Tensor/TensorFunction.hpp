@@ -197,6 +197,10 @@ struct structured_baddbmm : public TensorIterator {
     void meta(const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha);
 };
 
+struct structured_sum_dim_IntList : public TensorIterator {
+    void meta(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype);
+};
+
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override { \
@@ -429,6 +433,10 @@ struct structured_baddbmm_out_cpu : public structured_baddbmm {
     void impl(const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar & beta, const Scalar & alpha, const Tensor & out);
 };
 
+struct structured_sum_out : public structured_sum_dim_IntList {
+    void impl(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype, const Tensor & out);
+};
+
 namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha);
@@ -616,6 +624,9 @@ Tensor bmm(const Tensor & self, const Tensor & mat2);
 Tensor & bmm_out(Tensor & out, const Tensor & self, const Tensor & mat2);
 Tensor & bmm_outf(const Tensor & self, const Tensor & mat2, Tensor & out);
 
+Tensor sum(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype);
+Tensor & sum_out(Tensor & out, const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype);
+Tensor & sum_outf(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype, Tensor & out);
 }   // end namespace native
 
 }   // end namespace otter

@@ -33,6 +33,13 @@ Tensor scalar_tensor(const Scalar& s, ScalarType dtype) {
     return result;
 }
 
+Tensor scalar_tensor(const Scalar& s, TensorOptions options) {
+    Tensor result = empty_cpu({}, options);
+    scalar_fill(result, s);
+    
+    return result;
+}
+
 
 
 

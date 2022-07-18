@@ -6,6 +6,7 @@
 //
 
 #include "TensorBase.hpp"
+#include "Fill.hpp"
 
 namespace otter {
 

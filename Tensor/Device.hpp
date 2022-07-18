@@ -17,14 +17,6 @@ enum class Device : int16_t {
     Undefined
 };
 
-static OTTER_UNUSED std::ostream& operator<<(std::ostream& os, Device& d) {
-    switch (d) {
-        case Device::CPU:
-            os << "CPU"; break;
-        default:
-            os << "Undefined"; break;
-    }
-    return os;
-}
+std::ostream& operator<<(std::ostream& os, Device& d);
 
 #endif /* Device_hpp */

@@ -16,6 +16,7 @@ class Tensor;
 
 Tensor& scalar_fill(Tensor& self, const Scalar& value);
 Tensor scalar_tensor(const Scalar& s, ScalarType dtype);
+Tensor scalar_tensor(const Scalar& s, TensorOptions options);
 
 inline Tensor scalar_to_tensor(const Scalar& scalar, Device device = Device::CPU) {
     if (device == Device::CPU) {

@@ -44,6 +44,8 @@ __attribute__((no_sanitize("signed-integer-overflow")))
 #define OTTER_UNLIKELY(expr) (expr)
 #endif
 
+#define OTTER_RESTRICT __restrict
+
 #define OTTER_STRINGIZE_IMPL(x) #x
 #define OTTER_STRINGIZE(x) OTTER_STRINGIZE_IMPL(x)
 
@@ -70,5 +72,30 @@ __attribute__((no_sanitize("signed-integer-overflow")))
 #define OTTER_ALWAYS_INLINE inline
 #endif
 
+#if defined(__GNUG__) && __GNUC__ < 5
+#define OTTER_IS_TRIVIALLY_COPYABLE(T) __has_trivial_copy(T)
+#else
+#define OTTER_IS_TRIVIALLY_COPYABLE(T) std::is_trivially_copyable<T>::value
+#endif
+
+namespace otter {
+
+template <int n>
+struct ForcedUnroll {
+    template <typename Func>
+    OTTER_ALWAYS_INLINE void operator()(const Func& f) const {
+        ForcedUnroll<n - 1>{}(f);
+        f(n - 1);
+    }
+};
+template <>
+struct ForcedUnroll<1> {
+    template <typename Func>
+    OTTER_ALWAYS_INLINE void operator()(const Func& f) const {
+        f(0);
+    }
+};
+
+}
 
 #endif /* Macro_h */

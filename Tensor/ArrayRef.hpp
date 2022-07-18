@@ -9,6 +9,7 @@
 #define ArrayRef_hpp
 
 #include <vector>
+#include <iterator>
 #include <initializer_list>
 
 #include "SmallVector.hpp"
@@ -21,6 +22,8 @@ public:
     using iterator = const T*;
     using const_iterator = const T*;
     using value_type = T;
+    
+    using reverse_iterator = std::reverse_iterator<iterator>;
     
     constexpr ArrayRef() : data_(nullptr), length_(0) {}
     constexpr ArrayRef(T& single) : data_(&single), length_(1) {}
@@ -55,6 +58,24 @@ public:
     
     constexpr iterator end() const {
         return data_ + length_;
+    }
+    
+    // These are actually the same as iterator, since ArrayRef only
+    // gives you const iterators.
+    constexpr const_iterator cbegin() const {
+      return data_;
+    }
+    
+    constexpr const_iterator cend() const {
+      return data_ + length_;
+    }
+    
+    constexpr reverse_iterator rbegin() const {
+      return reverse_iterator(end());
+    }
+    
+    constexpr reverse_iterator rend() const {
+      return reverse_iterator(begin());
     }
     
     constexpr const_iterator const_begin() const {

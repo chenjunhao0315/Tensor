@@ -80,6 +80,12 @@
 		76486AFA27DF7CD80078FF9B /* LineIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76486AF827DF7CD80078FF9B /* LineIterator.cpp */; };
 		7651B6C62805CA77006710F5 /* LineDetection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7651B6C42805CA77006710F5 /* LineDetection.cpp */; };
 		7657320D2882928D004AE619 /* HFloat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7657320B2882928D004AE619 /* HFloat.cpp */; };
+		765732132882EB09004AE619 /* TensorIndexing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 765732112882EB09004AE619 /* TensorIndexing.cpp */; };
+		765732162882FB22004AE619 /* Optional.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 765732142882FB22004AE619 /* Optional.cpp */; };
+		7657321928830E22004AE619 /* IndexingKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7657321728830E21004AE619 /* IndexingKernel.cpp */; };
+		7657321E2884E3F5004AE619 /* ReduceOps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7657321C2884E3F5004AE619 /* ReduceOps.cpp */; };
+		765732252884EF29004AE619 /* ReduceOpsKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 765732232884EF29004AE619 /* ReduceOpsKernel.cpp */; };
+		7657322928850C43004AE619 /* AccmulateType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7657322728850C43004AE619 /* AccmulateType.cpp */; };
 		765D27122847CB0800996934 /* Quantize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 765D27102847CB0800996934 /* Quantize.cpp */; };
 		7663C21F281AF75900102057 /* Observer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C21D281AF75900102057 /* Observer.cpp */; };
 		7663C233281B503200102057 /* PoseEstimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7663C231281B503200102057 /* PoseEstimation.cpp */; };
@@ -369,6 +375,22 @@
 		7657320C2882928D004AE619 /* HFloat.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = HFloat.hpp; sourceTree = "<group>"; };
 		7657320E288293DC004AE619 /* TypeSafeSignMath.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TypeSafeSignMath.hpp; sourceTree = "<group>"; };
 		7657321028829752004AE619 /* HFloat-inl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = "HFloat-inl.hpp"; sourceTree = "<group>"; };
+		765732112882EB09004AE619 /* TensorIndexing.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TensorIndexing.cpp; sourceTree = "<group>"; };
+		765732122882EB09004AE619 /* TensorIndexing.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorIndexing.hpp; sourceTree = "<group>"; };
+		765732142882FB22004AE619 /* Optional.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Optional.cpp; sourceTree = "<group>"; };
+		765732152882FB22004AE619 /* Optional.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Optional.hpp; sourceTree = "<group>"; };
+		7657321728830E21004AE619 /* IndexingKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IndexingKernel.cpp; sourceTree = "<group>"; };
+		7657321828830E21004AE619 /* IndexingKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IndexingKernel.hpp; sourceTree = "<group>"; };
+		7657321A28830E3B004AE619 /* IndexKernelUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IndexKernelUtils.hpp; sourceTree = "<group>"; };
+		7657321B28831A85004AE619 /* TensorAdvancedIndexingUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorAdvancedIndexingUtils.hpp; sourceTree = "<group>"; };
+		7657321C2884E3F5004AE619 /* ReduceOps.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ReduceOps.cpp; sourceTree = "<group>"; };
+		7657321D2884E3F5004AE619 /* ReduceOps.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ReduceOps.hpp; sourceTree = "<group>"; };
+		7657321F2884E7DC004AE619 /* ReduceOpsUtils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ReduceOpsUtils.hpp; sourceTree = "<group>"; };
+		765732232884EF29004AE619 /* ReduceOpsKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ReduceOpsKernel.cpp; sourceTree = "<group>"; };
+		765732242884EF29004AE619 /* ReduceOpsKernel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ReduceOpsKernel.hpp; sourceTree = "<group>"; };
+		7657322728850C43004AE619 /* AccmulateType.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AccmulateType.cpp; sourceTree = "<group>"; };
+		7657322828850C43004AE619 /* AccmulateType.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AccmulateType.hpp; sourceTree = "<group>"; };
+		7657322A28850EA4004AE619 /* Reduce.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Reduce.hpp; sourceTree = "<group>"; };
 		765D27102847CB0800996934 /* Quantize.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Quantize.cpp; sourceTree = "<group>"; };
 		765D27112847CB0800996934 /* Quantize.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Quantize.hpp; sourceTree = "<group>"; };
 		7663C21D281AF75900102057 /* Observer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Observer.cpp; sourceTree = "<group>"; };
@@ -704,6 +726,10 @@
 				7604745227D67ED100FCB785 /* DataReader.cpp */,
 				7604745327D67ED100FCB785 /* DataReader.hpp */,
 				762B4D6827EF7E3D00A98E34 /* flat_hash_map.hpp */,
+				765732142882FB22004AE619 /* Optional.cpp */,
+				765732152882FB22004AE619 /* Optional.hpp */,
+				7657322728850C43004AE619 /* AccmulateType.cpp */,
+				7657322828850C43004AE619 /* AccmulateType.hpp */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -794,6 +820,12 @@
 				76F336CC27A5D17E00E3AEF1 /* BinaryOps.hpp */,
 				76F336BC27A5B52300E3AEF1 /* BinaryOpsKernel.cpp */,
 				76F336BD27A5B52300E3AEF1 /* BinaryOpsKernel.hpp */,
+				7657322A28850EA4004AE619 /* Reduce.hpp */,
+				7657321C2884E3F5004AE619 /* ReduceOps.cpp */,
+				7657321D2884E3F5004AE619 /* ReduceOps.hpp */,
+				7657321F2884E7DC004AE619 /* ReduceOpsUtils.hpp */,
+				765732232884EF29004AE619 /* ReduceOpsKernel.cpp */,
+				765732242884EF29004AE619 /* ReduceOpsKernel.hpp */,
 				76F336CE27A660D800E3AEF1 /* Fill.cpp */,
 				76F336CF27A660D800E3AEF1 /* Fill.hpp */,
 				76F336D127A668D900E3AEF1 /* FillKernel.cpp */,
@@ -868,8 +900,14 @@
 				76A222EB287BF92200681843 /* GridSampler.hpp */,
 				76A222ED287BFBEE00681843 /* GridSamplerKernel.cpp */,
 				76A222EE287BFBEE00681843 /* GridSamplerKernel.hpp */,
+				765732112882EB09004AE619 /* TensorIndexing.cpp */,
+				765732122882EB09004AE619 /* TensorIndexing.hpp */,
 				76A222F7287C6C8D00681843 /* TensorAdvancedIndexing.cpp */,
 				76A222F8287C6C8D00681843 /* TensorAdvancedIndexing.hpp */,
+				7657321B28831A85004AE619 /* TensorAdvancedIndexingUtils.hpp */,
+				7657321728830E21004AE619 /* IndexingKernel.cpp */,
+				7657321828830E21004AE619 /* IndexingKernel.hpp */,
+				7657321A28830E3B004AE619 /* IndexKernelUtils.hpp */,
 				76A222FA287D127300681843 /* ScatterGatherKernel.cpp */,
 				76A222FB287D127300681843 /* ScatterGatherKernel.hpp */,
 				76C4DFFA287D69620038A363 /* AffineGridGenerator.cpp */,
@@ -1231,6 +1269,7 @@
 				76F336CA27A5D02700E3AEF1 /* Device.cpp in Sources */,
 				76B4BBBD282DDD3300BE0949 /* KalmanTracker.cpp in Sources */,
 				7687216F27C12AAB006640CF /* Blob.cpp in Sources */,
+				7657321928830E22004AE619 /* IndexingKernel.cpp in Sources */,
 				76C19983283F6C0A00A5D737 /* TensorSoftmax.cpp in Sources */,
 				760382C027BF4AAB00CD599F /* DefaultDtype.cpp in Sources */,
 				761C9D022851647D00A272EF /* ConvolutionMM2DInt8Neon.cpp in Sources */,
@@ -1315,6 +1354,7 @@
 				762E3B3927BBBA8C0075F983 /* Convolution.cpp in Sources */,
 				76F336D027A660D800E3AEF1 /* Fill.cpp in Sources */,
 				760704DE27E6425300D5E00D /* ImageThreshold.cpp in Sources */,
+				7657321E2884E3F5004AE619 /* ReduceOps.cpp in Sources */,
 				7628E02F27CF543800B136FA /* Padding.cpp in Sources */,
 				76F336E027A90E8E00E3AEF1 /* TensorBase.cpp in Sources */,
 				76B4B7BC282D848800BE0949 /* DepthwiseConvTransposeKernelNeon.cpp in Sources */,
@@ -1375,10 +1415,13 @@
 				768B2CBF2876B7E700F8E108 /* FlattenLayer.cpp in Sources */,
 				760382D327C00DD000CD599F /* TensorCat.cpp in Sources */,
 				768B2CBC2876AD8A00F8E108 /* InnerProductLayer.cpp in Sources */,
+				7657322928850C43004AE619 /* AccmulateType.cpp in Sources */,
 				765D27122847CB0800996934 /* Quantize.cpp in Sources */,
+				765732132882EB09004AE619 /* TensorIndexing.cpp in Sources */,
 				76E6C51327A502A30036A26F /* Tensor.cpp in Sources */,
 				76E6C52827A505700036A26F /* SmallVector.cpp in Sources */,
 				769279D427D49BC90088BD9F /* UpsampleLayer.cpp in Sources */,
+				765732252884EF29004AE619 /* ReduceOpsKernel.cpp in Sources */,
 				76AA4A0827FBC6C500F0F3C6 /* NanodetPlusDetectionOutputLayer.cpp in Sources */,
 				762E3B3C27BBBDBE0075F983 /* ConvolutionUtils.cpp in Sources */,
 				76AA4A0B27FBF0A400F0F3C6 /* DrawDetection.cpp in Sources */,
@@ -1394,6 +1437,7 @@
 				76F0064327B67E4C009D67F5 /* TensorProperties.cpp in Sources */,
 				76CFA2C22808B7D800205034 /* ReluLayer.cpp in Sources */,
 				76F336D627A7AD1600E3AEF1 /* TensorFunction.cpp in Sources */,
+				765732162882FB22004AE619 /* Optional.cpp in Sources */,
 				760A333B27F62800003F0542 /* CropLayer.cpp in Sources */,
 				760F7546285BC561005F72C0 /* ConvolutionMM2DNeonPack.cpp in Sources */,
 				760A334127F7949F003F0542 /* SigmoidLayer.cpp in Sources */,

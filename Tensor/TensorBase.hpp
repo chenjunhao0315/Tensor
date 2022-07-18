@@ -434,6 +434,9 @@ public:
         }
     }
     
+    const TensorBase& fill_(const Scalar& scalar) const;
+    const TensorBase& zero_() const;
+    
     template <typename T>
     T* data_ptr() const;
     
@@ -515,6 +518,10 @@ public:
     
     const Memory& memory() const {
         return tensor_nucleus_->memory();
+    }
+    
+    bool is_alias_of(const TensorBase& other) const{
+        return tensor_nucleus_->memory().is_alias_of(other.memory());
     }
     
     TypeMeta dtype() const noexcept {

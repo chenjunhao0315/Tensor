@@ -16,6 +16,11 @@
 
 namespace otter {
 
+using DimMask = TensorIterator::DimMask;
+using PtrVector = TensorIterator::PtrVector;
+using loop2d_t = TensorIterator::loop2d_t;
+using StrideVector = TensorIterator::StrideVector;
+
 InlineTensorRef::InlineTensorRef() {
     static_assert(alignof(TensorRef) == alignof(TensorBase), "");
     static_assert(sizeof(TensorRef) == sizeof(TensorBase), "");
@@ -78,12 +83,138 @@ void OperandInfo::restore_original_tensor() {
     *tensor_storage_ = std::exchange(*original_tensor_storage_, TensorRef{});
 }
 
+void* TensorIterator::data_ptr(int arg) const {
+    return operands_[arg].data;
+}
+
+bool TensorIterator::is_contiguous() const {
+    if (numel() == 1) {
+        return true;
+    }
+    if (ndim() != 1) {
+        return false;
+    }
+    return has_contiguous_first_dim();
+}
+
+bool TensorIterator::is_dim_reduced(int dim) const {
+    for (auto& op : operands_) {
+        if (op.is_output && op.stride_bytes[dim] == 0 && shape_[dim] > 1) {
+            return true;
+        }
+    }
+    return false;
+}
+
+StrideVector TensorIterator::get_strides() const {
+    const auto dim = ndim();
+    StrideVector strides(std::max(dim, 2) * ntensors());
+    otter::get_strides(strides.data(), operands_, dim);
+    return strides;
+}
+
+StrideVector TensorIterator::get_dim_strides(int dim) const {
+    auto dims = ndim();
+    auto inner_strides = StrideVector();
+    for (auto& op : operands_) {
+        inner_strides.push_back(dims == 0 ? 0 : op.stride_bytes[dim]);
+    }
+    return inner_strides;
+}
+
+
+void TensorIterator::coalesce_dimensions() {
+    if (ndim() <= 1) {
+        return;
+    }
+    // We can coalesce two adjacent dimensions if either dim has size 1 or if:
+    // shape[n] * stride[n] == shape[n + 1].
+    auto can_coalesce = [&](int dim0, int dim1) {
+        auto shape0 = shape_[dim0];
+        auto shape1 = shape_[dim1];
+        if (shape0 == 1 || shape1 == 1) {
+            return true;
+        }
+        for (const auto i : otter::irange(ntensors())) {
+            auto& stride = operands_[i].stride_bytes;
+            if (shape0 * stride[dim0] != stride[dim1]) {
+                return false;
+            }
+        }
+        return true;
+    };
+    // replace each operands stride at dim0 with its stride at dim1
+    auto replace_stride = [&](int dim0, int dim1) {
+        for (const auto i : otter::irange(ntensors())) {
+            auto& stride = operands_[i].stride_bytes;
+            stride[dim0] = stride[dim1];
+        }
+    };
+    int prev_dim = 0;
+    for (const auto dim : otter::irange(1, ndim())) {
+        if (can_coalesce(prev_dim, dim)) {
+            if (shape_[prev_dim] == 1) {
+                replace_stride(prev_dim, dim);
+            }
+            shape_[prev_dim] *= shape_[dim];
+        } else {
+            prev_dim++;
+            if (prev_dim != dim) {
+                replace_stride(prev_dim, dim);
+                shape_[prev_dim] = shape_[dim];
+            }
+        }
+    }
+    shape_.resize(prev_dim + 1);
+    for (const auto i : otter::irange(ntensors())) {
+        operands_[i].stride_bytes.resize(ndim());
+    }
+    has_coalesced_dimensions_ = true;
+}
+
+int TensorIterator::num_reduce_dims() const {
+    int count = 0;
+    for (const auto dim : otter::irange(ndim())) {
+        if (operands_[0].stride_bytes[dim] == 0) {
+            count++;
+        }
+    }
+    return count;
+}
+
+SmallVector<char*, 4> TensorIterator::get_base_ptrs() const {
+    auto ptrs = SmallVector<char*, 4>(ntensors());
+    otter::get_base_ptrs(ptrs.data(), operands_);
+    return ptrs;
+}
+
 int64_t TensorIterator::numel() const {
     int64_t numel = 1;
     for (int64_t size: shape_) {
         numel *= size;
     }
     return numel;
+}
+
+void TensorIterator::narrow(int dim, int64_t start, int64_t size) {
+    OTTER_INTERNAL_ASSERT(dim < ndim() && size >= 1);
+    shape_[dim] = size;
+    view_offsets_[dim] += start;
+    for (auto& op : operands_) {
+        op.data = ((char*)op.data) + op.stride_bytes[dim] * start;
+    }
+    if (size == 1 && !is_reduction_) {
+        coalesce_dimensions();
+    }
+}
+void TensorIterator::select_all_keeping_dim(int start_dim, IntArrayRef indices) {
+    OTTER_INTERNAL_ASSERT(start_dim <= ndim());
+    for (const auto i : otter::irange(start_dim, ndim())) {
+        for (auto& op : operands_) {
+            op.data = ((char*)op.data) + op.stride_bytes[i] * indices[i - start_dim];
+        }
+        shape_[i] = 1;
+    }
 }
 
 void TensorIterator::unsafe_replace_operand(int arg, void* data) {
@@ -293,6 +424,9 @@ void TensorIterator::compute_types(const TensorIteratorConfig &config) {
 }
 
 void TensorIterator::mark_resize_outputs(const TensorIteratorConfig& config) {
+    if (!config.static_shape_.empty()) {
+        return;
+    }
     for (const auto i : otter::irange(num_outputs_)) {
         const auto& output = this->tensor(i);
         if (output.defined() && !output.sizes().equals(shape_)) {
@@ -300,6 +434,8 @@ void TensorIterator::mark_resize_outputs(const TensorIteratorConfig& config) {
                 operands_[i].will_resize = true;
                 continue;
             }
+            // for reduction, output size does not match shape_, as output is reduced size, and shape_ is size of the input
+            OTTER_CHECK(is_reduction_,  "output with shape ", output.sizes(), " doesn't match the broadcast shape ", shape_);
         }
     }
 }
@@ -337,6 +473,11 @@ void TensorIterator::reorder_dimensions() {
     
     std::iota(permutation_.rbegin(), permutation_.rend(), 0);
     
+    if (enforce_linear_iteration_) {
+        permute_dimensions(permutation_);
+        return;
+    }
+    
     auto should_swap = [&](size_t dim0, size_t dim1) {
         for (const auto arg : otter::irange(ntensors())) {
             if (operands_[arg].stride_bytes.empty() || operands_[arg].will_resize) {
@@ -344,7 +485,7 @@ void TensorIterator::reorder_dimensions() {
             }
             int64_t stride0 = operands_[arg].stride_bytes[dim0];
             int64_t stride1 = operands_[arg].stride_bytes[dim1];
-            if (operands_[arg].is_output) {
+            if (is_reduction_ && operands_[arg].is_output) {
                 if ((stride0 == 0) != (stride1 == 0)) {
                     return stride1 == 0 ? 1 : -1;
                 }
@@ -503,6 +644,9 @@ const Tensor& TensorIterator::maybe_get_output(int64_t output_idx) {
 }
 
 void TensorIterator::build(TensorIteratorConfig &config) {
+    is_reduction_ = config.is_reduction_;
+    enforce_linear_iteration_ = config.enforce_linear_iteration_;
+    
     // Put all tensor into operands pool
     this->initialize_operands(config);
     // Check memory overlap
@@ -649,6 +793,41 @@ TensorIterator TensorIterator::borrowing_nullary_op(const TensorBase& out) {
         .build();
 }
 
+TensorIterator TensorIterator::reduce_op(TensorBase& out, const TensorBase& a) {
+    OTTER_INTERNAL_ASSERT(out.defined());
+    return TensorIteratorConfig()
+        .set_check_mem_overlap(false)
+        .add_owned_output(out)
+        .add_owned_input(a)
+        .resize_outputs(false)
+        .is_reduction(true)
+        // TODO: not supporting casting to outputs is only really necessary for arg{min,max}
+        .promote_inputs_to_common_dtype(true)
+        .build();
+}
+TensorIterator TensorIterator::reduce_op(TensorBase& out1, TensorBase& out2, const TensorBase& a) {
+    OTTER_INTERNAL_ASSERT(out1.defined());
+    OTTER_INTERNAL_ASSERT(out2.defined());
+//    OTTER_CHECK(a.device() == out1.device() && out1.device() == out2.device(),
+//        "reduce_op(): expected input and both outputs to be on same device, but input is on ", a.device(),
+//        ", output1 is on ", out1.device(), " and output2 is on", out2.device());
+    OTTER_CHECK(out1.dim() == out2.dim(), "reduce_op(): expected both outputs to have same number of dims, but  output1 has ", out1.dim(),
+        " and output2 has ", out2.dim());
+    OTTER_CHECK(out1.sizes() == out2.sizes(), "reduce_op(): expected both outputs to have same sizes, but output1   has ", out1.sizes(),
+        " and output2 has ", out2.sizes());
+    OTTER_CHECK(out1.strides() == out2.strides(), "reduce_op(): expected both outputs to have same strides, but     output1 has ", out1.strides(),
+        " and output2 has ", out2.strides());
+    return TensorIteratorConfig()
+        .set_check_mem_overlap(false)
+        .add_owned_output(out1)
+        .add_owned_output(out2)
+        .add_owned_input(a)
+        .resize_outputs(false)
+        .is_reduction(true)
+        .check_all_same_dtype(false)
+        .build();
+}
+
 static void set_up_comparison_op_config(TensorIteratorConfig& config, const TensorBase& out) {
     config.set_check_mem_overlap(true);
     config.allow_cpu_scalars(true);
@@ -720,6 +899,148 @@ TensorIterator TensorIterator::unary_op(TensorBase& out, const TensorBase& a) {
     iter.build_unary_op(out, a);
     return iter;
 }
+
+// Reduce
+static bool use_two_pass_reduction(TensorIterator& iter);
+static void two_pass_reduction(TensorIterator& iter, loop2d_t loop);
+static void parallel_dim_reduction(TensorIterator& iter, loop2d_t loop);
+
+void TensorIterator::parallel_reduce(loop2d_t loop) {
+    OTTER_CHECK(ntensors() == 2, "parallel_reduce only supports one input and one output");
+    int64_t numel = this->numel();
+    if (numel < otter::GRAIN_SIZE || otter::get_num_threads() == 1 ||
+        otter::in_parallel_region()) {
+        serial_for_each(loop, {0, numel});
+    } else if (use_two_pass_reduction(*this)) {
+        two_pass_reduction(*this, loop);
+    } else {
+        parallel_dim_reduction(*this, loop);
+    }
+}
+static bool use_two_pass_reduction(TensorIterator& iter) {
+    return iter.output(0).numel() == 1;
+}
+static void two_pass_reduction(TensorIterator& iter, loop2d_t loop) {
+    const int max_threads = otter::get_num_threads();
+    auto dst = iter.output(0);
+    auto unsqueezed = dst.unsqueeze(0);
+    auto buffer_shape = DimVector(unsqueezed.sizes());
+    buffer_shape[0] = max_threads;
+    auto buffer = otter::empty(buffer_shape, dst.options());
+    // Fill with the identity
+    buffer.copy_(unsqueezed);
+    auto buffer_stride = buffer.strides()[0] * buffer.itemsize();
+    auto buffer_0 = buffer[0];
+    auto first_reduce = TensorIterator::reduce_op(buffer_0, iter.input(0));
+    OTTER_INTERNAL_ASSERT(first_reduce.output(0).is_alias_of(buffer_0));
+    otter::parallel_for(0, iter.numel(), otter::GRAIN_SIZE, [&](int64_t begin, int64_t end) {
+        const auto thread_num = otter::get_thread_num();
+        auto shape = first_reduce.shape();
+        auto strides = first_reduce.get_strides();
+        // Bump output ptr so each thread has its own ouput slice
+        auto base_ptrs = first_reduce.get_base_ptrs();
+        base_ptrs[0] += buffer_stride * thread_num;
+        internal::serial_for_each(shape, strides, base_ptrs.data(),
+                                      base_ptrs.size(), loop, {begin, end});
+    });
+    auto final_reduce = TensorIterator::reduce_op(unsqueezed, buffer);
+    final_reduce.for_each(loop);
+}
+/// Chooses a dimension over which to parallelize. Prefers the outer-most
+/// dimension thats larger than the number of available threads.
+static int find_split_dim(TensorIterator& iter) {
+    int num_threads = otter::get_num_threads();
+    auto shape = iter.shape();
+    // start with the outer-most dimension
+    int best_dim = iter.ndim() - 1;
+    for (int dim = best_dim; dim >= 0 && !iter.is_dim_reduced(dim); dim--) {
+        if (shape[dim] >= num_threads) {
+            return dim;
+        } else if (shape[dim] > shape[best_dim]) {
+            best_dim = dim;
+        }
+    }
+    assert(!iter.is_dim_reduced(best_dim));
+    return best_dim;
+}
+static std::tuple<int64_t, int64_t>
+round_columns(TensorIterator& iter, int dim, int multiple, int64_t begin, int64_t end) {
+    begin = begin - (begin % multiple);
+    if (end != iter.shape()[dim]) {
+        // only round the 'end' column down if it's not the final column
+        end = end - (end % multiple);
+    }
+    return std::make_tuple(begin, end);
+}
+static void parallel_dim_reduction(TensorIterator& iter, loop2d_t loop) {
+    assert(iter.ndim() >= 1);
+    int dim = find_split_dim(iter);
+    int64_t cols = iter.shape()[dim];
+    int element_size = iter.element_size(/*arg=*/1);
+    bool should_round_columns = iter.strides(1)[dim] == element_size;
+    otter::parallel_for(0, cols, 1, [&](int64_t begin, int64_t end) {
+        if (should_round_columns) {
+            // round columns to multiples of 128 bytes if adjacent columns are
+            // contiguous in memory.
+            int64_t cols_per_128_bytes = 128 / element_size;
+            std::tie(begin, end) = round_columns(iter, dim, cols_per_128_bytes, begin, end);
+        }
+        if (begin == end) {
+            return;
+        }
+        auto sub_iter = TensorIterator(iter);
+        sub_iter.narrow(dim, begin, end - begin);
+        sub_iter.for_each(loop);
+    });
+}
+void TensorIterator::foreach_reduced_elt(loop_subiter_t loop, bool parallelize) {
+    assert(ninputs() == 1);
+    assert(noutputs() >= 1);
+    auto shape = this->shape();
+    if (output(0).numel() == 0) {
+        return;
+    }
+    if (output(0).numel() == 1) {
+        loop(*this);
+    }
+    else if (numel() < otter::GRAIN_SIZE || otter::get_num_threads() == 1 ||
+             otter::in_parallel_region() || !parallelize) {
+        auto reduce_dims = num_reduce_dims();
+        auto non_reduced_shape = shape.slice(reduce_dims, shape.size() - reduce_dims);
+        int64_t non_reduced_numel = 1;
+        for (const auto i : non_reduced_shape) {
+            non_reduced_numel *= i;
+        }
+        DimCounter dims {non_reduced_shape, {0, non_reduced_numel}};
+        while (!dims.is_done()) {
+            TensorIterator reduced = *this;
+            reduced.select_all_keeping_dim(reduce_dims, dims.values_);
+            loop(reduced);
+            dims.increment({1, 1});
+        }
+    }
+    else {
+        int dim = find_split_dim(*this);
+        int64_t cols = shape[dim];
+        otter::parallel_for(0, cols, 1, [&](int64_t begin, int64_t end) {
+            if (begin == end) {
+                return;
+            }
+            TensorIterator sub_iter(*this);
+            sub_iter.narrow(dim, begin, end - begin);
+            // On some broken setups, `#ifdef _OPENMP` is true,
+            // and `get_num_threads` returns > 1, but
+            // `#pragma omp parallel` is ignored.
+            // There is no API to check for this, so we need to explicitly
+            // stop trying to parallelize if we've already gotten here.
+            //
+            // (If we are on one of those broken setups, we will
+            //  only have one thread here, and end - begin == cols.)
+            sub_iter.foreach_reduced_elt(loop, false);
+        });
+    }
+}
+//
 
 TensorIteratorConfig& TensorIteratorConfig::add_owned_output(const TensorBase& output) {
     assert(num_inputs_ == 0);

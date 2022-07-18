@@ -181,6 +181,9 @@ OTTER_ALL_SCALAR_TYPES(SPECIALIZE_CppTypeToScalarType)
 
 #undef SPECIALIZE_CppTypeToScalarType
 
+template <otter::ScalarType N>
+using ScalarTypeToCPPTypeT = typename ScalarTypeToCPPType<N>::type;
+
 #define ERROR_UNSUPPORTED_CAST fprintf(stderr, "[ScalarType] Unsupported cast!\n")
 
 #define FETCH_AND_CAST_CASE(type, scalartype)   \

@@ -12,6 +12,7 @@
 
 #include "TensorBase.hpp"
 #include "TensorAccessor.hpp"
+#include "Optional.hpp"
 #if __ARM_NEON
 #include <arm_neon.h>
 #endif
@@ -116,6 +117,31 @@ public:
     
     Tensor operator[](int64_t index) const;
     Tensor select(int64_t dim, int64_t index) const;
+    
+    Tensor & masked_fill_(const Tensor & mask, const Scalar & value) const;
+    Tensor masked_fill(const Tensor & mask, const Scalar & value) const;
+    Tensor & masked_fill_(const Tensor & mask, const Tensor & value) const;
+    Tensor masked_fill(const Tensor & mask, const Tensor & value) const;
+    
+    Tensor & index_fill_(int64_t dim, const Tensor & index, const Scalar & value) const;
+    Tensor index_fill(int64_t dim, const Tensor & index, const Scalar & value) const;
+    Tensor & index_fill_(int64_t dim, const Tensor & index, const Tensor & value) const;
+    Tensor index_fill(int64_t dim, const Tensor & index, const Tensor & value) const;
+    
+    Tensor & index_put_(const std::vector<otter::optional<Tensor>> & indices, const Tensor & values, bool accumulate = false) const;
+    Tensor index_put(const std::vector<otter::optional<Tensor>> & indices, const Tensor & values, bool accumulate = false) const;
+    
+    Tensor index_select(int64_t dim, const Tensor & index) const;
+    
+    Tensor masked_select(const Tensor & mask) const;
+    
+    Tensor take(const Tensor & index) const;
+    
+    Tensor & put_(const Tensor & index, const Tensor & source, bool accumulate = false) const;
+    Tensor put(const Tensor & index, const Tensor & source, bool accumulate = false) const;
+    
+    Tensor sum(ScalarType dtype = ScalarType::Undefined) const;
+    Tensor sum(IntArrayRef dim, bool keepdim = false, ScalarType dtype = ScalarType::Undefined) const;
     
     Tensor& copy_(const Tensor& src, bool non_blocking = false) const;
     
@@ -229,22 +255,22 @@ public:
         return bitwise_xor_(other);
     }
     
-    Tensor& zero_();
-    Tensor& fill_(const Scalar& value);
-    Tensor& fill_(const Tensor& value);
+    Tensor& zero_() const;
+    Tensor& fill_(const Scalar& value) const;
+    Tensor& fill_(const Tensor& value) const;
     
 #if __ARM_NEON
-    Tensor& fill_(float32x4_t _v);
-    Tensor& fill_(uint16x4_t _v);
-    Tensor& fill_(int32x4_t _v);
-    Tensor& fill_(int32x4_t _v0, int32x4_t _v1);
+    Tensor& fill_(float32x4_t _v) const;
+    Tensor& fill_(uint16x4_t _v) const;
+    Tensor& fill_(int32x4_t _v) const;
+    Tensor& fill_(int32x4_t _v0, int32x4_t _v1) const;
 #endif // __ARM_NEON
 #if __SSE2__
 #if __AVX__
-    Tensor& fill_(__m256 _v);
+    Tensor& fill_(__m256 _v) const;
 #endif // __AVX__
-    Tensor& fill_(__m128 _v);
-    Tensor& fill_(__m128i _v);
+    Tensor& fill_(__m128 _v) const;
+    Tensor& fill_(__m128i _v) const;
 #endif // __SSE2__
     
     template <typename scalar_t>
@@ -390,6 +416,8 @@ public:
     Tensor & baddbmm_(const Tensor & batch1, const Tensor & batch2, const Scalar & beta = 1, const Scalar & alpha = 1) const;
     
     Tensor bmm(const Tensor & mat2) const;
+    
+    Tensor nonzero() const;
 };
 
 template <typename T, typename... Args>
@@ -398,7 +426,7 @@ Tensor make_tensor(Args&&... args) {
 }
 
 #if __ARM_NEON
-OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(float32x4_t _v) {
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(float32x4_t _v) const {
     int size = (int)numel();
     float* ptr = (float*)raw_data();
     for (int i = 0; i < size; i++) {
@@ -406,10 +434,10 @@ OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(float32x4_t _v) {
         ptr += 4;
     }
     
-    return *this;
+    return const_cast<Tensor&>(*this);
 }
 
-OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(uint16x4_t _v) {
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(uint16x4_t _v) const {
     int size = (int)numel();
     unsigned short* ptr = (unsigned short*)raw_data();
     for (int i = 0; i < size; i++) {
@@ -417,10 +445,10 @@ OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(uint16x4_t _v) {
         ptr += 4;
     }
     
-    return *this;
+    return const_cast<Tensor&>(*this);
 }
 
-OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(int32x4_t _v) {
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(int32x4_t _v) const {
     int size = (int)numel();
     int* ptr = (int*)raw_data();
     for (int i = 0; i < size; i++) {
@@ -428,10 +456,10 @@ OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(int32x4_t _v) {
         ptr += 4;
     }
     
-    return *this;
+    return const_cast<Tensor&>(*this);
 }
 
-OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(int32x4_t _v0, int32x4_t _v1) {
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(int32x4_t _v0, int32x4_t _v1) const {
     int size = (int)numel();
     int* ptr = (int*)raw_data();
     for (int i = 0; i < size; i++) {
@@ -440,13 +468,13 @@ OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(int32x4_t _v0, int32x4_t _v1) {
         ptr += 8;
     }
     
-    return *this;
+    return const_cast<Tensor&>(*this);
 }
 #endif // __ARM_NEON
 
 #if __SSE2__
 #if __AVX__
-OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(__m256 _v) {
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(__m256 _v) const {
     int size = (int)numel();
     float* ptr = (float*)raw_data();
     for (int i = 0; i < size; i++) {
@@ -454,10 +482,10 @@ OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(__m256 _v) {
         ptr += 8;
     }
     
-    return *this;
+    return const_cast<Tensor&>(*this);
 }
 #endif // __AVX__
-OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(__m128 _v) {
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(__m128 _v) const {
     int size = (int)numel();
     float* ptr = (float*)raw_data();
     for (int i = 0; i < size; i++) {
@@ -465,10 +493,10 @@ OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(__m128 _v) {
         ptr += 4;
     }
     
-    return *this;
+    return const_cast<Tensor&>(*this);
 }
 
-OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(__m128i _v) {
+OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(__m128i _v) const {
     int size = (int)numel();
     unsigned short* ptr = (unsigned short*)raw_data();
     for (int i = 0; i < size; i++) {
@@ -476,7 +504,7 @@ OTTER_ALWAYS_INLINE Tensor& Tensor::fill_(__m128i _v) {
         ptr += 8;
     }
     
-    return *this;
+    return const_cast<Tensor&>(*this);
 }
 #endif // __SSE2__
 

@@ -29,6 +29,10 @@ void set_num_threads(int num_threads);
 // Returns the maximum number of threads that may be used in a parallel region
 int get_num_threads();
 
+// Returns the current thread number (starting from 0)
+// in the current parallel region, or 0 in the sequential region
+int get_thread_num();
+
 // Checks whether the code runs in parallel region
 bool in_parallel_region();
 

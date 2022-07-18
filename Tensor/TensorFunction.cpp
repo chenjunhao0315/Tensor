@@ -1984,6 +1984,39 @@ Tensor & wrapper_bmm_out_out(const Tensor & self, const Tensor & mat2, Tensor & 
 
     return out;
 }
+struct structured_sum_out_functional final : public structured_sum_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+      return *outputs_[output_idx];
+    }
+    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_sum_dim_IntList(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype) {
+    structured_sum_out_functional op;
+    op.meta(self, dim, keepdim, dtype);
+    op.impl(self, dim, keepdim, dtype, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_sum_out_out final : public structured_sum_out {
+    structured_sum_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+    }
+    
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+      return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_sum_out_IntList_out(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype, Tensor & out) {
+    structured_sum_out_out op(out);
+    op.meta(self, dim, keepdim, dtype);
+    op.impl(self, dim, keepdim, dtype, op.maybe_get_output(0));
+    return out;
+}
 
 namespace native {
 
@@ -2469,6 +2502,16 @@ Tensor & bmm_out(Tensor & out, const Tensor & self, const Tensor & mat2) {
 }
 Tensor & bmm_outf(const Tensor & self, const Tensor & mat2, Tensor & out) {
     return wrapper_bmm_out_out(self, mat2, out);
+}
+
+Tensor sum(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype) {
+    return wrapper_sum_dim_IntList(self, dim, keepdim, dtype);
+}
+Tensor & sum_out(Tensor & out, const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype) {
+    return wrapper_sum_out_IntList_out(self, dim, keepdim, dtype, out);
+}
+Tensor & sum_outf(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype, Tensor & out) {
+    return wrapper_sum_out_IntList_out(self, dim, keepdim, dtype, out);
 }
 
 }   // end namespace native
