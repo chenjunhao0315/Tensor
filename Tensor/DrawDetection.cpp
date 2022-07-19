@@ -77,10 +77,10 @@ void draw_coco_detection(otter::Tensor& image, const otter::Tensor& pred, int wi
         auto rect_size = getTextSize(coco_class_names[obj.label], otter::cv::FONT_HERSHEY_SIMPLEX, getFontScaleFromHeight(otter::cv::FONT_HERSHEY_SIMPLEX, h, text_size), text_size, nullptr);
         
         otter::cv::Rect rect((x1 - line_width / 2 < 0) ? 0 : x1 - line_width / 2, ((y1 - h * 1.8 + line_width / 2) < 0) ? 0 : y1 - h * 1.8 + line_width / 2, rect_size.width * 1.2, rect_size.height * 1.8);
-        otter::cv::rectangle(image, rect, color, -1);
+//        otter::cv::rectangle(image, rect, color, -1);
         otter::cv::rectangle(image, otter::cv::Point(x1, y1), otter::cv::Point(x2, y2), color, line_width);
 
-        otter::cv::putText(image, coco_class_names[obj.label], otter::cv::Point((x1 - line_width / 2 < 0) ? 0 : x1 + rect_size.width * 0.1 - line_width / 2, ((y1 - h * 0.4) < 0) ? 0 : y1 - h * 0.4), otter::cv::FONT_HERSHEY_SIMPLEX, h, otter::cv::Color(0, 0, 0), text_size, otter::cv::LINE_AA, false);
+//        otter::cv::putText(image, coco_class_names[obj.label], otter::cv::Point((x1 - line_width / 2 < 0) ? 0 : x1 + rect_size.width * 0.1 - line_width / 2, ((y1 - h * 0.4) < 0) ? 0 : y1 - h * 0.4), otter::cv::FONT_HERSHEY_SIMPLEX, h, otter::cv::Color(0, 0, 0), text_size, otter::cv::LINE_AA, false);
     }
 #endif // OTTER_OPENCV_DRAW
 }

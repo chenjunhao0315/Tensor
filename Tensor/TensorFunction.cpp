@@ -2018,6 +2018,47 @@ Tensor & wrapper_sum_out_IntList_out(const Tensor & self, IntArrayRef dim, bool 
     return out;
 }
 
+struct structured_index_out_functional final : public structured_index_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+
+        structured_index_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+      return *outputs_[output_idx];
+    }
+    std::array<otter::ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+
+Tensor wrapper_index_Tensor(const Tensor & self, const std::vector<otter::optional<Tensor>> & indices) {
+    structured_index_out_functional op;
+    auto precompute = op.meta(self, indices);
+    (void)precompute;
+    op.impl(self, precompute.sizes, precompute.strides, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_index_out_out final : public structured_index_out {
+    structured_index_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides,TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+
+        structured_index_out::set_output(output_idx, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+      return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_index_out_Tensor_out(const Tensor & self, const std::vector<otter::optional<Tensor>> & indices, Tensor & out) {
+    structured_index_out_out op(out);
+    auto precompute = op.meta(self, indices);
+    (void)precompute;
+    op.impl(self, precompute.sizes, precompute.strides, op.maybe_get_output(0));
+    return out;
+}
+
 namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha) {
@@ -2512,6 +2553,16 @@ Tensor & sum_out(Tensor & out, const Tensor & self, IntArrayRef dim, bool keepdi
 }
 Tensor & sum_outf(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype, Tensor & out) {
     return wrapper_sum_out_IntList_out(self, dim, keepdim, dtype, out);
+}
+
+Tensor index(const Tensor & self, const std::vector<otter::optional<Tensor>> & indices) {
+    return wrapper_index_Tensor(self, indices);
+}
+Tensor & index_out(Tensor & out, const Tensor & self, const std::vector<otter::optional<Tensor>> & indices) {
+    return wrapper_index_out_Tensor_out(self, indices, out);
+}
+Tensor & index_outf(const Tensor & self, const std::vector<otter::optional<Tensor>> & indices, Tensor & out) {
+    return wrapper_index_out_Tensor_out(self, indices, out);
 }
 
 }   // end namespace native

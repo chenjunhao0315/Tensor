@@ -10,6 +10,7 @@
 
 #include <array>
 #include <numeric>
+#include <bitset>
 
 #include "Tensor.hpp"
 #include "Utils.hpp"

@@ -25,8 +25,8 @@ Tensor grid_sampler(const Tensor& input,
 // See NOTE [ grid_sampler Native Functions ].
 static void check_grid_sampler_common(const TensorBase& input,
                                const TensorBase& grid) {
-    auto input_opt = input.options();
-    auto grid_opt = grid.options();
+//    auto input_opt = input.options();
+//    auto grid_opt = grid.options();
     OTTER_CHECK(input.defined(),
                 "grid_sampler(): expected input to not be undefined");
     OTTER_CHECK(grid.defined(),

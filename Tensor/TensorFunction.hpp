@@ -201,6 +201,34 @@ struct structured_sum_dim_IntList : public TensorIterator {
     void meta(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype);
 };
 
+struct structured_index_Tensor : public TensorIterator {
+    
+    template <bool SIZES = false, bool STRIDES = false>
+    struct precompute_out {
+        precompute_out<true, STRIDES> set_sizes(DimVector value) {
+            static_assert(SIZES == false, "sizes already set");
+            precompute_out<true, STRIDES> ret;
+            ret.sizes = value;
+            ret.strides = this->strides;
+            return ret;
+        }
+                
+        precompute_out<SIZES, true> set_strides(DimVector value) {
+            static_assert(STRIDES == false, "strides already set");
+            precompute_out<SIZES, true> ret;
+            ret.sizes = this->sizes;
+            ret.strides = value;
+            return ret;
+        }
+                
+        DimVector sizes;
+        DimVector strides;
+    };
+    
+    using meta_return_ty = precompute_out <true, true>;
+    meta_return_ty meta(const Tensor & self, std::vector<otter::optional<otter::Tensor>> indices);
+};
+
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override { \
@@ -437,6 +465,10 @@ struct structured_sum_out : public structured_sum_dim_IntList {
     void impl(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype, const Tensor & out);
 };
 
+struct structured_index_out : public structured_index_Tensor {
+    void impl(const Tensor & self, DimVector sizes, DimVector strides, const Tensor & out);
+};
+
 namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha);
@@ -627,6 +659,10 @@ Tensor & bmm_outf(const Tensor & self, const Tensor & mat2, Tensor & out);
 Tensor sum(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype);
 Tensor & sum_out(Tensor & out, const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype);
 Tensor & sum_outf(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype, Tensor & out);
+
+Tensor index(const Tensor & self, const std::vector<otter::optional<Tensor>> & indices);
+Tensor & index_out(Tensor & out, const Tensor & self, const std::vector<otter::optional<Tensor>> & indices);
+Tensor & index_outf(const Tensor & self, const std::vector<otter::optional<Tensor>> & indices, Tensor & out);
 }   // end namespace native
 
 }   // end namespace otter

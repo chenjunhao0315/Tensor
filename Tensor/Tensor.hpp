@@ -25,6 +25,10 @@
 
 namespace otter {
 
+namespace indexing {
+struct TensorIndex;
+} // namespace indexing
+
 struct Generator;
 
 class TensorRef;
@@ -128,6 +132,13 @@ public:
     Tensor & index_fill_(int64_t dim, const Tensor & index, const Tensor & value) const;
     Tensor index_fill(int64_t dim, const Tensor & index, const Tensor & value) const;
     
+    Tensor index(const std::vector<optional<Tensor>> & indices) const;
+    Tensor index(ArrayRef<indexing::TensorIndex> indices) const;
+    Tensor index(std::initializer_list<indexing::TensorIndex> indices) const;
+    Tensor & index_put_(ArrayRef<indexing::TensorIndex> indices, Tensor const & rhs);
+    Tensor & index_put_(ArrayRef<indexing::TensorIndex> indices, const Scalar& v);
+    Tensor & index_put_(std::initializer_list<indexing::TensorIndex> indices, Tensor const & rhs);
+    Tensor & index_put_(std::initializer_list<indexing::TensorIndex> indices, const Scalar& v);
     Tensor & index_put_(const std::vector<otter::optional<Tensor>> & indices, const Tensor & values, bool accumulate = false) const;
     Tensor index_put(const std::vector<otter::optional<Tensor>> & indices, const Tensor & values, bool accumulate = false) const;
     

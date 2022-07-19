@@ -228,6 +228,45 @@ DEFINE_META_FUNCTION_OVERLOAD(scatter, value_reduce)
     scatter_meta_impl(*this, self, dim, index, Tensor(), reduce);
 }
 
+static void build_index_op(
+    TensorIterator& iter,
+    const otter::AdvancedIndex& info,
+    const Tensor& result) {
+    // 'TensorIterator' needs to own the things comming from 'info', since
+    // 'info' will be destroyed after the META function.
+    TensorIteratorConfig config;
+    // info.src is a restrided view of result
+    config.set_check_mem_overlap(false)
+        .check_all_same_dtype(false)
+        .add_output(result)
+        .add_owned_input(info.src);
+    for (auto& index : info.indices) {
+        config.add_owned_input(index);
+    }
+    if (!result.defined()) {
+        config.declare_static_dtype_and_device(info.src.scalar_type(), info.src.device());
+    }
+    iter.build(config);
+}
+
+structured_index_Tensor::meta_return_ty structured_index_Tensor::meta(const Tensor& self, std::vector<otter::optional<otter::Tensor>> indices) {
+    const auto& result = maybe_get_output();
+    if (result.defined()) {
+        otter::assert_no_internal_overlap(result);
+        otter::assert_no_overlap(result, self);
+        for (const otter::optional<otter::Tensor>& index : indices) {
+            if (index.has_value()) {
+                otter::assert_no_overlap(result, *index);
+            }
+        }
+    }
+    auto info = make_info(self, indices);
+    build_index_op(*this, info, result);
+    return structured_index_Tensor::precompute_out<>()
+        .set_sizes(std::move(info.indexed_sizes))
+        .set_strides(std::move(info.indexed_strides));
+}
+
 //DEFINE_META_FUNCTION(scatter_add)
 //(const Tensor& self, int64_t dim, const Tensor& index, const Tensor& src) {
 //    scatter_meta_impl(*this, self, dim, index, src, 0);
@@ -496,6 +535,10 @@ static TensorIterator make_index_put_iterator(const AdvancedIndex& info, const T
     config.add_input(index);
   }
   return config.build();
+}
+
+DEFINE_IMPL_FUNCTION(index_out)(const Tensor& self, DimVector sizes, DimVector strides, const Tensor& result) {
+    index_stub(Device::CPU, *this, sizes, strides);
 }
 
 Tensor & put_(Tensor & self, const Tensor& index, const Tensor & source, const bool accumulate) {

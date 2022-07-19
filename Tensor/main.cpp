@@ -7,6 +7,7 @@
 #include "TensorFactory.hpp"
 #include "GridSampler.hpp"
 #include "GraphicAPI.hpp"
+#include "TensorIndexing.hpp"
 
 using namespace std;
 
@@ -91,8 +92,6 @@ otter::Tensor _do_paste_mask(const otter::Tensor& mask, const otter::Tensor& box
 
 void draw_detection(otter::Tensor& det_bbox, otter::Tensor& det_label, otter::Tensor& det_mask, otter::Tensor& img);
 
-void QuickSortFloatD(float* A, int low, int high, int* order);
-
 otter::Tensor pointrend_pre_process(otter::Tensor& img);
 
 float scale_h, scale_w;
@@ -156,7 +155,6 @@ int main(int argc, const char * argv[]) {
     }
     
     otter::Net point_rend_head;
-    point_rend_head.option.use_fp16_storage = true;
     point_rend_head.load_otter("point_head-opt.otter", otter::CompileMode::Inference);
     
     ret = point_rend_head.load_weight("point_head-opt.bin", otter::Net::WeightType::Ncnn);
@@ -168,13 +166,13 @@ int main(int argc, const char * argv[]) {
     
     const char* filepath = "input.jpg";
 
-//    FILE *img = fopen("img.bin", "rb");
-//    fseek(img, 0, SEEK_END);
-//    size_t size = ftell(img);
-//    fseek(img, 0, SEEK_SET);
+//    FILE *img_data = fopen("img.bin", "rb");
+//    fseek(img_data, 0, SEEK_END);
+//    size_t size = ftell(img_data);
+//    fseek(img_data, 0, SEEK_SET);
 //    void* raw_data = malloc(size);
-//    fread(raw_data, 1, size, img);
-//    fclose(img);
+//    fread(raw_data, 1, size, img_data);
+//    fclose(img_data);
 //
 //    otter::Tensor in = otter::from_blob(raw_data, {1, 3, 736, 1344}, otter::ScalarType::Float);
     
@@ -333,8 +331,8 @@ int main(int argc, const char * argv[]) {
                     otter::Tensor roi_feats_t;
                     ex.extract("roi_align", roi_feats_t, 0);
                     bbox_roi_align_net.stop_and_show("ms (bbox_roi_align_net)");
-
-                    fill_index(roi_feats, roi_feats_t, mask);
+                    
+                    roi_feats.index_put_({mask}, roi_feats_t);
                 }
             }
             roi_align_clock.stop_and_show("ms (bbox_roi_align)");
@@ -532,7 +530,7 @@ otter::Tensor get_seg_masks(otter::Tensor& mask_pred, otter::Tensor& det_bboxes,
     
     bboxes = bboxes / otter::tensor({scale_w, scale_h, scale_w, scale_h}, bboxes.options());
     
-    float threshold = 0.5;
+    float binary_threshold = 0.5;
     
     int N = mask_pred.size(0);
     
@@ -552,7 +550,7 @@ otter::Tensor get_seg_masks(otter::Tensor& mask_pred, otter::Tensor& det_bboxes,
         int x0_int, y0_int, x1_int, y1_int;
         
         auto mask = _do_paste_mask(mask_pred[inds], bboxes[inds], img_h, img_w, x0_int, y0_int, x1_int, y1_int).squeeze(0);
-        mask = mask > threshold;
+        mask = mask > binary_threshold;
         
         im_mask[inds].slice(0, y0_int, y1_int, 1).slice(1, x0_int, x1_int, 1) = mask;
     }
@@ -932,24 +930,13 @@ otter::Tensor AnchorGenerator::_get_bboxes_single(std::vector<otter::Tensor>& cl
         auto anchors = mlvl_anchors[level_idx];
         
         if (0 < nms_pre && nms_pre < scores.size(0)) { // Weird
-            float* scores_data = scores.data_ptr<float>();
-            auto index = otter::arange(0, scores.size(0), 1, otter::ScalarType::Int);
-            int* index_ptr = index.data_ptr<int>();
+            otter::Tensor scores_c = scores.clone(), indices;
+            std::tie(scores_c, indices) = scores_c.sort(true, 0, true);
 
-            QuickSortFloatD(scores_data, 0, scores.size(0) - 1, index_ptr);
-
-            auto new_scores = otter::empty({nms_pre}, otter::ScalarType::Float);
-            auto new_rpn_bbox_pred = otter::empty({nms_pre, rpn_bbox_pred.size(1)}, otter::ScalarType::Float);
-            auto new_anchors = otter::empty({nms_pre, anchors.size(1)}, otter::ScalarType::Float);
-            
-            for (int i = 0; i < nms_pre; ++i) {
-                new_scores[i] = scores[i];
-                new_rpn_bbox_pred[i] = rpn_bbox_pred[index_ptr[i]];
-                new_anchors[i] = anchors[index_ptr[i]];
-            }
-            scores = new_scores;
-            rpn_bbox_pred = new_rpn_bbox_pred;
-            anchors = new_anchors;
+            scores = scores.slice(0, 0, nms_pre, 1);
+            indices = indices.slice(0, 0, nms_pre, 1);
+            rpn_bbox_pred = rpn_bbox_pred.index_select(0, indices);
+            anchors = anchors.index_select(0, indices);
         }
 
         mlvl_scores.push_back(scores);
@@ -1001,6 +988,7 @@ otter::Tensor delta2bbox(otter::Tensor& rois, otter::Tensor& deltas, otter::IntA
     
     float* bbox = bboxes[0].data_ptr<float>();
     for (const auto i : otter::irange(0, bboxes.size(0))) {
+        (void)i;
         bbox[0] = std::clamp(bbox[0], (float)0, (float)max_shape[1]);
         bbox[2] = std::clamp(bbox[2], (float)0, (float)max_shape[1]);
         bbox[1] = std::clamp(bbox[1], (float)0, (float)max_shape[0]);
@@ -1059,6 +1047,7 @@ otter::Tensor AnchorGenerator::_bbox_post_process(std::vector<otter::Tensor>& ml
         float* scores_data = scores.data_ptr<float>();
         
         for (const auto i : otter::irange(0, proposals.size(0))) {
+            (void)i;
             Rect box;
             box.x1 = proposals_data[0];
             box.y1 = proposals_data[1];
@@ -1104,6 +1093,7 @@ otter::Tensor AnchorGenerator::_bbox_post_process(std::vector<otter::Tensor>& ml
     float* det_data = det.data_ptr<float>();
     
     for (const auto i : otter::irange(0, det.size(0))) {
+        (void)i;
         nms_proposal_boxes.push_back({det_data[0], det_data[1], det_data[2], det_data[3]});
         nms_scores.push_back(det_data[4]);
         det_data += 5;
@@ -1229,31 +1219,6 @@ std::vector<otter::Tensor> AnchorGenerator::generate_anchors() {
     }
     
     return base_anchors;
-}
-
-void QuickSortFloatD(float* A, int low, int high, int* order)
-{
-    int i = low;
-    int j = high;
-    float p = A[(low + high) / 2];
-
-    while (i <= j) {
-        while (A[i] > p)
-            ++i;
-        while (A[j] < p)
-            --j;
-        if (i <= j) {
-            std::swap(A[i], A[j]);
-            std::swap(order[i], order[j]);
-            
-            ++i;
-            --j;
-        }
-    }
-    if (low < j)
-        QuickSortFloatD(A, low, j, order);
-    if (i < high)
-        QuickSortFloatD(A, i, high, order);
 }
 
 static inline float intersection_area(const Rect& a, const Rect& b)

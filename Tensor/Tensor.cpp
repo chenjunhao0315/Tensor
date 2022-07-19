@@ -648,6 +648,9 @@ Tensor Tensor::masked_fill(const Tensor & mask, const Tensor & value) const {
     return otter::masked_fill(*this, mask, value);
 }
 
+Tensor Tensor::index(const std::vector<optional<Tensor>> & indices) const {
+    return otter::native::index(*this, indices);
+}
 
 Tensor & Tensor::index_fill_(int64_t dim, const Tensor & index, const Scalar & value) const {
     return otter::index_fill_(const_cast<Tensor&>(*this), dim, index, value);
