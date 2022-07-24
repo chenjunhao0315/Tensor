@@ -24,20 +24,8 @@ static inline std::ostream& operator<<(std::ostream& out, const Tensor& t) {
     return print(out, t, 80);
 }
 
-static inline std::ostream& operator<<(std::ostream& out, Scalar s) {
-    if (s.isFloatingPoint()) {
-        return out << s.toDouble();
-    }
-    if (s.isBoolean()) {
-        return out << (s.toBool() ? "true" : "false");
-    }
-    if (s.isIntegral(false)) {
-        return out << s.toLong();
-    }
-    throw std::logic_error("Unknown type in Scalar");
-    return out;
-}
+std::ostream& operator<<(std::ostream& out, Scalar s);
 
-}
+}   // end namespace otter
 
 #endif /* Formatting_hpp */

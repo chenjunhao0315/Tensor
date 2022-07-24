@@ -67,6 +67,22 @@ inline Tensor from_blob(void* data, IntArrayRef sizes, TensorOptions options) {
     return for_blob(data, sizes).options(options).make_tensor();
 }
 
+inline Tensor from_blob(void* data, IntArrayRef sizes, ScalarType dtype) {
+    TensorOptions options(dtype);
+    
+    return from_blob(data, sizes, options);
+}
+
+inline Tensor from_blob(void* data, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) {
+    return for_blob(data, sizes).strides(strides).options(options).make_tensor();
+}
+
+inline Tensor from_blob(void* data, IntArrayRef sizes, IntArrayRef strides, ScalarType dtype) {
+    TensorOptions options(dtype);
+    
+    return from_blob(data, sizes, strides, options);
+}
+
 Tensor from_float16(const unsigned short* data, IntArrayRef size);
 
 template <typename T>

@@ -36,10 +36,6 @@ private:
     std::ios saved;
 };
 
-//std::ostream& operator<<(std::ostream & out, const DeprecatedTypeProperties& t) {
-//    return out << t.toString();
-//}
-
 static std::tuple<double, int64_t> __printFormat(std::ostream& stream, const Tensor& self) {
     auto size = self.numel();
     if(size == 0) {
@@ -131,8 +127,7 @@ static std::tuple<double, int64_t> __printFormat(std::ostream& stream, const Ten
     return std::make_tuple(scale, sz);
 }
 
-static void __printIndent(std::ostream &stream, int64_t indent)
-{
+static void __printIndent(std::ostream &stream, int64_t indent) {
     for (const auto i : otter::irange(indent)) {
         (void)i; //Suppress unused variable warning
         stream << " ";
@@ -143,8 +138,8 @@ static void printScale(std::ostream & stream, double scale) {
     FormatGuard guard(stream);
     stream << defaultfloat << scale << " *" << std::endl;
 }
-static void __printMatrix(std::ostream& stream, const Tensor& self, int64_t linesize, int64_t indent)
-{
+
+static void __printMatrix(std::ostream& stream, const Tensor& self, int64_t linesize, int64_t indent) {
     // NOLINTNEXTLINE(cppcoreguidelines-init-variables)
     double scale;
     // NOLINTNEXTLINE(cppcoreguidelines-init-variables)
@@ -196,8 +191,7 @@ static void __printMatrix(std::ostream& stream, const Tensor& self, int64_t line
     }
 }
 
-void __printTensor(std::ostream& stream, Tensor& self, int64_t linesize)
-{
+void __printTensor(std::ostream& stream, Tensor& self, int64_t linesize) {
     std::vector<int64_t> counter(self.dim() - 2);
     bool start = true;
     bool finished = false;
@@ -240,6 +234,7 @@ void __printTensor(std::ostream& stream, Tensor& self, int64_t linesize)
 void print(const Tensor & t, int64_t linesize) {
     print(std::cout,t,linesize);
 }
+
 std::ostream& print(std::ostream& stream, const Tensor & tensor_, int64_t linesize) {
     FormatGuard guard(stream);
     if(!tensor_.defined()) {
@@ -286,6 +281,18 @@ std::ostream& print(std::ostream& stream, const Tensor & tensor_, int64_t linesi
     return stream;
 }
 
-
+std::ostream& operator<<(std::ostream& out, Scalar s) {
+    if (s.isFloatingPoint()) {
+        return out << s.toDouble();
+    }
+    if (s.isBoolean()) {
+        return out << (s.toBool() ? "true" : "false");
+    }
+    if (s.isIntegral(false)) {
+        return out << s.toLong();
+    }
+    throw std::logic_error("Unknown type in Scalar");
+    return out;
+}
 
 }   // namespace otter
