@@ -11,6 +11,7 @@
 #include "TensorIterator.hpp"
 #include "Dispatch.hpp"
 #include "Utils.hpp"
+#include "Math.hpp"
 
 namespace otter {
 
@@ -52,35 +53,35 @@ void topk_impl_loop(
             if (largest) {
                 std::partial_sort(queue.begin(), queue.begin() + k, queue.end(),
                                   [](const elem_t& x, const elem_t& y) -> bool {
-                    return ((std::isnan<accscalar_t>(x.first) && !std::isnan<accscalar_t>(y.first)) || (x.first > y.first));
+                    return ((otter::_isnan<accscalar_t>(x.first) && !otter::_isnan<accscalar_t>(y.first)) || (x.first > y.first));
                 });
             } else {
                 std::partial_sort(queue.begin(), queue.begin() + k, queue.end(),
                                   [](const elem_t& x, const elem_t& y) -> bool {
-                    return ((!std::isnan<accscalar_t>(x.first) && std::isnan<accscalar_t>(y.first)) || (x.first < y.first));
+                    return ((!otter::_isnan<accscalar_t>(x.first) && otter::_isnan<accscalar_t>(y.first)) || (x.first < y.first));
                 });
             }
         } else {
             if (largest) {
                 std::nth_element(queue.begin(), queue.begin() + k - 1, queue.end(),
                                  [](const elem_t& x, const elem_t& y) -> bool {
-                    return ((std::isnan<accscalar_t>(x.first) && !std::isnan<accscalar_t>(y.first)) || (x.first > y.first));
+                    return ((otter::_isnan<accscalar_t>(x.first) && !otter::_isnan<accscalar_t>(y.first)) || (x.first > y.first));
                 });
                 if (sorted) {
                     std::sort(queue.begin(), queue.begin() + k - 1,
                               [](const elem_t& x, const elem_t& y) -> bool {
-                        return ((std::isnan<accscalar_t>(x.first) && !std::isnan<accscalar_t>(y.first)) || (x.first > y.first));
+                        return ((otter::_isnan<accscalar_t>(x.first) && !otter::_isnan<accscalar_t>(y.first)) || (x.first > y.first));
                     });
                 }
             } else {
                 std::nth_element(queue.begin(), queue.begin() + k -1, queue.end(),
                                  [](const elem_t& x, const elem_t& y) -> bool {
-                    return ((!std::isnan<accscalar_t>(x.first) && std::isnan<accscalar_t>(y.first)) || (x.first < y.first));
+                    return ((!otter::_isnan<accscalar_t>(x.first) && otter::_isnan<accscalar_t>(y.first)) || (x.first < y.first));
                 });
                 if (sorted) {
                     std::sort(queue.begin(), queue.begin() + k -1,
                               [](const elem_t& x, const elem_t& y) -> bool {
-                        return ((!std::isnan<accscalar_t>(x.first) && std::isnan<accscalar_t>(y.first)) || (x.first < y.first));
+                        return ((!otter::_isnan<accscalar_t>(x.first) && otter::_isnan<accscalar_t>(y.first)) || (x.first < y.first));
                     });
                 }
             }
@@ -149,7 +150,7 @@ template <typename scalar_t>
 struct KeyValueCompAsc {
     template <typename LHS, typename RHS>
     constexpr bool operator()(LHS lhs, RHS rhs) const {
-        return (!std::isnan<scalar_t>(get<0>(lhs)) && std::isnan<scalar_t>(get<0>(rhs)))
+        return (!otter::_isnan<scalar_t>(get<0>(lhs)) && otter::_isnan<scalar_t>(get<0>(rhs)))
         || (get<0>(lhs) < get<0>(rhs));
     }
 };
@@ -158,7 +159,7 @@ template <typename scalar_t>
 struct KeyValueCompDesc {
     template <typename LHS, typename RHS>
     constexpr bool operator()(LHS lhs, RHS rhs) const {
-        return (std::isnan<scalar_t>(get<0>(lhs)) && !std::isnan<scalar_t>(get<0>(rhs)))
+        return (otter::_isnan<scalar_t>(get<0>(lhs)) && !otter::_isnan<scalar_t>(get<0>(rhs)))
         || (get<0>(lhs) > get<0>(rhs));
     }
 };
