@@ -843,8 +843,10 @@ FillConvexPoly(Tensor& img, const Point2l* v, int npts, const void* color, int l
     
     if (line_type < CV_AA)
         delta1 = delta2 = XY_ONE >> 1;
-    else
-        delta1 = XY_ONE - 1; delta2 = 0;
+    else {
+        delta1 = XY_ONE - 1;
+        delta2 = 0;
+    }
     
     p0 = v[npts - 1];
     p0.x <<= XY_SHIFT - shift;

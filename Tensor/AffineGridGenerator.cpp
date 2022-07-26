@@ -27,7 +27,7 @@ Tensor linspace_from_neg_one(const Tensor& grid, int64_t num_steps, bool align_c
 Tensor make_base_grid_4D(
     const Tensor& theta,
     int64_t N,
-    int64_t C,
+    int64_t /*C*/,
     int64_t H,
     int64_t W,
     bool align_corners) {
@@ -40,7 +40,7 @@ Tensor make_base_grid_4D(
 Tensor make_base_grid_5D(
     const Tensor& theta,
     int64_t N,
-    int64_t C,
+    int64_t /*C*/,
     int64_t D,
     int64_t H,
     int64_t W,

@@ -279,7 +279,7 @@ void original_pre_calc_for_bilinear_interpolate(
     }
 }
 
-int ROIAlignLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const {
+int ROIAlignLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& /*opt*/) const {
     const Tensor& bottom_blob = bottom_blobs[0];
     int w = bottom_blob.size(3);
     int h = bottom_blob.size(2);

@@ -554,7 +554,7 @@ Tensor& slide_win_conv2d_int8_out(
     const Tensor& self,
     const Tensor& input_int8_scales,
     const Tensor& weight,
-    const Tensor& weight_int8_scales,
+    const Tensor& /*weight_int8_scales*/,
     const Tensor& /*bias*/,
     IntArrayRef kernel_size,
     IntArrayRef stride,

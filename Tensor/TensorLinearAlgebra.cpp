@@ -143,7 +143,7 @@ void addmm_impl_cpu_(Tensor &result, const Tensor &self, Tensor m1, Tensor m2, c
 }
 
 template <typename Meta>
-void common_checks_baddbmm_bmm(Meta& meta, const Tensor& batch1, const Tensor& batch2, const Scalar& beta, const Scalar& alpha, bool is_bmm, const Tensor& self_baddbmm = Tensor()) {
+void common_checks_baddbmm_bmm(Meta& meta, const Tensor& batch1, const Tensor& batch2, const Scalar& /*beta*/, const Scalar& /*alpha*/, bool /*is_bmm*/, const Tensor& self_baddbmm = Tensor()) {
   OTTER_CHECK(batch1.dim() == 3, "batch1 must be a 3D tensor");
   OTTER_CHECK(batch2.dim() == 3, "batch2 must be a 3D tensor");
   const auto batch1_sizes = batch1.sizes();
@@ -159,7 +159,7 @@ void common_checks_baddbmm_bmm(Meta& meta, const Tensor& batch1, const Tensor& b
   auto& result = meta.maybe_get_output(0);
   // 'set_output' does not resize for in-place calls
   meta.set_output(0, output_size, {}, batch2.options());
-  const auto result_sizes = result.sizes();
+//  const auto result_sizes = result.sizes();
   // Error is raised if called from in-place overload with incorrect shape
 //  OTTER_CHECK(result_sizes == output_size,
 //              "Expected an output tensor with shape [", output_size, "] but got shape ", result_sizes);
@@ -322,12 +322,12 @@ static inline void bmm_out_or_baddbmm_(const Tensor& self_or_result_, const Tens
       return;
     }
   }
-  auto batch_items_contiguous_or_transposed = [&](const Tensor& t) {
-    const auto sizes = t.sizes();
-    const auto strides = t.strides();
-    return (strides[2] == 1 && strides[1] >= sizes[2])
-            || (strides[1] == 1 && strides[2] >= sizes[1]);
-  };
+//  auto batch_items_contiguous_or_transposed = [&](const Tensor& t) {
+//    const auto sizes = t.sizes();
+//    const auto strides = t.strides();
+//    return (strides[2] == 1 && strides[1] >= sizes[2])
+//            || (strides[1] == 1 && strides[2] >= sizes[1]);
+//  };
   if (contraction_size * res_rows * res_cols < 400) {
     if (is_bmm_out) {
       OTTER_DISPATCH_ALL_TYPES(batch1.scalar_type(), "bmm", [&] {
@@ -401,7 +401,7 @@ static inline void bmm_out_or_baddbmm_(const Tensor& self_or_result_, const Tens
 }
 
 DEFINE_IMPL_FUNCTION(baddbmm_out_cpu)
-(const Tensor & self, const Tensor & batch1, const Tensor & batch2, const Scalar& beta, const Scalar& alpha, const Tensor& result) {
+(const Tensor & /*self*/, const Tensor & batch1, const Tensor & batch2, const Scalar& beta, const Scalar& alpha, const Tensor& result) {
     bmm_out_or_baddbmm_(result, batch1, batch2, beta, alpha, false);
   }
 DEFINE_IMPL_FUNCTION(bmm_out_cpu)

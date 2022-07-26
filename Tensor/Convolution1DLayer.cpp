@@ -1318,6 +1318,6 @@ int Convolution1DLayer::forward_fp16s(const Tensor& bottom_blob, Tensor& top_blo
 
     return 0;
 }
-#endif  __F16C__
+#endif // __F16C__
 
 }   // end namespace otter

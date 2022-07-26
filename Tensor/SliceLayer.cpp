@@ -79,7 +79,7 @@ int SliceLayer::load_param(const ParamDict &pd) {
     return 0;
 }
 
-int SliceLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& opt) const {
+int SliceLayer::forward(const std::vector<Tensor>& bottom_blobs, std::vector<Tensor>& top_blobs, const NetOption& /*opt*/) const {
     auto slice_a = slice.accessor<int, 1>();
     
     int start = 0;

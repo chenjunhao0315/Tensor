@@ -121,7 +121,7 @@ struct cpu_scatter_gather_base_kernel {
   template <typename func_t>
   void operator()(const Tensor& self, int64_t dim,
     const Tensor& index, const Scalar& value,
-    const std::string& method_name, func_t& kernel_func) {
+    const std::string& /*method_name*/, func_t& kernel_func) {
     auto index_sizes = ensure_nonempty_vec(index.sizes().vec());
     auto index_strides = ensure_nonempty_vec(index.strides().vec());
     // `dim` is traversed in the kernel,
@@ -199,7 +199,7 @@ struct cpu_scatter_gather_base_kernel {
   template <typename func_t>
   void operator()(const Tensor& self, int64_t dim,
     const Tensor& index, const Tensor& src,
-    const std::string& method_name, func_t& kernel_func) {
+    const std::string& /*method_name*/, func_t& kernel_func) {
     auto iter = TensorIteratorConfig()
       .check_all_same_dtype(false)
       .resize_outputs(false)
@@ -277,7 +277,7 @@ struct cpu_scatter_gather_base_kernel {
   }
   void operator()(const Tensor& self, int64_t dim,
     const Tensor& index, const Tensor& src,
-    const std::string& method_name, ReduceMean& kernel_func) {
+    const std::string& /*method_name*/, ReduceMean& kernel_func) {
     auto iter = TensorIteratorConfig()
       .check_all_same_dtype(false)
       .resize_outputs(false)
@@ -354,7 +354,7 @@ struct cpu_scatter_gather_base_kernel {
   }
   void operator()(const Tensor& self, int64_t dim,
     const Tensor& index, const Tensor& src,
-    const std::string& method_name, ReduceMaximum& kernel_func) {
+    const std::string& /*method_name*/, ReduceMaximum& kernel_func) {
     auto iter = TensorIteratorConfig()
       .check_all_same_dtype(false)
       .resize_outputs(false)
@@ -432,7 +432,7 @@ struct cpu_scatter_gather_base_kernel {
   }
   void operator()(const Tensor& self, int64_t dim,
     const Tensor& index, const Tensor& src,
-    const std::string& method_name, ReduceMinimum& kernel_func) {
+    const std::string& /*method_name*/, ReduceMinimum& kernel_func) {
     auto iter = TensorIteratorConfig()
       .check_all_same_dtype(false)
       .resize_outputs(false)

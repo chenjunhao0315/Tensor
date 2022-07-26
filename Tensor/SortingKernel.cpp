@@ -100,7 +100,7 @@ void _dim_apply(
                 const TensorBase &values,
                 const TensorBase &indices,
                 int64_t dim,
-                const std::string& method_name,
+                const std::string& /*method_name*/,
                 const func_t& f) {
     auto iter = TensorIteratorConfig()
         .check_all_same_dtype(false)
@@ -165,7 +165,7 @@ struct KeyValueCompDesc {
 };
 
 static void sort_kernel(
-                        const TensorBase& self,
+                        const TensorBase& /*self*/,
                         const TensorBase& values,
                         const TensorBase& indices,
                         int64_t dim,

@@ -1702,7 +1702,7 @@ Tensor & wrapper_scatter_out_src_out(const Tensor & self, int64_t dim, const Ten
 }
 struct structured_scatter_src_out_inplace final : public structured_scatter_src_out {
     structured_scatter_src_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef /*strides*/, TensorOptions options) override {
         const auto& out = outputs_[output_idx].get();
         check_inplace(out, sizes, options);
         
@@ -1758,7 +1758,7 @@ Tensor & wrapper_scatter_out_value_out(const Tensor & self, int64_t dim, const T
 }
 struct structured_scatter_value_out_inplace final : public structured_scatter_value_out {
     structured_scatter_value_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef /*strides*/, TensorOptions options) override {
         const auto& out = outputs_[output_idx].get();
         check_inplace(out, sizes, options);
         
@@ -1814,7 +1814,7 @@ Tensor & wrapper_scatter_out_reduce_out(const Tensor & self, int64_t dim, const 
 }
 struct structured_scatter_reduce_out_inplace final : public structured_scatter_reduce_out {
     structured_scatter_reduce_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef /*strides*/, TensorOptions options) override {
         const auto& out = outputs_[output_idx].get();
         check_inplace(out, sizes, options);
         
@@ -1870,7 +1870,7 @@ Tensor & wrapper_scatter_out_value_reduce_out(const Tensor & self, int64_t dim, 
 }
 struct structured_scatter_value_reduce_out_inplace final : public structured_scatter_value_reduce_out {
     structured_scatter_value_reduce_out_inplace(Tensor& self) : outputs_{std::ref(self)} {}
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef /*strides*/, TensorOptions options) override {
         const auto& out = outputs_[output_idx].get();
         check_inplace(out, sizes, options);
         
@@ -1927,7 +1927,7 @@ Tensor & wrapper_baddbmm_out_out(const Tensor & self, const Tensor & batch1, con
 }
 struct structured_baddbmm_out_cpu_inplace final : public structured_baddbmm_out_cpu {
     structured_baddbmm_out_cpu_inplace(Tensor& self) : outputs_{std::ref(self)} {}
-    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef /*strides*/, TensorOptions options) override {
         const auto& out = outputs_[output_idx].get();
         check_inplace(out, sizes, options);
 

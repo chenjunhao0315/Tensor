@@ -29,8 +29,8 @@ inline ScalarType get_dtype_from_self(
 
 static ScalarType infer_dtype_from_optional(
     const Tensor& self,
-    IntArrayRef dim,
-    bool keepdim,
+    IntArrayRef /*dim*/,
+    bool /*keepdim*/,
     const ScalarType& opt_dtype,
     const Tensor& result) {
     // 'opt_dtype' has the priority for both cases.
@@ -51,7 +51,7 @@ DEFINE_META_FUNCTION_OVERLOAD(sum, dim_IntList)(const Tensor& self, IntArrayRef 
 
 DEFINE_DISPATCH(sum_stub);
 
-DEFINE_IMPL_FUNCTION(sum_out)(const Tensor& self, IntArrayRef dim, bool keepdim, ScalarType opt_dtype,
+DEFINE_IMPL_FUNCTION(sum_out)(const Tensor& self, IntArrayRef dim, bool keepdim, ScalarType /*opt_dtype*/,
  const Tensor& result) {
     auto iter = make_reduction_from_out_ty(self, result, dim, keepdim, result.scalar_type());
     if (iter.numel() == 0) {

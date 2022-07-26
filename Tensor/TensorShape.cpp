@@ -165,7 +165,7 @@ Tensor repeat(const Tensor& self, IntArrayRef repeats) {
     return result;
 }
 
-void check_stack_inputs(TensorList tensors, int64_t dim) {
+void check_stack_inputs(TensorList tensors, int64_t /*dim*/) {
     IntArrayRef entry_shape = tensors[0].sizes();
     for (const auto i : otter::irange(1, tensors.size())) {
         OTTER_CHECK(tensors[i].sizes() == entry_shape,

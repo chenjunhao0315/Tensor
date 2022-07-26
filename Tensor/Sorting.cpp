@@ -17,7 +17,7 @@ namespace otter {
 DEFINE_DISPATCH(sort_stub);
 DEFINE_DISPATCH(topk_stub);
 
-DEFINE_META_FUNCTION(topk)(const Tensor& self, int64_t k, int64_t dim_, bool largest, bool sorted) {
+DEFINE_META_FUNCTION(topk)(const Tensor& self, int64_t k, int64_t dim_, bool /*largest*/, bool /*sorted*/) {
     int64_t dim = maybe_wrap_dim(dim_, self.dim(), /*wrap_scalar=*/true);
     OTTER_CHECK(
                 k >= 0 && k <= (self.dim() > 0 ? self.size(dim) : 1),
@@ -35,7 +35,7 @@ DEFINE_META_FUNCTION(topk)(const Tensor& self, int64_t k, int64_t dim_, bool lar
     set_output(1, topKSize, {}, self.options().dtype(otter::ScalarType::Long));
 }
 
-DEFINE_META_FUNCTION_OVERLOAD(sort, stable)(const Tensor& self, bool stable, int64_t dim, bool descending) {
+DEFINE_META_FUNCTION_OVERLOAD(sort, stable)(const Tensor& self, bool /*stable*/, int64_t dim, bool /*descending*/) {
     maybe_wrap_dim(dim, self.dim());
     
     // See issue: https://github.com/pytorch/pytorch/issues/65863

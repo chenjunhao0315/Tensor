@@ -153,7 +153,7 @@ SCATTER_GATHER_OP get_operator_enum(const int64_t reduce, bool use_new_options =
     return SCATTER_GATHER_OP::REDUCE_ADD;
 }
 
-DEFINE_META_FUNCTION(gather)(const Tensor & self, int64_t dim, const Tensor & index, bool sparse_grad) {
+DEFINE_META_FUNCTION(gather)(const Tensor & self, int64_t dim, const Tensor & index, bool /*sparse_grad*/) {
     const Tensor& result = maybe_get_output(0);
     int64_t wrapped_dim = otter::maybe_wrap_dim(dim, self.dim());
     // Memory overlap checks need to be done after resizing (if required) is done.
@@ -208,7 +208,7 @@ DEFINE_META_FUNCTION_OVERLOAD(scatter, src)
     scatter_meta_impl(*this, self, dim, index, src);
 }
 DEFINE_META_FUNCTION_OVERLOAD(scatter, value)
-(const Tensor& self, int64_t dim, const Tensor& index, const Scalar& value) {
+(const Tensor& self, int64_t dim, const Tensor& index, const Scalar& /*value*/) {
     scatter_meta_impl(*this, self, dim, index);
 }
 DEFINE_META_FUNCTION_OVERLOAD(scatter, reduce)
@@ -223,7 +223,7 @@ DEFINE_META_FUNCTION_OVERLOAD(scatter, value_reduce)
 (const Tensor& self,
  int64_t dim,
  const Tensor& index,
- const Scalar& src,
+ const Scalar& /*src*/,
  const int64_t reduce) {
     scatter_meta_impl(*this, self, dim, index, Tensor(), reduce);
 }
@@ -304,7 +304,7 @@ DEFINE_DISPATCH(scatter_scalar_reduce_stub);
 //DEFINE_DISPATCH(scatter_reduce_two_stub);
 
 DEFINE_IMPL_FUNCTION(gather_out)
-(const Tensor& self, int64_t dim, const Tensor& index, bool sparse_grad, const Tensor& result) {
+(const Tensor& self, int64_t dim, const Tensor& index, bool /*sparse_grad*/, const Tensor& result) {
     if (index.numel() == 0) return;
     dim = otter::maybe_wrap_dim(dim, self.dim());
     gather_stub(Device::CPU, result, self, dim, index);
@@ -537,7 +537,7 @@ static TensorIterator make_index_put_iterator(const AdvancedIndex& info, const T
   return config.build();
 }
 
-DEFINE_IMPL_FUNCTION(index_out)(const Tensor& self, DimVector sizes, DimVector strides, const Tensor& result) {
+DEFINE_IMPL_FUNCTION(index_out)(const Tensor& /*self*/, DimVector sizes, DimVector strides, const Tensor& /*result*/) {
     index_stub(Device::CPU, *this, sizes, strides);
 }
 
@@ -578,7 +578,7 @@ Tensor index_put(const Tensor & self, const std::vector<otter::optional<Tensor>>
     return self.clone(otter::MemoryFormat::Preserve).index_put_(indices, value, accumulate);
 }
 
-Tensor & _index_put_impl_(Tensor & self, const std::vector<otter::optional<Tensor>>& indices, const Tensor & value, const bool accumulate, const bool unsafe) {
+Tensor & _index_put_impl_(Tensor & self, const std::vector<otter::optional<Tensor>>& indices, const Tensor & value, const bool accumulate, const bool /*unsafe*/) {
   OTTER_CHECK(indices.size() <= (size_t)self.dim(), "too many indices for tensor of dimension ", self.dim(), " (got ", indices.size(), ")");
   if (otter::has_internal_overlap(self) == MemOverlap::YES) {
     fprintf(stderr,

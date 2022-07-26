@@ -2183,7 +2183,7 @@ void conv3x3s1_winograd23_transform_kernel_sse(const Tensor& kernel, Tensor& ker
     auto kernel_tm_a = kernel_tm.accessor<float, 3>();
 
     otter::parallel_for(0, outch, 0, [&](int64_t begin, int64_t end) {
-        for (int p = 0; p < outch; p++) {
+        for (const auto p : otter::irange(begin, end)) {
             for (int q = 0; q < inch; q++) {
                 const float* kernel0 = (const float*)kernel_ptr + p * inch * 9 + q * 9;
                 float* kernel_tm0 = kernel_tm_a[p][q].data();
@@ -2760,7 +2760,7 @@ static void conv3x3s1_winograd23_transform_output_sse(const Tensor& top_blob_tm,
     auto top_blob_tm_a = top_blob_tm.accessor<float, 3>();
 
     otter::parallel_for(0, outch, 0, [&](int64_t begin, int64_t end) {
-        for (int p = 0; p < outch; p++)
+        for (const auto p : otter::irange(begin, end))
         {
             const auto out0_tm = top_blob_tm_a[p];
             auto out0 = top_blob_a[p];
