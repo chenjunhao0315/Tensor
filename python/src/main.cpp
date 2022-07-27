@@ -14,6 +14,7 @@
 #include <TensorOperator.hpp>
 #include <TensorFunction.hpp>
 #include <TensorIndexing.hpp>
+#include <TensorShape.hpp>
 #include <ArrayRef.hpp>
 #include <TypeMeta.hpp>
 #include <Formatting.hpp>
@@ -39,6 +40,17 @@ Tensor tensor_index(const Tensor& tensor, int64_t dim);
 Tensor tensor_index(const Tensor& tensor, const py::slice& slice);
 Tensor tensor_index(const Tensor& tensor, const py::ellipsis&);
 Tensor tensor_index(const Tensor& tensor, const py::none&);
+
+Tensor& tensor_index_put(Tensor& tensor, const py::tuple& tuple, const Tensor& other);
+Tensor& tensor_index_put(Tensor& tensor, int64_t dim, const Tensor& other);
+Tensor& tensor_index_put(Tensor& tensor, const py::slice& slice, const Tensor& other);
+Tensor& tensor_index_put(Tensor& tensor, const py::ellipsis&, const Tensor& other);
+Tensor& tensor_index_put(Tensor& tensor, const py::none&, const Tensor& other);
+Tensor& tensor_index_put(Tensor& tensor, const py::tuple& tuple, const Scalar& other);
+Tensor& tensor_index_put(Tensor& tensor, int64_t dim, const Scalar& other);
+Tensor& tensor_index_put(Tensor& tensor, const py::slice& slice, const Scalar& other);
+Tensor& tensor_index_put(Tensor& tensor, const py::ellipsis&, const Scalar& other);
+Tensor& tensor_index_put(Tensor& tensor, const py::none&, const Scalar& other);
 
 PYBIND11_MODULE(otter, m) {
     
@@ -182,7 +194,37 @@ PYBIND11_MODULE(otter, m) {
     .def("__getitem__", [](const Tensor& tensor, const py::none& none) {
         return tensor_index(tensor, none);
     }, py::arg("index"))
-    .def("__repr__", [](const Tensor& tensor) {
+    .def("__setitem__", [](Tensor& tensor, const py::tuple tuple, const Tensor& other) {
+        return tensor_index_put(tensor, tuple, other);
+    }, py::arg("index"), py::arg("value"))
+    .def("__setitem__", [](Tensor& tensor, int64_t dim, const Tensor& other) {
+        return tensor_index_put(tensor, dim, other);
+    }, py::arg("index"), py::arg("value"))
+    .def("__setitem__", [](Tensor& tensor, const py::slice& slice, const Tensor& other) {
+        return tensor_index_put(tensor, slice, other);
+    }, py::arg("index"), py::arg("value"))
+    .def("__setitem__", [](Tensor& tensor, const py::ellipsis& ellipsis, const Tensor& other) {
+        return tensor_index_put(tensor, ellipsis, other);
+    }, py::arg("index"), py::arg("value"))
+    .def("__setitem__", [](Tensor& tensor, const py::none& none, const Tensor& other) {
+        return tensor_index_put(tensor, none, other);
+    }, py::arg("index"), py::arg("value"))
+    .def("__setitem__", [](Tensor& tensor, const py::tuple tuple, float other) {
+        return tensor_index_put(tensor, tuple, other);
+    }, py::arg("index"), py::arg("value"))
+    .def("__setitem__", [](Tensor& tensor, int64_t dim, float other) {
+        return tensor_index_put(tensor, dim, other);
+    }, py::arg("index"), py::arg("value"))
+    .def("__setitem__", [](Tensor& tensor, const py::slice& slice, float other) {
+        return tensor_index_put(tensor, slice, other);
+    }, py::arg("index"), py::arg("value"))
+    .def("__setitem__", [](Tensor& tensor, const py::ellipsis& ellipsis, float other) {
+        return tensor_index_put(tensor, ellipsis, other);
+    }, py::arg("index"), py::arg("value"))
+    .def("__setitem__", [](Tensor& tensor, const py::none& none, float other) {
+        return tensor_index_put(tensor, none, other);
+    }, py::arg("index"), py::arg("value"))
+    .def("__repr__", [](Tensor& tensor) {
         return tensor_str(tensor.to(ScalarType::Double).contiguous());
     })
     .def("__neg__", [](const Tensor& tensor1) {
@@ -557,6 +599,23 @@ PYBIND11_MODULE(otter, m) {
     m.def("topk", [](const Tensor& tensor, int64_t k, int64_t dim, bool decreasing, bool sorted) {
         return otter::native::topk(tensor, k, dim, decreasing, sorted);
     }, py::arg("tensor"), py::arg("k"), py::arg("dim") = -1, py::arg("largest") = true, py::arg("sorted") = true);
+    m.def("linspace", [](float start, float end, float step, ScalarType dtype) {
+        return otter::linspace(start, end, step, dtype);
+    }, py::arg("start"), py::arg("end"), py::arg("steps"), py::arg("dtype") = ScalarType::Float);
+    m.def("eye", [](int64_t n, ScalarType dtype) {
+        return otter::eye(n, dtype);
+    }, py::arg("n"), py::arg("dtype") = ScalarType::Float);
+    m.def("eye", [](int64_t n, int64_t m, ScalarType dtype) {
+        return otter::eye(n, m, dtype);
+    }, py::arg("n"), py::arg("m"), py::arg("dtype") = ScalarType::Float);
+    m.def("cat", [](py::list tensors_list, int64_t dim) {
+        std::vector<otter::Tensor> tensors;
+        for (auto t : tensors_list) {
+            tensors.push_back(t.cast<otter::Tensor>());
+        }
+        
+        return otter::native::cat(tensors, dim);
+    }, py::arg("tensors"), py::arg("dim") = 0);
     
     py::class_<NetOption>(m, "NetOption")
     .def(py::init<>())
@@ -608,6 +667,115 @@ PYBIND11_MODULE(otter, m) {
     
     m.attr("__version__") = "dev";
 }
+
+Tensor& tensor_index_put(Tensor& tensor, const py::tuple& tuple, const Tensor& other) {
+    std::vector<indexing::TensorIndex> indices;
+
+    for (auto arg : tuple) {
+        std::string info = arg.attr("__str__")().cast<std::string>();
+        if (info.find("Ellipsis") != std::string::npos) {
+            indices.push_back(indexing::TensorIndex(indexing::Ellipsis));
+        } else if (info.find("None") != std::string::npos) {
+            indices.push_back(indexing::TensorIndex(indexing::None));
+        } else if (info.find("slice") != std::string::npos) {
+            py::slice slice = arg.cast<py::slice>();
+            py::ssize_t start = 0, stop = 0, step = 0, slicelength = 0;
+            if (!slice.compute(tensor.numel(), &start, &stop, &step, &slicelength)) {
+                throw py::error_already_set();
+            }
+            indices.push_back(indexing::TensorIndex(indexing::Slice(start, stop, step)));
+        } else {
+            int64_t dim = arg.cast<int64_t>();
+            
+            indices.push_back(indexing::TensorIndex(dim));
+        }
+    }
+
+    return tensor.index_put_(indices, other);
+}
+
+Tensor& tensor_index_put(Tensor& tensor, int64_t dim, const Tensor& other) {
+    indexing::TensorIndex index(dim);
+    
+    return tensor.index_put_(index, other);
+}
+
+Tensor& tensor_index_put(Tensor& tensor, const py::slice& slice, const Tensor& other) {
+    py::ssize_t start = 0, stop = 0, step = 0, slicelength = 0;
+    if (!slice.compute(tensor.numel(), &start, &stop, &step, &slicelength)) {
+        throw py::error_already_set();
+    }
+    indexing::TensorIndex index(indexing::Slice(start, stop, step));
+    
+    return tensor.index_put_(index, other);
+}
+
+Tensor& tensor_index_put(Tensor& tensor, const py::ellipsis&, const Tensor& other) {
+    indexing::TensorIndex index(indexing::Ellipsis);
+    
+    return tensor.index_put_(index, other);
+}
+
+Tensor& tensor_index_put(Tensor& tensor, const py::none&, const Tensor& other) {
+    indexing::TensorIndex index(indexing::None);
+    
+    return tensor.index_put_(index, other);
+}
+
+Tensor& tensor_index_put(Tensor& tensor, const py::tuple& tuple, const Scalar& other) {
+    std::vector<indexing::TensorIndex> indices;
+
+    for (auto arg : tuple) {
+        std::string info = arg.attr("__str__")().cast<std::string>();
+        if (info.find("Ellipsis") != std::string::npos) {
+            indices.push_back(indexing::TensorIndex(indexing::Ellipsis));
+        } else if (info.find("None") != std::string::npos) {
+            indices.push_back(indexing::TensorIndex(indexing::None));
+        } else if (info.find("slice") != std::string::npos) {
+            py::slice slice = arg.cast<py::slice>();
+            py::ssize_t start = 0, stop = 0, step = 0, slicelength = 0;
+            if (!slice.compute(tensor.numel(), &start, &stop, &step, &slicelength)) {
+                throw py::error_already_set();
+            }
+            indices.push_back(indexing::TensorIndex(indexing::Slice(start, stop, step)));
+        } else {
+            int64_t dim = arg.cast<int64_t>();
+            
+            indices.push_back(indexing::TensorIndex(dim));
+        }
+    }
+
+    return tensor.index_put_(indices, other);
+}
+
+Tensor& tensor_index_put(Tensor& tensor, int64_t dim, const Scalar& other) {
+    indexing::TensorIndex index(dim);
+    
+    return tensor.index_put_(index, other);
+}
+
+Tensor& tensor_index_put(Tensor& tensor, const py::slice& slice, const Scalar& other) {
+    py::ssize_t start = 0, stop = 0, step = 0, slicelength = 0;
+    if (!slice.compute(tensor.numel(), &start, &stop, &step, &slicelength)) {
+        throw py::error_already_set();
+    }
+    indexing::TensorIndex index(indexing::Slice(start, stop, step));
+    
+    return tensor.index_put_(index, other);
+}
+
+Tensor& tensor_index_put(Tensor& tensor, const py::ellipsis&, const Scalar& other) {
+    indexing::TensorIndex index(indexing::Ellipsis);
+    
+    return tensor.index_put_(index, other);
+}
+
+Tensor& tensor_index_put(Tensor& tensor, const py::none&, const Scalar& other) {
+    indexing::TensorIndex index(indexing::None);
+    
+    return tensor.index_put_(index, other);
+}
+
 
 Tensor tensor_index(const Tensor& tensor, const py::tuple& tuple) {
     std::vector<indexing::TensorIndex> indices;
@@ -662,7 +830,6 @@ Tensor tensor_index(const Tensor& tensor, const py::none&) {
     
     return tensor.index(index);
 }
-
 
 template <typename T>
 std::vector<T> tuple_to_vector(py::tuple tuple) {
