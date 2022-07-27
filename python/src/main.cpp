@@ -18,6 +18,7 @@
 #include <TypeMeta.hpp>
 #include <Formatting.hpp>
 #include <Parallel.hpp>
+#include <Net.hpp>
 
 #include "tensor_str.hpp"
 
@@ -40,6 +41,37 @@ Tensor tensor_index(const Tensor& tensor, const py::ellipsis&);
 Tensor tensor_index(const Tensor& tensor, const py::none&);
 
 PYBIND11_MODULE(otter, m) {
+    
+    py::enum_<ScalarType>(m, "ScalarType")
+    .value("Byte", ScalarType::Byte)
+    .value("Char", ScalarType::Char)
+    .value("Short", ScalarType::Short)
+    .value("Int", ScalarType::Int)
+    .value("Long", ScalarType::Long)
+    .value("Float", ScalarType::Float)
+    .value("Double", ScalarType::Double)
+    .value("Bool", ScalarType::Bool)
+    .value("HFloat", ScalarType::HFloat)
+    .value("Byte4", ScalarType::Byte4)
+    .value("Int4", ScalarType::Int4)
+    .value("Float4", ScalarType::Float4)
+    .value("HFloat4", ScalarType::HFloat4)
+    .value("Byte8", ScalarType::Byte8)
+    .value("Int8", ScalarType::Int8)
+    .value("Float8", ScalarType::Float8)
+    .value("HFloat8", ScalarType::HFloat8)
+    .value("Byte16", ScalarType::Byte16)
+    .value("Int16", ScalarType::Int16)
+    .value("Float16", ScalarType::Float16)
+    .value("HFloat16", ScalarType::HFloat16)
+    .value("Byte32", ScalarType::Byte32)
+    .value("Int32", ScalarType::Int32)
+    .value("Float32", ScalarType::Float32)
+    .value("HFloat32", ScalarType::HFloat32)
+    .value("Byte64", ScalarType::Byte64)
+    .value("Int64", ScalarType::Int64)
+    .value("Float64", ScalarType::Float64)
+    .value("HFloat64", ScalarType::HFloat64);
     
     py::class_<Tensor> tensor(m, "Tensor", py::buffer_protocol());
     tensor.def(py::init<>())
@@ -406,38 +438,30 @@ PYBIND11_MODULE(otter, m) {
     }, py::is_operator())
     .def("xor", [](const Tensor& tensor1, int value) {
         return tensor1.bitwise_xor(value);
-    });
-    
-    py::enum_<ScalarType>(m, "ScalarType")
-    .value("Byte", ScalarType::Byte)
-    .value("Char", ScalarType::Char)
-    .value("Short", ScalarType::Short)
-    .value("Int", ScalarType::Int)
-    .value("Long", ScalarType::Long)
-    .value("Float", ScalarType::Float)
-    .value("Double", ScalarType::Double)
-    .value("Bool", ScalarType::Bool)
-    .value("HFloat", ScalarType::HFloat)
-    .value("Byte4", ScalarType::Byte4)
-    .value("Int4", ScalarType::Int4)
-    .value("Float4", ScalarType::Float4)
-    .value("HFloat4", ScalarType::HFloat4)
-    .value("Byte8", ScalarType::Byte8)
-    .value("Int8", ScalarType::Int8)
-    .value("Float8", ScalarType::Float8)
-    .value("HFloat8", ScalarType::HFloat8)
-    .value("Byte16", ScalarType::Byte16)
-    .value("Int16", ScalarType::Int16)
-    .value("Float16", ScalarType::Float16)
-    .value("HFloat16", ScalarType::HFloat16)
-    .value("Byte32", ScalarType::Byte32)
-    .value("Int32", ScalarType::Int32)
-    .value("Float32", ScalarType::Float32)
-    .value("HFloat32", ScalarType::HFloat32)
-    .value("Byte64", ScalarType::Byte64)
-    .value("Int64", ScalarType::Int64)
-    .value("Float64", ScalarType::Float64)
-    .value("HFloat64", ScalarType::HFloat64);
+    })
+    .def("softmax", [](const Tensor& tensor, int64_t dim, ScalarType dtype) {
+        return tensor.softmax(dim, dtype);
+    }, py::arg("dim"), py::arg("dtype") = ScalarType::Undefined)
+    .def("abs", &Tensor::abs)
+    .def("abs_", &Tensor::abs_)
+    .def("sin", &Tensor::sin)
+    .def("sin_", &Tensor::sin_)
+    .def("cos", &Tensor::cos)
+    .def("cos_", &Tensor::cos_)
+    .def("tan", &Tensor::tan)
+    .def("tan_", &Tensor::tan_)
+    .def("exp", &Tensor::exp)
+    .def("exp_", &Tensor::exp_)
+    .def("sqrt", &Tensor::sqrt)
+    .def("sqrt_", &Tensor::sqrt_)
+    .def("sigmoid", &Tensor::sigmoid)
+    .def("sigmoid_", &Tensor::sigmoid_)
+    .def("sort", [](const Tensor& tensor, int64_t dim, bool decreasing, bool stable) {
+        return tensor.sort(dim, decreasing);
+    }, py::arg("dim") = -1, py::arg("decreasing") = false, py::arg("stable") = false)
+    .def("topk", [](const Tensor& tensor, int64_t k, int64_t dim, bool largest, bool sorted) {
+        return tensor.topk(k, dim, largest, sorted);
+    }, py::arg("k"), py::arg("dim") = -1, py::arg("largest") = true, py::arg("sorted") = true);
     
     m.def("tensor", [](py::buffer const b) {
         py::buffer_info info = b.request();
@@ -526,6 +550,57 @@ PYBIND11_MODULE(otter, m) {
     m.def("tan", &otter::native::tan);
     m.def("exp", &otter::native::exp);
     m.def("sqrt", &otter::native::sqrt);
+    m.def("sigmoid", &otter::native::sigmoid);
+    m.def("sort", [](const Tensor& tensor, int64_t dim, bool decreasing, bool stable) {
+        return otter::native::sort(tensor, stable, dim, decreasing);
+    }, py::arg("tensor"), py::arg("dim") = -1, py::arg("decreasing") = false, py::arg("stable") = false);
+    m.def("topk", [](const Tensor& tensor, int64_t k, int64_t dim, bool decreasing, bool sorted) {
+        return otter::native::topk(tensor, k, dim, decreasing, sorted);
+    }, py::arg("tensor"), py::arg("k"), py::arg("dim") = -1, py::arg("largest") = true, py::arg("sorted") = true);
+    
+    py::class_<NetOption>(m, "NetOption")
+    .def(py::init<>())
+    .def_readwrite("lightmode", &NetOption::lightmode)
+    .def_readwrite("openmp_blocktime", &NetOption::openmp_blocktime)
+    .def_readwrite("use_fp16_storage", &NetOption::use_fp16_storage)
+    .def_readwrite("use_packing_layout", &NetOption::use_packing_layout)
+    .def_readwrite("use_non_lib_optimize", &NetOption::use_non_lib_optimize);
+    
+    py::class_<Extractor>(m, "Extractor")
+    .def("__enter__", [](Extractor& ex) -> Extractor& { return ex; })
+    .def("__exit__", [](Extractor& ex, pybind11::args) {
+        ex.clear();
+    })
+    .def("input", (int (Extractor::*)(std::string, const Tensor&)) &Extractor::input, py::arg("input_name"), py::arg("in"))
+    .def("extract", (int (Extractor::*)(std::string, Tensor&, int)) &Extractor::extract, py::arg("input_name"), py::arg("feat"), py::arg("type") = 0)
+    .def("extract", [](Extractor& ex, std::string input_name, int type) {
+        otter::Tensor feat;
+        int ret = ex.extract(input_name, feat, type);
+        return py::make_tuple(ret, feat.clone());
+    }, py::arg("input_name"), py::arg("type") = 0)
+    .def("clear", &Extractor::clear);
+    
+    py::enum_<otter::CompileMode>(m, "CompileMode")
+    .value("Inference", otter::CompileMode::Inference)
+    .value("Initial", otter::CompileMode::Initial);
+    
+    py::class_<Net> net(m, "Net");
+    
+    py::enum_<otter::Net::WeightType>(net, "WeightType")
+    .value("Otter", otter::Net::WeightType::Otter)
+    .value("Ncnn", otter::Net::WeightType::Ncnn);
+    
+    net.def(py::init<>())
+    .def_readwrite("option", &Net::option)
+    .def("__enter__", [](Net& net) -> Net& { return net; })
+//    .def("__exit__", [](Net& net, pybind11::args) {
+//        net.clear();
+//    })
+    .def("load_otter", (int (Net::*)(const char*, CompileMode)) &Net::load_otter, py::arg("model_structure"), py::arg("compile_mode"))
+    .def("load_weight", (int (Net::*)(const char*, otter::Net::WeightType)) &Net::load_weight, py::arg("modelpath"), py::arg("type"))
+    .def("summary", &Net::summary)
+    .def("create_extractor", &Net::create_extractor, py::keep_alive<0, 1>());
+    
     
     m.doc() = R"pbdoc(
         otter python wrapper

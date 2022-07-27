@@ -538,3 +538,50 @@ def test_indexing():
     tensor1 = tensor[1, ..., None, 1]
     check = np.array(tensor1)
     assert np.array_equal(check, array[1, ..., None, 1])
+
+def test_math():
+    tensor = otter.rand((3, 3, 3))
+    array = np.array(tensor)
+    
+    tensor1 = otter.abs(tensor)
+    check = np.array(tensor1)
+    assert np.array_equal(check, np.abs(array))
+    
+    tensor1 = otter.sin(tensor)
+    check = np.array(tensor1)
+    assert np.array_equal(check, np.sin(array))
+    
+    tensor1 = otter.cos(tensor)
+    check = np.array(tensor1)
+    assert np.array_equal(check, np.cos(array))
+    
+    tensor1 = otter.tan(tensor)
+    check = np.array(tensor1)
+    assert np.array_equal(check, np.tan(array))
+    
+    tensor1 = otter.exp(tensor)
+    check = np.array(tensor1)
+    assert np.array_equal(check, np.exp(array))
+    
+    tensor1 = otter.sqrt(tensor)
+    check = np.array(tensor1)
+    assert np.array_equal(check, np.sqrt(array))
+
+def test_sort():
+    tensor1 = otter.rand((10, ))
+    array1 = np.array(tensor)
+    
+    sorted, indices = tensor.sort(dim = 0, decreasing = True)
+    check_sorted = np.array(sorted)
+    check_indices = np.array(indices)
+    sorted, indices = array[::-1].sort()
+    assert np.array_equal(check_sorted, sorted)
+    assert np.array_equal(check_indices, indices)
+    
+    sorted, indices = tensor.sort(dim = 0, decreasing = False)
+    check_sorted = np.array(sorted)
+    check_indices = np.array(indices)
+    sorted, indices = array.sort()
+    assert np.array_equal(check_sorted, sorted)
+    assert np.array_equal(check_indices, indices)
+    

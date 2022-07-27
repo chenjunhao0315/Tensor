@@ -2179,6 +2179,8 @@ Tensor& depthwise_conv2d_5x5s1_x86_pack8_out(
     auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
     auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {1, 1}, padding);
     output.resize_({output_size[0], output_size[1] / 8, output_size[2], output_size[3]});
+    
+    int w = int(input.size(2));
 
     int outw = int(output.size(3));
     int outh = int(output.size(2));
@@ -2386,9 +2388,9 @@ Tensor& depthwise_conv2d_5x5s2_x86_pack8_out(
     
     const float* bias = (bias_.defined()) ? bias_.data_ptr<float>() : nullptr;
     
-    auto input_a = input.accessor<float, 3, 4>();
-    auto output_a = output.accessor<float, 4, 4>()[0];
-    auto kernel_a = weight_data_packed.accessor<float, 2, 4>();
+    auto input_a = input.accessor<float, 3, 8>();
+    auto output_a = output.accessor<float, 4, 8>()[0];
+    auto kernel_a = weight_data_packed.accessor<float, 2, 8>();
     
     otter::parallel_for(0, group, 0, [&](int64_t begin, int64_t end) {
         for (const auto g : otter::irange(begin, end)) {

@@ -413,6 +413,13 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
     }
     
     if (elempack == 8 && out_elempack == 8) {
+        if (in_channels == groups && groups == out_channels) {
+            int maxk = kernel_width * kernel_height;
+            
+            weight_data_tf = weight_data.view({groups, maxk}).packing(8);
+            return 0;
+        }
+        
         if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
             otter::convolution_im2col_sgemm_transform_kernel_pack8_avx(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
         } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
@@ -453,6 +460,7 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
             int maxk = kernel_width * kernel_height;
             
             weight_data_tf = weight_data.view({groups, maxk}).packing(4);
+            return 0;
         }
         
         if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
@@ -463,12 +471,6 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
     }
     
     if (elempack == 4 && out_elempack == 1) {
-        if (in_channels == groups && groups == out_channels) {
-            int maxk = kernel_width * kernel_height;
-            
-            weight_data_tf = weight_data.view({groups * 4, maxk}).packing(4);
-        }
-        
         if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
             otter::convolution_im2col_sgemm_transform_kernel_pack4to1_sse(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
         } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
@@ -477,12 +479,6 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
     }
     
     if (elempack == 1 && out_elempack == 4) {
-        if (in_channels == groups && groups == out_channels) {
-            int maxk = kernel_width * kernel_height;
-            
-            weight_data_tf = weight_data.view({groups * 4, maxk}).packing(4);
-        }
-        
         if (kernel_width == 1 && kernel_height == 1 && stride_width == 1 && stride_height == 1) {
             otter::convolution_im2col_sgemm_transform_kernel_pack1to4_sse(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
         } else if (kernel_width == 1 && kernel_height == 1 && stride_width == 2 && stride_height == 2) {
