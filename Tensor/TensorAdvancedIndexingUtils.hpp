@@ -78,7 +78,7 @@ static std::tuple<bool, Tensor> canDispatchToMaskedFill(const Tensor& self, cons
     int64_t num_ind = 0;
     Tensor mask;
     auto self_device = self.device();
-    for (const otter::optional<Tensor> i: indices) {
+    for (const otter::optional<Tensor>& i: indices) {
     if (!i.has_value() || !(*i).defined()){
         num_ind++;
     } else {

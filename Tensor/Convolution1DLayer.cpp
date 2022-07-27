@@ -116,7 +116,6 @@ int Convolution1DLayer::compute_output_shape(ParamDict& pd) {
     int stride_w    = pd.get((int)Conv1DParam::Stride_width,  1);
     int padding_w   = pd.get((int)Conv1DParam::Padding_width,  0);
     int dilation_w  = pd.get((int)Conv1DParam::Dilation_width,  1);
-    int groups          = pd.get((int)Conv1DParam::Groups, 1);
     int out_length  = (input_length + 2 * padding_w - dilation_w * (kernel_w - 1) - 1) / stride_w + 1;
     
     pd.set((int)Conv1DParam::In_channels, input_channels);

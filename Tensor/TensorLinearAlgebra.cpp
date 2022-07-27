@@ -156,7 +156,7 @@ void common_checks_baddbmm_bmm(Meta& meta, const Tensor& batch1, const Tensor& b
   OTTER_CHECK(batch2_sizes[0] == bs && batch2_sizes[1] == contraction_size,
               "Expected size for first two dimensions of batch2 tensor to be: [",
               bs, ", ", contraction_size, "] but got: [", batch2_sizes[0], ", ", batch2_sizes[1], "].");
-  auto& result = meta.maybe_get_output(0);
+//  auto& result = meta.maybe_get_output(0);
   // 'set_output' does not resize for in-place calls
   meta.set_output(0, output_size, {}, batch2.options());
 //  const auto result_sizes = result.sizes();

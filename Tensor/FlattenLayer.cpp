@@ -73,7 +73,7 @@ int FlattenLayer::load_param(const ParamDict& pd) {
     return 0;
 }
 
-int FlattenLayer::forward_inplace(Tensor& bottom_blob, const NetOption& opt) const {
+int FlattenLayer::forward_inplace(Tensor& bottom_blob, const NetOption& /*opt*/) const {
     bottom_blob = bottom_blob.flatten(start_dim, end_dim);
     
     return 0;

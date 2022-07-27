@@ -2179,8 +2179,6 @@ Tensor& depthwise_conv2d_5x5s1_x86_pack8_out(
     auto input = otter::constant_pad(self, {padding[1], padding[1], padding[0], padding[0]}, 0)[0];
     auto output_size = otter::calculate_conv_output_size(self.sizes(), weight.sizes(), {1, 1}, padding);
     output.resize_({output_size[0], output_size[1] / 8, output_size[2], output_size[3]});
-    
-    int w = int(input.size(2));
 
     int outw = int(output.size(3));
     int outh = int(output.size(2));
