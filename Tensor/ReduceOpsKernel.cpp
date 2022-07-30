@@ -514,6 +514,65 @@ void sum_kernel_impl(TensorIterator &iter) {
   });
 }
 
+static void prod_kernel_impl(TensorIterator& iter) {
+  // Workaround for the error: '*' in boolean context, suggest '&&' instead
+  // [-Werror=int-in-bool-context]
+  if (iter.dtype() == ScalarType::Bool) {
+    using scalar_t = bool;
+    binary_kernel_reduce_vec(
+        iter,
+        [=](scalar_t a, scalar_t b)
+            __ubsan_ignore_undefined__ -> scalar_t { return a && b; },
+        [=](Vectorized<scalar_t> a, Vectorized<scalar_t> b)
+            __ubsan_ignore_undefined__ { return a && b; },
+        // NOLINTNEXTLINE(bugprone-argument-comment)
+        /*identity=*/1);
+  } else {
+    OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "prod_cpu", [&] {
+      binary_kernel_reduce_vec(
+          iter,
+          [=](scalar_t a, scalar_t b)
+              __ubsan_ignore_undefined__ -> scalar_t { return a * b; },
+          [=](Vectorized<scalar_t> a, Vectorized<scalar_t> b)
+              __ubsan_ignore_undefined__ { return a * b; },
+          // NOLINTNEXTLINE(bugprone-argument-comment)
+          /*identity=*/1);
+    });
+  }
+}
+
+template <typename acc_t, typename factor_t>
+struct MeanOps {
+  factor_t factor;
+  inline acc_t reduce(acc_t a, acc_t b, int64_t /*idx*/) const {
+    return combine(a, b);
+  }
+  inline acc_t combine(acc_t a, acc_t b) const {
+    return a + b;
+  }
+  inline acc_t project(acc_t a) const {
+    return a * factor;
+  }
+  static acc_t translate_idx(acc_t acc, int64_t /*base_idx*/) {
+    return acc;
+  }
+  MeanOps(factor_t factor): factor(factor) {
+  }
+};
+
+static void mean_kernel_impl(TensorIterator& iter) {
+  OTTER_DISPATCH_ALL_TYPES(iter.dtype(), "mean_cpu", [&] {
+    scalar_t factor = scalar_t(iter.num_output_elements()) / scalar_t(iter.numel());
+    binary_kernel_reduce(
+      iter,
+      MeanOps<scalar_t, scalar_t> {factor},
+      scalar_t(0)
+    );
+  });
+}
+
 REGISTER_DISPATCH(sum_stub, &sum_kernel_impl);
+REGISTER_DISPATCH(prod_stub, &prod_kernel_impl);
+REGISTER_DISPATCH(mean_stub, &mean_kernel_impl);
 
 }   // end namespace otter

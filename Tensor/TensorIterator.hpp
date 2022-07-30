@@ -159,6 +159,7 @@ public:
     int ntensors() const { return static_cast<int>(operands_.size()); }
     int noutputs() const { return num_outputs_; }
     int ninputs() const { return ntensors() - noutputs(); }
+    int64_t num_output_elements() const;
     IntArrayRef shape() const { return shape_; }
     IntArrayRef view_offsets() const { return view_offsets_; }
     

@@ -182,6 +182,16 @@ int TensorIterator::num_reduce_dims() const {
     return count;
 }
 
+int64_t TensorIterator::num_output_elements() const {
+    int64_t elem = 1;
+    for (const auto dim : otter::irange(ndim())) {
+        if (operands_[0].stride_bytes[dim] != 0 || shape_[dim] == 0)  {
+            elem *= shape_[dim];
+        }
+    }
+    return elem;
+}
+
 SmallVector<char*, 4> TensorIterator::get_base_ptrs() const {
     auto ptrs = SmallVector<char*, 4>(ntensors());
     otter::get_base_ptrs(ptrs.data(), operands_);

@@ -2059,6 +2059,74 @@ Tensor & wrapper_index_out_Tensor_out(const Tensor & self, const std::vector<ott
     return out;
 }
 
+struct structured_prod_out_functional final : public structured_prod_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+    }
+
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+      return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_prod_dim_int(const Tensor & self, int64_t dim, bool keepdim, ScalarType dtype) {
+    structured_prod_out_functional op;
+    op.meta(self, dim, keepdim, dtype);
+    op.impl(self, dim, keepdim, dtype, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_prod_out_out final : public structured_prod_out {
+    structured_prod_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+      return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_prod_out_int_out(const Tensor & self, int64_t dim, bool keepdim, ScalarType dtype, Tensor & out) {
+    structured_prod_out_out op(out);
+    op.meta(self, dim, keepdim, dtype);
+    op.impl(self, dim, keepdim, dtype, op.maybe_get_output(0));
+    return out;
+}
+
+struct structured_mean_out_functional final : public structured_mean_out {
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        outputs_[output_idx] = create_out(sizes, strides, options);
+    }
+
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+      return *outputs_[output_idx];
+    }
+    std::array<ExclusivelyOwned<Tensor>, 1> outputs_;
+};
+Tensor wrapper_mean_dim(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype) {
+    structured_mean_out_functional op;
+    op.meta(self, dim, keepdim, dtype);
+    op.impl(self, dim, keepdim, dtype, *op.outputs_[0]);
+    return std::move(op.outputs_[0]).take();
+}
+struct structured_mean_out_out final : public structured_mean_out {
+    structured_mean_out_out(Tensor& out0) : outputs_{ std::ref(out0) } {}
+    void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override {
+        const auto& out = outputs_[output_idx].get();
+        resize_out(out, sizes, strides, options);
+    }
+    const Tensor& maybe_get_output(int64_t output_idx) override {
+        return outputs_[output_idx];
+    }
+    std::array<std::reference_wrapper<Tensor>, 1> outputs_;
+};
+Tensor & wrapper_mean_out_out(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype, Tensor & out) {
+    structured_mean_out_out op(out);
+    op.meta(self, dim, keepdim, dtype);
+    op.impl(self, dim, keepdim, dtype, op.maybe_get_output(0));
+    return out;
+}
+
 namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha) {
@@ -2563,6 +2631,26 @@ Tensor & index_out(Tensor & out, const Tensor & self, const std::vector<otter::o
 }
 Tensor & index_outf(const Tensor & self, const std::vector<otter::optional<Tensor>> & indices, Tensor & out) {
     return wrapper_index_out_Tensor_out(self, indices, out);
+}
+
+Tensor prod(const Tensor & self, int64_t dim, bool keepdim, ScalarType dtype) {
+    return wrapper_prod_dim_int(self, dim, keepdim, dtype);
+}
+Tensor & prod_out(Tensor & out, const Tensor & self, int64_t dim, bool keepdim, ScalarType dtype) {
+    return wrapper_prod_out_int_out(self, dim, keepdim, dtype, out);
+}
+Tensor & prod_outf(const Tensor & self, int64_t dim, bool keepdim, ScalarType dtype, Tensor & out) {
+    return wrapper_prod_out_int_out(self, dim, keepdim, dtype, out);
+}
+
+Tensor mean(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype) {
+    return wrapper_mean_dim(self, dim, keepdim, dtype);
+}
+Tensor & mean_out(Tensor & out, const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype) {
+    return wrapper_mean_out_out(self, dim, keepdim, dtype, out);
+}
+Tensor & mean_outf(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype, Tensor & out) {
+    return wrapper_mean_out_out(self, dim, keepdim, dtype, out);
 }
 
 }   // end namespace native

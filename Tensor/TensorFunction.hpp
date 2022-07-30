@@ -229,6 +229,56 @@ struct structured_index_Tensor : public TensorIterator {
     meta_return_ty meta(const Tensor & self, std::vector<otter::optional<otter::Tensor>> indices);
 };
 
+struct structured_prod_dim_int : public TensorIterator {
+    void meta(const Tensor & self, int64_t dim, bool keepdim, ScalarType dtype);
+};
+
+struct structured_mean_dim : public TensorIterator {
+    void meta(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype);
+};
+
+struct structured_min_dim : public TensorIterator {
+    
+    template <bool DIM = false>
+    struct precompute_out {
+        precompute_out<true> set_dim(int64_t value) {
+            static_assert(DIM == false, "dim already set");
+            precompute_out<true> ret;
+            ret.dim = value;
+            return ret;
+        }
+                
+        int64_t dim;
+    };
+    using meta_return_ty = precompute_out <true>;
+    meta_return_ty meta(const Tensor & self, int64_t dim, bool keepdim);
+};
+
+struct structured_max_dim : public TensorIterator {
+    
+    template <bool DIM = false>
+    struct precompute_out {
+        precompute_out<true> set_dim(int64_t value) {
+            static_assert(DIM == false, "dim already set");
+            precompute_out<true> ret;
+            ret.dim = value;
+            return ret;
+        }
+                
+        int64_t dim;
+    };
+    using meta_return_ty = precompute_out <true>;
+    meta_return_ty meta(const Tensor & self, int64_t dim, bool keepdim);
+};
+
+struct structured_argmax : public TensorIterator {
+    void meta(const Tensor & self, int64_t dim, bool keepdim);
+};
+
+struct structured_argmin : public TensorIterator {
+    void meta(const Tensor & self, int64_t dim, bool keepdim);
+};
+
 #define DEFINE_FINAL_OP_AFTER(name) \
 struct structured_##name##_functional : structured_##name { \
     void set_output(int64_t output_idx, IntArrayRef sizes, IntArrayRef strides, TensorOptions options) override { \
@@ -469,6 +519,30 @@ struct structured_index_out : public structured_index_Tensor {
     void impl(const Tensor & self, DimVector sizes, DimVector strides, const Tensor & out);
 };
 
+struct structured_prod_out : public structured_prod_dim_int {
+    void impl(const Tensor & self, int64_t dim, bool keepdim, ScalarType dtype, const Tensor & out);
+};
+
+struct structured_mean_out : public structured_mean_dim {
+    void impl(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype, const Tensor & out);
+};
+
+struct structured_min_out : public structured_min_dim {
+    void impl(const Tensor & self, int64_t dim, bool keepdim, const Tensor & min, const Tensor & min_indices);
+};
+
+struct structured_max_out : public structured_max_dim {
+    void impl(const Tensor & self, int64_t dim, bool keepdim, const Tensor & max, const Tensor & max_values);
+};
+
+struct structured_argmin_out : public structured_argmin {
+    void impl(const Tensor & self, int64_t dim, bool keepdim, const Tensor & out);
+};
+
+struct structured_argmax_out : public structured_argmax {
+    void impl(const Tensor & self, int64_t dim, bool keepdim, const Tensor & out);
+};
+
 namespace native {
 
 Tensor add(const Tensor & self, const Tensor & other, const Scalar & alpha);
@@ -663,6 +737,15 @@ Tensor & sum_outf(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType
 Tensor index(const Tensor & self, const std::vector<otter::optional<Tensor>> & indices);
 Tensor & index_out(Tensor & out, const Tensor & self, const std::vector<otter::optional<Tensor>> & indices);
 Tensor & index_outf(const Tensor & self, const std::vector<otter::optional<Tensor>> & indices, Tensor & out);
+
+Tensor prod(const Tensor & self, int64_t dim, bool keepdim = false, ScalarType dtype = ScalarType::Undefined);
+Tensor & prod_out(Tensor & out, const Tensor & self, int64_t dim, bool keepdim = false, ScalarType dtype = ScalarType::Undefined);
+Tensor & prod_outf(const Tensor & self, int64_t dim, bool keepdim, ScalarType dtype, Tensor & out);
+
+Tensor mean(const Tensor & self, IntArrayRef dim, bool keepdim = false, ScalarType dtype = ScalarType::Undefined);
+Tensor & mean_out(Tensor & out, const Tensor & self, IntArrayRef dim, bool keepdim = false, ScalarType dtype = ScalarType::Undefined);
+Tensor & mean_outf(const Tensor & self, IntArrayRef dim, bool keepdim, ScalarType dtype, Tensor & out);
+
 }   // end namespace native
 
 }   // end namespace otter
