@@ -158,6 +158,10 @@ Tensor Tensor::unfold(int64_t dim, int64_t size, int64_t step) const {
     return otter::native::unfold(*this, dim, size, step);
 }
 
+Tensor Tensor::diagonal(int64_t offset, int64_t dim1_, int64_t dim2_) const {
+    return otter::native::diagonal(*this, offset, dim1_, dim2_);
+}
+
 Tensor Tensor::detach() const {
     return otter::native::detach(*this);
 }

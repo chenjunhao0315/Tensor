@@ -1197,6 +1197,52 @@ std::vector<Tensor> dsplit(const Tensor& self, IntArrayRef split_sizes) {
     return tensor_split(self, split_sizes, 2);
 }
 
+Tensor diagonal(const Tensor& self, int64_t offset, int64_t dim1_, int64_t dim2_) {
+    int64_t nDims = self.dim();
+    int64_t dim1 = maybe_wrap_dim(dim1_, nDims);
+    int64_t dim2 = maybe_wrap_dim(dim2_, nDims);
+    OTTER_CHECK(dim1 != dim2, "diagonal dimensions cannot be identical ", dim1_, ", ", dim2_);
+    
+    int64_t diag_size;
+    int64_t memory_offset = self.memory_offset();
+    // compute storage offset and size for the diagonal
+    // for positive values of offset (above the main diagonal)
+    // "leftmost columns" (along dim2) are dropped
+    // for negative values of offset (below the main diagonal)
+    // "topmost rows" (along dim1) are dropped.
+    // Note that we invert +/- in the second to absorb the negative
+    // sign in the offset.
+    if (offset >= 0) {
+        diag_size = std::max<int64_t>(std::min(self.size(dim1), self.size(dim2) - offset), 0);
+    } else {
+        diag_size = std::max<int64_t>(std::min(self.size(dim1) + offset, self.size(dim2)), 0);
+    }
+    // NumPy allows you to specify offsets "off the end"; let's just be careful not to
+    // set a ridiculous memory_offset in that case (technically it shouldn't matter
+    // because there are no elements in the tensor, but let's be kosher).
+    if (diag_size == 0) {
+        // skip
+    } else if (offset >= 0) {
+        memory_offset += offset * self.stride(dim2);
+    } else {
+        memory_offset -= offset * self.stride(dim1);
+    }
+    // construct new size and stride: we drop dim1 and dim2 (maximum first for not changing the index of the minimum)
+    // the new ("joint") dimension is appended to the end of the shape / stride to match numpy semantics
+    DimVector sizes(self.sizes().begin(), self.sizes().end());
+    DimVector strides(self.strides().begin(), self.strides().end());
+    sizes.erase(sizes.begin() + std::max(dim1, dim2));
+    strides.erase(strides.begin() + std::max(dim1, dim2));
+    sizes.erase(sizes.begin() + std::min(dim1, dim2));
+    strides.erase(strides.begin() + std::min(dim1, dim2));
+    sizes.push_back(diag_size);
+    strides.push_back(self.stride(dim1)+self.stride(dim2));
+    // return view with new parameters
+    auto result = self.as_strided(sizes, strides, memory_offset);
+    
+    return result;
+}
+
 }   // end namespace native
 
 }   // end namespace otter

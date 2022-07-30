@@ -59,6 +59,8 @@ Tensor narrow(const Tensor& self, int64_t dim, int64_t start, int64_t length);
 Tensor& cat_out(TensorList tensors, int64_t dim, Tensor& out);
 Tensor cat(TensorList tensors, int64_t dim);
 
+Tensor diagonal(const Tensor& self, int64_t offset, int64_t dim1_, int64_t dim2_);
+
 Tensor unfold(const Tensor& self, int64_t dim, int64_t size, int64_t step);
 
 std::vector<Tensor> chunk(const Tensor& self, int64_t chunks, int64_t dim = 0);

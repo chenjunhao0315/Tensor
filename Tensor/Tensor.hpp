@@ -198,6 +198,8 @@ public:
     
     Tensor unfold(int64_t dim, int64_t size, int64_t step) const;
     
+    Tensor diagonal(int64_t offset = 0, int64_t dim1_ = 0, int64_t dim2_ = 1) const;
+    
     Tensor detach() const;
     
     ::std::vector<Tensor> tensor_split(int64_t sections, int64_t dim = 0) const;
