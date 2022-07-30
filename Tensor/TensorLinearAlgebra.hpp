@@ -12,6 +12,12 @@ namespace otter {
 
 void addmm_impl_cpu_(Tensor &result, const Tensor &self, Tensor m1, Tensor m2, const Scalar& beta, const Scalar& alpha);
 
+int linalg_lu(const Tensor& src, Tensor& P, Tensor& L, Tensor& U);
+
+void linalg_cholesky(const Tensor& src, Tensor& L, bool upper = false);
+
+Tensor linalg_det(const Tensor& src);
+
 enum DecompTypes {
     /** Gaussian elimination with the optimal pivot element chosen. */
     DECOMP_LU       = 0,

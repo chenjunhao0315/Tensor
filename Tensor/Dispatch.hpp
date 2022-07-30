@@ -49,7 +49,12 @@ inline ScalarType scalar_type(ScalarType s) {
         OTTER_CASE_TYPE(ScalarType::Float, float, __VA_ARGS__)       \
         OTTER_CASE_TYPE(ScalarType::Double, double, __VA_ARGS__)     \
         default:                                                \
-            assert(false);                                      \
+            OTTER_ERROR(                                                    \
+            '"',                                                            \
+            NAME,                                                           \
+            "\" not implemented for '",                                     \
+            toString(_st),                                                  \
+            "'");                                                           \
     }                                                           \
     }()
 
@@ -67,7 +72,12 @@ inline ScalarType scalar_type(ScalarType s) {
         OTTER_CASE_TYPE(ScalarType::Double, double, __VA_ARGS__)     \
         OTTER_CASE_TYPE(SCALARTYPE, decltype(ScalarTypeToCPPType<SCALARTYPE>::t), __VA_ARGS__)  \
         default:                                                \
-            assert(false);                                      \
+            OTTER_ERROR(                                                    \
+            '"',                                                            \
+            NAME,                                                           \
+            "\" not implemented for '",                                     \
+            toString(_st),                                                  \
+            "'");                                                           \
     }                                                           \
     }()
 
@@ -86,7 +96,12 @@ inline ScalarType scalar_type(ScalarType s) {
         OTTER_CASE_TYPE(SCALARTYPE1, decltype(ScalarTypeToCPPType<SCALARTYPE1>::t), __VA_ARGS__)  \
         OTTER_CASE_TYPE(SCALARTYPE2, decltype(ScalarTypeToCPPType<SCALARTYPE2>::t), __VA_ARGS__)  \
         default:                                                \
-            assert(false);                                      \
+            OTTER_ERROR(                                                    \
+            '"',                                                            \
+            NAME,                                                           \
+            "\" not implemented for '",                                     \
+            toString(_st),                                                  \
+            "'");                                                           \
     }                                                           \
     }()
 
@@ -101,7 +116,12 @@ inline ScalarType scalar_type(ScalarType s) {
         OTTER_CASE_TYPE(ScalarType::Int, int, __VA_ARGS__)           \
         OTTER_CASE_TYPE(ScalarType::Long, int64_t, __VA_ARGS__)      \
         default:                                                \
-            assert(false);                         \
+            OTTER_ERROR(                                                    \
+            '"',                                                            \
+            NAME,                                                           \
+            "\" not implemented for '",                                     \
+            toString(_st),                                                  \
+            "'");                                                           \
     }                                                           \
     }()
 
@@ -117,7 +137,12 @@ inline ScalarType scalar_type(ScalarType s) {
         OTTER_CASE_TYPE(ScalarType::Long, int64_t, __VA_ARGS__)      \
         OTTER_CASE_TYPE(SCALARTYPE, decltype(ScalarTypeToCPPType<SCALARTYPE>::t), __VA_ARGS__)  \
         default:                                                \
-            assert(false);                         \
+            OTTER_ERROR(                                                    \
+            '"',                                                            \
+            NAME,                                                           \
+            "\" not implemented for '",                                     \
+            toString(_st),                                                  \
+            "'");                                                           \
     }                                                           \
     }()
 
@@ -129,7 +154,12 @@ inline ScalarType scalar_type(ScalarType s) {
         OTTER_CASE_TYPE(ScalarType::Float, float, __VA_ARGS__)       \
         OTTER_CASE_TYPE(ScalarType::Double, double, __VA_ARGS__)     \
         default:                                                \
-            assert(false);                         \
+            OTTER_ERROR(                                                    \
+            '"',                                                            \
+            NAME,                                                           \
+            "\" not implemented for '",                                     \
+            toString(_st),                                                  \
+            "'");                                                           \
     }                                                           \
     }()
 
@@ -142,7 +172,12 @@ inline ScalarType scalar_type(ScalarType s) {
         OTTER_CASE_TYPE(ScalarType::Double, double, __VA_ARGS__)     \
         OTTER_CASE_TYPE(SCALARTYPE, decltype(ScalarTypeToCPPType<SCALARTYPE>::t), __VA_ARGS__)  \
         default:                                                \
-            assert(false);                         \
+            OTTER_ERROR(                                                    \
+            '"',                                                            \
+            NAME,                                                           \
+            "\" not implemented for '",                                     \
+            toString(_st),                                                  \
+            "'");                                                           \
     }                                                           \
     }()
 
@@ -159,7 +194,12 @@ inline ScalarType scalar_type(ScalarType s) {
         OTTER_CASE_TYPE_HINT(ScalarType::Float, float, HINT, __VA_ARGS__)       \
         OTTER_CASE_TYPE_HINT(ScalarType::Double, double, HINT, __VA_ARGS__)     \
         default:                                                \
-            assert(false);                         \
+            OTTER_ERROR(                                                    \
+            '"',                                                            \
+            NAME,                                                           \
+            "\" not implemented for '",                                     \
+            toString(_st),                                                  \
+            "'");                                                           \
     }                                                           \
     }()
 
@@ -171,7 +211,12 @@ inline ScalarType scalar_type(ScalarType s) {
         OTTER_CASE_TYPE(ScalarType::Float, float, __VA_ARGS__)       \
         OTTER_CASE_TYPE(ScalarType::Double, double, __VA_ARGS__)     \
         default:                                                \
-            assert(false);                                      \
+            OTTER_ERROR(                                                    \
+            '"',                                                            \
+            NAME,                                                           \
+            "\" not implemented for '",                                     \
+            toString(_st),                                                  \
+            "'");                                                           \
     }                                                           \
     }()
 
@@ -183,7 +228,12 @@ inline ScalarType scalar_type(ScalarType s) {
     switch (_st) {                                                          \
       __VA_ARGS__                                                           \
       default:                                                              \
-        OTTER_CHECK(false, "unimplement");                                  \
+        OTTER_ERROR(                                                    \
+        '"',                                                            \
+        NAME,                                                           \
+        "\" not implemented for '",                                     \
+        toString(_st),                                                  \
+        "'");                                                           \
     }                                                                       \
   }()
 

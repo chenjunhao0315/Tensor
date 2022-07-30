@@ -4,6 +4,8 @@ import pytest
 
 import otter
 
+FLT_EPSILON = 1.192092896e-07
+
 def test_tensor():
     tensor = otter.empty((1, ))
     assert (
@@ -170,7 +172,7 @@ def test_fill():
     tensor = otter.empty((1, ))
     tensor.fill(1)
     array = np.array(tensor)
-    assert np.abs(array[0] - 1.0) < sys.float_info.min
+    assert np.abs(array[0] - 1.0) < FLT_EPSILON
    
 def test_clone():
     tensor1 = otter.rand((1, ))
@@ -549,23 +551,23 @@ def test_math():
     
     tensor1 = otter.sin(tensor)
     check = np.array(tensor1)
-    assert np.isclose(check, np.sin(array), rtol = sys.float_info.min).any()
+    assert np.isclose(check, np.sin(array), atol = FLT_EPSILON).all()
     
     tensor1 = otter.cos(tensor)
     check = np.array(tensor1)
-    assert np.isclose(check, np.cos(array), rtol = sys.float_info.min).any()
+    assert np.isclose(check, np.cos(array), atol = FLT_EPSILON).all()
     
     tensor1 = otter.tan(tensor)
     check = np.array(tensor1)
-    assert np.isclose(check, np.tan(array), rtol = sys.float_info.min).any()
+    assert np.isclose(check, np.tan(array), atol = FLT_EPSILON).all()
     
     tensor1 = otter.exp(tensor)
     check = np.array(tensor1)
-    assert np.isclose(check, np.exp(array), rtol = sys.float_info.min).any()
+    assert np.isclose(check, np.exp(array), atol = FLT_EPSILON).all()
     
     tensor1 = otter.sqrt(tensor)
     check = np.array(tensor1)
-    assert np.isclose(check, np.sqrt(array), rtol = sys.float_info.min).any()
+    assert np.isclose(check, np.sqrt(array), atol = FLT_EPSILON).all()
 
 def test_sort():
     tensor = otter.rand((10, ))
@@ -587,3 +589,43 @@ def test_sort():
     assert np.array_equal(check_sorted, sorted)
     assert np.array_equal(check_indices, indices)
     
+def test_lu():
+    tensor = otter.rand((5, 5))
+    
+    P, L, U = otter.lu(tensor)
+    
+    check = P @ L @ U
+    
+    original = np.array(tensor)
+    decompose = np.array(check)
+    
+    assert np.isclose(original, decompose, atol = FLT_EPSILON).all()
+    
+    tensor = otter.rand((10, 10))
+    
+    P, L, U = otter.lu(tensor)
+    
+    check = P @ L @ U
+    
+    original = np.array(tensor)
+    decompose = np.array(check)
+    
+    assert np.isclose(original, decompose, atol = FLT_EPSILON).all()
+
+def test_det():
+    tensor = otter.rand((10, 10))
+    array = np.array(tensor)
+    
+    det = otter.det(tensor)
+    check = np.linalg.det(array)
+    
+    assert np.isclose(np.array(check), np.array(det), atol = FLT_EPSILON).all()
+    
+def test_cholesky():
+    array = np.array([[6, 3, 4, 8], [3, 6, 5, 1], [4, 5, 10, 7], [8, 1, 7, 25]]).astype(float)
+    tensor = otter.tensor(array)
+    
+    cholesky = otter.cholesky(tensor)
+    check = np.linalg.cholesky(array)
+    
+    assert np.isclose(check, np.array(cholesky), atol = FLT_EPSILON).all()

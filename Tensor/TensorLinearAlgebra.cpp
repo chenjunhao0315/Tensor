@@ -205,6 +205,7 @@ static void addbmm_impl_(Tensor &result, const Tensor &self, const Tensor &batch
     adjusted_beta = 1; // accumulate output once
   }
 }
+
 Tensor& addbmm_out(const Tensor& self, const Tensor& batch1, const Tensor& batch2, const Scalar& beta, const Scalar& alpha, Tensor& result) {
   auto b_self = expand_size(self, {batch1.size(1), batch2.size(2)});
   {
@@ -212,9 +213,11 @@ Tensor& addbmm_out(const Tensor& self, const Tensor& batch1, const Tensor& batch
   }
   return result;
 }
+
 Tensor &addbmm_(Tensor& self, const Tensor& batch1, const Tensor& batch2, const Scalar& beta, const Scalar& alpha) {
   return addbmm_out(self, batch1, batch2, beta, alpha, self);
 }
+
 Tensor addbmm(const Tensor& self, const Tensor& batch1, const Tensor& batch2, const Scalar& beta, const Scalar& alpha) {
   Tensor result = otter::empty({0}, self.options());
   return addbmm_out(self, batch1, batch2, beta, alpha, result);
@@ -409,6 +412,186 @@ DEFINE_IMPL_FUNCTION(bmm_out_cpu)
     {
     bmm_out_or_baddbmm_(result, batch1, batch2, Scalar(0.0), Scalar(1.0), true);
     }
+}
+
+/*
+ 
+ To calculate LLT decomposition
+ Suppose S is 3x3 matrix, and S = L * LT
+ 
+ s11 s12 s13     l11   0   0     l11 l12 l13
+ s21 s22 s23  =  l21 l22   0  *    0 l22 l23
+ s31 s32 s33     l31 l32 l33       0   0 l33
+ 
+ =>
+ 
+ s11 s12 s13      l11^2             l21l11                   l31l11
+ s21 s22 s23  =  l21l11     l21^2 +  l22^2          l31l21 + l32l22
+ s31 s32 s33     l31l11    l31l21 + l32l22    l31^2 + l32^2 + l33^2
+ 
+ =>
+                 sqrt(s11)                    0                        0
+       L      =  s21 / l11    sqrt(s22 - l21^2)                        0
+                 s31 / l11 (s32 - l31l21) / l22 sqrt(s33 - l31^2 - l32^2)
+ 
+ =>
+ 
+    ljj = sqrt(sjj - SUM(ljk^2)), where k = 1 ... < j
+    lij = (sij - SUM(lik * ljk)) / ljj, where k = 1 ... < j
+ 
+ */
+void linalg_cholesky(const Tensor& src, Tensor& L, bool upper) {
+    OTTER_CHECK(src.dim() == 2, "Expect 2d matrix but get dim = ", src.dim());
+    OTTER_CHECK(src.size(0) == src.size(1), "Expect square matrix but get ", src.size(0), " x ", src.size(1));
+    
+    const int64_t n = src.size(0);
+
+    // check symmetric
+    {
+        Tensor symmetric = src == src.transpose(0, 1);
+        bool* check = symmetric.data_ptr<bool>();
+        for (const auto i : otter::irange(n * n)) {
+            OTTER_CHECK(check[i], "cholesky decomposition failed");
+        }
+    }
+    
+    L = otter::zeros({n, n}, src.options());
+
+    OTTER_DISPATCH_FLOATING_TYPES(src.scalar_type(), "llt", [&] {
+        auto mat = src.accessor<scalar_t, 2>();
+        auto lower = L.accessor<scalar_t, 2>();
+
+        for (int i = 0; i < n; ++i) {
+            for (int k = 0; k < i; ++k) {
+                scalar_t value = mat[i][k];
+                for (int j = 0; j < k; ++j)
+                    value -= lower[i][j] * lower[k][j];
+                lower[i][k] = value / lower[k][k];
+            }
+            scalar_t value = mat[i][i];
+            for (int j = 0; j < i; ++j)
+                value -= lower[i][j] * lower[i][j];
+            lower[i][i] = std::sqrt(value);
+        }
+    });
+    
+    if (upper)
+        L.transpose_(0, 1);
+}
+
+/*
+ 
+ To calculate LU decomposition
+ Suppose S is 3x3 matrix, and S = L * U
+ 
+ s11 s12 s13       1   0   0     u11 u12 u13
+ s21 s22 s23  =  l21   1   0  *    0 u22 u23
+ s31 s32 s33     l31 l32   1       0   0 u33
+ 
+ =>
+ 
+ s11 s12 s13        u11              u12                    u13
+ s21 s22 s23  =  l21u11  l21u12 +    u22           l21u13 + u23
+ s31 s32 s33     l31u11  l31u12 + l32u22  l31u13 + l32u23 + u33
+ 
+ =>
+ 
+ Calculate U with index i, k
+ L with index k, i
+ 
+ -> uik = sik - SUM(lij * ujk), where j = 1 ... < i
+ -> lki = (ski - SUM(lkj * uji)) / lii, where j = 1 ... < i
+ 
+ ex. u11 = s11
+ u12 = s12
+ u13 = s13
+ l21 = (s21) / u11
+ l31 = (s31) / u11
+ 
+ u22 = s22 - (l21u12)
+ u23 = s23 - (l21u13)
+ l32 = (s32 - l31u12) / u22
+ 
+ u33 = s33 - (l31u13 + l32u23)
+ 
+ */
+int linalg_lu(const Tensor& src, Tensor& P, Tensor& L, Tensor& U) {
+    OTTER_CHECK(src.dim() == 2, "Expect 2d matrix but get dim = ", src.dim());
+    OTTER_CHECK(src.size(0) == src.size(1), "Expect square matrix but get ", src.size(0), " x ", src.size(1));
+    
+    const int64_t n = src.size(0);
+    
+    Tensor S = src.clone();
+    P = otter::eye(n, src.scalar_type());
+    L = otter::zeros({n, n}, src.options());
+    U = otter::zeros({n, n}, src.options());
+    
+    int p = 1;
+    
+    OTTER_DISPATCH_FLOATING_TYPES(src.scalar_type(), "lu", [&] {
+        auto mat = S.accessor<scalar_t, 2>();
+        auto permute = P.accessor<scalar_t, 2>();
+        auto lower = L.accessor<scalar_t, 2>();
+        auto upper = U.accessor<scalar_t, 2>();
+        
+        for (int i = 0; i < n; i++) {
+            int k = i;
+            
+            for (int j = i + 1; j < n; j++)
+                if (std::abs(mat[j][i]) > std::abs(mat[k][i]))
+                    k = j;
+            
+            if (k != i) {
+                for (int j = 0; j < n; j++) {
+                    std::swap(mat[i][j], mat[k][j]);
+                    std::swap(permute[i][j], permute[k][j]);
+                }
+                
+                p = -p;
+            }
+        }
+        
+        P.transpose_(0, 1);
+        
+        // Decomposing matrix into Upper and Lower
+        // triangular matrix
+        for (int i = 0; i < n; i++) {
+            // Upper Triangular
+            for (int k = i; k < n; k++) {
+                // Summation of L(i, j) * U(j, k)
+                scalar_t sum = 0;
+                for (int j = 0; j < i; j++)
+                    sum += (lower[i][j] * upper[j][k]);
+                
+                // Evaluating U(i, k)
+                upper[i][k] = mat[i][k] - sum;
+            }
+            // Lower Triangular
+            for (int k = i; k < n; k++) {
+                if (i == k)
+                    lower[i][i] = 1; // Diagonal as 1
+                else {
+                    // Summation of L(k, j) * U(j, i)
+                    scalar_t sum = 0;
+                    for (int j = 0; j < i; j++)
+                        sum += (lower[k][j] * upper[j][i]);
+                    
+                    // Evaluating L(k, i)
+                    lower[k][i] = (mat[k][i] - sum) / upper[i][i];
+                }
+            }
+        }
+    });
+    
+    return p;
+}
+
+Tensor linalg_det(const Tensor& src) {
+    Tensor P, L, U;
+    
+    int coef = linalg_lu(src, P, L, U);
+    
+    return coef * otter::native::prod(U.diagonal(0), -1);
 }
 
 #define det2(m)   ((double)m(0,0)*m(1,1) - (double)m(0,1)*m(1,0))

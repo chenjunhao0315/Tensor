@@ -15,6 +15,7 @@
 #include <TensorFunction.hpp>
 #include <TensorIndexing.hpp>
 #include <TensorShape.hpp>
+#include <TensorLinearAlgebra.hpp>
 #include <ArrayRef.hpp>
 #include <TypeMeta.hpp>
 #include <Formatting.hpp>
@@ -481,6 +482,9 @@ PYBIND11_MODULE(otter, m) {
     .def("xor", [](const Tensor& tensor1, int value) {
         return tensor1.bitwise_xor(value);
     })
+    .def("__matmul__", [](const Tensor& tensor1, const Tensor& tensor2) {
+        return tensor1.mm(tensor2);
+    }, py::is_operator())
     .def("softmax", [](const Tensor& tensor, int64_t dim, ScalarType dtype) {
         return tensor.softmax(dim, dtype);
     }, py::arg("dim"), py::arg("dtype") = ScalarType::Undefined)
@@ -503,7 +507,13 @@ PYBIND11_MODULE(otter, m) {
     }, py::arg("dim") = -1, py::arg("decreasing") = false, py::arg("stable") = false)
     .def("topk", [](const Tensor& tensor, int64_t k, int64_t dim, bool largest, bool sorted) {
         return tensor.topk(k, dim, largest, sorted);
-    }, py::arg("k"), py::arg("dim") = -1, py::arg("largest") = true, py::arg("sorted") = true);
+    }, py::arg("k"), py::arg("dim") = -1, py::arg("largest") = true, py::arg("sorted") = true)
+    .def("mm", [](const Tensor& self, const Tensor& other) {
+        return self.mm(other);
+    })
+    .def("bmm", [](const Tensor& self, const Tensor& other) {
+        return self.bmm(other);
+    });
     
     m.def("tensor", [](py::buffer const b) {
         py::buffer_info info = b.request();
@@ -616,6 +626,19 @@ PYBIND11_MODULE(otter, m) {
         
         return otter::native::cat(tensors, dim);
     }, py::arg("tensors"), py::arg("dim") = 0);
+    m.def("lu", [](const Tensor& tensor) {
+        Tensor P, L, U;
+        otter::linalg_lu(tensor, P, L, U);
+        
+        return std::tuple(P, L, U);
+    });
+    m.def("cholesky", [](const Tensor& tensor, bool upper) {
+        Tensor L;
+        otter::linalg_cholesky(tensor, L, upper);
+        
+        return L;
+    }, py::arg("tensor"), py::arg("upper") = false);
+    m.def("det", &otter::linalg_det);
     
     py::class_<NetOption>(m, "NetOption")
     .def(py::init<>())

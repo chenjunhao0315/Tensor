@@ -73,6 +73,8 @@ inline const char* torchCheckMsgImpl(const char* /*msg*/, const char* args) {
     return args;
 }
 
+#define OTTER_EXPAND_MSVC_WORKAROUND(x) x
+
 #define OTTER_CHECK_MSG(cond, type, ...)                    \
     (torchCheckMsgImpl(                                     \
     "Expected " #cond                                       \
@@ -128,6 +130,11 @@ if (!(cond)) { \
         static_cast<uint32_t>(__LINE__),                              \
         #cond " INTERNAL ASSERT FAILED at " OTTER_STRINGIZE(__FILE__)); \
   }
+
+#define OTTER_ERROR(...)                                                   \
+  do {                                                                     \
+    OTTER_EXPAND_MSVC_WORKAROUND(OTTER_CHECK(false, str(__VA_ARGS__)));    \
+  } while (false)
 
 }   // end namespace otter
 
