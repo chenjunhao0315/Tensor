@@ -20,8 +20,12 @@
 
 namespace otter {
 
-bool summary = true;
-int64_t edgeitems = 3;
+static bool summary = true;
+static int64_t edgeitems = 3;
+
+void set_print_edgeitems(int64_t items) {
+    edgeitems = items;
+}
 
 inline std::ios_base& defaultfloat(std::ios_base& __base) {
     __base.unsetf(std::ios_base::floatfield);
@@ -144,97 +148,102 @@ static void printScale(std::stringstream & stream, double scale) {
     stream << defaultfloat << scale << " *" << std::endl;
 }
 
-std::string scalar_str(const Tensor& tensor) {
-    std::stringstream stream;
-    
-    stream << defaultfloat << tensor.data_ptr<double>()[0] << std::endl;
-    
-    std::string str = "[" + stream.str() + "]";
-    
-    return str;
+static void scalar_str(const Tensor& tensor, std::stringstream& stream) {
+    stream << "[" << defaultfloat << tensor.data_ptr<double>()[0] << "]" << std::endl;
 }
 
-std::string _vector_str(const Tensor& tensor, double scale, int64_t sz) {
-    std::stringstream stream;
-    
+static void _vector_str(const Tensor& tensor, std::stringstream& stream, double scale, int64_t sz) {
     double* tensor_p = tensor.data_ptr<double>();
+    
     for (const auto i : otter::irange(tensor.size(0))) {
         if (i)
             stream << ", ";
         stream << std::setw((int)sz) << tensor_p[i] / scale;
     }
-    
-    return stream.str();
 }
 
-std::string vector_str(const Tensor& tensor) {
+static void vector_str(const Tensor& tensor, std::stringstream& stream, double scale, int64_t sz, int64_t indent, bool head) {
+    if (!head)
+        __printIndent(stream, indent);
+    stream << "[";
+    
+    if (summary && tensor.size(0) > 2 * edgeitems) {
+        _vector_str(tensor.slice(0, 0, edgeitems, 1), stream, scale, sz);
+        stream << " ... ";
+        _vector_str(tensor.slice(0, -edgeitems, tensor.size(0), 1), stream, scale, sz);
+    } else {
+        _vector_str(tensor, stream, scale, sz);
+    }
+    stream << "]";
+}
+
+static void _tensor_str(const Tensor& tensor, std::stringstream& stream, double scale, int64_t sz, int64_t indent, bool head) {
+    int64_t dim = tensor.dim();
+    
+    if (dim == 0) {
+        return scalar_str(tensor, stream);
+    }
+    
+    if (dim == 1) {
+        return vector_str(tensor, stream, scale, sz, indent + 1, head);
+    }
+    
+    if (!head)
+        __printIndent(stream, indent + 1);
+    stream << "[";
+    
+    if (summary && tensor.size(0) > 2 * edgeitems) {
+        for (const auto i : otter::irange(0, edgeitems)) {
+            _tensor_str(tensor[i], stream, scale, sz, indent + 1, i == 0);
+            stream << ",\n";
+            if (dim >= 3)
+                stream << "\n";
+        }
+        __printIndent(stream, indent + 2);
+        stream << ".\n";
+        __printIndent(stream, indent + 2);
+        stream << ".\n";
+        __printIndent(stream, indent + 2);
+        stream << ".\n";
+        if (dim >= 3)
+            stream << "\n";
+        for (const auto i : otter::irange(tensor.size(0) - edgeitems, tensor.size(0))) {
+            _tensor_str(tensor[i], stream, scale, sz, indent + 1, false);
+            if (i != tensor.size(0) - 1) {
+                stream << ",\n";
+                if (dim >= 3)
+                    stream << "\n";
+            }
+        }
+    } else {
+        for (const auto i : otter::irange(0, tensor.size(0))) {
+            _tensor_str(tensor[i], stream, scale, sz, indent + 1, i == 0);
+            if (i != tensor.size(0) - 1) {
+                stream << ",\n";
+                if (dim >= 3)
+                    stream << "\n";
+            }
+        }
+    }
+    stream << "]";
+}
+
+std::string tensor_str(const Tensor& tensor) {
     std::stringstream stream;
     
     double scale;
     int64_t sz;
     std::tie(scale, sz) =  __printFormat(stream, tensor);
     
-    if(scale != 1) {
+    if(scale != 1 && tensor.dim() != 0) {
         printScale(stream, scale);
     }
     
-    std::string str = stream.str() + "[";
-    if (summary && tensor.size(0) > 2 * edgeitems) {
-        str += _vector_str(tensor.slice(0, 0, edgeitems, 1), scale, sz);
-        str += " ... ";
-        str += _vector_str(tensor.slice(0, -edgeitems, tensor.size(0), 1), scale, sz);
-    } else {
-        str += _vector_str(tensor, scale, sz);
-    }
-    str += "]";
+    _tensor_str(tensor, stream, scale, sz, -1, true);
     
-    return str;
-}
-
-std::string tensor_str(const Tensor& tensor) {
-    int64_t dim = tensor.dim();
+    stream << std::endl;
     
-    std::string str = "[";
-    
-    if (dim == 0) {
-        return scalar_str(tensor);
-    }
-    
-    if (dim == 1) {
-        return vector_str(tensor);
-    }
-    
-    if (summary && tensor.size(0) > 2 * edgeitems) {
-        for (const auto i : otter::irange(0, edgeitems)) {
-            str += tensor_str(tensor[i]);
-            str += ",\n";
-            if (dim >= 3)
-                str += "\n";
-        }
-        str += ".\n.\n.\n";
-        if (dim >= 3)
-            str += "\n";
-        for (const auto i : otter::irange(tensor.size(0) - edgeitems, tensor.size(0))) {
-            str += tensor_str(tensor[i]);
-            if (i != tensor.size(0) - 1) {
-                str += ",\n";
-                if (dim >= 3)
-                    str += "\n";
-            }
-        }
-    } else {
-        for (const auto i : otter::irange(0, tensor.size(0))) {
-            str += tensor_str(tensor[i]);
-            if (i != tensor.size(0) - 1) {
-                str += ",\n";
-                if (dim >= 3)
-                    str += "\n";
-            }
-        }
-    }
-    str += "]";
-    
-    return str;
+    return stream.str();
 }
 
 }   // end namespace otter

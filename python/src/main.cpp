@@ -125,6 +125,9 @@ PYBIND11_MODULE(otter, m) {
     .def("fill", [](Tensor& tensor, float value) {
         return tensor.fill_(value);
     }, py::arg("value"))
+    .def("to", [](Tensor& tensor, ScalarType dtype, bool non_blocking, bool copy) {
+        return tensor.to(dtype, non_blocking, copy);
+    }, py::arg("dtype"), py::arg("non_blocking") = false, py::arg("copy") = false)
     .def("permute", [](Tensor& tensor, py::tuple dims) {
         auto tensor_dim = tuple_to_vector<int64_t>(dims);
         
@@ -552,6 +555,34 @@ PYBIND11_MODULE(otter, m) {
         
         return from_blob(info.ptr, tensor_shape, tensor_strides, dtype);
     }, py::arg("array"));
+    m.def("tensor", [](std::vector<int>& array) {
+        Tensor tensor = otter::from_blob(array.data(), {static_cast<int64_t>(array.size())}, ScalarType::Int).clone();
+        
+        return tensor;
+    });
+    m.def("tensor", [](std::vector<float>& array) {
+        Tensor tensor = otter::from_blob(array.data(), {static_cast<int64_t>(array.size())}, ScalarType::Float).clone();
+        
+        return tensor;
+    });
+    m.def("tensor", [](std::vector<std::vector<int> >& nested_array) {
+        std::vector<Tensor> nested_tensor;
+        
+        for (auto array : nested_array) {
+            nested_tensor.push_back(otter::from_blob(array.data(), {static_cast<int64_t>(array.size())}, ScalarType::Int).clone());
+        }
+        
+        return otter::native::stack(nested_tensor, 0);
+    });
+    m.def("tensor", [](std::vector<std::vector<float> >& nested_array) {
+        std::vector<Tensor> nested_tensor;
+        
+        for (auto array : nested_array) {
+            nested_tensor.push_back(otter::from_blob(array.data(), {static_cast<int64_t>(array.size())}, ScalarType::Float).clone());
+        }
+        
+        return otter::native::stack(nested_tensor, 0);
+    });
     m.def("empty", [](py::tuple shape, ScalarType dtype) {
         auto tensor_shape = tuple_to_vector<int64_t>(shape);
         
