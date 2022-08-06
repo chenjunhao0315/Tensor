@@ -333,6 +333,7 @@
 		762B4D6827EF7E3D00A98E34 /* flat_hash_map.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = flat_hash_map.hpp; sourceTree = "<group>"; };
 		762B4D6A27EF80AB00A98E34 /* CPUProfilingAllocator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CPUProfilingAllocator.cpp; sourceTree = "<group>"; };
 		762B4D6B27EF80AB00A98E34 /* CPUProfilingAllocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CPUProfilingAllocator.hpp; sourceTree = "<group>"; };
+		762B87A9289EC70D00E13480 /* Complex.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Complex.hpp; sourceTree = "<group>"; };
 		762E3B2C27BACA050075F983 /* TensorAccessor.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TensorAccessor.hpp; sourceTree = "<group>"; };
 		762E3B2E27BB5D260075F983 /* ConvolutionMM2D.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionMM2D.cpp; sourceTree = "<group>"; };
 		762E3B2F27BB5D260075F983 /* ConvolutionMM2D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ConvolutionMM2D.hpp; sourceTree = "<group>"; };
@@ -679,6 +680,7 @@
 				7657320B2882928D004AE619 /* HFloat.cpp */,
 				7657320C2882928D004AE619 /* HFloat.hpp */,
 				7657321028829752004AE619 /* HFloat-inl.hpp */,
+				762B87A9289EC70D00E13480 /* Complex.hpp */,
 			);
 			name = Dtype;
 			sourceTree = "<group>";

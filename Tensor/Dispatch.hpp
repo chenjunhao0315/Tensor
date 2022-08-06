@@ -55,6 +55,7 @@ inline ScalarType scalar_type(ScalarType s) {
             "\" not implemented for '",                                     \
             toString(_st),                                                  \
             "'");                                                           \
+            assert(false);                                                  \
     }                                                           \
     }()
 
@@ -78,6 +79,7 @@ inline ScalarType scalar_type(ScalarType s) {
             "\" not implemented for '",                                     \
             toString(_st),                                                  \
             "'");                                                           \
+            assert(false);                                                  \
     }                                                           \
     }()
 
@@ -102,6 +104,7 @@ inline ScalarType scalar_type(ScalarType s) {
             "\" not implemented for '",                                     \
             toString(_st),                                                  \
             "'");                                                           \
+            assert(false);                                                  \
     }                                                           \
     }()
 
@@ -122,6 +125,7 @@ inline ScalarType scalar_type(ScalarType s) {
             "\" not implemented for '",                                     \
             toString(_st),                                                  \
             "'");                                                           \
+            assert(false);                                                  \
     }                                                           \
     }()
 
@@ -143,6 +147,7 @@ inline ScalarType scalar_type(ScalarType s) {
             "\" not implemented for '",                                     \
             toString(_st),                                                  \
             "'");                                                           \
+            assert(false);                                                  \
     }                                                           \
     }()
 
@@ -160,6 +165,7 @@ inline ScalarType scalar_type(ScalarType s) {
             "\" not implemented for '",                                     \
             toString(_st),                                                  \
             "'");                                                           \
+            assert(false);                                                  \
     }                                                           \
     }()
 
@@ -178,6 +184,7 @@ inline ScalarType scalar_type(ScalarType s) {
             "\" not implemented for '",                                     \
             toString(_st),                                                  \
             "'");                                                           \
+            assert(false);                                                  \
     }                                                           \
     }()
 
@@ -200,6 +207,7 @@ inline ScalarType scalar_type(ScalarType s) {
             "\" not implemented for '",                                     \
             toString(_st),                                                  \
             "'");                                                           \
+            assert(false);                                                  \
     }                                                           \
     }()
 
@@ -217,6 +225,7 @@ inline ScalarType scalar_type(ScalarType s) {
             "\" not implemented for '",                                     \
             toString(_st),                                                  \
             "'");                                                           \
+            assert(false);                                                  \
     }                                                           \
     }()
 
@@ -234,6 +243,7 @@ inline ScalarType scalar_type(ScalarType s) {
         "\" not implemented for '",                                     \
         toString(_st),                                                  \
         "'");                                                           \
+        assert(false);                                                  \
     }                                                                       \
   }()
 
