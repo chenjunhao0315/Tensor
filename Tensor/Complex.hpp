@@ -8,6 +8,19 @@
 #ifndef Complex_h
 #define Complex_h
 
+#include <complex>
+#include "Macro.hpp"
+#if defined(__CUDACC__) || defined(__HIPCC__)
+#include <thrust/complex.h>
+#endif
+OTTER_CLANG_DIAGNOSTIC_PUSH()
+#if OTTER_CLANG_HAS_WARNING("-Wimplicit-float-conversion")
+OTTER_CLANG_DIAGNOSTIC_IGNORE("-Wimplicit-float-conversion")
+#endif
+#if OTTER_CLANG_HAS_WARNING("-Wfloat-conversion")
+OTTER_CLANG_DIAGNOSTIC_IGNORE("-Wfloat-conversion")
+#endif
+
 namespace otter {
 
 // otter::complex is an implementation of complex numbers that aims
@@ -438,7 +451,90 @@ std::basic_istream<CharT, Traits>& operator>>(
   return is;
 }
 
+}   // end namespace otter
 
+// std functions
+//
+// The implementation of these functions also follow the design of C++20
+#if defined(__CUDACC__) || defined(__HIPCC__)
+namespace otter_internal {
+template <typename T>
+constexpr thrust::complex<T>
+cuda101bug_cast_otter_complex_to_thrust_complex(const otter::complex<T>& x) {
+#if defined(CUDA_VERSION) && (CUDA_VERSION < 10020)
+  // This is to circumvent a CUDA compilation bug. See
+  // https://github.com/pytorch/pytorch/pull/38941 . When the bug is fixed, we
+  // should do static_cast directly.
+  return thrust::complex<T>(x.real(), x.imag());
+#else
+  return static_cast<thrust::complex<T>>(x);
+#endif
 }
+} // namespace otter_internal
+#endif
+namespace std {
+template <typename T>
+constexpr T real(const otter::complex<T>& z) {
+  return z.real();
+}
+template <typename T>
+constexpr T imag(const otter::complex<T>& z) {
+  return z.imag();
+}
+template <typename T>
+T abs(const otter::complex<T>& z) {
+#if defined(__CUDACC__) || defined(__HIPCC__)
+  return thrust::abs(
+      otter_internal::cuda101bug_cast_otter_complex_to_thrust_complex(z));
+#else
+  return std::abs(static_cast<std::complex<T>>(z));
+#endif
+}
+#if defined(USE_ROCM)
+#define ROCm_Bug(x)
+#else
+#define ROCm_Bug(x) x
+#endif
+template <typename T>
+T arg(const otter::complex<T>& z) {
+  return ROCm_Bug(std)::atan2(std::imag(z), std::real(z));
+}
+#undef ROCm_Bug
+template <typename T>
+constexpr T norm(const otter::complex<T>& z) {
+  return z.real() * z.real() + z.imag() * z.imag();
+}
+// For std::conj, there are other versions of it:
+//   constexpr std::complex<float> conj( float z );
+//   template< class DoubleOrInteger >
+//   constexpr std::complex<double> conj( DoubleOrInteger z );
+//   constexpr std::complex<long double> conj( long double z );
+// These are not implemented
+// TODO(@zasdfgbnm): implement them as otter::conj
+template <typename T>
+constexpr otter::complex<T> conj(const otter::complex<T>& z) {
+  return otter::complex<T>(z.real(), -z.imag());
+}
+// Thrust does not have complex --> complex version of thrust::proj,
+// so this function is not implemented at otter right now.
+// TODO(@zasdfgbnm): implement it by ourselves
+// There is no otter version of std::polar, because std::polar always
+// returns std::complex. Use otter::polar instead;
+} // namespace std
+
+namespace otter {
+template <typename T>
+complex<T> polar(const T& r, const T& theta = T()) {
+#if defined(__CUDACC__) || defined(__HIPCC__)
+  return static_cast<complex<T>>(thrust::polar(r, theta));
+#else
+  // std::polar() requires r >= 0, so spell out the explicit implementation to
+  // avoid a branch.
+  return complex<T>(r * std::cos(theta), r * std::sin(theta));
+#endif
+}
+} // namespace otter
+
+OTTER_CLANG_DIAGNOSTIC_POP()
 
 #endif /* Complex_h */

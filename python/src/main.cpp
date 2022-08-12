@@ -229,7 +229,7 @@ PYBIND11_MODULE(otter, m) {
         return tensor_index_put(tensor, none, other);
     }, py::arg("index"), py::arg("value"))
     .def("__repr__", [](Tensor& tensor) {
-        return tensor_str(tensor.to(ScalarType::Double).contiguous());
+        return tensor_str(tensor);
     })
     .def("__neg__", [](const Tensor& tensor1) {
         return tensor1.neg();
