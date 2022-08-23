@@ -16,6 +16,7 @@
 #include <TensorIndexing.hpp>
 #include <TensorShape.hpp>
 #include <TensorLinearAlgebra.hpp>
+#include <TensorSpectral.hpp>
 #include <ArrayRef.hpp>
 #include <TypeMeta.hpp>
 #include <Formatting.hpp>
@@ -670,6 +671,7 @@ PYBIND11_MODULE(otter, m) {
         return L;
     }, py::arg("tensor"), py::arg("upper") = false);
     m.def("det", &otter::linalg_det);
+    m.def("fft", &otter::fft, py::arg("real"), py::arg("imag") = Tensor());
     
     py::class_<NetOption>(m, "NetOption")
     .def(py::init<>())

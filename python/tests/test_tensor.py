@@ -622,10 +622,35 @@ def test_det():
     assert np.isclose(np.array(check), np.array(det), atol = FLT_EPSILON).all()
     
 def test_cholesky():
-    array = np.array([[6, 3, 4, 8], [3, 6, 5, 1], [4, 5, 10, 7], [8, 1, 7, 25]]).astype(float)
-    tensor = otter.tensor(array)
+    matrix = np.random.random((5, 5))
+    matrix_upper = np.triu(matrix)
+    matrix_symm = matrix_upper @ matrix_upper.T
+    tensor = otter.tensor(matrix_symm)
     
     cholesky = otter.cholesky(tensor)
-    check = np.linalg.cholesky(array)
+    check = np.linalg.cholesky(matrix_symm)
     
     assert np.isclose(check, np.array(cholesky), atol = FLT_EPSILON).all()
+    
+    matrix = np.random.random((10, 10))
+    matrix_upper = np.triu(matrix)
+    matrix_symm = matrix_upper @ matrix_upper.T
+    tensor = otter.tensor(matrix_symm)
+    
+    cholesky = otter.cholesky(tensor)
+    check = np.linalg.cholesky(matrix_symm)
+    
+    assert np.isclose(check, np.array(cholesky), atol = FLT_EPSILON).all()
+
+def test_fft():
+    linspace = otter.linspace(1, 128, 128, otter.ScalarType.Double)
+    signal = 255 * (otter.sin(2 * np.pi * linspace / 25) + otter.sin(2 * np.pi * linspace * 0.4))
+    signal_array = np.array(signal)
+    
+    real, imag = otter.fft(signal)
+    mag = otter.sqrt(real * real + imag * imag)
+    
+    fft = np.fft.fft(signal_array)
+    fft_abs = np.abs(fft)
+    
+    assert np.isclose(fft_abs, np.array(mag), atol = 1e-3).all()

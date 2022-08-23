@@ -451,7 +451,7 @@ void linalg_cholesky(const Tensor& src, Tensor& L, bool upper) {
         Tensor symmetric = src == src.transpose(0, 1);
         bool* check = symmetric.data_ptr<bool>();
         for (const auto i : otter::irange(n * n)) {
-            OTTER_CHECK(check[i], "cholesky decomposition failed");
+            OTTER_CHECK(check[i], "Non symmetric matrix, cholesky decomposition failed");
         }
     }
     
