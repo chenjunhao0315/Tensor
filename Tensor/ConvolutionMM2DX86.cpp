@@ -2222,7 +2222,7 @@ void conv3x3s1_winograd23_transform_kernel_sse(const Tensor& kernel, Tensor& ker
 #if __SSE2__
     kernel_tm2 = otter::empty({outch / 8 + (outch % 8) / 4 + outch % 4, 16, 8 * inch}, otter::ScalarType::Float);
 #else
-    kernel_tm2 = otter::empty({outch, 16m inch}, otter::ScalarType::Float);
+    kernel_tm2 = otter::empty({outch, 16, inch}, otter::ScalarType::Float);
 #endif
     
     auto kernel_tm2_a = kernel_tm2.accessor<float, 3>();

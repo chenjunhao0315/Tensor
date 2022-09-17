@@ -112,6 +112,13 @@ public:
                                       a.values.val[1]);
         return vec;
     }
+    template<typename step_t>
+    static Vectorized<float> arange(float base = 0.f, step_t step = static_cast<step_t>(1)) {
+      const Vectorized<float> base_vec(base);
+      const Vectorized<float> step_vec(step);
+      const Vectorized<float> step_sizes(0, 1, 2, 3, 4, 5, 6, 7);
+      return fmadd(step_sizes, step_vec, base_vec);
+    }
     static Vectorized<float> set(const Vectorized<float>& a, const Vectorized<float>& b,
                                  int64_t count = size()) {
         switch (count) {

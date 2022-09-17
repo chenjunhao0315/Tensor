@@ -368,7 +368,7 @@ int ConvolutionLayer::create_pipeline(const NetOption& opt) {
             otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
         } else if (kernel_width == 3 && kernel_height == 3 && stride_width == 1 && stride_height == 1) {
             if (in_channels >= 16 && weight_data.size(0) >= 16) {
-                otter::conv3x3s1_winograd64_transform_kernel_neon5(weight_data, weight_3x3_winograd64_data, in_channels, out_channels);
+                otter::conv3x3s1_winograd64_transform_kernel_neon5(weight_data, weight_3x3_winograd63_data, in_channels, out_channels);
             }
         } else if (kernel_width == 3 && kernel_height == 3 && stride_width == 2 && stride_height == 2) {
             otter::convolution_im2col_sgemm_transform_kernel_neon(weight_data, weight_sgemm_data, in_channels, out_channels, kernel_width, kernel_height);
@@ -614,7 +614,7 @@ int ConvolutionLayer::forward(const Tensor &bottom_blob, Tensor &top_blob, const
                 optimize_kernel = weight_sgemm_data;
             } else if (kernel_height == 3 && kernel_width == 3 && stride_width == 1 && stride_height == 1) {
                 if (in_channels >= 16 && out_channels >= 16 && bottom_blob.size(3) <= 120 && bottom_blob.size(2) <= 120) {
-                    optimize_kernel = weight_3x3_winograd64_data;
+                    optimize_kernel = weight_3x3_winograd63_data;
                 }
             } else if (kernel_width == 3 && kernel_height == 3 && stride_width == 2 && stride_height == 2) {
                 auto output_shape = otter::calculate_conv_output_size(bottom_blob.sizes(), weight_data.sizes(), {stride_height, stride_width}, {padding_height, padding_width});

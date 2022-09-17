@@ -411,7 +411,9 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
         output = otter::empty({w, outh, outw}, input.scalar_type());
         
         const float* in = (const float*)input.raw_data();
-        
+
+#if __SSE2__
+#if __AVX__
         if (elempack == 8)
         {
             otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
@@ -424,6 +426,7 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
 
             return output;
         }
+#endif  // __AVX__
         
         if (elempack == 4) {
             otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
@@ -436,6 +439,7 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
             
             return output;
         }
+#endif  // __SSE2__
         
         otter::parallel_for(0, w, 0, [&](int64_t begin, int64_t end) {
             for (const auto q : otter::irange(begin, end)) {
@@ -459,7 +463,8 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
         }
         
         output = otter::empty({h, outw}, input.scalar_type());
-        
+       
+#if __SSE2__
 #if __AVX__
         if (elempack == 8) {
             auto input_a = input.accessor<float, 2, 8>();
@@ -588,6 +593,7 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
                 return output;
             }
         }
+#endif  // __SSE2__
         
         auto input_a = input.accessor<float, 2>();
         auto output_a = output.accessor<float, 2>();
@@ -652,7 +658,8 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
         }
         
         output = otter::empty({channels, outh, outw}, input.scalar_type());
-        
+    
+#if __SSE2__
 #if __AVX__
         if (elempack == 8) {
             auto input_a = input.accessor<float, 3, 8>();
@@ -773,6 +780,7 @@ Tensor interpolate_packed_x86(const Tensor& input, IntArrayRef size, Interpolate
                 return output;
             }
         }
+#endif  // __SSE2__
         
         auto input_a = input.accessor<float, 3>();
         auto output_a = output.accessor<float, 3>();

@@ -284,6 +284,8 @@ Tensor& crop_x86_(const Tensor& input, IntArrayRef border, Tensor& output) {
     
     auto output_shape = resolve_roi(input.shape(), border);
     
+#if __SSE2__
+#if __AVX__
     if (elempack == 8) {
         if (dims == 1) {
             int w = input.size(0);
@@ -411,6 +413,7 @@ Tensor& crop_x86_(const Tensor& input, IntArrayRef border, Tensor& output) {
             }
         }
     }
+#endif  // __AVX__
     
     if (elempack == 4) {
         if (dims == 1) {
@@ -539,6 +542,7 @@ Tensor& crop_x86_(const Tensor& input, IntArrayRef border, Tensor& output) {
             }
         }
     }
+#endif  // __SSE2__
     
     return crop_(input.packing(1), border, output);
 }
