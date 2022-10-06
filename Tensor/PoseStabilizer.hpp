@@ -20,10 +20,13 @@ class PoseStabilizer {
 public:
     PoseStabilizer() {}
     
+    void reset() { kpts.clear(); checklist.clear(); }
+    
     std::vector<KeyPoint> track(std::vector<KeyPoint> keypoints);
     
 private:
     std::vector<KalmanPointTracker> kpts;
+    std::vector<int> checklist;
 };
 
 }   // end namespace cv
