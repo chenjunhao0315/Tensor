@@ -24,6 +24,8 @@
 		760704D427E4FE6A00D5E00D /* TensorDistributionKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760704D227E4FE6A00D5E00D /* TensorDistributionKernel.cpp */; };
 		760704DB27E6189600D5E00D /* ColorConvert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760704D927E6189600D5E00D /* ColorConvert.cpp */; };
 		760704DE27E6425300D5E00D /* ImageThreshold.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760704DC27E6425300D5E00D /* ImageThreshold.cpp */; };
+		76081D0728EF2E5E00E85CF9 /* KalmanPointTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76081D0528EF2E5E00E85CF9 /* KalmanPointTracker.cpp */; };
+		76081D0A28EF3EF800E85CF9 /* PoseStabilizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76081D0828EF3EF800E85CF9 /* PoseStabilizer.cpp */; };
 		760A333227F5F733003F0542 /* ChannelShuffle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333027F5F733003F0542 /* ChannelShuffle.cpp */; };
 		760A333527F5F84F003F0542 /* ChannelShuffleKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333327F5F84F003F0542 /* ChannelShuffleKernel.cpp */; };
 		760A333827F62553003F0542 /* ChannelShuffleLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333627F62553003F0542 /* ChannelShuffleLayer.cpp */; };
@@ -248,6 +250,10 @@
 		760704DA27E6189600D5E00D /* ColorConvert.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ColorConvert.hpp; sourceTree = "<group>"; };
 		760704DC27E6425300D5E00D /* ImageThreshold.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImageThreshold.cpp; sourceTree = "<group>"; };
 		760704DD27E6425300D5E00D /* ImageThreshold.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ImageThreshold.hpp; sourceTree = "<group>"; };
+		76081D0528EF2E5E00E85CF9 /* KalmanPointTracker.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = KalmanPointTracker.cpp; sourceTree = "<group>"; };
+		76081D0628EF2E5E00E85CF9 /* KalmanPointTracker.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KalmanPointTracker.hpp; sourceTree = "<group>"; };
+		76081D0828EF3EF800E85CF9 /* PoseStabilizer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PoseStabilizer.cpp; sourceTree = "<group>"; };
+		76081D0928EF3EF800E85CF9 /* PoseStabilizer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PoseStabilizer.hpp; sourceTree = "<group>"; };
 		760A333027F5F733003F0542 /* ChannelShuffle.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChannelShuffle.cpp; sourceTree = "<group>"; };
 		760A333127F5F733003F0542 /* ChannelShuffle.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ChannelShuffle.hpp; sourceTree = "<group>"; };
 		760A333327F5F84F003F0542 /* ChannelShuffleKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChannelShuffleKernel.cpp; sourceTree = "<group>"; };
@@ -987,6 +993,10 @@
 				7663C238281D4B7C00102057 /* KalmanFilter.hpp */,
 				76B4BBBB282DDD3300BE0949 /* KalmanTracker.cpp */,
 				76B4BBBC282DDD3300BE0949 /* KalmanTracker.hpp */,
+				76081D0528EF2E5E00E85CF9 /* KalmanPointTracker.cpp */,
+				76081D0628EF2E5E00E85CF9 /* KalmanPointTracker.hpp */,
+				76081D0828EF3EF800E85CF9 /* PoseStabilizer.cpp */,
+				76081D0928EF3EF800E85CF9 /* PoseStabilizer.hpp */,
 				76B4BBBE282DDDBF00BE0949 /* Hungarian.cpp */,
 				76B4BBBF282DDDBF00BE0949 /* Hungarian.hpp */,
 				76B4BBC1282DE31000BE0949 /* Stabilizer.cpp */,
@@ -1267,6 +1277,7 @@
 				76B4BBC0282DDDBF00BE0949 /* Hungarian.cpp in Sources */,
 				7687218B27C3C28D006640CF /* BatchNormalizationKernel.cpp in Sources */,
 				76E5EC7B27C4A6D800A2B38A /* BatchNormalizationLayer.cpp in Sources */,
+				76081D0A28EF3EF800E85CF9 /* PoseStabilizer.cpp in Sources */,
 				76E6C54227A5124A0036A26F /* ThreadPool.cpp in Sources */,
 				76F336CA27A5D02700E3AEF1 /* Device.cpp in Sources */,
 				76B4BBBD282DDD3300BE0949 /* KalmanTracker.cpp in Sources */,
@@ -1366,6 +1377,7 @@
 				760704CE27E3E87500D5E00D /* TensorDistribution.cpp in Sources */,
 				760A333527F5F84F003F0542 /* ChannelShuffleKernel.cpp in Sources */,
 				760704B527E2934200D5E00D /* ColorMap.cpp in Sources */,
+				76081D0728EF2E5E00E85CF9 /* KalmanPointTracker.cpp in Sources */,
 				7687217827C14A28006640CF /* ParamDict.cpp in Sources */,
 				7663C233281B503200102057 /* PoseEstimation.cpp in Sources */,
 				76F336C127A5B61E00E3AEF1 /* Scalar.cpp in Sources */,

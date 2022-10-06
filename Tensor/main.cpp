@@ -164,7 +164,7 @@ int main(int argc, const char * argv[]) {
     
     initialize_clock.stop_and_show("ms (initialize)");
     
-    const char* filepath = "input.jpg";
+    const char* filepath = "5D4A0574.jpg";
 
 //    FILE *img_data = fopen("img.bin", "rb");
 //    fseek(img_data, 0, SEEK_END);
