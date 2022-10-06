@@ -26,6 +26,7 @@
 		760704DE27E6425300D5E00D /* ImageThreshold.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760704DC27E6425300D5E00D /* ImageThreshold.cpp */; };
 		76081D0728EF2E5E00E85CF9 /* KalmanPointTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76081D0528EF2E5E00E85CF9 /* KalmanPointTracker.cpp */; };
 		76081D0A28EF3EF800E85CF9 /* PoseStabilizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76081D0828EF3EF800E85CF9 /* PoseStabilizer.cpp */; };
+		76081D1D28EF6BCE00E85CF9 /* Composer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76081D1B28EF6BCE00E85CF9 /* Composer.cpp */; };
 		760A333227F5F733003F0542 /* ChannelShuffle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333027F5F733003F0542 /* ChannelShuffle.cpp */; };
 		760A333527F5F84F003F0542 /* ChannelShuffleKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333327F5F84F003F0542 /* ChannelShuffleKernel.cpp */; };
 		760A333827F62553003F0542 /* ChannelShuffleLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 760A333627F62553003F0542 /* ChannelShuffleLayer.cpp */; };
@@ -254,6 +255,8 @@
 		76081D0628EF2E5E00E85CF9 /* KalmanPointTracker.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KalmanPointTracker.hpp; sourceTree = "<group>"; };
 		76081D0828EF3EF800E85CF9 /* PoseStabilizer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PoseStabilizer.cpp; sourceTree = "<group>"; };
 		76081D0928EF3EF800E85CF9 /* PoseStabilizer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PoseStabilizer.hpp; sourceTree = "<group>"; };
+		76081D1B28EF6BCE00E85CF9 /* Composer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Composer.cpp; sourceTree = "<group>"; };
+		76081D1C28EF6BCE00E85CF9 /* Composer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Composer.hpp; sourceTree = "<group>"; };
 		760A333027F5F733003F0542 /* ChannelShuffle.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChannelShuffle.cpp; sourceTree = "<group>"; };
 		760A333127F5F733003F0542 /* ChannelShuffle.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ChannelShuffle.hpp; sourceTree = "<group>"; };
 		760A333327F5F84F003F0542 /* ChannelShuffleKernel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChannelShuffleKernel.cpp; sourceTree = "<group>"; };
@@ -1003,6 +1006,8 @@
 				76B4BBC2282DE31000BE0949 /* Stabilizer.hpp */,
 				7663C231281B503200102057 /* PoseEstimation.cpp */,
 				7663C232281B503200102057 /* PoseEstimation.hpp */,
+				76081D1B28EF6BCE00E85CF9 /* Composer.cpp */,
+				76081D1C28EF6BCE00E85CF9 /* Composer.hpp */,
 			);
 			name = cv;
 			sourceTree = "<group>";
@@ -1375,6 +1380,7 @@
 				76B4B5BD282D6B9200BE0949 /* ConvolutionMM2DTransposeNeon.cpp in Sources */,
 				76B4BBC3282DE31000BE0949 /* Stabilizer.cpp in Sources */,
 				760704CE27E3E87500D5E00D /* TensorDistribution.cpp in Sources */,
+				76081D1D28EF6BCE00E85CF9 /* Composer.cpp in Sources */,
 				760A333527F5F84F003F0542 /* ChannelShuffleKernel.cpp in Sources */,
 				760704B527E2934200D5E00D /* ColorMap.cpp in Sources */,
 				76081D0728EF2E5E00E85CF9 /* KalmanPointTracker.cpp in Sources */,
