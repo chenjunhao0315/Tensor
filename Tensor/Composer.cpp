@@ -15,6 +15,10 @@ namespace otter {
 namespace cv {
 
 Composer::Composer(const char* nanodet_param, const char* nanodet_weight, const char* simplepose_param, const char* simplepose_weight, bool object_stable, bool pose_stable) {
+    init(nanodet_param, nanodet_weight, simplepose_param, simplepose_param, object_stable, pose_stable);
+}
+
+void Composer::init(const char* nanodet_param, const char* nanodet_weight, const char* simplepose_param, const char* simplepose_weight, bool object_stable, bool pose_stable) {
     nanodet.load_otter(nanodet_param, otter::CompileMode::Inference);
     nanodet.load_weight(nanodet_weight, otter::Net::WeightType::Ncnn);
     
@@ -23,6 +27,7 @@ Composer::Composer(const char* nanodet_param, const char* nanodet_weight, const 
     
     enable_pose_stabilizer = pose_stable;
     enable_object_stabilizer = object_stable;
+    target_size = 416;
 }
 
 void Composer::set_pose_stabilizer(bool option) {
@@ -33,10 +38,13 @@ void Composer::set_object_stabilizer(bool option) {
     enable_object_stabilizer = option;
 }
 
+void Composer::set_detection_size(int size) {
+    target_size = size;
+}
+
 void Composer::detect(Tensor frame) {
     int frame_width = frame.size(3);
     int frame_height = frame.size(2);
-    const int target_size = 416;
     
     float scale;
     int wpad, hpad;
@@ -111,7 +119,10 @@ void Composer::detect(Tensor frame) {
 }
 
 void Composer::predict() {
-    
+    // predict keypoint
+    if (enable_pose_stabilizer) {
+        keypoints = pose_stabilizer.predict();
+    }
 }
 
 std::vector<Object> from_tensor_to_object(Tensor& objs) {

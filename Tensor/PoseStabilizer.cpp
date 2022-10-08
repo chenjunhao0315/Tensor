@@ -34,5 +34,23 @@ std::vector<KeyPoint> PoseStabilizer::track(std::vector<KeyPoint> keypoints) {
     return keypoints;
 }
 
+std::vector<KeyPoint> PoseStabilizer::predict() {
+    if (kpts.size() > 0) {
+        std::vector<KeyPoint> keypoints;
+        
+        for (size_t i = 0; i < kpts.size(); ++i) {
+            KeyPoint keypoint;
+            keypoint.p = kpts[i].predict();
+            keypoint.prob = checklist[i] > 0 ? 0.25 : 0;
+            
+            keypoints.push_back(keypoint);
+        }
+        
+        return keypoints;
+    }
+    
+    return std::vector<KeyPoint>();
+}
+
 }   // end namespace cv
 }   // end namespace otter

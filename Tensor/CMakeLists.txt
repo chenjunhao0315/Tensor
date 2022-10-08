@@ -263,6 +263,7 @@ if(OTTER_INSTALL_SDK)
         ColorConvert.hpp
         ColorMap.hpp
         Complex.hpp
+        Composer.hpp
         ConcatLayer.hpp
         Config.hpp
         Convolution.hpp

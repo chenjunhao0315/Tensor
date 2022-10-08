@@ -24,6 +24,8 @@ public:
     
     std::vector<KeyPoint> track(std::vector<KeyPoint> keypoints);
     
+    std::vector<KeyPoint> predict();
+    
 private:
     std::vector<KalmanPointTracker> kpts;
     std::vector<int> checklist;
