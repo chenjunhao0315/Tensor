@@ -44,7 +44,7 @@ class Suggester {
 public:
     Suggester() : num_method(2) {}
     
-    Movement suggest_portrait(Tensor object, Tensor& keypoints);
+    Movement suggest_portrait(Tensor object, std::vector<KeyPoint>& keypoints);
 private:
     void increase_method_freq(int method);
     void reset_methods_freq() { methods_freq = std::vector<int>(num_method, 0); }
@@ -73,6 +73,8 @@ public:
     
     int get_target_index(SelectMethod method, int label);
     void force_set_target_id(int id);
+    
+    Movement get_suggest_portrait();
     
 private:
     int target_size;

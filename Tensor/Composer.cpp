@@ -61,7 +61,7 @@ void Suggester::increase_method_freq(int method) {
     }
 }
 
-Movement Suggester::suggest_portrait(Tensor target, Tensor& keypoints) {
+Movement Suggester::suggest_portrait(Tensor target, std::vector<KeyPoint>& keypoints) {
     Movement move = {otter::cv::Vec2f(0, 0), 90};
     
     float* target_data = target.data_ptr<float>();
@@ -78,11 +78,11 @@ Movement Suggester::suggest_portrait(Tensor target, Tensor& keypoints) {
     float center_y = y + h / 2;
     
     std::map<std::string, float> keypoints_xy;
-    for (const auto i : otter::irange(keypoints.size(0))) {
-        auto keypoint_data = keypoints[i].data_ptr<float>();
-        keypoints_xy[std::string(keypoint_name[i])] = keypoint_data[2] > 0.2;
-        keypoints_xy[std::string(keypoint_name[i]) + "_x"] = keypoint_data[0];
-        keypoints_xy[std::string(keypoint_name[i]) + "_y"] = keypoint_data[1];
+    for (const auto i : otter::irange(keypoints.size())) {
+        auto keypoint_data = keypoints[i];
+        keypoints_xy[std::string(keypoint_name[i])] = keypoint_data.prob > 0.2;
+        keypoints_xy[std::string(keypoint_name[i]) + "_x"] = keypoint_data.p.x;
+        keypoints_xy[std::string(keypoint_name[i]) + "_y"] = keypoint_data.p.y;
     }
 
     // Check id
@@ -214,6 +214,15 @@ void Composer::detect(Tensor frame) {
 
 int Composer::get_target_index(SelectMethod method, int label) {
     return selector.get_target_index_with_label(stabilized_objects, method, label);
+}
+
+Movement Composer::get_suggest_portrait() {
+    int target_index = this->get_target_index(SelectMethod::MAX_AREA_WITH_ID, 1);
+    
+    if (target_index == -1)
+        return {otter::cv::Vec2f(0, 0), 90};
+    
+    return suggester.suggest_portrait(stabilized_objects[target_index], keypoints);
 }
 
 void Composer::force_set_target_id(int id) {
