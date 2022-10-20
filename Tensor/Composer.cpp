@@ -14,6 +14,41 @@
 namespace otter {
 namespace cv {
 
+int Selector::get_target_index_with_label(Tensor &objects, SelectMethod method, int label) {
+    if (method == SelectMethod::MAX_AREA || method == SelectMethod::MAX_AREA_WITH_ID) {
+        int target_index = -1;
+        float max_area = 0, area;
+        
+        for (const auto i : otter::irange(objects.size(0))) {
+            const auto object = objects[i];
+            auto object_a = object.accessor<float, 1>();
+            
+            if (method == SelectMethod::MAX_AREA_WITH_ID && object_a[6] == id_selected) {
+                return i;
+            }
+            
+            if (object_a[0] == label) {
+                if ((area = object_a[4] * object_a[5]) > max_area) {
+                    max_area = area;
+                    target_index = i;
+                }
+            }
+        }
+        
+        if (method == SelectMethod::MAX_AREA_WITH_ID) {
+            id_selected = target_index;
+        }
+        
+        return target_index;
+    }
+    
+    return -1;
+}
+
+void Selector::set_id_selected(int id) {
+    id_selected = id;
+}
+
 Composer::Composer(const char* nanodet_param, const char* nanodet_weight, const char* simplepose_param, const char* simplepose_weight, bool object_stable, bool pose_stable) {
     init(nanodet_param, nanodet_weight, simplepose_param, simplepose_param, object_stable, pose_stable);
 }
@@ -69,17 +104,11 @@ void Composer::detect(Tensor frame) {
         
         auto tracking_box = object_stabilizer.track(objects);
         
-        std::vector<otter::Object> tracking_objects;
-        
-        for (auto& box : tracking_box) {
-            tracking_objects.push_back(box.obj);
-        }
-        
-        stabilized_objects = from_object_to_tensor(tracking_objects);
+        stabilized_objects = from_trackingbox_to_tensor(tracking_box);
     }
     
     // Finding the target
-    int target_index = observer.getTarget(stabilized_objects);
+    int target_index = this->get_target_index(SelectMethod::MAX_AREA_WITH_ID, 1);
     
     if (target_index != -1) {
         auto object_data = stabilized_objects.accessor<float, 2>();
@@ -118,6 +147,14 @@ void Composer::detect(Tensor frame) {
     }
 }
 
+int Composer::get_target_index(SelectMethod method, int label) {
+    return selector.get_target_index_with_label(stabilized_objects, method, label);
+}
+
+void Composer::force_set_target_id(int id) {
+    selector.set_id_selected(id);
+}
+
 void Composer::predict() {
     // predict keypoint
     if (enable_pose_stabilizer) {
@@ -147,6 +184,24 @@ Tensor from_object_to_tensor(std::vector<Object> objs) {
         object[3] = objs[i].rect.y;
         object[4] = objs[i].rect.width;
         object[5] = objs[i].rect.height;
+    }
+    
+    return objects;
+}
+
+Tensor from_trackingbox_to_tensor(std::vector<core::TrackingBox> objs) {
+    auto objects = otter::empty({static_cast<long long>(objs.size()), 7}, otter::ScalarType::Float);
+    auto object_a = objects.accessor<float, 2>();
+    
+    for (int i = 0; i < objs.size(); ++i) {
+        auto object = object_a[i];
+        object[0] = objs[i].obj.label;
+        object[1] = objs[i].obj.prob;
+        object[2] = objs[i].obj.rect.x;
+        object[3] = objs[i].obj.rect.y;
+        object[4] = objs[i].obj.rect.width;
+        object[5] = objs[i].obj.rect.height;
+        object[6] = objs[i].id;
     }
     
     return objects;

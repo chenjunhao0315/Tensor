@@ -34,7 +34,6 @@ typedef struct TrackingBox {
     int frame;
     int id;
     otter::Object obj;
-//    otter::cv::Rect_<float> box;
 } TrackingBox;
 
 class Stabilizer {

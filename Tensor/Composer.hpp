@@ -20,6 +20,21 @@
 namespace otter {
 namespace cv {
 
+enum class SelectMethod {
+    MAX_AREA,
+    MAX_AREA_WITH_ID
+};
+
+class Selector {
+public:
+    Selector() : id_selected(-1) {}
+    
+    int get_target_index_with_label(Tensor& objects, SelectMethod method, int label);
+    void set_id_selected(int id);
+private:
+    int id_selected;
+};
+
 class Composer {
 public:
     Composer() : target_size(416) {}
@@ -37,6 +52,9 @@ public:
     Tensor get_object_detection() { return stabilized_objects; }
     std::vector<KeyPoint> get_pose_detection() { return keypoints; }
     
+    int get_target_index(SelectMethod method, int label);
+    void force_set_target_id(int id);
+    
 private:
     int target_size;
     
@@ -53,11 +71,14 @@ private:
     otter::cv::PoseStabilizer pose_stabilizer;
     
     otter::core::Observer observer;
+    Selector selector;
 };
 
 std::vector<Object> from_tensor_to_object(Tensor& objs);
 
 Tensor from_object_to_tensor(std::vector<Object> objs);
+
+Tensor from_trackingbox_to_tensor(std::vector<core::TrackingBox> objs);
 
 
 }   // end namespace cv
