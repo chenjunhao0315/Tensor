@@ -35,6 +35,25 @@ private:
     int id_selected;
 };
 
+struct Movement {
+    otter::cv::Vec2f vec;
+    int pitch;
+};
+
+class Suggester {
+public:
+    Suggester() : num_method(2) {}
+    
+    Movement suggest_portrait(Tensor object, Tensor& keypoints);
+private:
+    void increase_method_freq(int method);
+    void reset_methods_freq() { methods_freq = std::vector<int>(num_method, 0); }
+    
+    int num_method;
+    int id_selected;
+    std::vector<int> methods_freq;
+};
+
 class Composer {
 public:
     Composer() : target_size(416) {}
@@ -72,6 +91,7 @@ private:
     
     otter::core::Observer observer;
     Selector selector;
+    Suggester suggester;
 };
 
 std::vector<Object> from_tensor_to_object(Tensor& objs);

@@ -49,6 +49,71 @@ void Selector::set_id_selected(int id) {
     id_selected = id;
 }
 
+static const char *keypoint_name[] = {"nose", "right_eye", "left_eye", "right_ear", "left_ear", "right_shoulder", "left_shoulder", "right_elbow", "left_elbow", "right_wrist", "left_wrist", "right_hip", "left_hip", "right_knee", "left_knee", "right_ankle", "left_ankle"};
+
+void Suggester::increase_method_freq(int method) {
+    for (const auto i : otter::irange(num_method)) {
+        if (i == method) {
+            methods_freq[i] = std::max(methods_freq[i] + 1, 10);
+        } else {
+            methods_freq[i] = std::min(methods_freq[i] - 2, 0);
+        }
+    }
+}
+
+Movement Suggester::suggest_portrait(Tensor target, Tensor& keypoints) {
+    Movement move = {otter::cv::Vec2f(0, 0), 90};
+    
+    float* target_data = target.data_ptr<float>();
+    
+    int label = target_data[0];
+    float x = target_data[2];
+    float y = target_data[3];
+    float w = target_data[4];
+    float h = target_data[5];
+    int id = target_data[6];
+    
+    float area = w * h;
+    float center_x = x + w / 2;
+    float center_y = y + h / 2;
+    
+    std::map<std::string, float> keypoints_xy;
+    for (const auto i : otter::irange(keypoints.size(0))) {
+        auto keypoint_data = keypoints[i].data_ptr<float>();
+        keypoints_xy[std::string(keypoint_name[i])] = keypoint_data[2] > 0.2;
+        keypoints_xy[std::string(keypoint_name[i]) + "_x"] = keypoint_data[0];
+        keypoints_xy[std::string(keypoint_name[i]) + "_y"] = keypoint_data[1];
+    }
+
+    // Check id
+    if (id != id_selected)
+        reset_methods_freq();
+    
+    // Get Method
+    int method = 0; // default
+    
+//    if (keypoints_xy["right_shoulder"] && keypoints_xy["left_shoulder"]) {
+//        this->increase_method_freq(1);
+//    } else {    // default method
+        this->increase_method_freq(0);
+//    }
+    
+    // get highest frequency method
+    method = *std::max_element(methods_freq.begin(), methods_freq.end());
+    
+    // Calculate move
+    switch (method) {
+        case 0:
+            move.vec = otter::cv::Vec2f(center_x - 0.5, center_y - 0.5);
+            break;
+            
+        default:
+            break;
+    }
+    
+    return move;
+}
+
 Composer::Composer(const char* nanodet_param, const char* nanodet_weight, const char* simplepose_param, const char* simplepose_weight, bool object_stable, bool pose_stable) {
     init(nanodet_param, nanodet_weight, simplepose_param, simplepose_param, object_stable, pose_stable);
 }
